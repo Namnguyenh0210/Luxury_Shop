@@ -203,31 +203,45 @@ Thực hiện theo các bước dưới đây để cài đặt và chạy dự 
 
 ### 3.3. Cấu hình ứng dụng
 
-1.  **Mở file `src/main/resources/application.properties`**.
-2.  **Cấu hình kết nối Database**:
-    -   Chỉnh sửa các thông số sau để khớp với cấu hình SQL Server của bạn:
+Với cách thiết lập mới, việc cấu hình trở nên an toàn và dễ dàng hơn. Secret keys của bạn sẽ được lưu trong một file riêng và không bao giờ bị commit lên Git.
+
+1.  **Tạo file cấu hình local**:
+    -   Trong thư mục `src/main/resources/`, tạo một file mới tên là `application-local.properties`.
+    -   **Quan trọng**: File này đã được thêm vào `.gitignore` nên sẽ không được đưa lên Git.
+
+2.  **Điền các secret keys**:
+    -   Mở file `application-local.properties` vừa tạo và dán nội dung sau vào, thay thế bằng các keys của bạn:
+
+    ```properties
+    # ===================================================================
+    # LOCAL SECRETS - DO NOT COMMIT THIS FILE TO GIT
+    # ===================================================================
+
+    # ===== PAYOS PAYMENT GATEWAY SECRETS =====
+    # Thay thế bằng thông tin của bạn từ https://payos.vn/
+    payos.client-id=YOUR_PAYOS_CLIENT_ID
+    payos.api-key=YOUR_PAYOS_API_KEY
+    payos.checksum-key=YOUR_PAYOS_CHECKSUM_KEY
+
+    # ===== GOOGLE OAUTH2 SECRETS =====
+    # Thay thế bằng thông tin của bạn từ https://console.cloud.google.com/
+    GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+    GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
+    ```
+
+3.  **Cấu hình Database (nếu cần)**:
+    -   Mở file `application.properties` chính.
+    -   Chỉnh sửa thông tin kết nối database nếu cần. Các thông tin này thường không phải là bí mật trong môi trường local.
         ```properties
         spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=LuxuryFashion_2025;...
         spring.datasource.username=sa
         spring.datasource.password=your_strong_password
         ```
-3.  **Cấu hình Google OAuth2 (Tùy chọn nhưng khuyến khích)**:
-    -   Truy cập [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
-    -   Tạo một "OAuth 2.0 Client ID" mới.
-    -   Trong file `application.properties`, tìm đến phần `GOOGLE OAUTH2 CONFIGURATION` và điền `client-id` và `client-secret` của bạn.
-        ```properties
-        spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
-        spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
-        ```
-4.  **Cấu hình PayOS (Quan trọng cho chức năng thanh toán)**:
-    -   Đăng ký tài khoản tại [PayOS](https://payos.vn/).
-    -   Lấy các thông tin `Client ID`, `Api Key`, và `Checksum Key` từ dashboard của PayOS.
-    -   Điền các thông tin này vào file `application.properties`:
-        ```properties
-        payos.client-id=YOUR_PAYOS_CLIENT_ID
-        payos.api-key=YOUR_PAYOS_API_KEY
-        payos.checksum-key=YOUR_PAYOS_CHECKSUM_KEY
-        ```
+
+**Lợi ích của cách làm này**:
+-   **An toàn**: Bạn không bao giờ vô tình commit secret keys lên GitHub.
+-   **Tiện lợi**: Bạn có thể `git add .` và `git commit` thoải mái mà không cần lo lắng.
+-   **Chuẩn mực**: Đây là phương pháp tiêu chuẩn được các lập trình viên chuyên nghiệp sử dụng.
 
 ### 3.4. Build và Chạy dự án
 
