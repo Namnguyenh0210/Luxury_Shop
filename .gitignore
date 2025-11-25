@@ -19,10 +19,10 @@ Thumbs.db
 server.log
 
 # Application secrets (use application.properties.example as template)
-# src/main/resources/application.properties
+# DO NOT commit your local secrets file!
+src/main/resources/application-local.properties
 
 # Temporary files
 *.tmp
 *.bak
 cookies.txt
-
