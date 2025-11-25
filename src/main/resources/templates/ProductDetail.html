@@ -1,0 +1,380 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}"
+      th:with="pageTitle='ProductDetail'">
+<head>
+    <link th:href="@{/css/ProductDetail.css}" rel="stylesheet"/>
+</head>
+<body>
+<div layout:fragment="content">
+    <main class="container mx-auto px-6 py-8">
+        <!-- Breadcrumb - Dữ liệu thực từ DB -->
+        <div class="flex flex-wrap gap-2 text-sm mb-8">
+            <a class="text-text-primary/60 dark:text-background-light/60 hover:text-primary" th:href="@{/}">Trang chủ</a>
+            <span class="text-text-primary/60 dark:text-background-light/60">/</span>
+            <a class="text-text-primary/60 dark:text-background-light/60 hover:text-primary" th:href="@{/sanpham}">Sản phẩm</a>
+            <span class="text-text-primary/60 dark:text-background-light/60">/</span>
+            <a class="text-text-primary/60 dark:text-background-light/60 hover:text-primary"
+               th:if="${sanPham.loaiSanPham != null}"
+               th:href="@{/sanpham(loai=${sanPham.loaiSanPham.maLoai})}"
+               th:text="${sanPham.loaiSanPham.tenLoai}">Danh mục</a>
+            <span class="text-text-primary/60 dark:text-background-light/60" th:if="${sanPham.loaiSanPham != null}">/</span>
+            <span class="text-text-primary dark:text-background-light font-medium" th:text="${sanPham.tenSP}">Sản phẩm</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Hình ảnh sản phẩm - SỬA ĐỂ HIỂN THỊ ẢNH TỪ DB -->
+            <div class="flex items-start justify-center">
+                <img class="w-full aspect-[3/4] max-h-[700px] object-cover rounded-xl shadow-lg"
+                     th:src="${sanPham.anhChinh}"
+                     th:alt="${sanPham.tenSP}"
+                     onerror="this.src='/img/placeholder.png'"/>
+            </div>
+
+            <!-- Thông tin sản phẩm -->
+            <div class="flex flex-col gap-6">
+                <div>
+                    <a class="text-sm font-medium tracking-widest uppercase text-text-primary/70 dark:text-background-light/70 hover:text-primary"
+                       th:if="${sanPham.thuongHieu != null}"
+                       th:href="@{/sanpham(thuongHieu=${sanPham.thuongHieu.maTH})}"
+                       th:text="${sanPham.thuongHieu.tenTH}">Brand</a>
+                    <h1 class="text-4xl lg:text-5xl font-serif-display font-bold text-text-primary dark:text-background-light"
+                        th:text="${sanPham.tenSP}">Tên sản phẩm</h1>
+                    <!-- Hiển thị giá -->
+                    <p class="text-2xl mt-4 font-light text-text-primary dark:text-background-light"
+                       th:if="${minPrice != null && minPrice.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                        <span th:if="${minPrice.equals(maxPrice)}"
+                              th:text="${#numbers.formatDecimal(minPrice,0,'COMMA',0,'POINT')} + ' đ'">Giá</span>
+                        <span th:if="${!minPrice.equals(maxPrice)}">
+                            <span th:text="${#numbers.formatDecimal(minPrice,0,'COMMA',0,'POINT')} + ' - ' + ${#numbers.formatDecimal(maxPrice,0,'COMMA',0,'POINT')} + ' đ'">Giá</span>
+                        </span>
+                    </p>
+                    <p class="text-2xl mt-4 font-light text-text-primary dark:text-background-light"
+                       th:if="${minPrice == null || minPrice.compareTo(T(java.math.BigDecimal).ZERO) == 0}">
+                        Liên hệ
+                    </p>
+                </div>
+
+                <!-- Lựa chọn Màu sắc -->
+                <div class="border-t border-text-secondary/30 pt-6" th:if="${variants != null and !variants.isEmpty()}">
+                    <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light">
+                        MÀU SẮC: <span class="font-light" id="selectedColor">CHỌN MÀU</span>
+                    </label>
+                    <div class="flex gap-3 mt-3 flex-wrap" id="colorOptions">
+                        <!-- Hiển thị tất cả màu, JavaScript sẽ loại bỏ trùng -->
+                        <th:block th:each="variant : ${variants}">
+                            <button th:if="${variant.mauSacSP != null}"
+                                    class="size-8 rounded-full hover:ring-2 hover:ring-offset-2 hover:ring-primary transition-all color-btn"
+                                    th:style="${'background-color: ' + (variant.mauSacSP.maHex != null ? variant.mauSacSP.maHex : '#ccc')}"
+                                    th:attr="data-color-name=${variant.mauSacSP.tenMau},data-color-id=${variant.mauSacSP.maMau},title=${variant.mauSacSP.tenMau}"
+                                    onclick="selectColor(this)">
+                            </button>
+                        </th:block>
+                    </div>
+                </div>
+
+                <!-- Lựa chọn Size -->
+                <div class="border-t border-text-secondary/30 pt-6" th:if="${variants != null and !variants.isEmpty()}">
+                    <div class="flex justify-between items-center">
+                        <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light">SIZE</label>
+                        <a class="text-sm underline text-text-primary/70 dark:text-background-light/70 hover:text-primary" href="#">Hướng dẫn chọn size</a>
+                    </div>
+                    <div class="flex flex-wrap gap-3 mt-3" id="sizeOptions">
+                        <!-- Hiển thị tất cả size, JavaScript sẽ loại bỏ trùng -->
+                        <th:block th:each="variant : ${variants}">
+                            <button th:if="${variant.sizeSP != null}"
+                                    class="px-5 py-2.5 border border-text-secondary/30 rounded-lg text-sm hover:border-primary transition-all size-btn"
+                                    th:text="${variant.sizeSP.tenSize}"
+                                    th:attr="data-size-name=${variant.sizeSP.tenSize},data-size-id=${variant.sizeSP.maSize},data-stock=${variant.soLuongTon},data-variant-id=${variant.maBienThe}"
+                                    th:classappend="${variant.soLuongTon == 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                    onclick="selectSize(this)">
+                            </button>
+                        </th:block>
+                    </div>
+                </div>
+
+                <!-- Nút hành động -->
+                <div class="flex flex-col gap-4 mt-4">
+                    <button id="addToCartBtn"
+                            class="w-full bg-primary text-white h-12 rounded-lg text-sm font-bold tracking-wider hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                            th:disabled="${totalStock == null || totalStock == 0}"
+                            onclick="addProductToCart()">
+                        <span th:text="${totalStock != null && totalStock > 0 ? '🛒 Thêm giỏ hàng' : 'Hết hàng'}">Thêm giỏ hàng</span>
+                    </button>
+                    <button class="w-full border border-primary text-primary h-12 rounded-lg text-sm font-bold tracking-wider hover:bg-primary/5 dark:border-accent dark:text-accent dark:hover:bg-accent/10"
+                            th:disabled="${totalStock == null || totalStock == 0}"
+                            onclick="buyNow()">
+                        Mua ngay
+                    </button>
+                </div>
+
+                <!-- Mô tả sản phẩm -->
+                <div class="border-t border-text-secondary/30 pt-6 space-y-4">
+                    <details class="group" th:if="${sanPham.moTa != null}">
+                        <summary class="flex justify-between items-center cursor-pointer list-none">
+                            <span class="text-base font-medium">Mô tả sản phẩm</span>
+                            <span class="transition-transform duration-300 group-open:rotate-45">
+                                <span class="material-symbols-outlined">add</span>
+                            </span>
+                        </summary>
+                        <p class="mt-4 text-sm text-text-primary/80 dark:text-background-light/80" th:text="${sanPham.moTa}">
+                            Mô tả sản phẩm
+                        </p>
+                    </details>
+                    <div class="border-t border-text-secondary/30" th:if="${sanPham.moTa != null}"></div>
+                    <details class="group">
+                        <summary class="flex justify-between items-center cursor-pointer list-none pt-4">
+                            <span class="text-base font-medium">Thông tin chung</span>
+                            <span class="transition-transform duration-300 group-open:rotate-45">
+                                <span class="material-symbols-outlined">add</span>
+                            </span>
+                        </summary>
+                        <ul class="mt-4 text-sm text-text-primary/80 dark:text-background-light/80 list-disc pl-5 space-y-1">
+                            <li th:text="${'Thương hiệu: ' + (sanPham.thuongHieu != null ? sanPham.thuongHieu.tenTH : 'N/A')}">Thương hiệu</li>
+                            <li th:text="${'Danh mục: ' + (sanPham.loaiSanPham != null ? sanPham.loaiSanPham.tenLoai : 'N/A')}">Danh mục</li>
+                            <li th:text="${sanPham.gioiTinh == 0 ? 'Giới tính: Nam' : (sanPham.gioiTinh == 1 ? 'Giới tính: Nữ' : 'Giới tính: Unisex')}">Giới tính</li>
+                            <li th:text="${'Số lượng tồn kho: ' + (totalStock != null ? totalStock : 0)}">Tồn kho</li>
+                        </ul>
+                    </details>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sản phẩm liên quan -->
+        <div class="mt-24" th:if="${relatedProducts != null and !relatedProducts.isEmpty()}">
+            <h2 class="text-3xl font-serif-display font-bold text-center mb-8">Sản phẩm liên quan</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="group" th:each="relProd : ${relatedProducts}">
+                    <a th:href="@{/sanpham/{id}(id=${relProd.maSP})}" class="block">
+                        <div class="relative w-full h-96 rounded-lg overflow-hidden">
+                            <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                 th:src="${relProd.anhChinh}"
+                                 th:alt="${relProd.tenSP}"
+                                 onerror="this.src='/img/placeholder.png'"/>
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-300 flex items-center justify-center">
+                                <span class="text-white bg-primary bg-opacity-80 px-4 py-2 rounded-lg text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    Xem chi tiết
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <p class="text-xs uppercase tracking-wider text-text-primary/60 dark:text-background-light/60"
+                               th:text="${relProd.thuongHieu != null ? relProd.thuongHieu.tenTH : 'Brand'}">Brand</p>
+                            <h3 class="text-lg font-medium mt-1" th:text="${relProd.tenSP}">Tên sản phẩm</h3>
+                            <p class="text-base text-text-primary/70 dark:text-background-light/70 mt-1">Liên hệ</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Script xử lý chọn màu/size và thêm giỏ hàng -->
+<th:block layout:fragment="scripts">
+    <script th:inline="javascript">
+        let selectedColorId = null;
+        let selectedSizeId = null;
+        let selectedVariantId = null;
+        const variants = /*[[${variants}]]*/ [];
+
+        console.log('Loaded variants:', variants);
+
+        // Loại bỏ trùng lặp màu sắc và size khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            removeDuplicateColors();
+            removeDuplicateSizes();
+
+            // Auto-select nếu chỉ có 1 lựa chọn
+            const colorBtns = document.querySelectorAll('.color-btn');
+            const sizeBtns = document.querySelectorAll('.size-btn:not([style*="display: none"])');
+
+            if (colorBtns.length === 1) {
+                colorBtns[0].click();
+            }
+            if (sizeBtns.length === 1) {
+                sizeBtns[0].click();
+            }
+        });
+
+        function removeDuplicateColors() {
+            const colorBtns = document.querySelectorAll('.color-btn');
+            const seenColors = new Set();
+
+            colorBtns.forEach(btn => {
+                const colorId = btn.getAttribute('data-color-id');
+                if (seenColors.has(colorId)) {
+                    btn.style.display = 'none';
+                } else {
+                    seenColors.add(colorId);
+                }
+            });
+        }
+
+        function removeDuplicateSizes() {
+            const sizeBtns = document.querySelectorAll('.size-btn');
+            const seenSizes = new Set();
+
+            sizeBtns.forEach(btn => {
+                const sizeId = btn.getAttribute('data-size-id');
+                if (seenSizes.has(sizeId)) {
+                    btn.style.display = 'none';
+                } else {
+                    seenSizes.add(sizeId);
+                }
+            });
+        }
+
+        function selectColor(btn) {
+            // Remove selection from all color buttons
+            document.querySelectorAll('.color-btn').forEach(b => {
+                b.classList.remove('ring-2', 'ring-offset-2', 'ring-primary');
+            });
+            // Add selection to clicked button
+            btn.classList.add('ring-2', 'ring-offset-2', 'ring-primary');
+            selectedColorId = btn.getAttribute('data-color-id');
+            document.getElementById('selectedColor').textContent = btn.getAttribute('data-color-name');
+            console.log('Selected color:', selectedColorId);
+        }
+
+        function selectSize(btn) {
+            // Check if button is disabled
+            const stock = parseInt(btn.getAttribute('data-stock') || '0');
+            if (stock <= 0) {
+                alert('⚠️ Size này hiện đã hết hàng');
+                return;
+            }
+
+            // Remove selection from all size buttons
+            document.querySelectorAll('.size-btn').forEach(b => {
+                b.classList.remove('border-primary', 'bg-primary', 'text-white');
+            });
+            // Add selection to clicked button
+            btn.classList.add('border-primary', 'bg-primary', 'text-white');
+            selectedSizeId = btn.getAttribute('data-size-id');
+            selectedVariantId = btn.getAttribute('data-variant-id');
+            console.log('Selected size:', selectedSizeId, 'Variant ID:', selectedVariantId);
+        }
+
+        function findVariantId() {
+            let variantId = null;
+
+            // Nếu đã chọn cả màu và size, tìm variant tương ứng
+            if (selectedColorId && selectedSizeId) {
+                const variant = variants.find(v =>
+                    v.mauSacSP && v.mauSacSP.maMau == selectedColorId &&
+                    v.sizeSP && v.sizeSP.maSize == selectedSizeId
+                );
+                if (variant) {
+                    variantId = variant.maBienThe;
+                    console.log('Found variant by color+size:', variantId);
+                }
+            }
+            // Nếu chỉ chọn size, dùng selectedVariantId
+            else if (selectedVariantId) {
+                variantId = selectedVariantId;
+                console.log('Using selected variant ID:', variantId);
+            }
+            // Nếu chưa chọn gì, lấy variant đầu tiên có tồn kho
+            else if (variants && variants.length > 0) {
+                const availableVariant = variants.find(v => v.soLuongTon > 0);
+                if (availableVariant) {
+                    variantId = availableVariant.maBienThe;
+                    console.log('Using first available variant:', variantId);
+                }
+            }
+
+            return variantId;
+        }
+
+        function addProductToCart() {
+            const variantId = findVariantId();
+
+            if (!variantId) {
+                alert('⚠️ Vui lòng chọn màu sắc và size');
+                return;
+            }
+
+            console.log('Adding to cart, variant ID:', variantId);
+
+            // Disable button để tránh click nhiều lần
+            const btn = document.getElementById('addToCartBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span>Đang thêm...</span>';
+
+            fetch('/api/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    maBienThe: variantId,
+                    soLuong: 1
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+
+                console.log('Add to cart response:', data);
+
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                    // Cập nhật số lượng giỏ hàng trong header nếu có
+                    if (data.cartCount) {
+                        const cartBadge = document.querySelector('.cart-count');
+                        if (cartBadge) {
+                            cartBadge.textContent = data.cartCount;
+                        }
+                    }
+                } else {
+                    alert('❌ ' + (data.message || 'Có lỗi xảy ra'));
+                }
+            })
+            .catch(e => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                console.error('Error adding to cart:', e);
+                alert('❌ Lỗi: ' + e.message);
+            });
+        }
+
+        function buyNow() {
+            const variantId = findVariantId();
+
+            if (!variantId) {
+                alert('⚠️ Vui lòng chọn màu sắc và size');
+                return;
+            }
+
+            console.log('Buy now, variant ID:', variantId);
+
+            // Thêm vào giỏ hàng rồi chuyển đến trang thanh toán
+            fetch('/api/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    maBienThe: variantId,
+                    soLuong: 1
+                })
+            })
+            .then r => r.json())
+            .then(data => {
+                console.log('Buy now response:', data);
+
+                if (data.success) {
+                    // Chuyển đến trang thanh toán
+                    window.location.href = '/checkout';
+                } else {
+                    alert('❌ ' + (data.message || 'Có lỗi xảy ra'));
+                }
+            })
+            .catch(e => {
+                console.error('Error in buy now:', e);
+                alert('❌ Lỗi: ' + e.message);
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

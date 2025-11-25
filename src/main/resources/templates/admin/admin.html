@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Luxe Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
+<div class="relative flex min-h-screen w-full flex-col">
+    <div class="flex h-full w-full grow">
+        <aside class="flex h-screen min-h-full w-64 flex-col justify-between border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 sticky top-0">
+            <div class="flex flex-col gap-8">
+                <div class="flex items-center gap-3 px-3">
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="Abstract black and gold logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCz9tB0811o5b7D7b2Mi5VyAvR58zsynFoFBX4uhO4rR8eRJVK42MPECHvacAEqCsJ2J75_uxSePEA_ANfEq3MWSxBwMCOB2n3Bb45RYSGi5ib3z_BTFo9LCMDBNor1FEm21zXbm2IH4HNLps5_TOKaZoZ7dbtO5ljk8VRLJp5UFS7B1YuZ5Nlpe1RUBs_4bdOPXmCK0UIqaB3tDtTcBpGGK-mR9eI18yTO_PlyYf58hgP6WgxYGqaTZ5LmP54eGJA95UGa2fUBlww");'></div>
+                    <div class="flex flex-col">
+                        <h1 class="text-text-primary-light dark:text-text-primary-dark text-base font-bold leading-normal">LUXE ADMIN</h1>
+                        <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">Management Panel</p>
+                    </div>
+                </div>
+                <nav class="flex flex-col gap-2">
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 bg-accent/20 text-text-primary-light dark:text-text-primary-dark" href="#">
+                        <span class="material-symbols-outlined text-text-primary-light dark:text-text-primary-dark">dashboard</span>
+                        <p class="text-sm font-medium leading-normal">Dashboard</p>
+                    </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5" href="#">
+                        <span class="material-symbols-outlined">diamond</span>
+                        <p class="text-sm font-medium leading-normal">Sản Phẩm</p>
+                    </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5" href="#">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                        <p class="text-sm font-medium leading-normal">Kho & Nhà Cung Cấp</p>
+                    </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5" href="#">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        <p class="text-sm font-medium leading-normal">Đơn Hàng</p>
+                    </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5" href="#">
+                        <span class="material-symbols-outlined">group</span>
+                        <p class="text-sm font-medium leading-normal">Khách Hàng & Khuyến Mãi</p>
+                    </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5" href="#">
+                        <span class="material-symbols-outlined">article</span>
+                        <p class="text-sm font-medium leading-normal">Nội Dung & Tương Tác</p>
+                    </a>
+                    <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5" href="#">
+                        <span class="material-symbols-outlined">bar_chart</span>
+                        <p class="text-sm font-medium leading-normal">Báo Cáo & Thống Kê</p>
+                    </a>
+                </nav>
+            </div>
+            <div class="flex flex-col gap-1">
+                <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-black/5 dark:hover:bg-white/5" href="#">
+                    <span class="material-symbols-outlined">settings</span>
+                    <p class="text-sm font-medium leading-normal">Settings</p>
+                </a>
+            </div>
+        </aside>
+        <main class="flex flex-1 flex-col">
+            <header class="sticky top-0 z-10 flex items-center justify-between whitespace-nowrap border-b border-border-light dark:border-border-dark px-10 py-3 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+                <div class="flex items-center gap-8">
+                    <h2 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight tracking-[-0.015em]">Dashboard</h2>
+                    <label class="flex flex-col min-w-40 !h-10 max-w-64">
+                        <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                            <div class="text-text-secondary-light dark:text-text-secondary-dark flex border border-r-0 border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark items-center justify-center pl-4 rounded-l-lg">
+                                <span class="material-symbols-outlined">search</span>
+                            </div>
+                            <input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-text-primary-light dark:text-text-primary-dark focus:outline-0 focus:ring-1 focus:ring-accent border border-l-0 border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark h-full placeholder:text-text-secondary-light dark:placeholder:text-text-secondary-dark px-4 rounded-l-none pl-2 text-base font-normal leading-normal" placeholder="Search..." value=""/>
+                        </div>
+                    </label>
+                </div>
+                <div class="flex flex-1 justify-end gap-4 items-center">
+                    <div class="flex gap-2">
+                        <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark">
+                            <span class="material-symbols-outlined">notifications</span>
+                        </button>
+                        <button class="flex h-10 w-10 cursor-pointer items-center justify-center overflow-hidden rounded-full hover:bg-black/5 dark:hover:bg-white/5 text-text-secondary-light dark:text-text-secondary-dark">
+                            <span class="material-symbols-outlined">mail</span>
+                        </button>
+                    </div>
+                    <div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCHxdCFtoHYI-vkCn_rLyw7929t71H3y3bC6F_q7QpOvf0YIC0Lo3Rk2AjLe3nFS_RTGFEH91sbRrQ8DFh6v0XQSo3gCHbkFwFIpcOrDa1wM1OAq_V30N7i-jh432BjAQ6sLy8VqmEAXDnNLZbP5YEwrbJfPmIStaZgueXofs5j89cF7OLEFaZXpm3dcJgGC4o8xWWM9sIaTvM4Wn_chWvY6rPT3Z0hKTKLs-tBJpZzW6SoJoDcydhTxliRRemzMJJz2Gbidg2hLcs");'></div>
+                </div>
+            </header>
+            <div class="flex flex-1 flex-col p-10 gap-10">
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="flex flex-col gap-1 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark">
+                        <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">Total Sales</p>
+                        <p class="text-text-primary-light dark:text-text-primary-dark text-3xl font-bold tracking-tight">$1,234,567</p>
+                        <p class="text-green-600 dark:text-green-400 text-sm font-medium">+5.2% vs last month</p>
+                    </div>
+                    <div class="flex flex-col gap-1 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark">
+                        <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">New Orders</p>
+                        <p class="text-text-primary-light dark:text-text-primary-dark text-3xl font-bold tracking-tight">1,203</p>
+                        <p class="text-green-600 dark:text-green-400 text-sm font-medium">+2.1% vs last month</p>
+                    </div>
+                    <div class="flex flex-col gap-1 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark">
+                        <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">Unique Visitors</p>
+                        <p class="text-text-primary-light dark:text-text-primary-dark text-3xl font-bold tracking-tight">45,890</p>
+                        <p class="text-red-600 dark:text-red-400 text-sm font-medium">-0.5% vs last month</p>
+                    </div>
+                    <div class="flex flex-col gap-1 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark">
+                        <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-medium">New Signups</p>
+                        <p class="text-text-primary-light dark:text-text-primary-dark text-3xl font-bold tracking-tight">789</p>
+                        <p class="text-green-600 dark:text-green-400 text-sm font-medium">+10.3% vs last month</p>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <h2 class="text-text-primary-light dark:text-text-primary-dark text-[22px] font-bold leading-tight tracking-[-0.015em] mb-5">Core Modules</h2>
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        <div class="flex flex-col gap-4 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center justify-center size-12 rounded-lg bg-accent/20 text-accent">
+                                    <span class="material-symbols-outlined !text-3xl">diamond</span>
+                                </div>
+                                <h3 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight">Quản Lý Sản Phẩm</h3>
+                            </div>
+                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">Thêm mới, chỉnh sửa, và quản lý tất cả sản phẩm.</p>
+                            <a class="mt-auto flex items-center gap-2 text-sm font-medium leading-normal text-text-primary-light dark:text-text-primary-dark hover:text-primary dark:hover:text-accent group" href="#">
+                                <span>Go to module</span>
+                                <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div class="flex flex-col gap-4 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center justify-center size-12 rounded-lg bg-accent/20 text-accent">
+                                    <span class="material-symbols-outlined !text-3xl">inventory_2</span>
+                                </div>
+                                <h3 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight">Kho & Nhà Cung Cấp</h3>
+                            </div>
+                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">Quản lý tồn kho, nhà cung cấp và nhập hàng.</p>
+                            <a class="mt-auto flex items-center gap-2 text-sm font-medium leading-normal text-text-primary-light dark:text-text-primary-dark hover:text-primary dark:hover:text-accent group" href="#">
+                                <span>Go to module</span>
+                                <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div class="flex flex-col gap-4 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center justify-center size-12 rounded-lg bg-accent/20 text-accent">
+                                    <span class="material-symbols-outlined !text-3xl">receipt_long</span>
+                                </div>
+                                <h3 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight">Quản Lý Đơn Hàng</h3>
+                            </div>
+                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">Xem và xử lý các đơn hàng của khách hàng.</p>
+                            <a class="mt-auto flex items-center gap-2 text-sm font-medium leading-normal text-text-primary-light dark:text-text-primary-dark hover:text-primary dark:hover:text-accent group" href="#">
+                                <span>Go to module</span>
+                                <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div class="flex flex-col gap-4 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center justify-center size-12 rounded-lg bg-accent/20 text-accent">
+                                    <span class="material-symbols-outlined !text-3xl">group</span>
+                                </div>
+                                <h3 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight">Khách Hàng & Khuyến Mãi</h3>
+                            </div>
+                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">Quản lý thông tin khách hàng và các chiến dịch marketing.</p>
+                            <a class="mt-auto flex items-center gap-2 text-sm font-medium leading-normal text-text-primary-light dark:text-text-primary-dark hover:text-primary dark:hover:text-accent group" href="#">
+                                <span>Go to module</span>
+                                <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div class="flex flex-col gap-4 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center justify-center size-12 rounded-lg bg-accent/20 text-accent">
+                                    <span class="material-symbols-outlined !text-3xl">article</span>
+                                </div>
+                                <h3 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight">Nội Dung & Tương Tác</h3>
+                            </div>
+                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">Quản lý bài viết blog, banner và các trang tĩnh.</p>
+                            <a class="mt-auto flex items-center gap-2 text-sm font-medium leading-normal text-text-primary-light dark:text-text-primary-dark hover:text-primary dark:hover:text-accent group" href="#">
+                                <span>Go to module</span>
+                                <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </div>
+                        <div class="flex flex-col gap-4 rounded-xl p-6 border border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center justify-center size-12 rounded-lg bg-accent/20 text-accent">
+                                    <span class="material-symbols-outlined !text-3xl">bar_chart</span>
+                                </div>
+                                <h3 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight">Báo Cáo & Thống Kê</h3>
+                            </div>
+                            <p class="text-text-secondary-light dark:text-text-secondary-dark text-sm font-normal leading-normal">Xem các báo cáo chi tiết về hoạt động kinh doanh.</p>
+                            <a class="mt-auto flex items-center gap-2 text-sm font-medium leading-normal text-text-primary-light dark:text-text-primary-dark hover:text-primary dark:hover:text-accent group" href="#">
+                                <span>Go to module</span>
+                                <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body></html>

@@ -1,0 +1,142 @@
+/* Giỏ Hàng - Shopping Cart Styles */
+body {
+    font-family: 'Manrope', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+}
+
+/* Cart specific styles */
+.cart-row {
+    transition: background-color 0.2s ease;
+}
+
+.cart-row:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark .cart-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Quantity button styles */
+.qty-btn {
+    min-width: 2.5rem;
+    user-select: none;
+    cursor: pointer;
+}
+
+.qty-btn:active {
+    transform: scale(0.95);
+}
+
+.qty-value {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Remove button hover effect */
+.remove-btn {
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    transform: scale(1.1);
+}
+
+/* Product image styles */
+.cart-row img {
+    transition: transform 0.3s ease;
+}
+
+.cart-row:hover img {
+    transform: scale(1.05);
+}
+
+/* Line clamp utility for product names */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Smooth transitions for all interactive elements */
+button, a {
+    transition: all 0.2s ease;
+}
+
+/* Order summary sticky positioning */
+@media (min-width: 1024px) {
+    #cart-summary {
+        position: sticky;
+        top: 1.5rem;
+    }
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    .cart-row {
+        padding: 1rem !important;
+    }
+
+    .qty-btn {
+        min-width: 2rem;
+        padding: 0.5rem !important;
+    }
+
+    .qty-value {
+        min-width: 2.5rem !important;
+        padding: 0.5rem !important;
+    }
+}
+
+/* Loading state */
+.cart-row.removing {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Empty state animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.flex.flex-col.items-center {
+    animation: fadeInUp 0.5s ease;
+}
+
+/* Trust badge icons */
+.material-symbols-outlined.text-green-600 {
+    font-size: 1.25rem;
+}
+
+/* Price formatting */
+#subtotal-text, #total-text {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Cart button styles */
+.bg-hover-cta:hover {
+    transform: translateY(-2px);
+}
+
+/* Dark mode specific adjustments */
+.dark .bg-gray-750 {
+    background-color: rgba(31, 41, 55, 0.5);
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 1023px) {
+    .lg\:col-span-8,
+    .lg\:col-span-4 {
+        grid-column: span 1 / span 1;
+    }
+}

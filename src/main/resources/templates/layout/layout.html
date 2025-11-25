@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title th:text="${pageTitle != null ? pageTitle : 'Rentzy'}">Rentzy</title>
+    <!-- Shared Tailwind config (must come BEFORE CDN script) -->
+    <script th:src="@{/js/tailwind-config.js}"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+    <link th:href="@{/css/Home.css}" rel="stylesheet"/>
+
+    <!-- Product list CSS: load if legacy pageTitle='Products' OR controller set currentPage='sanpham' -->
+    <th:block th:if="${pageTitle == 'Products' or currentPage == 'sanpham'}">
+        <link th:href="@{/css/Product.css}" rel="stylesheet"/>
+    </th:block>
+    <!-- Cart CSS broadened -->
+    <th:block th:if="${pageTitle == 'Cart' or currentPage == 'giohang' or (pageTitle != null and #strings.contains(pageTitle, 'Giỏ hàng'))}">
+        <link th:href="@{/css/Giohang.css}" rel="stylesheet"/>
+    </th:block>
+    <!-- Product detail page CSS: load if legacy pageTitle='ProductDetail' OR controller set currentPage='sanpham-detail' -->
+    <th:block th:if="${pageTitle == 'ProductDetail' or currentPage == 'sanpham-detail'}">
+        <link th:href="@{/css/ProductDetail.css}" rel="stylesheet"/>
+    </th:block>
+    <!-- Pay CSS -->
+    <th:block th:if="${pageTitle == 'Pay'}">
+        <link th:href="@{/css/Pay.css}" rel="stylesheet"/>
+    </th:block>
+    <!-- Profile CSS -->
+    <th:block th:if="${pageTitle == 'Profile'}">
+        <link th:href="@{/css/Profile.css}" rel="stylesheet"/>
+    </th:block>
+
+    <script th:src="@{/js/Home.js}"></script>
+    <!-- Product list script: broaden condition like CSS above -->
+    <th:block th:if="${pageTitle == 'Products' or currentPage == 'sanpham'}">
+        <script th:src="@{/js/Product.js}"></script>
+    </th:block>
+    <!-- Cart script broadened -->
+    <th:block th:if="${pageTitle == 'Cart' or currentPage == 'giohang' or (pageTitle != null and #strings.contains(pageTitle, 'Giỏ hàng'))}">
+        <script th:src="@{/js/Giohang.js}"></script>
+    </th:block>
+    <!-- Product detail script: broaden condition -->
+    <th:block th:if="${pageTitle == 'ProductDetail' or currentPage == 'sanpham-detail'}">
+        <script th:src="@{/js/ProductDetail.js}"></script>
+    </th:block>
+    <!-- Pay JS -->
+    <th:block th:if="${pageTitle == 'Pay'}">
+        <script th:src="@{/js/Pay.js}"></script>
+    </th:block>
+    <!-- Profile JS -->
+    <th:block th:if="${pageTitle == 'Profile'}">
+        <script th:src="@{/js/Profile.js}"></script>
+    </th:block>
+    <!-- Register JS -->
+    <th:block th:if="${pageTitle == 'Register'}">
+        <script th:src="@{/js/ĐkiTk.js}"></script>
+    </th:block>
+
+    <th:block layout:fragment="head"></th:block>
+</head>
+<body class="bg-background-light dark:bg-background-dark">
+<div class="relative flex min-h-screen w-full flex-col group/design-root">
+    <!-- Header Fragment -->
+    <div th:replace="fragments/header.html :: header"></div>
+
+    <!-- Main Content Section -->
+    <div layout:fragment="content">
+        <!-- Default content if no content is provided -->
+    </div>
+
+    <!-- Footer Fragment -->
+    <div th:replace="fragments/footer.html :: footer"></div>
+</div>
+
+<!-- Page-specific scripts -->
+<th:block layout:fragment="scripts"></th:block>
+
+</body>
+</html>

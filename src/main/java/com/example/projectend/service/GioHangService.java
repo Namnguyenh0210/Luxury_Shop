@@ -1,0 +1,191 @@
+package com.example.projectend.service;
+
+import com.example.projectend.entity.*;
+import com.example.projectend.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+
+/**
+ * GIO HANG SERVICE - VIẾT LẠI HOÀN TOÀN
+ * Theo cấu trúc mới: GioHang (container) + GioHangChiTiet (items)
+ */
+@Service
+@Transactional
+public class GioHangService {
+
+    private static final Logger log = LoggerFactory.getLogger(GioHangService.class);
+
+    @Autowired
+    private GioHangRepository gioHangRepository;
+
+    @Autowired
+    private GioHangChiTietRepository gioHangChiTietRepository;
+
+    @Autowired
+    private SanPhamChiTietRepository sanPhamChiTietRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    /**
+     * Lấy hoặc tạo giỏ hàng cho user
+     */
+    public GioHang getOrCreateGioHang(TaiKhoan taiKhoan) {
+        return gioHangRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK())
+                .orElseGet(() -> {
+                    GioHang gh = new GioHang(taiKhoan);
+                    return gioHangRepository.save(gh);
+                });
+    }
+
+    /**
+     * Thêm sản phẩm vào giỏ hàng
+     */
+    public void addToCart(TaiKhoan taiKhoan, Long maBienThe, int soLuong) {
+        GioHang gioHang = getOrCreateGioHang(taiKhoan);
+
+        // Khóa đọc bi quan để đảm bảo không đọc giá trị "bị ghi đè" giữa chừng (tùy DB có hỗ trợ)
+        SanPhamChiTiet spct = sanPhamChiTietRepository.findLockedById(maBienThe)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+        if (soLuong <= 0) throw new RuntimeException("Số lượng không hợp lệ");
+
+        Optional<GioHangChiTiet> existingItem = gioHangChiTietRepository
+                .findByGioHang_MaGioHangAndSanPhamChiTiet_MaBienThe(gioHang.getMaGioHang(), maBienThe);
+
+        // Đọc tồn kho mới nhất bằng native (tránh persistence context giữ giá trị cũ)
+        Integer currentStockNative = sanPhamChiTietRepository.findCurrentStockNative(maBienThe);
+        int currentStock = currentStockNative != null ? currentStockNative : (spct.getSoLuongTon() != null ? spct.getSoLuongTon() : 0);
+        if (currentStock < 0) currentStock = 0;
+
+        log.debug("AddToCart START => maBienThe={}, soLuongYeuCau={}, tonKhoNative={}, tonKhoEntity={}, tonKhoSuDung={}, daCoTrongGio={}",
+                maBienThe, soLuong, currentStockNative, spct.getSoLuongTon(), currentStock, existingItem.isPresent());
+
+        if (existingItem.isPresent()) {
+            GioHangChiTiet item = existingItem.get();
+            int existingQty = item.getSoLuong();
+            int newQty = existingQty + soLuong;
+            if (newQty > currentStock) {
+                int remainingCanAdd = Math.max(currentStock - existingQty, 0);
+                log.debug("OUT_OF_STOCK_UPDATE => existingQty={}, reqAdd={}, newQty={}, stock={}, remainingCanAdd={}", existingQty, soLuong, newQty, currentStock, remainingCanAdd);
+                throw new RuntimeException("Hết hàng: tồn kho còn " + currentStock + ", bạn đang có " + existingQty + ", chỉ có thể thêm tối đa " + remainingCanAdd);
+            }
+            item.setSoLuong(newQty);
+            gioHangChiTietRepository.save(item);
+            log.debug("UPDATE_CART_ITEM_OK => maGHCT={}, oldQty={}, added={}, newQty={}", item.getMaGHCT(), existingQty, soLuong, newQty);
+        } else {
+            if (soLuong > currentStock) {
+                log.debug("OUT_OF_STOCK_NEW => reqAdd={}, stock={}", soLuong, currentStock);
+                throw new RuntimeException("Hết hàng: tồn kho còn " + currentStock);
+            }
+            GioHangChiTiet newItem = new GioHangChiTiet(gioHang, spct, soLuong);
+            gioHangChiTietRepository.save(newItem);
+            log.debug("CREATE_CART_ITEM_OK => maGHCT={}, soLuong={}, stockSauKhiThem={}", newItem.getMaGHCT(), soLuong, currentStock);
+        }
+    }
+
+    /**
+     * Cập nhật số lượng sản phẩm trong giỏ
+     */
+    public void updateQuantity(Long maGHCT, int soLuong) {
+        Optional<GioHangChiTiet> item = gioHangChiTietRepository.findById(maGHCT);
+        if (item.isPresent()) {
+            if (soLuong > 0) {
+                item.get().setSoLuong(soLuong);
+                gioHangChiTietRepository.save(item.get());
+            } else {
+                gioHangChiTietRepository.deleteById(maGHCT);
+            }
+        }
+    }
+
+    /**
+     * Xóa sản phẩm khỏi giỏ
+     */
+    public void removeFromCart(Long maGHCT) {
+        gioHangChiTietRepository.deleteById(maGHCT);
+    }
+
+    /**
+     * Lấy tất cả items trong giỏ hàng
+     */
+    public List<GioHangChiTiet> getCartItems(TaiKhoan taiKhoan) {
+        GioHang gioHang = getOrCreateGioHang(taiKhoan);
+        return gioHangChiTietRepository.findByGioHang_MaGioHang(gioHang.getMaGioHang());
+    }
+
+    /**
+     * Tính tổng tiền giỏ hàng
+     */
+    public BigDecimal calculateTotal(TaiKhoan taiKhoan) {
+        List<GioHangChiTiet> items = getCartItems(taiKhoan);
+        return items.stream()
+                .map(item -> item.getSanPhamChiTiet().getGiaBan()
+                        .multiply(BigDecimal.valueOf(item.getSoLuong())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Đếm số lượng items trong giỏ
+     */
+    public long countCartItems(TaiKhoan taiKhoan) {
+        GioHang gioHang = gioHangRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK())
+                .orElse(null);
+        if (gioHang == null) return 0;
+        return gioHangChiTietRepository.countByGioHang_MaGioHang(gioHang.getMaGioHang());
+    }
+
+    /**
+     * Tổng số lượng sản phẩm (cộng dồn qty) trong giỏ hàng
+     */
+    public long sumQuantity(TaiKhoan taiKhoan) {
+        GioHang gioHang = gioHangRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK()).orElse(null);
+        if (gioHang == null) return 0L;
+        List<GioHangChiTiet> items = gioHangChiTietRepository.findByGioHang_MaGioHang(gioHang.getMaGioHang());
+        return items.stream().mapToLong(i -> i.getSoLuong() != null ? i.getSoLuong() : 0).sum();
+    }
+
+    /**
+     * Xóa toàn bộ giỏ hàng (sau khi đặt hàng)
+     */
+    public void clearCart(TaiKhoan taiKhoan) {
+        GioHang gioHang = gioHangRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK())
+                .orElse(null);
+        if (gioHang != null) {
+            gioHangChiTietRepository.deleteByGioHang_MaGioHang(gioHang.getMaGioHang());
+        }
+    }
+
+    /**
+     * Lấy danh sách GioHangChiTiet theo TaiKhoan (cho CheckoutController)
+     */
+    public List<GioHangChiTiet> getGioHangByTaiKhoan(TaiKhoan taiKhoan) {
+        return getCartItems(taiKhoan);
+    }
+
+    /**
+     * Tính tổng tiền từ danh sách GioHangChiTiet (cho CheckoutController)
+     */
+    public BigDecimal tinhTongTien(List<GioHangChiTiet> items) {
+        return items.stream()
+                .map(item -> item.getSanPhamChiTiet().getGiaBan()
+                        .multiply(BigDecimal.valueOf(item.getSoLuong())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    /**
+     * Xóa giỏ hàng (alias cho clearCart - cho CheckoutController)
+     */
+    public void clearGioHang(TaiKhoan taiKhoan) {
+        clearCart(taiKhoan);
+    }
+}

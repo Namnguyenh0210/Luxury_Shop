@@ -1,0 +1,233 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}"
+      th:with="pageTitle='Thanh toán PayOS'">
+<head>
+    <link th:href="@{/css/Pay.css}" rel="stylesheet"/>
+    <style>
+        /* CSS cho trang thanh toán PayOS */
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .qr-container {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        .qr-code {
+            max-width: 300px;
+            margin: 20px auto;
+        }
+        .payment-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        .countdown {
+            font-size: 18px;
+            font-weight: bold;
+            color: #dc3545;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <main class="payment-container">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-4">💳 Thanh toán qua PayOS</h1>
+            <p class="text-gray-600">Quét mã QR bên dưới để thanh toán đơn hàng</p>
+        </div>
+
+        <!-- Thông tin đơn hàng -->
+        <div class="payment-info">
+            <h3 class="text-xl font-bold mb-4">📋 Thông tin đơn hàng</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600">Mã đơn hàng:</p>
+                    <p class="font-bold text-lg" th:text="'#' + ${orderCode}"></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Số tiền thanh toán:</p>
+                    <p class="font-bold text-lg text-red-600" th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Trạng thái:</p>
+                    <span class="status-badge status-pending" id="paymentStatus">⏳ Chờ thanh toán</span>
+                </div>
+                <div th:if="${donHang}">
+                    <p class="text-sm text-gray-600">Khách hàng:</p>
+                    <p class="font-medium" th:text="${donHang.taiKhoan?.hoTen}"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code -->
+        <div class="qr-container">
+            <h3 class="text-xl font-bold mb-4">📱 Quét mã QR để thanh toán</h3>
+
+            <!-- Hiển thị QR Code nếu có -->
+            <div class="qr-code" th:if="${qrCode}">
+                <img th:src="${qrCode}" alt="QR Code PayOS" style="width: 100%;">
+            </div>
+
+            <!-- Hoặc hiển thị nút chuyển đến trang thanh toán -->
+            <div th:unless="${qrCode}">
+                <p class="mb-4">Nhấn nút bên dưới để mở trang thanh toán PayOS</p>
+                <a th:href="${checkoutUrl}" target="_blank"
+                   class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                    🔗 Mở trang thanh toán
+                </a>
+            </div>
+
+            <div class="mt-6">
+                <p class="text-sm text-gray-600 mb-2">
+                    ✅ Mở ứng dụng ngân hàng<br>
+                    ✅ Quét mã QR hoặc nhấn vào link<br>
+                    ✅ Xác nhận thanh toán
+                </p>
+                <div class="countdown" id="countdown">
+                    ⏱️ Thời gian còn lại: <span id="timeLeft">15:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hướng dẫn -->
+        <div class="bg-blue-50 p-4 rounded-lg mb-6">
+            <h4 class="font-bold mb-2">💡 Hướng dẫn thanh toán:</h4>
+            <ol class="list-decimal list-inside space-y-2 text-sm">
+                <li>Mở ứng dụng ngân hàng trên điện thoại (Momo, ZaloPay, Banking app...)</li>
+                <li>Chọn chức năng "Quét mã QR" hoặc "Chuyển khoản"</li>
+                <li>Quét mã QR code hiển thị bên trên</li>
+                <li>Kiểm tra thông tin và xác nhận thanh toán</li>
+                <li>Hệ thống sẽ tự động cập nhật khi thanh toán thành công</li>
+            </ol>
+        </div>
+
+        <!-- Nút hành động -->
+        <div class="flex gap-4 justify-center">
+            <button onclick="checkPaymentStatus()"
+                    class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                🔄 Kiểm tra thanh toán
+            </button>
+            <a th:href="@{/profile}"
+               class="bg-gray-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition inline-block">
+                📝 Xem đơn hàng
+            </a>
+        </div>
+    </main>
+
+    <!-- JavaScript để tự động kiểm tra trạng thái -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const orderCode = /*[[${orderCode}]]*/ null;
+        const checkInterval = 5000; // Kiểm tra mỗi 5 giây
+        let checkTimer;
+        let countdownTimer;
+        let timeLeft = 15 * 60; // 15 phút
+
+        // Hàm kiểm tra trạng thái thanh toán
+        function checkPaymentStatus() {
+            fetch(`/payment/payos/check/${orderCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Payment status:', data);
+
+                    if (data.success) {
+                        const status = data.status;
+                        const statusElement = document.getElementById('paymentStatus');
+
+                        if (status === 'PAID') {
+                            // Thanh toán thành công
+                            statusElement.className = 'status-badge status-paid';
+                            statusElement.textContent = '✅ Đã thanh toán';
+
+                            // Dừng timer
+                            clearInterval(checkTimer);
+                            clearInterval(countdownTimer);
+
+                            // Thông báo và chuyển trang
+                            alert('✅ Thanh toán thành công! Cảm ơn bạn đã mua hàng.');
+                            setTimeout(() => {
+                                window.location.href = `/checkout/success?orderId=${orderCode}`;
+                            }, 2000);
+
+                        } else if (status === 'CANCELLED') {
+                            // Thanh toán bị hủy
+                            statusElement.className = 'status-badge bg-danger';
+                            statusElement.textContent = '❌ Đã hủy';
+                            clearInterval(checkTimer);
+                            clearInterval(countdownTimer);
+
+                        } else if (status === 'PENDING') {
+                            // Vẫn đang chờ
+                            statusElement.className = 'status-badge status-pending';
+                            statusElement.textContent = '⏳ Chờ thanh toán';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking payment status:', error);
+                });
+        }
+
+        // Hàm đếm ngược thời gian
+        function updateCountdown() {
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                clearInterval(checkTimer);
+                document.getElementById('timeLeft').textContent = 'Hết hạn';
+                alert('⚠️ Đã hết thời gian thanh toán. Vui lòng thử lại!');
+                window.location.href = '/profile';
+                return;
+            }
+
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timeLeft').textContent =
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            timeLeft--;
+        }
+
+        // Tự động kiểm tra trạng thái mỗi 5 giây
+        if (orderCode) {
+            checkTimer = setInterval(checkPaymentStatus, checkInterval);
+            countdownTimer = setInterval(updateCountdown, 1000);
+
+            // Kiểm tra ngay lập tức khi load trang
+            checkPaymentStatus();
+        }
+
+        // Dừng timer khi rời khỏi trang
+        window.addEventListener('beforeunload', function() {
+            clearInterval(checkTimer);
+            clearInterval(countdownTimer);
+        });
+        /*]]>*/
+    </script>
+</div>
+</body>
+</html>

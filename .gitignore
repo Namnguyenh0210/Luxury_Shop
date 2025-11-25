@@ -1,0 +1,28 @@
+# Maven build output
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+server.log
+
+# Application secrets (use application.properties.example as template)
+# src/main/resources/application.properties
+
+# Temporary files
+*.tmp
+*.bak
+cookies.txt
+
