@@ -12,12 +12,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 
 @Controller
-@RequestMapping("/admin/taikhoan")
+@RequestMapping("/admin/customers") // Đã khớp với Sidebar
 @PreAuthorize("hasRole('ADMIN')")
-public class AdminTaiKhoanController {
+public class AdminTaiKhoanController { // Tên class khớp với tên file
 
     @Autowired
     private TaiKhoanService taiKhoanService;
@@ -28,123 +30,126 @@ public class AdminTaiKhoanController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // Danh sách tài khoản
+    // ==========================================
+    // 1. HIỂN THỊ DANH SÁCH
+    // ==========================================
     @GetMapping
-    public String danhSachTaiKhoan(Model model) {
-        List<TaiKhoan> accounts = taiKhoanService.findAll();
+    public String listCustomers(Model model, 
+                                @RequestParam(required = false) String keyword) {
+        
+        List<TaiKhoan> list;
+        
+        if (keyword != null && !keyword.isEmpty()) {
+            // Tạm thời dùng findAll, bạn có thể thay bằng taiKhoanService.search(keyword) sau
+            list = taiKhoanService.findAll(); 
+        } else {
+            list = taiKhoanService.findAll();
+        }
+
         List<VaiTro> vaiTros = vaiTroRepository.findAll();
 
-        model.addAttribute("accounts", accounts);
+        // Tên attribute "customers" khớp với th:each="kh : ${customers}" trong HTML
+        model.addAttribute("customers", list); 
         model.addAttribute("vaiTros", vaiTros);
-        model.addAttribute("account", new TaiKhoan());
-        model.addAttribute("isEdit", false);
-        model.addAttribute("currentPage", "taikhoan");
-        model.addAttribute("pageTitle", "Quản lý Tài khoản");
+        
+        // Active menu bên trái
+        model.addAttribute("currentPage", "customers"); 
+        model.addAttribute("keyword", keyword);
 
-        return "admin/taikhoan";
+        // Trả về file HTML: src/main/resources/templates/admin/customer-list.html
+        return "admin/customer-list"; 
     }
 
-    // Form sửa tài khoản
-    @GetMapping("/edit/{id}")
-    public String editTaiKhoan(@PathVariable Long id, Model model) {
-        TaiKhoan account = taiKhoanService.findById(id).orElse(new TaiKhoan());
-        List<TaiKhoan> accounts = taiKhoanService.findAll();
-        List<VaiTro> vaiTros = vaiTroRepository.findAll();
-
-        model.addAttribute("account", account);
-        model.addAttribute("accounts", accounts);
-        model.addAttribute("vaiTros", vaiTros);
-        model.addAttribute("isEdit", true);
-        model.addAttribute("currentPage", "taikhoan");
-        model.addAttribute("pageTitle", "Sửa Tài khoản");
-
-        return "admin/taikhoan";
-    }
-
-    // Lưu tài khoản (thêm mới hoặc cập nhật)
+    // ==========================================
+    // 2. LƯU TÀI KHOẢN
+    // ==========================================
     @PostMapping("/save")
-    public String saveTaiKhoan(@ModelAttribute TaiKhoan account,
-                               @RequestParam(required = false) String matKhauMoi,
-                               RedirectAttributes ra) {
+    public String saveAccount(@ModelAttribute TaiKhoan account,
+                              @RequestParam(required = false) String matKhauMoi,
+                              @RequestParam(required = false) Long vaiTroId,
+                              RedirectAttributes ra) {
         try {
-            // Nếu là tài khoản mới
+            // --- THÊM MỚI ---
             if (account.getMaTK() == null) {
-                // Mật khẩu mặc định là "123456" nếu không nhập
-                String password = (matKhauMoi != null && !matKhauMoi.isEmpty())
-                        ? matKhauMoi : "123456";
-                account.setMatKhau(passwordEncoder.encode(password));
-                account.setTrangThai(true); // Mặc định kích hoạt
-            } else {
-                // Nếu đang sửa, giữ nguyên mật khẩu cũ nếu không nhập mật khẩu mới
-                TaiKhoan existingAccount = taiKhoanService.findById(account.getMaTK()).orElse(null);
-                if (existingAccount != null) {
+                account.setNgayTao(LocalDateTime.now());
+                account.setTrangThai(true);
+                
+                String rawPass = (matKhauMoi != null && !matKhauMoi.isEmpty()) ? matKhauMoi : "123456";
+                account.setMatKhau(passwordEncoder.encode(rawPass));
+            } 
+            // --- CẬP NHẬT ---
+            else {
+                TaiKhoan oldAccount = taiKhoanService.findById(account.getMaTK()).orElse(null);
+                if (oldAccount != null) {
+                    account.setNgayTao(oldAccount.getNgayTao());
+                    account.setTrangThai(oldAccount.getTrangThai());
+                    
                     if (matKhauMoi != null && !matKhauMoi.isEmpty()) {
                         account.setMatKhau(passwordEncoder.encode(matKhauMoi));
                     } else {
-                        account.setMatKhau(existingAccount.getMatKhau());
+                        account.setMatKhau(oldAccount.getMatKhau());
                     }
-                    account.setNgayTao(existingAccount.getNgayTao());
-                    account.setTrangThai(existingAccount.getTrangThai());
+                    // Giữ roles cũ tạm thời trước khi set role mới bên dưới
+                    account.setRoles(oldAccount.getRoles());
+                }
+            }
+            
+            // --- CẬP NHẬT ROLE ---
+            if (vaiTroId != null) {
+                VaiTro vaiTro = vaiTroRepository.findById(vaiTroId).orElse(null);
+                if (vaiTro != null) {
+                    if (account.getRoles() == null) {
+                        account.setRoles(new HashSet<>());
+                    }
+                    account.getRoles().clear();
+                    account.getRoles().add(vaiTro);
                 }
             }
 
+            account.setNgayCapNhat(LocalDateTime.now());
             taiKhoanService.save(account);
-            ra.addFlashAttribute("success",
-                    account.getMaTK() == null ? "Thêm tài khoản thành công!" : "Cập nhật tài khoản thành công!");
+            
+            ra.addFlashAttribute("success", "Lưu thông tin thành công!");
+
         } catch (Exception e) {
+            e.printStackTrace();
             ra.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/admin/taikhoan";
+        // Redirect về trang danh sách
+        return "redirect:/admin/customers"; 
     }
 
-    // Khóa/Mở khóa tài khoản
+    // ==========================================
+    // 3. KHÓA / MỞ KHÓA
+    // ==========================================
     @PostMapping("/{id}/toggle-status")
     public String toggleStatus(@PathVariable Long id, RedirectAttributes ra) {
         try {
             TaiKhoan account = taiKhoanService.findById(id).orElse(null);
             if (account != null) {
-                account.setTrangThai(!account.getTrangThai());
+                boolean newStatus = !account.getTrangThai(); // Đảo ngược trạng thái
+                account.setTrangThai(newStatus);
                 taiKhoanService.save(account);
-                ra.addFlashAttribute("success",
-                        account.getTrangThai() ? "Đã mở khóa tài khoản!" : "Đã khóa tài khoản!");
+                
+                ra.addFlashAttribute("success", newStatus ? "Đã mở khóa tài khoản!" : "Đã khóa tài khoản!");
             }
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Không thể thay đổi trạng thái: " + e.getMessage());
+            ra.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/admin/taikhoan";
+        return "redirect:/admin/customers";
     }
 
-    // Xóa tài khoản
+    // ==========================================
+    // 4. XÓA TÀI KHOẢN
+    // ==========================================
     @PostMapping("/delete/{id}")
-    public String deleteTaiKhoan(@PathVariable Long id, RedirectAttributes ra) {
+    public String deleteAccount(@PathVariable Long id, RedirectAttributes ra) {
         try {
             taiKhoanService.deleteById(id);
             ra.addFlashAttribute("success", "Xóa tài khoản thành công!");
         } catch (Exception e) {
-            ra.addFlashAttribute("error", "Không thể xóa tài khoản: " + e.getMessage());
+            ra.addFlashAttribute("error", "Không thể xóa (Tài khoản đã có dữ liệu liên quan).");
         }
-        return "redirect:/admin/taikhoan";
-    }
-
-    // Thay đổi vai trò
-    @PostMapping("/change-role/{id}")
-    public String changeRole(@PathVariable Long id,
-                             @RequestParam Long vaiTroId,
-                             RedirectAttributes ra) {
-        try {
-            TaiKhoan account = taiKhoanService.findById(id).orElse(null);
-            VaiTro vaiTro = vaiTroRepository.findById(vaiTroId).orElse(null);
-
-            if (account != null && vaiTro != null) {
-                // Xóa tất cả roles cũ và thêm role mới
-                account.getRoles().clear();
-                account.addRole(vaiTro);
-                taiKhoanService.save(account);
-                ra.addFlashAttribute("success", "Thay đổi vai trò thành công!");
-            }
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Không thể thay đổi vai trò: " + e.getMessage());
-        }
-        return "redirect:/admin/taikhoan";
+        return "redirect:/admin/customers";
     }
 }

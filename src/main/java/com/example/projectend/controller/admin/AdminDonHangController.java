@@ -3,16 +3,13 @@ package com.example.projectend.controller.admin;
 import com.example.projectend.entity.DonHang;
 import com.example.projectend.entity.DonHangChiTiet;
 import com.example.projectend.entity.TaiKhoan;
-import com.example.projectend.entity.TrangThaiDonHang;
 import com.example.projectend.repository.TaiKhoanRepository;
-import com.example.projectend.repository.TrangThaiDonHangRepository;
 import com.example.projectend.service.DonHangService;
-import com.example.projectend.service.TaiKhoanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+// import org.springframework.data.domain.Sort; // <-- Bỏ import này
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -20,255 +17,137 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * ADMIN DON HANG CONTROLLER - Quản lý đơn hàng (Admin & Staff)
- * =============================
- * PHÂN CÔNG: TV3 - ADMIN BACKEND
- * =============================
- */
 @Controller
 @RequestMapping("/admin/orders")
-@PreAuthorize("hasRole('Admin') or hasRole('Nhân viên')")
+@PreAuthorize("hasRole('ADMIN') or hasRole('NHANVIEN')")
 public class AdminDonHangController {
 
     @Autowired
     private DonHangService donHangService;
 
     @Autowired
-    private TrangThaiDonHangRepository trangThaiRepository;
-
-    @Autowired
     private TaiKhoanRepository taiKhoanRepository;
 
-    @Autowired
-    private TaiKhoanService taiKhoanService;
-
-    /**
-     * Helper method để kiểm tra user có phải Nhân viên không
-     */
     private boolean isStaff(Authentication auth) {
         return auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_Nhân viên"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_NHANVIEN"));
     }
 
-    // =============================
-    // Endpoint 1 - Danh sách đơn hàng
-    // GET /admin/orders
-    // =============================
-    @GetMapping("")
-    public String danhSachDonHang(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String trangThai,
-            Authentication auth,
-            Model model) {
+    // ==========================================
+    // 1. DANH SÁCH ĐƠN HÀNG (ĐÃ SỬA LỖI SORT)
+    // ==========================================
+    @GetMapping
+    public String listOrders(@RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "10") int size,
+                             @RequestParam(required = false) String keyword,
+                             @RequestParam(required = false) Integer status, 
+                             Model model) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("ngayDat").descending());
-        if (trangThai != null && trangThai.trim().isEmpty()) {
-            trangThai = null;
-        }
+        // --- SỬA LỖI TẠI ĐÂY ---
+        // Bỏ Sort.by("ngayDat") vì trong Service/Repository tên hàm đã có OrderByNgayDatDesc rồi
+        // Nếu để cả 2 sẽ bị lỗi "A column has been specified more than once" trên SQL Server
+        Pageable pageable = PageRequest.of(page, size); 
 
-        // Admin thấy tất cả đơn hàng
-        Page<DonHang> donHangPage = donHangService.searchAdmin(keyword, trangThai, pageable);
+        String statusStr = (status != null) ? status.toString() : null;
 
-        List<TrangThaiDonHang> trangThaiList = trangThaiRepository.findAll();
+        Page<DonHang> orderPage = donHangService.searchAdmin(keyword, statusStr, pageable);
 
-        model.addAttribute("donHangPage", donHangPage);
-        model.addAttribute("orders", donHangPage.getContent());
-        model.addAttribute("trangThaiList", trangThaiList);
+        model.addAttribute("orders", orderPage.getContent());
+        model.addAttribute("orderPage", orderPage);
         model.addAttribute("keyword", keyword);
-        model.addAttribute("trangThaiFilter", trangThai);
-        model.addAttribute("currentPage", "donhang");
-        model.addAttribute("pageTitle", "Quản lý đơn hàng");
+        model.addAttribute("currentStatus", status);
+        
+        model.addAttribute("currentPage", "orders");
 
-        // ADMIN luôn dùng template admin/orders (không phân biệt)
-        return "admin/orders";
+        return "admin/order-list";
     }
 
-    // =============================
-    // Endpoint 2 - Chi tiết đơn hàng
-    // GET /admin/orders/detail/{id}
-    // =============================
+    // ==========================================
+    // 2. CHI TIẾT ĐƠN HÀNG
+    // ==========================================
     @GetMapping("/detail/{id}")
-    public String chiTietDonHang(@PathVariable Long id, Authentication auth, Model model) {
-
-        Optional<DonHang> donHangOpt = donHangService.findById(id);
-        if (donHangOpt.isEmpty()) {
+    public String orderDetail(@PathVariable Long id, Authentication auth, Model model) {
+        Optional<DonHang> orderOpt = donHangService.findById(id);
+        
+        if (orderOpt.isEmpty()) {
             return "redirect:/admin/orders?error=notfound";
         }
 
-        DonHang donHang = donHangOpt.get();
+        DonHang order = orderOpt.get();
+        List<DonHangChiTiet> orderItems = donHangService.getOrderDetails(id);
 
-        // Lấy thông tin user hiện tại
-        String email = auth.getName();
-        TaiKhoan currentUser = taiKhoanRepository.findByEmail(email).orElse(null);
+        model.addAttribute("order", order);
+        model.addAttribute("orderItems", orderItems);
+        model.addAttribute("currentPage", "orders");
 
-        List<DonHangChiTiet> chiTiet = donHangService.getChiTietDonHang(donHang);
-        List<TrangThaiDonHang> trangThaiList = trangThaiRepository.findAll();
-
-        model.addAttribute("donHang", donHang);
-        model.addAttribute("chiTiet", chiTiet);
-        model.addAttribute("trangThaiList", trangThaiList);
-        model.addAttribute("currentUser", currentUser);
-        model.addAttribute("currentPage", "donhang");
-        model.addAttribute("pageTitle", "Chi tiết đơn hàng #" + id);
-
-        // ADMIN luôn dùng template admin/order_detail (không phân biệt)
-        return "admin/order_detail";
+        return "admin/order-detail";
     }
 
-    // =============================
-    // Endpoint 3 - Cập nhật trạng thái đơn hàng
-    // POST /admin/orders/update-status/{id}
-    // =============================
-    @PostMapping("/update-status/{id}")
-    public String capNhatTrangThai(
-            @PathVariable Long id,
-            @RequestParam String trangThaiMoi,
-            Authentication auth,
-            RedirectAttributes redirectAttributes) {
-
+    // ==========================================
+    // 3. CẬP NHẬT TRẠNG THÁI
+    // ==========================================
+    @PostMapping("/update-status")
+    public String updateStatus(@RequestParam Long orderId,
+                               @RequestParam Integer status,
+                               Authentication auth,
+                               RedirectAttributes redirectAttributes) {
         try {
-            // Lấy thông tin user hiện tại
             String email = auth.getName();
             TaiKhoan currentUser = taiKhoanRepository.findByEmail(email).orElse(null);
-
+            
             if (currentUser == null) {
-                redirectAttributes.addFlashAttribute("error", "❌ Không tìm thấy thông tin người dùng!");
-                return "redirect:/admin/orders/detail/" + id;
+                redirectAttributes.addFlashAttribute("error", "Lỗi xác thực người dùng.");
+                return "redirect:/admin/orders/detail/" + orderId;
             }
 
-            // Lấy đơn hàng
-            Optional<DonHang> donHangOpt = donHangService.findById(id);
-            if (donHangOpt.isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "❌ Không tìm thấy đơn hàng!");
-                return "redirect:/admin/orders";
-            }
-
-            DonHang donHang = donHangOpt.get();
-            String trangThaiHienTai = donHang.getTrangThaiDonHang();
-
-            // Kiểm tra nếu là nhân viên
+            DonHang order = donHangService.findById(orderId)
+                    .orElseThrow(() -> new Exception("Không tìm thấy đơn hàng"));
+            
+            Integer currentStatus = order.getTrangThaiDH();
             boolean isStaff = isStaff(auth);
 
-            // Logic đặc biệt cho nhân viên
             if (isStaff) {
-                // Nếu đơn hàng đang ở trạng thái "Chờ xác nhận" và nhân viên chuyển sang "Đang giao"
-                if ("Chờ xác nhận".equals(trangThaiHienTai) && "Đang giao".equals(trangThaiMoi)) {
-                    // Tự động gán nhân viên này cho đơn hàng
-                    donHang.setNhanVien(currentUser);
-                    System.out.println("=== GÁN NHÂN VIÊN: " + currentUser.getHoTen() + " cho đơn hàng #" + id);
+                if (currentStatus == 0 && status > 0) {
+                     order.setNhanVien(currentUser);
+                     donHangService.save(order);
                 }
-                // Nếu đơn hàng đã có nhân viên khác được gán
-                else if (donHang.getNhanVien() != null && !donHang.getNhanVien().getMaTK().equals(currentUser.getMaTK())) {
-                    redirectAttributes.addFlashAttribute("error",
-                            "❌ Đơn hàng này đã được gán cho nhân viên: " + donHang.getNhanVien().getHoTen() +
-                                    ". Chỉ nhân viên đó mới có thể cập nhật!");
-                    return "redirect:/admin/orders/detail/" + id;
+                
+                if (order.getNhanVien() != null && !order.getNhanVien().getMaTK().equals(currentUser.getMaTK())) {
+                    redirectAttributes.addFlashAttribute("error", "Đơn hàng này thuộc về nhân viên: " + order.getNhanVien().getHoTen());
+                    return "redirect:/admin/orders/detail/" + orderId;
                 }
 
-                // Kiểm tra workflow: chỉ cho phép chuyển theo thứ tự
-                if (!isValidTransition(trangThaiHienTai, trangThaiMoi)) {
-                    redirectAttributes.addFlashAttribute("error",
-                            "❌ Không thể chuyển từ '" + trangThaiHienTai + "' sang '" + trangThaiMoi + "'. " +
-                                    "Vui lòng tuân thủ thứ tự: Chờ xác nhận → Đang giao → Hoàn tất");
-                    return "redirect:/admin/orders/detail/" + id;
+                if (!isValidTransition(currentStatus, status)) {
+                    redirectAttributes.addFlashAttribute("error", "Không thể chuyển trạng thái sai quy trình!");
+                    return "redirect:/admin/orders/detail/" + orderId;
                 }
             }
 
-            // Cập nhật trạng thái đơn giản
-            // Chuyển đổi tên trạng thái sang số
-            Integer statusCode = convertStatusNameToCode(trangThaiMoi);
-            donHang.setTrangThaiDH(statusCode);
+            String updatedBy = currentUser.getHoTen();
+            boolean success = donHangService.updateOrderStatus(orderId, status, updatedBy);
 
-            // Lấy người cập nhật
-            String updatedBy = currentUser != null ? currentUser.getHoTen() : "Admin";
-            donHangService.updateOrderStatus(id, statusCode, updatedBy);
+            if (success) {
+                redirectAttributes.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Cập nhật thất bại.");
+            }
 
-            redirectAttributes.addFlashAttribute("success",
-                    "✅ Cập nhật trạng thái thành công cho đơn hàng #" + id);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "⚠️ Lỗi hệ thống: " + e.getMessage());
             e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
 
-        return "redirect:/admin/orders/detail/" + id;
+        return "redirect:/admin/orders/detail/" + orderId;
     }
 
-    /**
-     * Chuyển đổi tên trạng thái sang mã số
-     */
-    private Integer convertStatusNameToCode(String statusName) {
-        return switch (statusName) {
-            case "Chờ xác nhận" -> 0;
-            case "Đã xác nhận" -> 1;
-            case "Đang giao" -> 2;
-            case "Đã giao", "Hoàn tất" -> 3;
-            case "Đã hủy" -> 4;
-            default -> 0;
-        };
-    }
-
-    /**
-     * Kiểm tra workflow hợp lệ cho nhân viên
-     */
-    private boolean isValidTransition(String from, String to) {
-        // Chỉ cho phép chuyển theo thứ tự: Chờ xác nhận → Đang giao → Hoàn tất
-        if ("Chờ xác nhận".equals(from) && "Đang giao".equals(to)) return true;
-        if ("Đang giao".equals(from) && "Hoàn tất".equals(to)) return true;
-        if ("Đang giao".equals(from) && "Đã hủy".equals(to)) return true; // Cho phép hủy khi đang giao
+    private boolean isValidTransition(Integer from, Integer to) {
+        if (from == 0 && to == 1) return true;
+        if (from == 1 && to == 2) return true; 
+        if (from == 2 && to == 3) return true; 
+        if (to == 4 && from < 2) return true;  
         return false;
-    }
-
-    // =============================
-    // Endpoint 4 - Đơn chờ xác nhận (dashboard widget)
-    // GET /admin/orders/pending
-    // =============================
-    @GetMapping("/pending")
-    @ResponseBody
-    public List<DonHang> getPendingOrders(@RequestParam(defaultValue = "10") int limit) {
-        return donHangService.getPendingOrders(limit);
-    }
-
-    // TODO: Sửa lại logic sau khi Entity DonHang đã hoàn chỉnh
-    @GetMapping("/admin/donhang/detail/{id}")
-    public String viewOrderDetail(@PathVariable Long id, Model model) {
-        try {
-            Optional<DonHang> donHang = donHangService.findById(id);
-            if (donHang.isPresent()) {
-                model.addAttribute("donHang", donHang.get());
-                model.addAttribute("chiTiet", donHangService.getOrderDetails(id));
-            }
-        } catch (Exception e) {
-            model.addAttribute("error", e.getMessage());
-        }
-        return "admin/order_detail";
-    }
-
-    @PostMapping("/{id}/update-status")
-    public String updateOrderStatus(@PathVariable Long id,
-                                   @RequestParam Integer status,
-                                   Principal principal,
-                                   RedirectAttributes ra) {
-        try {
-            String updatedBy = "Admin";
-            if (principal != null) {
-                TaiKhoan admin = taiKhoanService.findByEmail(principal.getName());
-                if (admin != null) {
-                    updatedBy = admin.getHoTen();
-                }
-            }
-
-            donHangService.updateOrderStatus(id, status, updatedBy);
-            ra.addFlashAttribute("success", "Cập nhật trạng thái thành công!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-        }
-        return "redirect:/admin/donhang";
     }
 }
