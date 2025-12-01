@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="en" xmlns:th="http://www.thymeleaf.org">
+<html class="light" lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
 <meta charset="utf-8" />
 <meta content="width=device-width, initial-scale=1.0" name="viewport" />
@@ -49,28 +49,23 @@
 }
 </style>
 </head>
-<body
-	class="font-display bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
+<body class="font-display bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark">
 	<div class="relative flex min-h-screen w-full flex-col">
 		<div class="flex h-full w-full grow">
 
-			<aside
-				class="flex h-screen min-h-full w-64 flex-col justify-between border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 sticky top-0">
+			<aside class="flex h-screen min-h-full w-64 flex-col justify-between border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 sticky top-0">
 				<div class="flex flex-col gap-8">
 					<div class="flex items-center gap-3 px-3">
-						<div
-							class="size-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg uppercase">
-							<span sec:authentication="name"
-								th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
+						<div class="size-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg uppercase">
+							<span th:text="${#strings.substring((currentUserName ?: 'U'),0,1)}">U</span>
 						</div>
 
 						<div class="flex flex-col">
-							<h1
-								class="text-text-primary-light dark:text-text-primary-dark text-sm font-bold leading-normal truncate w-32"
-								sec:authentication="name">Admin User</h1>
-							<p
-								class="text-text-secondary-light dark:text-text-secondary-dark text-xs font-normal leading-normal">
-								<span sec:authentication="principal.authorities">ROLE_ADMIN</span>
+							<h1 class="text-text-primary-light dark:text-text-primary-dark text-sm font-bold leading-normal truncate w-32" th:text="${currentUserName ?: 'Người dùng'}">Người dùng</h1>
+							<p class="text-text-secondary-light dark:text-text-secondary-dark text-xs font-normal leading-normal">
+								<span sec:authorize="hasRole('ADMIN')">ROLE_ADMIN</span>
+								<span sec:authorize="hasRole('NHANVIEN')">ROLE_NHANVIEN</span>
+								<span sec:authorize="hasRole('KHACHHANG')">ROLE_KHACH</span>
 							</p>
 						</div>
 					</div>
@@ -141,7 +136,7 @@
 						class="flex gap-6 border-b border-slate-200 dark:border-slate-700">
 						<button onclick="switchTab('inventory')" id="tab-inventory"
 							class="tab-btn active pb-3 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
-							Lịch Sử Nhập Kho</button>
+							Nhập Kho</button>
 						<button onclick="switchTab('supplier')" id="tab-supplier"
 							class="tab-btn pb-3 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">
 							Nhà Cung Cấp</button>
@@ -178,46 +173,97 @@
 						</div>
 					</div>
 
-					<div id="content-inventory"
-						class="tab-content active bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+					<div id="content-inventory" class="tab-content active">
 						<div
-							class="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-							<h2 class="text-lg font-bold">Lịch Sử Nhập Kho</h2>
-							<button onclick="openImportModal()"
-								class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-								<span class="material-symbols-outlined">add</span> Nhập Hàng Mới
-							</button>
+							class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 mb-6">
+							<div class="flex justify-between items-center">
+								<h2 class="text-lg font-bold">Phiếu Nhập Kho </h2>
+								<button onclick="openImportModal()"
+									class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+									<span class="material-symbols-outlined">add</span> Tạo Phiếu Nhập
+								</button>
+							</div>
 						</div>
-						<div class="overflow-x-auto">
-							<table
-								class="w-full text-left text-sm text-slate-600 dark:text-slate-400">
-								<thead
-									class="bg-slate-50 dark:bg-slate-700/50 text-xs uppercase font-semibold text-slate-700 dark:text-slate-200">
-									<tr>
-										<th class="px-6 py-4">Mã NK</th>
-										<th class="px-6 py-4">Sản Phẩm</th>
-										<th class="px-6 py-4">Ngày Nhập</th>
-										<th class="px-6 py-4 text-right">Số Lượng</th>
-									</tr>
-								</thead>
-								<tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-									<tr th:each="nk : ${nhapKhos}"
-										class="hover:bg-slate-50 dark:hover:bg-slate-700/30">
-										<td class="px-6 py-4 font-mono font-medium">NK<span
-											th:text="${nk.maNK}">001</span></td>
-										<td class="px-6 py-4"
-											th:text="${nk.sanPham?.tenSP ?: 'SP đã xóa'}">Tên SP</td>
-										<td class="px-6 py-4"
-											th:text="${#temporals.format(nk.ngayNhap, 'dd/MM/yyyy HH:mm')}">01/01/2025</td>
-										<td class="px-6 py-4 text-right font-bold text-green-600">+<span
-											th:text="${nk.soLuong}">10</span></td>
-									</tr>
-									<tr th:if="${#lists.isEmpty(nhapKhos)}">
-										<td colspan="4" class="px-6 py-8 text-center text-slate-500">Chưa
-											có dữ liệu nhập kho.</td>
-									</tr>
-								</tbody>
-							</table>
+
+						<!-- Grid Cards - 3 phiếu mỗi hàng -->
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+							<div th:each="pn : ${phieuNhaps}"
+								th:attr="data-phieu-id=${pn.maPN}"
+								onclick="showPhieuNhapDetails(this)"
+								class="bg-white dark:bg-slate-800 rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-lg hover:border-blue-400 cursor-pointer transition-all duration-200 p-6">
+
+								<!-- Header -->
+								<div class="flex justify-between items-start mb-4">
+									<div>
+										<p class="text-xs font-semibold text-slate-500 uppercase mb-1">Phiếu Nhập</p>
+										<h3 class="text-2xl font-bold text-blue-600" th:text="'PN' + ${pn.maPN}">PN1</h3>
+									</div>
+									<span class="material-symbols-outlined text-blue-500 text-3xl">receipt_long</span>
+								</div>
+
+								<!-- Info -->
+								<div class="space-y-3 border-t border-slate-200 dark:border-slate-700 pt-4">
+									<div class="flex items-start gap-2">
+										<span class="material-symbols-outlined text-slate-400 text-[20px]">store</span>
+										<div class="flex-1">
+											<p class="text-xs text-slate-500">Nhà Cung Cấp</p>
+											<p class="text-sm font-semibold text-slate-900 dark:text-white"
+												th:text="${pn.nhaCungCap?.tenNCC ?: 'Không có'}">Gucci</p>
+										</div>
+									</div>
+
+									<div class="flex items-start gap-2">
+										<span class="material-symbols-outlined text-slate-400 text-[20px]">person</span>
+										<div class="flex-1">
+											<p class="text-xs text-slate-500">Nhân Viên</p>
+											<p class="text-sm font-medium text-slate-700 dark:text-slate-300"
+												th:text="${pn.nhanVien?.hoTen ?: 'Không có'}">Admin</p>
+										</div>
+									</div>
+
+									<div class="flex items-start gap-2">
+										<span class="material-symbols-outlined text-slate-400 text-[20px]">calendar_today</span>
+										<div class="flex-1">
+											<p class="text-xs text-slate-500">Ngày Nhập</p>
+											<p class="text-sm font-medium text-slate-700 dark:text-slate-300"
+												th:text="${#temporals.format(pn.ngayNhap, 'dd/MM/yyyy HH:mm')}">01/12/2025</p>
+										</div>
+									</div>
+
+									<div class="flex items-start gap-2">
+										<span class="material-symbols-outlined text-green-500 text-[20px]">payments</span>
+										<div class="flex-1">
+											<p class="text-xs text-slate-500">Tổng Tiền</p>
+											<p class="text-lg font-bold text-green-600"
+												th:text="${#numbers.formatDecimal(pn.tongTien, 0, 'COMMA', 0, 'POINT')} + '₫'">80,000,000₫</p>
+										</div>
+									</div>
+
+									<div th:if="${pn.ghiChu}" class="flex items-start gap-2 pt-2 border-t border-slate-100">
+										<span class="material-symbols-outlined text-slate-400 text-[20px]">notes</span>
+										<div class="flex-1">
+											<p class="text-xs text-slate-500">Ghi Chú</p>
+											<p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-2"
+												th:text="${pn.ghiChu}">Ghi chú...</p>
+										</div>
+									</div>
+								</div>
+
+								<!-- Footer -->
+								<div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+									<button class="w-full text-center text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center justify-center gap-1">
+										<span>Xem chi tiết</span>
+										<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+									</button>
+								</div>
+							</div>
+
+							<!-- Empty State -->
+							<div th:if="${#lists.isEmpty(phieuNhaps)}"
+								class="col-span-full text-center py-16">
+								<span class="material-symbols-outlined text-slate-300 text-6xl mb-4">inventory</span>
+								<p class="text-slate-500">Chưa có phiếu nhập kho nào.</p>
+							</div>
 						</div>
 					</div>
 
@@ -282,46 +328,243 @@
 			</main>
 		</div>
 
+		<!-- Modal Tạo Phiếu Nhập -->
 		<div id="importModal"
 			class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
 			<div
-				class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-lg animate-fade-in">
+				class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-5xl max-h-[90vh] overflow-y-auto animate-fade-in">
 				<div
-					class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-					<h3 class="text-lg font-bold text-slate-900 dark:text-white">Nhập
-						Hàng Vào Kho</h3>
+					class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-800 z-10">
+					<h3 class="text-lg font-bold text-slate-900 dark:text-white">Tạo Phiếu Nhập Kho</h3>
 					<button onclick="closeImportModal()"
 						class="text-slate-400 hover:text-slate-600">
 						<span class="material-symbols-outlined">close</span>
 					</button>
 				</div>
 
-				<form th:action="@{/admin/inventory/import/save}" method="post"
-					class="p-6 space-y-4">
-					<div>
-						<label class="block text-sm font-medium mb-1">Chọn Sản
-							Phẩm</label> <select name="sanPhamId" required
-							class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
-							<option value="">-- Chọn sản phẩm --</option>
-							<option th:each="p : ${products}" th:value="${p.maSP}"
-								th:text="${p.tenSP}"></option>
-						</select>
-						<p class="text-xs text-gray-400 mt-1">Chỉ hiện sản phẩm đang
-							bán.</p>
-					</div>
-					<div>
-						<label class="block text-sm font-medium mb-1">Số Lượng
-							Nhập</label> <input type="number" name="soLuong" min="1" required
-							class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
+				<form th:action="@{/admin/inventory/phieu-nhap/save}" method="post"
+					class="p-6 space-y-6">
+
+					<!-- Thông tin phiếu nhập -->
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50 dark:bg-slate-700/30 rounded-lg">
+						<div>
+							<label class="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-300">Mã Phiếu Nhập</label>
+							<input type="text" id="maPhieuNhapDisplay" value="Đang tải..." disabled
+								class="w-full rounded-lg border-slate-300 bg-blue-50 dark:bg-slate-700 py-2 px-3 text-sm font-bold text-blue-600">
+							<p class="text-xs text-slate-500 mt-1">Mã phiếu sẽ được tạo tự động</p>
+						</div>
+						<div>
+							<label class="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-300">Nhân Viên Nhập</label>
+							<input type="text" id="nhanVienDisplay" value="Đang tải..." disabled
+								class="w-full rounded-lg border-slate-300 bg-green-50 dark:bg-slate-700 py-2 px-3 text-sm font-semibold text-green-700">
+							<p class="text-xs text-slate-500 mt-1">Tự động lấy theo tài khoản đăng nhập</p>
+						</div>
+						<div>
+							<label class="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-300">Nhà Cung Cấp <span class="text-red-500">*</span></label>
+							<select id="nhaCungCapSelect" name="maNCC" required
+								class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
+								<option value="">-- Chọn nhà cung cấp --</option>
+								<option th:each="ncc : ${suppliers}" th:value="${ncc.maNCC}"
+									th:text="${ncc.tenNCC}"></option>
+							</select>
+							<p class="text-xs text-slate-500 mt-1">Chuyển sang tab "Nhà Cung Cấp" để thêm NCC mới</p>
+						</div>
+						<div>
+							<label class="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-300">Ngày Nhập</label>
+							<input type="text" th:value="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}" disabled
+								class="w-full rounded-lg border-slate-300 bg-slate-100 dark:bg-slate-700 py-2 px-3 text-sm">
+						</div>
+						<div class="md:col-span-2">
+							<label class="block text-sm font-semibold mb-2 text-slate-700 dark:text-slate-300">Ghi Chú</label>
+							<textarea name="ghiChu" rows="2"
+								class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm"
+								placeholder="Nhập ghi chú về phiếu nhập này..."></textarea>
+						</div>
 					</div>
 
-					<div
-						class="pt-4 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-700">
+					<!-- Chi tiết nhập kho - FORM BASED -->
+					<div>
+						<div class="flex justify-between items-center mb-4">
+							<h4 class="text-base font-bold text-slate-900 dark:text-white">
+								<span class="material-symbols-outlined align-middle">inventory</span>
+								Chi Tiết Sản Phẩm Nhập
+							</h4>
+							<div class="flex gap-2">
+								<button type="button" onclick="showExistingProductForm()"
+									class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-1">
+									<span class="material-symbols-outlined text-[18px]">add_shopping_cart</span>
+									Nhập sản phẩm có sẵn
+								</button>
+								<button type="button" onclick="showNewProductForm()"
+									class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium flex items-center gap-1">
+									<span class="material-symbols-outlined text-[18px]">add_box</span>
+									Thêm sản phẩm mới
+								</button>
+							</div>
+						</div>
+
+						<!-- Form nhập sản phẩm có sẵn -->
+						<div id="existingProductForm" class="hidden mb-4 p-4 bg-blue-50 dark:bg-slate-700/50 rounded-lg border-2 border-blue-200">
+							<h5 class="font-semibold mb-3 text-blue-900 dark:text-blue-300">Nhập sản phẩm có sẵn trong kho</h5>
+							<div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+								<div>
+									<label class="block text-xs font-medium mb-1">Sản Phẩm <span class="text-red-500">*</span></label>
+									<select id="existingProduct" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3"
+										onchange="loadExistingVariants()">
+										<option value="">-- Chọn sản phẩm --</option>
+										<option th:each="p : ${products}" th:value="${p.maSP}" th:text="${p.tenSP}"></option>
+									</select>
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Size <span class="text-red-500">*</span></label>
+									<select id="existingSize" disabled class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+										<option value="">-- Chọn size --</option>
+									</select>
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Màu <span class="text-red-500">*</span></label>
+									<select id="existingColor" disabled class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+										<option value="">-- Chọn màu --</option>
+									</select>
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Số Lượng <span class="text-red-500">*</span></label>
+									<input type="number" id="existingQty" min="1" value="1" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Đơn Giá <span class="text-red-500">*</span></label>
+									<input type="number" id="existingPrice" min="0" step="1000" value="0" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+								</div>
+							</div>
+							<div class="flex justify-end gap-2 mt-3">
+								<button type="button" onclick="hideExistingProductForm()"
+									class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm">
+									Hủy
+								</button>
+								<button type="button" onclick="addExistingProduct()"
+									class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm">
+									Thêm vào danh sách
+								</button>
+							</div>
+						</div>
+
+						<!-- Form thêm sản phẩm mới -->
+						<div id="newProductForm" class="hidden mb-4 p-4 bg-green-50 dark:bg-slate-700/50 rounded-lg border-2 border-green-200">
+							<h5 class="font-semibold mb-3 text-green-900 dark:text-green-300">Thêm sản phẩm mới vào hệ thống</h5>
+							<div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+								<div class="md:col-span-2">
+									<label class="block text-xs font-medium mb-1">Tên Sản Phẩm <span class="text-red-500">*</span></label>
+									<input type="text" id="newProductName" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3"
+										placeholder="Nhập tên sản phẩm...">
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Loại Sản Phẩm</label>
+									<select id="newProductCategory" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+										<option value="">-- Chọn loại --</option>
+										<option th:each="c : ${categories}" th:value="${c.maLoai}" th:text="${c.tenLoai}"></option>
+									</select>
+								</div>
+							</div>
+							<div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+								<div>
+									<label class="block text-xs font-medium mb-1">Thương Hiệu</label>
+									<select id="newProductBrand" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+										<option value="">-- Chọn thương hiệu --</option>
+										<option th:each="b : ${brands}" th:value="${b.maTH}" th:text="${b.tenTH}"></option>
+									</select>
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Size <span class="text-red-500">*</span></label>
+									<input type="text" id="newProductSize" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3"
+										placeholder="VD: M, L, XL...">
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Màu <span class="text-red-500">*</span></label>
+									<input type="text" id="newProductColor" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3"
+										placeholder="VD: Đỏ, Xanh...">
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Số Lượng <span class="text-red-500">*</span></label>
+									<input type="number" id="newProductQty" min="1" value="1" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Giá Nhập <span class="text-red-500">*</span></label>
+									<input type="number" id="newProductPriceImport" min="0" step="1000" value="0" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-1">Giá Bán <span class="text-red-500">*</span></label>
+									<input type="number" id="newProductPriceSell" min="0" step="1000" value="0" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+								</div>
+							</div>
+							<div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+								<div>
+									<label class="block text-xs font-medium mb-1">Giới Tính</label>
+									<select id="newProductGender" class="w-full rounded border-slate-300 dark:bg-slate-900 text-sm py-2 px-3">
+										<option value="2">Unisex</option>
+										<option value="0">Nam</option>
+										<option value="1">Nữ</option>
+									</select>
+								</div>
+							</div>
+							<div class="flex justify-end gap-2 mt-3">
+								<button type="button" onclick="hideNewProductForm()"
+									class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-sm">
+									Hủy
+								</button>
+								<button type="button" onclick="addNewProduct()"
+									class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm">
+									Tạo & Thêm vào danh sách
+								</button>
+							</div>
+						</div>
+
+						<!-- Danh sách sản phẩm đã thêm -->
+						<div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
+							<table class="w-full text-left text-sm">
+								<thead class="bg-slate-100 dark:bg-slate-700 text-xs uppercase font-semibold">
+									<tr>
+										<th class="px-4 py-3 w-10">STT</th>
+										<th class="px-4 py-3">Sản Phẩm</th>
+										<th class="px-4 py-3">Size</th>
+										<th class="px-4 py-3">Màu</th>
+										<th class="px-4 py-3 w-32">Số Lượng</th>
+										<th class="px-4 py-3 w-40">Đơn Giá Nhập</th>
+										<th class="px-4 py-3 w-40">Thành Tiền</th>
+										<th class="px-4 py-3 w-20 text-center">Xóa</th>
+									</tr>
+								</thead>
+								<tbody id="nhapKhoTableBody" class="divide-y divide-slate-200 dark:divide-slate-700">
+									<tr id="emptyRow">
+										<td colspan="8" class="px-4 py-8 text-center text-slate-500">
+											Chưa có sản phẩm nào. Click nút phía trên để thêm sản phẩm.
+										</td>
+									</tr>
+								</tbody>
+								<tfoot class="bg-slate-50 dark:bg-slate-700/50">
+									<tr>
+										<td colspan="6" class="px-4 py-3 text-right font-bold">Tổng Tiền:</td>
+										<td class="px-4 py-3 font-bold text-green-600" id="tongTienDisplay">0₫</td>
+										<td></td>
+									</tr>
+								</tfoot>
+							</table>
+						</div>
+					</div>
+
+					<input type="hidden" name="tongTien" id="tongTienInput" value="0">
+					<div id="productDataContainer"></div>
+
+					<!-- Actions -->
+					<div class="pt-4 flex justify-end gap-3 border-t border-slate-200 dark:border-slate-700">
 						<button type="button" onclick="closeImportModal()"
-							class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium">Hủy</button>
-						<button type="submit"
-							class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Xác
-							nhận nhập</button>
+							class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium">
+							Hủy
+						</button>
+						<button type="submit" id="submitBtn"
+							class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+							<span class="material-symbols-outlined text-[18px]">save</span>
+							Tạo Phiếu Nhập
+						</button>
 					</div>
 				</form>
 			</div>
@@ -370,7 +613,120 @@
 			</div>
 		</div>
 
+		<!-- Popup Chi Tiết Phiếu Nhập -->
+		<div id="phieuNhapModal"
+			class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+			<div
+				class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto animate-fade-in">
+				<div
+					class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-800 z-10">
+					<h3 class="text-lg font-bold text-slate-900 dark:text-white"
+						id="phieuNhapModalTitle">Chi Tiết Phiếu Nhập</h3>
+					<button onclick="closePhieuNhapModal()"
+						class="text-slate-400 hover:text-slate-600">
+						<span class="material-symbols-outlined">close</span>
+					</button>
+				</div>
+
+				<div class="p-6">
+					<!-- Loading Spinner -->
+					<div id="phieuLoading" class="text-center py-8">
+						<div
+							class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600"></div>
+						<p class="mt-4 text-slate-600">Đang tải...</p>
+					</div>
+
+					<!-- Phieu Nhap Details Content -->
+					<div id="phieuContent" class="hidden">
+						<!-- Thông tin phiếu -->
+						<div
+							class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 p-6 bg-slate-50 dark:bg-slate-700/30 rounded-lg">
+							<div>
+								<label
+									class="text-xs font-semibold text-slate-500 uppercase">Mã
+									Phiếu</label>
+								<p id="phieuMaPN"
+									class="text-lg font-bold text-blue-600 dark:text-blue-400"></p>
+							</div>
+							<div>
+								<label
+									class="text-xs font-semibold text-slate-500 uppercase">Ngày
+									Nhập</label>
+								<p id="phieuNgayNhap"
+									class="text-base font-medium text-slate-900 dark:text-white"></p>
+							</div>
+							<div>
+								<label
+									class="text-xs font-semibold text-slate-500 uppercase">Nhà
+									Cung Cấp</label>
+								<p id="phieuNCC"
+									class="text-base font-medium text-slate-900 dark:text-white"></p>
+							</div>
+							<div>
+								<label
+									class="text-xs font-semibold text-slate-500 uppercase">Nhân
+									Viên</label>
+								<p id="phieuNhanVien"
+									class="text-base font-medium text-slate-900 dark:text-white"></p>
+							</div>
+							<div class="md:col-span-2">
+								<label
+									class="text-xs font-semibold text-slate-500 uppercase">Ghi
+									Chú</label>
+								<p id="phieuGhiChu"
+									class="text-sm text-slate-700 dark:text-slate-300"></p>
+							</div>
+						</div>
+
+						<!-- Chi tiết sản phẩm -->
+						<div class="border-t border-slate-200 dark:border-slate-700 pt-6">
+							<h4 class="text-lg font-bold text-slate-900 dark:text-white mb-4">
+								<span class="material-symbols-outlined align-middle">inventory_2</span>
+								Chi Tiết Sản Phẩm Nhập
+							</h4>
+							<div class="overflow-x-auto">
+								<table
+									class="w-full text-left text-sm text-slate-600 dark:text-slate-400">
+									<thead
+										class="bg-slate-50 dark:bg-slate-700/50 text-xs uppercase font-semibold text-slate-700 dark:text-slate-200">
+										<tr>
+											<th class="px-4 py-3">STT</th>
+											<th class="px-4 py-3">Sản Phẩm</th>
+											<th class="px-4 py-3">Size</th>
+											<th class="px-4 py-3">Màu</th>
+											<th class="px-4 py-3 text-right">Số Lượng</th>
+											<th class="px-4 py-3 text-right">Đơn Giá</th>
+											<th class="px-4 py-3 text-right">Thành Tiền</th>
+										</tr>
+									</thead>
+									<tbody id="phieuChiTietTable"
+										class="divide-y divide-slate-200 dark:divide-slate-700">
+										<!-- Rows will be loaded via JavaScript -->
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+						<!-- Tổng tiền -->
+						<div
+							class="border-t border-slate-200 dark:border-slate-700 mt-6 pt-4 flex justify-end">
+							<div class="text-right">
+								<p class="text-sm text-slate-600 dark:text-slate-400 mb-1">Tổng
+									Tiền Phiếu Nhập:</p>
+								<p id="phieuTongTien"
+									class="text-2xl font-bold text-green-600"></p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inventory page loaded');
+        });
+
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -412,7 +768,402 @@
         function closeSupplierModal() {
             supplierModal.classList.add('hidden');
         }
+
+        // ============================================
+        // PHIEU NHAP DETAILS POPUP - MỚI THÊM
+        // ============================================
+        const phieuNhapModal = document.getElementById('phieuNhapModal');
+        const phieuLoading = document.getElementById('phieuLoading');
+        const phieuContent = document.getElementById('phieuContent');
+
+        function showPhieuNhapDetails(row) {
+            const phieuId = row.getAttribute('data-phieu-id');
+            console.log('Loading phieu nhap:', phieuId);
+
+            // Show modal and loading
+            phieuNhapModal.classList.remove('hidden');
+            phieuLoading.classList.remove('hidden');
+            phieuContent.classList.add('hidden');
+
+            // Fetch phieu nhap details
+            fetch('/admin/inventory/api/phieu-nhap/' + phieuId)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP error! status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(phieu => {
+                    console.log('Phieu data:', phieu);
+
+                    // Hide loading, show content
+                    phieuLoading.classList.add('hidden');
+                    phieuContent.classList.remove('hidden');
+
+                    // Update phieu info
+                    document.getElementById('phieuNhapModalTitle').textContent = 'Chi Tiết Phiếu Nhập: PN' + phieu.maPN;
+                    document.getElementById('phieuMaPN').textContent = 'PN' + phieu.maPN;
+
+                    // Format date
+                    const ngayNhap = new Date(phieu.ngayNhap);
+                    document.getElementById('phieuNgayNhap').textContent = ngayNhap.toLocaleString('vi-VN');
+
+                    document.getElementById('phieuNCC').textContent = phieu.nhaCungCap?.tenNCC || 'Không có';
+                    document.getElementById('phieuNhanVien').textContent = phieu.nhanVien?.hoTen || 'Không có';
+                    document.getElementById('phieuGhiChu').textContent = phieu.ghiChu || 'Không có ghi chú';
+
+                    // Format tổng tiền
+                    const formattedTongTien = new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND'
+                    }).format(phieu.tongTien || 0);
+                    document.getElementById('phieuTongTien').textContent = formattedTongTien;
+
+                    // Display chi tiet
+                    displayPhieuChiTiet(phieu.chiTiet || []);
+                })
+                .catch(error => {
+                    console.error('Error loading phieu nhap:', error);
+                    phieuLoading.innerHTML = '<p class="text-red-600">Lỗi khi tải dữ liệu: ' + error.message + '</p>';
+                });
+        }
+
+        function displayPhieuChiTiet(chiTiet) {
+            const tbody = document.getElementById('phieuChiTietTable');
+            tbody.innerHTML = '';
+
+            if (!chiTiet || chiTiet.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">Chưa có chi tiết sản phẩm</td></tr>';
+                return;
+            }
+
+            chiTiet.forEach((item, index) => {
+                const sanPham = item.sanPhamChiTiet?.sanPham;
+                const tenSP = sanPham?.tenSP || 'Sản phẩm đã xóa';
+                const size = item.sanPhamChiTiet?.sizeSP?.tenSize || 'N/A';
+                const mau = item.sanPhamChiTiet?.mauSacSP?.tenMau || 'N/A';
+
+                const donGia = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(item.donGiaNhap || 0);
+
+                const thanhTien = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(item.thanhTien || 0);
+
+                const row = `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                        <td class="px-4 py-3 text-center">${index + 1}</td>
+                        <td class="px-4 py-3 font-medium text-slate-900 dark:text-white">${tenSP}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">${size}</span></td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">${mau}</span></td>
+                        <td class="px-4 py-3 text-right font-bold text-green-600">${item.soLuong || 0}</td>
+                        <td class="px-4 py-3 text-right">${donGia}</td>
+                        <td class="px-4 py-3 text-right font-bold">${thanhTien}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function closePhieuNhapModal() {
+            phieuNhapModal.classList.add('hidden');
+        }
+
+        // ============================================
+        // AUTO LOAD MA PN VA NHAN VIEN
+        // ============================================
+        function loadPhieuNhapInfo() {
+            // Load next PN code
+            fetch('/admin/inventory/api/next-phieu-code')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('maPhieuNhapDisplay').value = 'PN' + data.nextCode;
+                })
+                .catch(error => {
+                    document.getElementById('maPhieuNhapDisplay').value = 'PN (Tự động)';
+                });
+
+            // Load current user info
+            fetch('/admin/inventory/api/current-user')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('nhanVienDisplay').value = data.hoTen + ' (' + data.email + ')';
+                })
+                .catch(error => {
+                    document.getElementById('nhanVienDisplay').value = 'Người dùng hiện tại';
+                });
+        }
+
+        // ============================================
+        // FORM BASED PRODUCT ENTRY - MỚI
+        // ============================================
+        let productList = []; // Lưu danh sách sản phẩm đã thêm
+        let existingVariants = []; // Lưu variants của sản phẩm đang chọn
+
+        function showExistingProductForm() {
+            hideNewProductForm();
+            document.getElementById('existingProductForm').classList.remove('hidden');
+        }
+
+        function hideExistingProductForm() {
+            document.getElementById('existingProductForm').classList.add('hidden');
+            document.getElementById('existingProduct').value = '';
+            document.getElementById('existingSize').innerHTML = '<option value="">-- Chọn size --</option>';
+            document.getElementById('existingColor').innerHTML = '<option value="">-- Chọn màu --</option>';
+            document.getElementById('existingSize').disabled = true;
+            document.getElementById('existingColor').disabled = true;
+            document.getElementById('existingQty').value = 1;
+            document.getElementById('existingPrice').value = 0;
+        }
+
+        function showNewProductForm() {
+            hideExistingProductForm();
+            document.getElementById('newProductForm').classList.remove('hidden');
+        }
+
+        function hideNewProductForm() {
+            document.getElementById('newProductForm').classList.add('hidden');
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductSize').value = '';
+            document.getElementById('newProductColor').value = '';
+            document.getElementById('newProductQty').value = 1;
+            document.getElementById('newProductPriceImport').value = 0;
+            document.getElementById('newProductPriceSell').value = 0;
+        }
+
+        function loadExistingVariants() {
+            const maSP = document.getElementById('existingProduct').value;
+            if (!maSP) return;
+
+            const sizeSelect = document.getElementById('existingSize');
+            const colorSelect = document.getElementById('existingColor');
+
+            sizeSelect.innerHTML = '<option value="">Đang tải...</option>';
+            sizeSelect.disabled = true;
+            colorSelect.innerHTML = '<option value="">-- Chọn màu --</option>';
+            colorSelect.disabled = true;
+
+            fetch('/admin/products/api/variants/' + maSP)
+                .then(response => response.json())
+                .then(variants => {
+                    existingVariants = variants;
+
+                    // Get unique sizes and colors
+                    const sizes = [...new Set(variants.map(v => JSON.stringify({id: v.sizeSP?.maSize, name: v.sizeSP?.tenSize})))].map(s => JSON.parse(s));
+                    const colors = [...new Set(variants.map(v => JSON.stringify({id: v.mauSacSP?.maMau, name: v.mauSacSP?.tenMau})))].map(c => JSON.parse(c));
+
+                    sizeSelect.innerHTML = '<option value="">-- Chọn size --</option>';
+                    sizes.forEach(size => {
+                        if (size.id) {
+                            sizeSelect.innerHTML += `<option value="${size.id}">${size.name}</option>`;
+                        }
+                    });
+
+                    colorSelect.innerHTML = '<option value="">-- Chọn màu --</option>';
+                    colors.forEach(color => {
+                        if (color.id) {
+                            colorSelect.innerHTML += `<option value="${color.id}">${color.name}</option>`;
+                        }
+                    });
+
+                    sizeSelect.disabled = false;
+                    colorSelect.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error loading variants:', error);
+                    sizeSelect.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+                });
+        }
+
+        function addExistingProduct() {
+            const productSelect = document.getElementById('existingProduct');
+            const sizeSelect = document.getElementById('existingSize');
+            const colorSelect = document.getElementById('existingColor');
+            const qty = parseInt(document.getElementById('existingQty').value);
+            const price = parseFloat(document.getElementById('existingPrice').value);
+
+            if (!productSelect.value || !sizeSelect.value || !colorSelect.value || qty <= 0 || price <= 0) {
+                alert('Vui lòng điền đầy đủ thông tin sản phẩm!');
+                return;
+            }
+
+            // Find variant
+            const variant = existingVariants.find(v =>
+                v.sizeSP?.maSize == sizeSelect.value &&
+                v.mauSacSP?.maMau == colorSelect.value
+            );
+
+            if (!variant) {
+                alert('Không tìm thấy biến thể phù hợp!');
+                return;
+            }
+
+            // Add to list
+            const product = {
+                type: 'existing',
+                maBienThe: variant.maBienThe,
+                tenSP: productSelect.options[productSelect.selectedIndex].text,
+                size: sizeSelect.options[sizeSelect.selectedIndex].text,
+                color: colorSelect.options[colorSelect.selectedIndex].text,
+                soLuong: qty,
+                donGiaNhap: price,
+                thanhTien: qty * price
+            };
+
+            productList.push(product);
+            updateProductTable();
+            hideExistingProductForm();
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('newProductName').value.trim();
+            const categoryId = document.getElementById('newProductCategory').value || null;
+            const brandId = document.getElementById('newProductBrand').value || null;
+            const size = document.getElementById('newProductSize').value.trim();
+            const color = document.getElementById('newProductColor').value.trim();
+            const qty = parseInt(document.getElementById('newProductQty').value);
+            const priceImport = parseFloat(document.getElementById('newProductPriceImport').value);
+            const priceSell = parseFloat(document.getElementById('newProductPriceSell').value);
+            const gender = parseInt(document.getElementById('newProductGender').value);
+
+            if (!name || !size || !color || qty <= 0 || priceImport <= 0 || priceSell <= 0) {
+                alert('Vui lòng điền đầy đủ thông tin sản phẩm mới!');
+                return;
+            }
+
+            const product = {
+                type: 'new',
+                tenSP: name,
+                categoryId: categoryId ? parseInt(categoryId) : null,
+                brandId: brandId ? parseInt(brandId) : null,
+                gender: isNaN(gender) ? 2 : gender,
+                size: size,
+                color: color,
+                soLuong: qty,
+                donGiaNhap: priceImport,
+                giaBan: priceSell,
+                thanhTien: qty * priceImport
+            };
+
+            productList.push(product);
+            updateProductTable();
+            hideNewProductForm();
+        }
+
+        function updateProductTable() {
+            const tbody = document.getElementById('nhapKhoTableBody');
+            const emptyRow = document.getElementById('emptyRow');
+            if (emptyRow) emptyRow.remove();
+
+            tbody.innerHTML = '';
+
+            if (productList.length === 0) {
+                tbody.innerHTML = '<tr id="emptyRow"><td colspan="8" class="px-4 py-8 text-center text-slate-500">Chưa có sản phẩm nào. Click nút phía trên để thêm sản phẩm.</td></tr>';
+                updateTotalAmount();
+                return;
+            }
+
+            productList.forEach((product, index) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-50 dark:hover:bg-slate-700/30';
+
+                const formattedPrice = new Intl.NumberFormat('vi-VN').format(product.donGiaNhap);
+                const formattedTotal = new Intl.NumberFormat('vi-VN').format(product.thanhTien);
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-center">${index + 1}</td>
+                    <td class="px-4 py-3">
+                        <div class="font-medium text-slate-900 dark:text-white">${product.tenSP}</div>
+                        ${product.type === 'new' ? '<span class="text-xs text-green-600 font-medium">● Sản phẩm mới</span>' : ''}
+                    </td>
+                    <td class="px-4 py-3"><span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium">${product.size}</span></td>
+                    <td class="px-4 py-3"><span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium">${product.color}</span></td>
+                    <td class="px-4 py-3 text-center">
+                        <input type="number" min="1" value="${product.soLuong}"
+                            onchange="updateProductQuantity(${index}, this.value)"
+                            class="w-20 rounded border-slate-300 dark:bg-slate-900 text-sm py-1 px-2 text-center">
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <input type="number" min="0" step="1000" value="${product.donGiaNhap}"
+                            onchange="updateProductPrice(${index}, this.value)"
+                            class="w-32 rounded border-slate-300 dark:bg-slate-900 text-sm py-1 px-2 text-right">
+                    </td>
+                    <td class="px-4 py-3 text-right font-bold text-green-600">${formattedTotal}₫</td>
+                    <td class="px-4 py-3 text-center">
+                        <button type="button" onclick="removeProduct(${index})"
+                            class="text-red-600 hover:bg-red-50 p-1 rounded">
+                            <span class="material-symbols-outlined text-[20px]">delete</span>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            updateTotalAmount();
+            updateHiddenInputs();
+        }
+
+        function updateProductQuantity(index, newQty) {
+            productList[index].soLuong = parseInt(newQty);
+            productList[index].thanhTien = productList[index].soLuong * productList[index].donGiaNhap;
+            updateProductTable();
+        }
+
+        function updateProductPrice(index, newPrice) {
+            productList[index].donGiaNhap = parseFloat(newPrice);
+            productList[index].thanhTien = productList[index].soLuong * productList[index].donGiaNhap;
+            updateProductTable();
+        }
+
+        function removeProduct(index) {
+            productList.splice(index, 1);
+            updateProductTable();
+        }
+
+        function updateTotalAmount() {
+            const total = productList.reduce((sum, product) => sum + product.thanhTien, 0);
+
+            document.getElementById('tongTienDisplay').textContent = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(total);
+            document.getElementById('tongTienInput').value = total;
+        }
+
+        function updateHiddenInputs() {
+            const container = document.getElementById('productDataContainer');
+            container.innerHTML = '';
+
+            productList.forEach((product) => {
+                if (product.type === 'existing') {
+                    // Existing product - send maBienThe
+                    container.innerHTML += `
+                        <input type="hidden" name="maBienThe" value="${product.maBienThe}">
+                        <input type="hidden" name="soLuongs" value="${product.soLuong}">
+                        <input type="hidden" name="donGiaNhaps" value="${product.donGiaNhap}">
+                        <input type="hidden" name="productTypes" value="existing">
+                    `;
+                } else {
+                    container.innerHTML += `
+                        <input type="hidden" name="newProductNames" value="${product.tenSP}">
+                        <input type="hidden" name="newProductSizes" value="${product.size}">
+                        <input type="hidden" name="newProductColors" value="${product.color}">
+                        <input type="hidden" name="newProductQtys" value="${product.soLuong}">
+                        <input type="hidden" name="newProductPriceImports" value="${product.donGiaNhap}">
+                        <input type="hidden" name="newProductPriceSells" value="${product.giaBan}">
+                        <input type="hidden" name="newProductCategoryIds" value="${product.categoryId ?? ''}">
+                        <input type="hidden" name="newProductBrandIds" value="${product.brandId ?? ''}">
+                        <input type="hidden" name="newProductGenders" value="${product.gender ?? 2}">
+                        <input type="hidden" name="productTypes" value="new">
+                    `;
+                }
+            });
+        }
     </script>
 	</div>
 </body>
 </html>
+

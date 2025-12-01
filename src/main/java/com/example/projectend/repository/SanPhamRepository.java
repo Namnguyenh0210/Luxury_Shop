@@ -45,4 +45,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Long>, JpaSpec
 
     // Đếm số lượng sản phẩm
     long count();
+
+    // Đếm số lượng sản phẩm theo trạng thái
+    long countByTrangThaiSP(Integer trangThai);
 }

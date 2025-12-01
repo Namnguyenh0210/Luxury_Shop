@@ -3,6 +3,8 @@ package com.example.projectend.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "PhieuNhap")
@@ -14,12 +16,12 @@ public class PhieuNhap {
     private Long maPN;
 
     // Người nhập (Nhân viên)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MaNV") 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "MaNV")
     private TaiKhoan nhanVien;
 
     // Nhà cung cấp
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaNCC")
     private NhaCungCap nhaCungCap;
 
@@ -31,6 +33,10 @@ public class PhieuNhap {
 
     @Column(name = "GhiChu", length = 500)
     private String ghiChu;
+
+    // Chi tiết phiếu nhập
+    @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<NhapKhoChiTiet> chiTiet = new ArrayList<>();
 
     // Constructors
     public PhieuNhap() {
@@ -91,5 +97,13 @@ public class PhieuNhap {
 
     public void setGhiChu(String ghiChu) {
         this.ghiChu = ghiChu;
+    }
+
+    public List<NhapKhoChiTiet> getChiTiet() {
+        return chiTiet;
+    }
+
+    public void setChiTiet(List<NhapKhoChiTiet> chiTiet) {
+        this.chiTiet = chiTiet;
     }
 }

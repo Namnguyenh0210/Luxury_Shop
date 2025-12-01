@@ -125,10 +125,67 @@
 					<div class="flex justify-between items-center mb-6">
 						<h1 class="text-2xl font-bold text-slate-800 dark:text-white">Danh
 							Sách Sản Phẩm</h1>
-						<button onclick="openModal()"
-							class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
-							<span class="material-symbols-outlined">add</span> Thêm Mới
-						</button>
+					</div>
+
+					<!-- Filter Section -->
+					<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+						<form th:action="@{/admin/products}" method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+							<div>
+								<label class="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Tìm kiếm</label>
+								<input type="text" name="keyword" th:value="${keyword}"
+									placeholder="Tên sản phẩm..."
+									class="w-full rounded-lg border-slate-300 dark:bg-slate-900 dark:border-slate-600 py-2 px-3 text-sm">
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Danh mục</label>
+								<select name="categoryId"
+									class="w-full rounded-lg border-slate-300 dark:bg-slate-900 dark:border-slate-600 py-2 px-3 text-sm">
+									<option value="">Tất cả danh mục</option>
+									<option th:each="cat : ${categories}"
+										th:value="${cat.maLoai}"
+										th:text="${cat.tenLoai}"
+										th:selected="${selectedCategoryId != null && selectedCategoryId == cat.maLoai}">
+									</option>
+								</select>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Thương hiệu</label>
+								<select name="brandId"
+									class="w-full rounded-lg border-slate-300 dark:bg-slate-900 dark:border-slate-600 py-2 px-3 text-sm">
+									<option value="">Tất cả thương hiệu</option>
+									<option th:each="brand : ${brands}"
+										th:value="${brand.maTH}"
+										th:text="${brand.tenTH}"
+										th:selected="${selectedBrandId != null && selectedBrandId == brand.maTH}">
+									</option>
+								</select>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Trạng thái</label>
+								<select name="status"
+									class="w-full rounded-lg border-slate-300 dark:bg-slate-900 dark:border-slate-600 py-2 px-3 text-sm">
+									<option value="">Tất cả trạng thái</option>
+									<option value="1" th:selected="${selectedStatus != null && selectedStatus == 1}">Đang bán</option>
+									<option value="0" th:selected="${selectedStatus != null && selectedStatus == 0}">Ngừng bán</option>
+								</select>
+							</div>
+
+							<div class="md:col-span-4 flex gap-2">
+								<button type="submit"
+									class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+									<span class="material-symbols-outlined text-[18px]">search</span>
+									Lọc
+								</button>
+								<a th:href="@{/admin/products}"
+									class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+									<span class="material-symbols-outlined text-[18px]">refresh</span>
+									Xóa bộ lọc
+								</a>
+							</div>
+						</form>
 					</div>
 
 					<div th:if="${success}"
@@ -153,36 +210,49 @@
 									<th class="px-6 py-4">Hình Ảnh</th>
 									<th class="px-6 py-4">Tên Sản Phẩm</th>
 									<th class="px-6 py-4">Danh Mục</th>
+									<th class="px-6 py-4">Thương Hiệu</th>
 									<th class="px-6 py-4">Trạng Thái</th>
 									<th class="px-6 py-4 text-center">Thao Tác</th>
 								</tr>
 							</thead>
 							<tbody class="divide-y divide-slate-200 dark:divide-slate-700">
 								<tr th:each="p : ${products}"
-									class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+									th:attr="data-product-id=${p.maSP}"
+									onclick="showProductDetailsFromRow(event, this)"
+									class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer">
 									<td class="px-6 py-4 font-mono">#<span th:text="${p.maSP}">1</span></td>
 									<td class="px-6 py-4"><img
 										th:src="${p.anhChinh != null ? p.anhChinh : 'https://placehold.co/50'}"
+										alt="Product image"
 										class="size-12 rounded object-cover border border-slate-200">
 									</td>
-									<td
-										class="px-6 py-4 font-medium text-slate-900 dark:text-white"
-										th:text="${p.tenSP}">Tên SP</td>
+									<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">
+										<span th:text="${p.tenSP}">Tên SP</span>
+									</td>
 									<td class="px-6 py-4"><span
 										class="bg-slate-100 px-2 py-1 rounded text-xs"
 										th:text="${p.loaiSanPham?.tenLoai ?: '---'}">Category</span></td>
+									<td class="px-6 py-4"><span
+										class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-medium"
+										th:text="${p.thuongHieu?.tenTH ?: '---'}">Brand</span></td>
 
-									<td class="px-6 py-4"><span th:if="${p.trangThaiSP == 1}"
-										class="text-green-600 bg-green-50 px-2 py-1 rounded-full text-xs font-medium">Còn
-											hàng</span> <span th:if="${p.trangThaiSP == 0}"
-										class="text-red-600 bg-red-50 px-2 py-1 rounded-full text-xs font-medium">Hết
-											hàng</span></td>
+									<td class="px-6 py-4">
+										<span th:if="${p.trangThaiSP == 1}"
+											class="text-green-600 bg-green-50 px-2 py-1 rounded-full text-xs font-medium">
+											Đang bán
+										</span>
+										<span th:if="${p.trangThaiSP == 0}"
+											class="text-red-600 bg-red-50 px-2 py-1 rounded-full text-xs font-medium">
+											Ngừng bán
+										</span>
+									</td>
 
-									<td class="px-6 py-4 text-center">
+									<td class="px-6 py-4 text-center" onclick="event.stopPropagation()">
 										<div class="flex justify-center gap-2">
 											<button type="button" th:data-id="${p.maSP}"
 												th:data-name="${p.tenSP}"
 												th:data-category="${p.loaiSanPham?.maLoai}"
+												th:data-brand="${p.thuongHieu?.maTH}"
 												th:data-status="${p.trangThaiSP}"
 												onclick="editProduct(this)"
 												class="text-blue-600 hover:bg-blue-50 p-2 rounded transition-colors">
@@ -242,11 +312,20 @@
 						</div>
 
 						<div>
+							<label class="block text-sm font-medium mb-1">Thương hiệu</label> <select
+								id="brandId" name="thuongHieu.maTH"
+								class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
+								<option th:each="b : ${brands}" th:value="${b.maTH}"
+									th:text="${b.tenTH}"></option>
+							</select>
+						</div>
+
+						<div class="col-span-2">
 							<label class="block text-sm font-medium mb-1">Trạng thái</label>
 							<select id="status" name="trangThaiSP"
 								class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
-								<option value="1">Còn hàng</option>
-								<option value="0">Hết hàng</option>
+								<option value="1">Đang bán</option>
+								<option value="0">Ngừng bán</option>
 							</select>
 						</div>
 
@@ -269,51 +348,389 @@
 			</div>
 		</div>
 
+		<!-- Product Details Modal -->
+		<div id="detailsModal"
+			class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+			<div
+				class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-4xl overflow-hidden animate-fade-in max-h-[90vh] overflow-y-auto">
+				<div
+					class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-800 z-10">
+					<h3 class="text-lg font-bold text-slate-900 dark:text-white"
+						id="detailsModalTitle">Chi Tiết Sản Phẩm</h3>
+					<button onclick="closeDetailsModal()"
+						class="text-slate-400 hover:text-slate-600">
+						<span class="material-symbols-outlined">close</span>
+					</button>
+				</div>
+
+				<div class="p-6">
+					<!-- Loading Spinner -->
+					<div id="detailsLoading" class="text-center py-8">
+						<div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600"></div>
+						<p class="mt-4 text-slate-600">Đang tải...</p>
+					</div>
+
+					<!-- Product Details Content -->
+					<div id="detailsContent" class="hidden">
+						<!-- Product Info Section -->
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+							<div>
+								<img id="detailImage" src="" alt="Product Image"
+									class="w-full h-auto rounded-lg border border-slate-200 dark:border-slate-700">
+							</div>
+							<div class="space-y-4">
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Tên sản phẩm:</label>
+									<p id="detailName" class="text-lg font-bold text-slate-900 dark:text-white"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Danh mục:</label>
+									<p id="detailCategory" class="text-slate-900 dark:text-white"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Thương hiệu:</label>
+									<p id="detailBrand" class="text-slate-900 dark:text-white"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Giới tính:</label>
+									<p id="detailGender" class="text-slate-900 dark:text-white"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Trạng thái:</label>
+									<p id="detailStatus"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Mô tả:</label>
+									<p id="detailDescription" class="text-slate-700 dark:text-slate-300"></p>
+								</div>
+							</div>
+						</div>
+
+						<!-- Variants/Sizes Section -->
+						<div class="border-t border-slate-200 dark:border-slate-700 pt-6">
+							<h4 class="text-lg font-bold text-slate-900 dark:text-white mb-4">
+								<span class="material-symbols-outlined align-middle">inventory_2</span>
+								Các Size & Tồn Kho
+							</h4>
+							<div id="variantsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<!-- Variants will be loaded here via JavaScript -->
+							</div>
+							<div id="noVariants" class="hidden text-center py-8 text-slate-500">
+								<span class="material-symbols-outlined text-5xl">inventory</span>
+								<p class="mt-2">Chưa có biến thể nào cho sản phẩm này</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<script>
-        const modal = document.getElementById('productModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const formId = document.getElementById('productId');
-        const formName = document.getElementById('productName');
-        const formCategory = document.getElementById('categoryId');
-        const formStatus = document.getElementById('status');
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded');
 
-        function openModal() {
-            modalTitle.textContent = "Thêm Sản Phẩm Mới";
-            formId.value = "";
-            formName.value = "";
-            formStatus.value = "1"; // Mặc định là Còn hàng (1)
-            modal.classList.remove('hidden');
-        }
+            const modal = document.getElementById('productModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const formId = document.getElementById('productId');
+            const formName = document.getElementById('productName');
+            const formCategory = document.getElementById('categoryId');
+            const formBrand = document.getElementById('brandId');
+            const formStatus = document.getElementById('status');
 
-        function closeModal() {
-            modal.classList.add('hidden');
-        }
+            // Details Modal
+            const detailsModal = document.getElementById('detailsModal');
+            const detailsLoading = document.getElementById('detailsLoading');
+            const detailsContent = document.getElementById('detailsContent');
 
-        function editProduct(button) {
-            const id = button.getAttribute('data-id');
-            const name = button.getAttribute('data-name');
-            const catId = button.getAttribute('data-category');
-            
-            // Lấy trạng thái từ button
-            const status = button.getAttribute('data-status');
+            // Check if elements exist
+            console.log('detailsModal exists:', !!detailsModal);
+            console.log('detailsLoading exists:', !!detailsLoading);
+            console.log('detailsContent exists:', !!detailsContent);
 
-            modalTitle.textContent = "Cập Nhật Sản Phẩm #" + id;
-            formId.value = id;
-            formName.value = name;
-            
-            if(catId) formCategory.value = catId; 
-            
-            // FIX LỖI HẾT HÀNG:
-            // Nếu status có giá trị (1 hoặc 0), gán vào select box
-            // Nếu không, mặc định là 1 (Còn hàng)
-            if (status !== null && status !== undefined && status !== "") {
-                formStatus.value = status.toString(); 
-            } else {
-                formStatus.value = "1";
+            // Make functions global
+            window.openModal = function() {
+                modalTitle.textContent = "Thêm Sản Phẩm Mới";
+                formId.value = "";
+                formName.value = "";
+                formStatus.value = "1"; // Mặc định là Đang bán (1)
+                modal.classList.remove('hidden');
+            };
+
+            window.closeModal = function() {
+                modal.classList.add('hidden');
+            };
+
+            window.editProduct = function(button) {
+                const id = button.getAttribute('data-id');
+                const name = button.getAttribute('data-name');
+                const catId = button.getAttribute('data-category');
+                const brandId = button.getAttribute('data-brand');
+
+                // Lấy trạng thái từ button
+                const status = button.getAttribute('data-status');
+
+                modalTitle.textContent = "Cập Nhật Sản Phẩm #" + id;
+                formId.value = id;
+                formName.value = name;
+
+                if(catId) formCategory.value = catId;
+                if(brandId) formBrand.value = brandId;
+
+                // Set status: 1 = Đang bán, 0 = Ngừng bán
+                if (status !== null && status !== undefined && status !== "") {
+                    formStatus.value = status.toString();
+                } else {
+                    formStatus.value = "1"; // Default: Đang bán
+                }
+
+                modal.classList.remove('hidden');
+            };
+
+            // Show Product Details - Make it global
+            window.showProductDetails = function(button) {
+                console.log('showProductDetails called'); // Debug
+                const productId = button.getAttribute('data-product-id');
+                console.log('Product ID:', productId); // Debug
+
+                if (!productId) {
+                    console.error('Product ID not found!');
+                    alert('Lỗi: Không tìm thấy ID sản phẩm');
+                    return;
+                }
+
+                if (!detailsModal) {
+                    console.error('detailsModal element not found!');
+                    alert('Lỗi: Modal không tồn tại');
+                    return;
+                }
+
+                // Show modal and loading
+                console.log('Showing modal...'); // Debug
+                detailsModal.classList.remove('hidden');
+                detailsLoading.classList.remove('hidden');
+                detailsContent.classList.add('hidden');
+
+                // Fetch product details
+                console.log('Fetching product details...'); // Debug
+                fetch('/admin/products/api/details/' + productId)
+                    .then(response => {
+                        console.log('Response status:', response.status); // Debug
+                        if (!response.ok) {
+                            throw new Error('HTTP error! status: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(product => {
+                        console.log('Product data:', product); // Debug
+                        // Hide loading, show content
+                        detailsLoading.classList.add('hidden');
+                        detailsContent.classList.remove('hidden');
+
+                    // Update product info
+                    document.getElementById('detailsModalTitle').textContent = 'Chi Tiết: ' + product.tenSP;
+                    document.getElementById('detailImage').src = product.anhChinh || 'https://placehold.co/400x400?text=No+Image';
+                    document.getElementById('detailName').textContent = product.tenSP;
+                    document.getElementById('detailCategory').textContent = product.loaiSanPham?.tenLoai || 'N/A';
+                    document.getElementById('detailBrand').textContent = product.thuongHieu?.tenTH || 'N/A';
+
+                    // Gender
+                    const genderMap = { 0: 'Nam', 1: 'Nữ', 2: 'Unisex' };
+                    document.getElementById('detailGender').textContent = genderMap[product.gioiTinh] || 'N/A';
+
+                    // Status
+                    const statusEl = document.getElementById('detailStatus');
+                    if (product.trangThaiSP === 1) {
+                        statusEl.innerHTML = '<span class="text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm font-medium">Đang bán</span>';
+                    } else {
+                        statusEl.innerHTML = '<span class="text-red-600 bg-red-50 px-3 py-1 rounded-full text-sm font-medium">Ngừng bán</span>';
+                    }
+
+                    // Description
+                    document.getElementById('detailDescription').textContent = product.moTa || 'Chưa có mô tả';
+
+                    // Display variants
+                    displayVariants(product.variants || []);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    detailsLoading.innerHTML = '<p class="text-red-600">Lỗi khi tải dữ liệu: ' + error.message + '</p>';
+                });
+            }; // End of showProductDetails
+
+            // Show Product Details from Row Click - NEW FUNCTION
+            window.showProductDetailsFromRow = function(event, row) {
+                // Prevent triggering when clicking on action buttons (edit/delete)
+                const target = event.target;
+
+                // Check if click is on action buttons or their children
+                if (target.closest('button') || target.closest('a')) {
+                    console.log('Clicked on action button, ignoring...');
+                    return;
+                }
+
+                console.log('showProductDetailsFromRow called'); // Debug
+                const productId = row.getAttribute('data-product-id');
+                console.log('Product ID from row:', productId); // Debug
+
+                if (!productId) {
+                    console.error('Product ID not found in row!');
+                    return;
+                }
+
+                if (!detailsModal) {
+                    console.error('detailsModal element not found!');
+                    return;
+                }
+
+                // Show modal and loading
+                console.log('Showing modal from row click...'); // Debug
+                detailsModal.classList.remove('hidden');
+                detailsLoading.classList.remove('hidden');
+                detailsContent.classList.add('hidden');
+
+                // Fetch product details
+                fetch('/admin/products/api/details/' + productId)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error('HTTP error! status: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(product => {
+                        console.log('Product data:', product);
+                        detailsLoading.classList.add('hidden');
+                        detailsContent.classList.remove('hidden');
+
+                    // Update product info
+                    document.getElementById('detailsModalTitle').textContent = 'Chi Tiết: ' + product.tenSP;
+                    document.getElementById('detailImage').src = product.anhChinh || 'https://placehold.co/400x400?text=No+Image';
+                    document.getElementById('detailName').textContent = product.tenSP;
+                    document.getElementById('detailCategory').textContent = product.loaiSanPham?.tenLoai || 'N/A';
+                    document.getElementById('detailBrand').textContent = product.thuongHieu?.tenTH || 'N/A';
+
+                    // Gender
+                    const genderMap = { 0: 'Nam', 1: 'Nữ', 2: 'Unisex' };
+                    document.getElementById('detailGender').textContent = genderMap[product.gioiTinh] || 'N/A';
+
+                    // Status
+                    const statusEl = document.getElementById('detailStatus');
+                    if (product.trangThaiSP === 1) {
+                        statusEl.innerHTML = '<span class="text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm font-medium">Đang bán</span>';
+                    } else {
+                        statusEl.innerHTML = '<span class="text-red-600 bg-red-50 px-3 py-1 rounded-full text-sm font-medium">Ngừng bán</span>';
+                    }
+
+                    // Description
+                    document.getElementById('detailDescription').textContent = product.moTa || 'Chưa có mô tả';
+
+                    // Display variants
+                    displayVariants(product.variants || []);
+                })
+                .catch(error => {
+                    console.error('Error loading product:', error);
+                    detailsLoading.innerHTML = '<p class="text-red-600">Lỗi khi tải dữ liệu: ' + error.message + '</p>';
+                });
+            }; // End of showProductDetailsFromRow
+
+        function displayVariants(variants) {
+            const container = document.getElementById('variantsContainer');
+            const noVariants = document.getElementById('noVariants');
+
+            container.innerHTML = '';
+
+            if (!variants || variants.length === 0) {
+                noVariants.classList.remove('hidden');
+                return;
             }
-            
-            modal.classList.remove('hidden');
+
+            noVariants.classList.add('hidden');
+
+            // Group variants by size
+            const groupedBySize = {};
+            variants.forEach(variant => {
+                const sizeName = variant.sizeSP?.tenSize || 'N/A';
+                if (!groupedBySize[sizeName]) {
+                    groupedBySize[sizeName] = [];
+                }
+                groupedBySize[sizeName].push(variant);
+            });
+
+            // Create cards for each size
+            Object.keys(groupedBySize).forEach(sizeName => {
+                const sizeVariants = groupedBySize[sizeName];
+                const totalStock = sizeVariants.reduce((sum, v) => sum + (v.soLuongTon || 0), 0);
+
+                // Determine stock status
+                let stockStatus = '';
+                let stockClass = '';
+                if (totalStock === 0) {
+                    stockStatus = 'Hết hàng';
+                    stockClass = 'bg-red-50 text-red-700 border-red-200';
+                } else if (totalStock <= 10) {
+                    stockStatus = 'Sắp hết hàng';
+                    stockClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+                } else {
+                    stockStatus = 'Còn hàng';
+                    stockClass = 'bg-green-50 text-green-700 border-green-200';
+                }
+
+                // Get price (assume same price for all colors in same size)
+                const price = sizeVariants[0]?.giaBan || 0;
+                const purchasePrice = sizeVariants[0]?.giaNhap || 0;
+                const formattedPrice = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(price);
+                const formattedPurchasePrice = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(purchasePrice);
+
+                // Build colors list
+                let colorsHTML = '';
+                sizeVariants.forEach(variant => {
+                    const colorName = variant.mauSacSP?.tenMau || 'N/A';
+                    const colorStock = variant.soLuongTon || 0;
+                    colorsHTML += `
+                        <div class="flex justify-between items-center text-xs py-1 px-2 rounded bg-slate-50 dark:bg-slate-700">
+                            <span class="font-medium">${colorName}</span>
+                            <span class="text-slate-600 dark:text-slate-400">${colorStock} sp</span>
+                        </div>
+                    `;
+                });
+
+                const card = `
+                    <div class="border ${stockClass} rounded-lg p-4 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h5 class="font-bold text-lg">Size ${sizeName}</h5>
+                                <p class="text-sm font-semibold mt-1 text-green-600">${formattedPrice}</p>
+                                <p class="text-xs text-slate-600 dark:text-slate-400">Giá nhập: ${formattedPurchasePrice}</p>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-bold ${stockClass.replace('border-', 'bg-').replace('bg-', 'border border-')}">
+                                ${stockStatus}
+                            </span>
+                        </div>
+                        <div class="border-t pt-2">
+                            <p class="text-sm font-semibold mb-2">Tồn kho: ${totalStock} sản phẩm</p>
+                            <div class="space-y-1">
+                                ${colorsHTML}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML += card;
+            });
         }
+
+        window.closeDetailsModal = function() {
+            detailsModal.classList.add('hidden');
+        };
+
+        }); // End of DOMContentLoaded
     </script>
 	</div>
 </body>
