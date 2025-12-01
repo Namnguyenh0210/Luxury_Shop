@@ -1,5 +1,6 @@
 package com.example.projectend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 
@@ -20,6 +21,7 @@ public class SanPhamChiTiet {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MaSP", nullable = false)
+    @JsonIgnoreProperties({"variants"})
     private SanPham sanPham;
 
     @ManyToOne(fetch = FetchType.EAGER)
