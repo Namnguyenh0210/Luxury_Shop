@@ -1,6 +1,8 @@
 package com.example.projectend.repository;
 
+import com.example.projectend.entity.LoaiSanPham;
 import com.example.projectend.entity.SanPham;
+import com.example.projectend.entity.ThuongHieu;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * SAN PHAM REPOSITORY - LUXURY FASHION
@@ -48,4 +51,8 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Long>, JpaSpec
 
     // Đếm số lượng sản phẩm theo trạng thái
     long countByTrangThaiSP(Integer trangThai);
+
+    Optional<SanPham> findByTenSPAndLoaiSanPhamAndThuongHieu(String tenSP, LoaiSanPham loaiSanPham, ThuongHieu thuongHieu);
+
+    Optional<SanPham> findByTenSP(String tenSP);
 }

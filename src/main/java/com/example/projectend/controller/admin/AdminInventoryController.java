@@ -247,4 +247,230 @@ public class AdminInventoryController {
         }
         return "redirect:/admin/inventory";
     }
+
+    /**
+     * ⚡ API TỐI ƯU: Preview danh sách sản phẩm trước khi submit (xử lý ở backend)
+     * Frontend chỉ cần gửi dữ liệu đơn giản, backend trả về HTML đã render sẵn
+     */
+    @PostMapping("/api/preview-products")
+    @ResponseBody
+    public java.util.Map<String, Object> previewProducts(
+            @RequestBody java.util.Map<String, Object> requestData) {
+        try {
+            @SuppressWarnings("unchecked")
+            List<java.util.Map<String, Object>> products = (List<java.util.Map<String, Object>>) requestData.get("products");
+
+            if (products == null || products.isEmpty()) {
+                return java.util.Map.of("success", false, "message", "Chưa có sản phẩm nào");
+            }
+
+            StringBuilder htmlBuilder = new StringBuilder();
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            int index = 1;
+
+            for (java.util.Map<String, Object> product : products) {
+                String type = (String) product.get("type");
+                String tenSP = (String) product.get("tenSP");
+                String size = (String) product.get("size");
+                String color = (String) product.get("color");
+                int soLuong = ((Number) product.get("soLuong")).intValue();
+                BigDecimal donGia = new BigDecimal(product.get("donGiaNhap").toString());
+                BigDecimal thanhTien = donGia.multiply(new BigDecimal(soLuong));
+                totalAmount = totalAmount.add(thanhTien);
+
+                String badgeHtml = "new".equals(type) ?
+                    "<span class='text-xs text-green-600 font-medium'>● Sản phẩm mới</span>" : "";
+
+                htmlBuilder.append(String.format(
+                    "<tr class='hover:bg-slate-50 dark:hover:bg-slate-700/30' data-index='%d'>" +
+                    "<td class='px-4 py-3 text-center'>%d</td>" +
+                    "<td class='px-4 py-3'>" +
+                    "  <div class='font-medium text-slate-900 dark:text-white'>%s</div>" +
+                    "  %s" +
+                    "</td>" +
+                    "<td class='px-4 py-3'><span class='px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-medium'>%s</span></td>" +
+                    "<td class='px-4 py-3'><span class='px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium'>%s</span></td>" +
+                    "<td class='px-4 py-3 text-center'>" +
+                    "  <input type='number' min='1' value='%d' onchange='updateProductQuantity(%d, this.value)' " +
+                    "    class='w-20 rounded border-slate-300 dark:bg-slate-900 text-sm py-1 px-2 text-center'>" +
+                    "</td>" +
+                    "<td class='px-4 py-3 text-right'>" +
+                    "  <input type='number' min='0' step='1000' value='%s' onchange='updateProductPrice(%d, this.value)' " +
+                    "    class='w-32 rounded border-slate-300 dark:bg-slate-900 text-sm py-1 px-2 text-right'>" +
+                    "</td>" +
+                    "<td class='px-4 py-3 text-right font-bold text-green-600'>%,d₫</td>" +
+                    "<td class='px-4 py-3 text-center'>" +
+                    "  <div class='flex justify-center gap-1'>" +
+                    "    <button type='button' onclick='duplicateProduct(%d)' " +
+                    "      class='text-blue-600 hover:bg-blue-50 p-1 rounded' title='Sao chép'>" +
+                    "      <span class='material-symbols-outlined text-[18px]'>content_copy</span>" +
+                    "    </button>" +
+                    "    <button type='button' onclick='removeProduct(%d)' " +
+                    "      class='text-red-600 hover:bg-red-50 p-1 rounded' title='Xóa'>" +
+                    "      <span class='material-symbols-outlined text-[18px]'>delete</span>" +
+                    "    </button>" +
+                    "  </div>" +
+                    "</td>" +
+                    "</tr>",
+                    index - 1, index, tenSP, badgeHtml, size, color,
+                    soLuong, index - 1,
+                    donGia.toString(), index - 1,
+                    thanhTien.longValue(),
+                    index - 1, index - 1
+                ));
+                index++;
+            }
+
+            return java.util.Map.of(
+                "success", true,
+                "html", htmlBuilder.toString(),
+                "totalAmount", totalAmount.toString(),
+                "productCount", products.size()
+            );
+        } catch (Exception e) {
+            log.error("Error previewing products", e);
+            return java.util.Map.of("success", false, "message", e.getMessage());
+        }
+    }
+
+    /**
+     * ⚡ API TỐI ƯU: Validate và tính toán ngay khi thêm sản phẩm (giảm lag frontend)
+     */
+    @PostMapping("/api/validate-product")
+    @ResponseBody
+    public java.util.Map<String, Object> validateProduct(@RequestBody java.util.Map<String, Object> productData) {
+        try {
+            String type = (String) productData.get("type");
+
+            if ("existing".equals(type)) {
+                Long maBienThe = Long.valueOf(productData.get("maBienThe").toString());
+                // Validate sản phẩm tồn tại
+                // TODO: Add validation logic
+                return java.util.Map.of("valid", true, "message", "Sản phẩm hợp lệ");
+            } else if ("new".equals(type)) {
+                String tenSP = (String) productData.get("tenSP");
+                if (tenSP == null || tenSP.trim().isEmpty()) {
+                    return java.util.Map.of("valid", false, "message", "Tên sản phẩm không được để trống");
+                }
+                return java.util.Map.of("valid", true, "message", "Sản phẩm mới hợp lệ");
+            }
+
+            return java.util.Map.of("valid", false, "message", "Loại sản phẩm không hợp lệ");
+        } catch (Exception e) {
+            return java.util.Map.of("valid", false, "message", e.getMessage());
+        }
+    }
+
+    /**
+     * ⚡ API TỐI ƯU: Lấy variants của sản phẩm và trả về HTML dropdown sẵn
+     * Frontend chỉ cần set innerHTML, không cần xử lý logic
+     */
+    @GetMapping("/api/product-variants-html/{maSP}")
+    @ResponseBody
+    public java.util.Map<String, Object> getProductVariantsAsHtml(@PathVariable Long maSP) {
+        try {
+            List<SanPhamChiTiet> variants = sanPhamRepository.findById(maSP)
+                .map(SanPham::getVariants)
+                .orElse(new ArrayList<>());
+
+            if (variants.isEmpty()) {
+                return java.util.Map.of(
+                    "success", false,
+                    "message", "Sản phẩm không có biến thể nào"
+                );
+            }
+
+            // Build HTML cho size dropdown
+            StringBuilder sizeHtml = new StringBuilder("<option value=''>-- Chọn size --</option>");
+            java.util.Set<String> addedSizes = new java.util.HashSet<>();
+
+            for (SanPhamChiTiet variant : variants) {
+                if (variant.getSizeSP() != null && variant.getSizeSP().getMaSize() != null) {
+                    String sizeKey = variant.getSizeSP().getMaSize().toString();
+                    if (!addedSizes.contains(sizeKey)) {
+                        sizeHtml.append(String.format("<option value='%d'>%s</option>",
+                            variant.getSizeSP().getMaSize(),
+                            variant.getSizeSP().getTenSize()));
+                        addedSizes.add(sizeKey);
+                    }
+                }
+            }
+
+            // Build HTML cho color dropdown
+            StringBuilder colorHtml = new StringBuilder("<option value=''>-- Chọn màu --</option>");
+            java.util.Set<String> addedColors = new java.util.HashSet<>();
+
+            for (SanPhamChiTiet variant : variants) {
+                if (variant.getMauSacSP() != null && variant.getMauSacSP().getMaMau() != null) {
+                    String colorKey = variant.getMauSacSP().getMaMau().toString();
+                    if (!addedColors.contains(colorKey)) {
+                        colorHtml.append(String.format("<option value='%d'>%s</option>",
+                            variant.getMauSacSP().getMaMau(),
+                            variant.getMauSacSP().getTenMau()));
+                        addedColors.add(colorKey);
+                    }
+                }
+            }
+
+            // Trả về JSON với variants gốc để validate
+            return java.util.Map.of(
+                "success", true,
+                "sizeHtml", sizeHtml.toString(),
+                "colorHtml", colorHtml.toString(),
+                "variants", variants
+            );
+        } catch (Exception e) {
+            log.error("Error loading variants for product: " + maSP, e);
+            return java.util.Map.of(
+                "success", false,
+                "message", "Lỗi tải dữ liệu: " + e.getMessage()
+            );
+        }
+    }
+
+    /**
+     * ⚡ API TỐI ƯU: Tìm biến thể cụ thể theo size + màu
+     * Frontend chỉ cần gửi size+color ID, backend trả về biến thể đã validate
+     */
+    @GetMapping("/api/find-variant")
+    @ResponseBody
+    public java.util.Map<String, Object> findVariant(
+            @RequestParam Long maSP,
+            @RequestParam Long sizeId,
+            @RequestParam Long colorId) {
+        try {
+            List<SanPhamChiTiet> variants = sanPhamRepository.findById(maSP)
+                .map(SanPham::getVariants)
+                .orElse(new ArrayList<>());
+
+            SanPhamChiTiet found = variants.stream()
+                .filter(v -> v.getSizeSP() != null && v.getMauSacSP() != null)
+                .filter(v -> v.getSizeSP().getMaSize().equals(sizeId))
+                .filter(v -> v.getMauSacSP().getMaMau().equals(colorId))
+                .findFirst()
+                .orElse(null);
+
+            if (found == null) {
+                return java.util.Map.of(
+                    "success", false,
+                    "message", "Không tìm thấy biến thể phù hợp"
+                );
+            }
+
+            return java.util.Map.of(
+                "success", true,
+                "maBienThe", found.getMaBienThe(),
+                "tenSP", found.getSanPham().getTenSP(),
+                "size", found.getSizeSP().getTenSize(),
+                "color", found.getMauSacSP().getTenMau(),
+                "soLuongTon", found.getSoLuongTon()
+            );
+        } catch (Exception e) {
+            log.error("Error finding variant", e);
+            return java.util.Map.of(
+                "success", false,
+                "message", "Lỗi: " + e.getMessage()
+            );
+        }
+    }
 }

@@ -18,6 +18,13 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     // Lấy tất cả biến thể của 1 sản phẩm
     List<SanPhamChiTiet> findBySanPham_MaSP(Long maSP);
 
+    // Tìm biến thể theo sản phẩm + size + màu (tránh trùng lặp)
+    Optional<SanPhamChiTiet> findBySanPhamAndSizeSPAndMauSacSP(
+            com.example.projectend.entity.SanPham sanPham,
+            com.example.projectend.entity.SizeSP sizeSP,
+            com.example.projectend.entity.MauSacSP mauSacSP
+    );
+
     // Lấy giá rẻ nhất của 1 sản phẩm
     @Query("SELECT MIN(spct.giaBan) FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP = :maSP")
     BigDecimal findMinPriceBySanPham(@Param("maSP") Long maSP);

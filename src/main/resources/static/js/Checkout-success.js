@@ -1,22 +1,22 @@
-tailwind.config = {
-    darkMode: "class",
-    theme: {
-        extend: {
-            colors: {
-                "primary": "#d5c0a4",
-                "background-light": "#FAFAFA",
-                "background-dark": "#1d1a15",
-                "text-primary-light": "#111111",
-                "text-primary-dark": "#f7f7f6",
-                "text-secondary-light": "#7e766d",
-                "text-secondary-dark": "#a39e93",
-                "border-light": "#e3e1de",
-                "border-dark": "#4d4941",
-            },
-            fontFamily: {
-                "display": ["Manrope", "sans-serif"]
-            },
-            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-        },
-    },
-};
+/**
+ * CHECKOUT-SUCCESS.JS - TỐI ƯU
+ * Logic cho trang đặt hàng thành công
+ */
+
+// Chỉ load khi ở trang Checkout Success
+if (document.body.classList.contains('checkout-success-page') || location.pathname.includes('/checkout-success')) {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== CHECKOUT SUCCESS PAGE LOADED ===');
+
+        // Animation hiển thị thông báo thành công
+        const successIcon = document.querySelector('.success-icon');
+        if (successIcon) {
+            successIcon.classList.add('animate-bounce');
+        }
+
+        // Clear cart sau khi đặt hàng thành công
+        if (typeof window.refreshCartCount === 'function') {
+            window.refreshCartCount();
+        }
+    });
+}

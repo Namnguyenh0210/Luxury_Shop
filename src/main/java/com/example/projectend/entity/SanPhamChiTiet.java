@@ -41,6 +41,9 @@ public class SanPhamChiTiet {
     @Column(name = "SoLuongTon")
     private Integer soLuongTon = 0;
 
+    @Column(name = "SoLuongDaBan")
+    private Integer soLuongDaBan = 0;
+
     @Column(name = "AnhBienThe", length = 255)
     private String anhBienThe;
 
@@ -110,6 +113,14 @@ public class SanPhamChiTiet {
 
     public void setSoLuongTon(Integer soLuongTon) {
         this.soLuongTon = soLuongTon;
+    }
+
+    public Integer getSoLuongDaBan() {
+        return soLuongDaBan;
+    }
+
+    public void setSoLuongDaBan(Integer soLuongDaBan) {
+        this.soLuongDaBan = soLuongDaBan;
     }
 
     public String getAnhBienThe() {

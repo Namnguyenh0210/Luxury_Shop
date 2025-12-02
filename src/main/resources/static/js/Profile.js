@@ -1,27 +1,28 @@
-tailwind.config = {
-    darkMode: "class",
-    theme: {
-        extend: {
-            colors: {
-                "primary": "#D5BFA3",
-                "background-light": "#FAFAFA",
-                "background-dark": "#1d1a15",
-                "primary-text": "#111111",
-                "secondary-text": "#7e766d",
-                "secondary": "#CFCFCF",
-                "cta": "#000000",
-            },
-            fontFamily: {
-                "display": ["Manrope", "sans-serif"],
-                "heading": ["Playfair Display", "serif"]
-            },
-            borderRadius: {
-                "DEFAULT": "0.25rem",
-                "lg": "0.5rem",
-                "xl": "0.75rem",
-                "full": "9999px"
-            },
-        },
-    },
-}
+/**
+ * PROFILE.JS - TỐI ƯU
+ * Logic cho trang profile
+ */
 
+// Chỉ load khi ở trang Profile
+if (document.body.classList.contains('profile-page') || location.pathname.includes('/profile')) {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== PROFILE PAGE LOADED ===');
+
+        // Preview avatar upload
+        const avatarInput = document.getElementById('avatar-upload');
+        const avatarPreview = document.getElementById('avatar-preview');
+
+        if (avatarInput && avatarPreview) {
+            avatarInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+}

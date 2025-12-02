@@ -8,7 +8,7 @@
 <body>
 <div layout:fragment="content">
     <main class="container mx-auto px-6 py-8">
-        <!-- Breadcrumb - Dữ liệu thực từ DB -->
+        <!-- Breadcrumb -->
         <div class="flex flex-wrap gap-2 text-sm mb-8">
             <a class="text-text-primary/60 dark:text-background-light/60 hover:text-primary" th:href="@{/}">Trang chủ</a>
             <span class="text-text-primary/60 dark:text-background-light/60">/</span>
@@ -23,7 +23,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <!-- Hình ảnh sản phẩm - SỬA ĐỂ HIỂN THỊ ẢNH TỪ DB -->
+            <!-- Hình ảnh sản phẩm -->
             <div class="flex items-start justify-center">
                 <img class="w-full aspect-[3/4] max-h-[700px] object-cover rounded-xl shadow-lg"
                      th:src="${sanPham.anhChinh}"
@@ -38,10 +38,11 @@
                        th:if="${sanPham.thuongHieu != null}"
                        th:href="@{/sanpham(thuongHieu=${sanPham.thuongHieu.maTH})}"
                        th:text="${sanPham.thuongHieu.tenTH}">Brand</a>
-                    <h1 class="text-4xl lg:text-5xl font-serif-display font-bold text-text-primary dark:text-background-light"
+                    <h1 class="text-4xl lg:text-5xl font-serif-display font-bold text-text-primary dark:text-background-light mt-2"
                         th:text="${sanPham.tenSP}">Tên sản phẩm</h1>
+
                     <!-- Hiển thị giá -->
-                    <p class="text-2xl mt-4 font-light text-text-primary dark:text-background-light"
+                    <p class="text-3xl mt-4 font-semibold text-text-primary dark:text-background-light" id="productPrice"
                        th:if="${minPrice != null && minPrice.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
                         <span th:if="${minPrice.equals(maxPrice)}"
                               th:text="${#numbers.formatDecimal(minPrice,0,'COMMA',0,'POINT')} + ' đ'">Giá</span>
@@ -49,7 +50,7 @@
                             <span th:text="${#numbers.formatDecimal(minPrice,0,'COMMA',0,'POINT')} + ' - ' + ${#numbers.formatDecimal(maxPrice,0,'COMMA',0,'POINT')} + ' đ'">Giá</span>
                         </span>
                     </p>
-                    <p class="text-2xl mt-4 font-light text-text-primary dark:text-background-light"
+                    <p class="text-3xl mt-4 font-semibold text-text-primary dark:text-background-light"
                        th:if="${minPrice == null || minPrice.compareTo(T(java.math.BigDecimal).ZERO) == 0}">
                         Liên hệ
                     </p>
@@ -57,17 +58,20 @@
 
                 <!-- Lựa chọn Màu sắc -->
                 <div class="border-t border-text-secondary/30 pt-6" th:if="${variants != null and !variants.isEmpty()}">
-                    <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light">
-                        MÀU SẮC: <span class="font-light" id="selectedColor">CHỌN MÀU</span>
-                    </label>
-                    <div class="flex gap-3 mt-3 flex-wrap" id="colorOptions">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light">
+                            MÀU SẮC: <span class="font-normal" id="selectedColorName">Chọn màu</span>
+                        </label>
+                    </div>
+                    <div class="flex gap-3 flex-wrap" id="colorOptions">
                         <!-- Hiển thị tất cả màu, JavaScript sẽ loại bỏ trùng -->
                         <th:block th:each="variant : ${variants}">
                             <button th:if="${variant.mauSacSP != null}"
-                                    class="size-8 rounded-full hover:ring-2 hover:ring-offset-2 hover:ring-primary transition-all color-btn"
+                                    class="relative size-10 rounded-full border-2 border-text-secondary/30 hover:border-primary transition-all duration-200 color-btn"
                                     th:style="${'background-color: ' + (variant.mauSacSP.maHex != null ? variant.mauSacSP.maHex : '#ccc')}"
                                     th:attr="data-color-name=${variant.mauSacSP.tenMau},data-color-id=${variant.mauSacSP.maMau},title=${variant.mauSacSP.tenMau}"
                                     onclick="selectColor(this)">
+                                <span class="absolute inset-0 rounded-full ring-2 ring-primary ring-offset-2 opacity-0 transition-opacity duration-200 selected-indicator"></span>
                             </button>
                         </th:block>
                     </div>
@@ -75,36 +79,61 @@
 
                 <!-- Lựa chọn Size -->
                 <div class="border-t border-text-secondary/30 pt-6" th:if="${variants != null and !variants.isEmpty()}">
-                    <div class="flex justify-between items-center">
-                        <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light">SIZE</label>
-                        <a class="text-sm underline text-text-primary/70 dark:text-background-light/70 hover:text-primary" href="#">Hướng dẫn chọn size</a>
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light">
+                            SIZE: <span class="font-normal" id="selectedSizeName">Chọn size</span>
+                        </label>
+                        <a class="text-xs underline text-text-primary/70 dark:text-background-light/70 hover:text-primary" href="#" onclick="event.preventDefault(); alert('📏 Hướng dẫn chọn size:\n\nS: Ngực 86cm, Eo 70cm\nM: Ngực 90cm, Eo 74cm\nL: Ngực 94cm, Eo 78cm\nXL: Ngực 98cm, Eo 82cm');">Hướng dẫn chọn size</a>
                     </div>
-                    <div class="flex flex-wrap gap-3 mt-3" id="sizeOptions">
+                    <div class="flex flex-wrap gap-3" id="sizeOptions">
                         <!-- Hiển thị tất cả size, JavaScript sẽ loại bỏ trùng -->
                         <th:block th:each="variant : ${variants}">
                             <button th:if="${variant.sizeSP != null}"
-                                    class="px-5 py-2.5 border border-text-secondary/30 rounded-lg text-sm hover:border-primary transition-all size-btn"
+                                    class="min-w-[60px] px-4 py-3 border-2 border-text-secondary/30 rounded-lg text-sm font-medium hover:border-primary transition-all duration-200 size-btn disabled:opacity-40 disabled:cursor-not-allowed"
                                     th:text="${variant.sizeSP.tenSize}"
-                                    th:attr="data-size-name=${variant.sizeSP.tenSize},data-size-id=${variant.sizeSP.maSize},data-stock=${variant.soLuongTon},data-variant-id=${variant.maBienThe}"
-                                    th:classappend="${variant.soLuongTon == 0 ? 'opacity-50 cursor-not-allowed' : ''}"
+                                    th:attr="data-size-name=${variant.sizeSP.tenSize},data-size-id=${variant.sizeSP.maSize},data-stock=${variant.soLuongTon},data-variant-id=${variant.maBienThe},data-price=${variant.giaBan}"
                                     onclick="selectSize(this)">
                             </button>
                         </th:block>
+                    </div>
+                    <!-- Hiển thị tồn kho của size được chọn -->
+                    <div id="stockInfo" class="mt-3 text-sm hidden">
+                        <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span id="stockText">Còn hàng</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Số lượng -->
+                <div class="border-t border-text-secondary/30 pt-6">
+                    <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light block mb-3">Số lượng</label>
+                    <div class="flex items-center gap-3">
+                        <button onclick="decreaseQuantity()" class="w-10 h-10 border-2 border-text-secondary/30 rounded-lg hover:border-primary transition-all duration-200 flex items-center justify-center font-bold">
+                            −
+                        </button>
+                        <input type="number" id="quantity" value="1" min="1" max="99"
+                               class="w-20 h-10 text-center border-2 border-text-secondary/30 rounded-lg focus:border-primary focus:outline-none"/>
+                        <button onclick="increaseQuantity()" class="w-10 h-10 border-2 border-text-secondary/30 rounded-lg hover:border-primary transition-all duration-200 flex items-center justify-center font-bold">
+                            +
+                        </button>
                     </div>
                 </div>
 
                 <!-- Nút hành động -->
                 <div class="flex flex-col gap-4 mt-4">
                     <button id="addToCartBtn"
-                            class="w-full bg-primary text-white h-12 rounded-lg text-sm font-bold tracking-wider hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="w-full bg-primary text-white h-14 rounded-lg text-base font-bold tracking-wider hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                             th:disabled="${totalStock == null || totalStock == 0}"
                             onclick="addProductToCart()">
-                        <span th:text="${totalStock != null && totalStock > 0 ? '🛒 Thêm giỏ hàng' : 'Hết hàng'}">Thêm giỏ hàng</span>
+                        <span th:text="${totalStock != null && totalStock > 0 ? '🛒 Thêm vào giỏ hàng' : '❌ Hết hàng'}">Thêm vào giỏ hàng</span>
                     </button>
-                    <button class="w-full border border-primary text-primary h-12 rounded-lg text-sm font-bold tracking-wider hover:bg-primary/5 dark:border-accent dark:text-accent dark:hover:bg-accent/10"
+                    <button class="w-full border-2 border-primary text-primary h-14 rounded-lg text-base font-bold tracking-wider hover:opacity-90 dark:border-accent dark:text-accent dark:hover:opacity-90 transition-all duration-200"
                             th:disabled="${totalStock == null || totalStock == 0}"
                             onclick="buyNow()">
-                        Mua ngay
+                        ⚡ Mua ngay
                     </button>
                 </div>
 
@@ -133,7 +162,7 @@
                             <li th:text="${'Thương hiệu: ' + (sanPham.thuongHieu != null ? sanPham.thuongHieu.tenTH : 'N/A')}">Thương hiệu</li>
                             <li th:text="${'Danh mục: ' + (sanPham.loaiSanPham != null ? sanPham.loaiSanPham.tenLoai : 'N/A')}">Danh mục</li>
                             <li th:text="${sanPham.gioiTinh == 0 ? 'Giới tính: Nam' : (sanPham.gioiTinh == 1 ? 'Giới tính: Nữ' : 'Giới tính: Unisex')}">Giới tính</li>
-                            <li th:text="${'Số lượng tồn kho: ' + (totalStock != null ? totalStock : 0)}">Tồn kho</li>
+                            <li th:text="${'Tổng số lượng: ' + (totalStock != null ? totalStock : 0)}">Tổng tồn kho</li>
                         </ul>
                     </details>
                 </div>
@@ -176,18 +205,21 @@
         let selectedColorId = null;
         let selectedSizeId = null;
         let selectedVariantId = null;
+        let selectedStock = 0;
+        let selectedPrice = null;
         const variants = /*[[${variants}]]*/ [];
 
-        console.log('Loaded variants:', variants);
+        console.log('📦 Loaded variants:', variants);
 
         // Loại bỏ trùng lặp màu sắc và size khi trang load
         document.addEventListener('DOMContentLoaded', function() {
             removeDuplicateColors();
             removeDuplicateSizes();
+            updateSizeAvailability();
 
             // Auto-select nếu chỉ có 1 lựa chọn
-            const colorBtns = document.querySelectorAll('.color-btn');
-            const sizeBtns = document.querySelectorAll('.size-btn:not([style*="display: none"])');
+            const colorBtns = document.querySelectorAll('.color-btn:not([style*="display: none"])');
+            const sizeBtns = document.querySelectorAll('.size-btn:not([style*="display: none"]):not(:disabled)');
 
             if (colorBtns.length === 1) {
                 colorBtns[0].click();
@@ -228,17 +260,65 @@
         function selectColor(btn) {
             // Remove selection from all color buttons
             document.querySelectorAll('.color-btn').forEach(b => {
-                b.classList.remove('ring-2', 'ring-offset-2', 'ring-primary');
+                b.querySelector('.selected-indicator').style.opacity = '0';
             });
+
             // Add selection to clicked button
-            btn.classList.add('ring-2', 'ring-offset-2', 'ring-primary');
+            btn.querySelector('.selected-indicator').style.opacity = '1';
             selectedColorId = btn.getAttribute('data-color-id');
-            document.getElementById('selectedColor').textContent = btn.getAttribute('data-color-name');
-            console.log('Selected color:', selectedColorId);
+            document.getElementById('selectedColorName').textContent = btn.getAttribute('data-color-name');
+
+            console.log('🎨 Selected color:', selectedColorId, btn.getAttribute('data-color-name'));
+
+            // Update size availability based on selected color
+            updateSizeAvailability();
+        }
+
+        function updateSizeAvailability() {
+            const sizeBtns = document.querySelectorAll('.size-btn:not([style*="display: none"])');
+
+            sizeBtns.forEach(btn => {
+                const sizeId = btn.getAttribute('data-size-id');
+
+                if (selectedColorId) {
+                    // Find variant with this color and size
+                    const variant = variants.find(v =>
+                        v.mauSacSP && v.mauSacSP.maMau == selectedColorId &&
+                        v.sizeSP && v.sizeSP.maSize == sizeId
+                    );
+
+                    if (variant && variant.soLuongTon > 0) {
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                        btn.setAttribute('data-stock', variant.soLuongTon);
+                        btn.setAttribute('data-variant-id', variant.maBienThe);
+                        btn.setAttribute('data-price', variant.giaBan);
+                    } else {
+                        btn.disabled = true;
+                        btn.classList.add('opacity-40', 'cursor-not-allowed');
+                        btn.setAttribute('data-stock', 0);
+                    }
+                } else {
+                    // Show all available sizes
+                    const stock = parseInt(btn.getAttribute('data-stock') || '0');
+                    if (stock > 0) {
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                    } else {
+                        btn.disabled = true;
+                        btn.classList.add('opacity-40', 'cursor-not-allowed');
+                    }
+                }
+            });
         }
 
         function selectSize(btn) {
             // Check if button is disabled
+            if (btn.disabled) {
+                alert('⚠️ Size này hiện đã hết hàng với màu đã chọn');
+                return;
+            }
+
             const stock = parseInt(btn.getAttribute('data-stock') || '0');
             if (stock <= 0) {
                 alert('⚠️ Size này hiện đã hết hàng');
@@ -247,13 +327,68 @@
 
             // Remove selection from all size buttons
             document.querySelectorAll('.size-btn').forEach(b => {
-                b.classList.remove('border-primary', 'bg-primary', 'text-white');
+                b.classList.remove('border-primary', 'bg-primary', 'text-white', 'border-2');
+                b.classList.add('border-2', 'border-text-secondary/30');
             });
+
             // Add selection to clicked button
+            btn.classList.remove('border-text-secondary/30');
             btn.classList.add('border-primary', 'bg-primary', 'text-white');
+
             selectedSizeId = btn.getAttribute('data-size-id');
             selectedVariantId = btn.getAttribute('data-variant-id');
-            console.log('Selected size:', selectedSizeId, 'Variant ID:', selectedVariantId);
+            selectedStock = stock;
+            selectedPrice = parseFloat(btn.getAttribute('data-price') || '0');
+
+            document.getElementById('selectedSizeName').textContent = btn.getAttribute('data-size-name');
+
+            // Update stock info
+            const stockInfo = document.getElementById('stockInfo');
+            const stockText = document.getElementById('stockText');
+            stockInfo.classList.remove('hidden');
+
+            if (stock > 10) {
+                stockText.innerHTML = `Còn <strong>${stock}</strong> sản phẩm`;
+                stockInfo.querySelector('span').className = 'inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg';
+            } else if (stock > 0) {
+                stockText.innerHTML = `Chỉ còn <strong>${stock}</strong> sản phẩm`;
+                stockInfo.querySelector('span').className = 'inline-flex items-center gap-2 px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-lg';
+            }
+
+            // Update price display
+            if (selectedPrice > 0) {
+                const priceElement = document.getElementById('productPrice');
+                if (priceElement) {
+                    priceElement.innerHTML = selectedPrice.toLocaleString('vi-VN') + ' đ';
+                }
+            }
+
+            // Update quantity max
+            document.getElementById('quantity').max = stock;
+            if (parseInt(document.getElementById('quantity').value) > stock) {
+                document.getElementById('quantity').value = stock;
+            }
+
+            console.log('📏 Selected size:', selectedSizeId, 'Stock:', stock, 'Variant ID:', selectedVariantId);
+        }
+
+        function decreaseQuantity() {
+            const input = document.getElementById('quantity');
+            const currentValue = parseInt(input.value) || 1;
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+            }
+        }
+
+        function increaseQuantity() {
+            const input = document.getElementById('quantity');
+            const currentValue = parseInt(input.value) || 1;
+            const maxValue = parseInt(input.max) || 99;
+            if (currentValue < maxValue) {
+                input.value = currentValue + 1;
+            } else {
+                alert(`⚠️ Chỉ còn ${maxValue} sản phẩm trong kho`);
+            }
         }
 
         function findVariantId() {
@@ -267,20 +402,20 @@
                 );
                 if (variant) {
                     variantId = variant.maBienThe;
-                    console.log('Found variant by color+size:', variantId);
+                    console.log('✅ Found variant by color+size:', variantId);
                 }
             }
             // Nếu chỉ chọn size, dùng selectedVariantId
             else if (selectedVariantId) {
                 variantId = selectedVariantId;
-                console.log('Using selected variant ID:', variantId);
+                console.log('✅ Using selected variant ID:', variantId);
             }
             // Nếu chưa chọn gì, lấy variant đầu tiên có tồn kho
             else if (variants && variants.length > 0) {
                 const availableVariant = variants.find(v => v.soLuongTon > 0);
                 if (availableVariant) {
                     variantId = availableVariant.maBienThe;
-                    console.log('Using first available variant:', variantId);
+                    console.log('✅ Using first available variant:', variantId);
                 }
             }
 
@@ -289,26 +424,37 @@
 
         function addProductToCart() {
             const variantId = findVariantId();
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
             if (!variantId) {
                 alert('⚠️ Vui lòng chọn màu sắc và size');
                 return;
             }
 
-            console.log('Adding to cart, variant ID:', variantId);
+            if (!selectedColorId || !selectedSizeId) {
+                alert('⚠️ Vui lòng chọn đầy đủ màu sắc và size');
+                return;
+            }
+
+            if (quantity > selectedStock) {
+                alert(`⚠️ Chỉ còn ${selectedStock} sản phẩm trong kho`);
+                return;
+            }
+
+            console.log('🛒 Adding to cart:', { variantId, quantity });
 
             // Disable button để tránh click nhiều lần
             const btn = document.getElementById('addToCartBtn');
             const originalText = btn.innerHTML;
             btn.disabled = true;
-            btn.innerHTML = '<span>Đang thêm...</span>';
+            btn.innerHTML = '<span>⏳ Đang thêm...</span>';
 
             fetch('/api/cart/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
                     maBienThe: variantId,
-                    soLuong: 1
+                    soLuong: quantity
                 })
             })
             .then(r => r.json())
@@ -316,11 +462,15 @@
                 btn.disabled = false;
                 btn.innerHTML = originalText;
 
-                console.log('Add to cart response:', data);
+                console.log('✅ Add to cart response:', data);
 
                 if (data.success) {
-                    alert('✅ ' + data.message);
-                    // Cập nhật số lượng giỏ hàng trong header nếu có
+                    // Show success message with details
+                    const colorName = document.getElementById('selectedColorName').textContent;
+                    const sizeName = document.getElementById('selectedSizeName').textContent;
+                    alert(`✅ ${data.message}\n\nSản phẩm: ${/*[[${sanPham.tenSP}]]*/ 'Sản phẩm'}\nMàu: ${colorName}\nSize: ${sizeName}\nSố lượng: ${quantity}`);
+
+                    // Cập nhật số lượng giỏ hàng trong header
                     if (data.cartCount) {
                         const cartBadge = document.querySelector('.cart-count');
                         if (cartBadge) {
@@ -334,20 +484,31 @@
             .catch(e => {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
-                console.error('Error adding to cart:', e);
+                console.error('❌ Error adding to cart:', e);
                 alert('❌ Lỗi: ' + e.message);
             });
         }
 
         function buyNow() {
             const variantId = findVariantId();
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
             if (!variantId) {
                 alert('⚠️ Vui lòng chọn màu sắc và size');
                 return;
             }
 
-            console.log('Buy now, variant ID:', variantId);
+            if (!selectedColorId || !selectedSizeId) {
+                alert('⚠️ Vui lòng chọn đầy đủ màu sắc và size');
+                return;
+            }
+
+            if (quantity > selectedStock) {
+                alert(`⚠️ Chỉ còn ${selectedStock} sản phẩm trong kho`);
+                return;
+            }
+
+            console.log('⚡ Buy now:', { variantId, quantity });
 
             // Thêm vào giỏ hàng rồi chuyển đến trang thanh toán
             fetch('/api/cart/add', {
@@ -355,12 +516,12 @@
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
                     maBienThe: variantId,
-                    soLuong: 1
+                    soLuong: quantity
                 })
             })
             .then r => r.json())
             .then(data => {
-                console.log('Buy now response:', data);
+                console.log('✅ Buy now response:', data);
 
                 if (data.success) {
                     // Chuyển đến trang thanh toán
@@ -370,7 +531,7 @@
                 }
             })
             .catch(e => {
-                console.error('Error in buy now:', e);
+                console.error('❌ Error in buy now:', e);
                 alert('❌ Lỗi: ' + e.message);
             });
         }

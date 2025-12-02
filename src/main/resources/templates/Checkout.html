@@ -40,8 +40,8 @@
                 <div class="lg:col-span-7 space-y-6">
 
                     <!-- Shipping Address Section -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-[#fef8f3] dark:bg-gray-800 rounded-xl shadow-sm border border-[#e9d5c7] dark:border-gray-700 overflow-hidden">
+                        <div class="p-6 border-b border-[#e9d5c7] dark:border-gray-700">
                             <h2 class="text-xl font-bold text-primary-text dark:text-white flex items-center gap-2">
                                 <span class="material-symbols-outlined">local_shipping</span>
                                 Địa chỉ giao hàng
@@ -53,7 +53,7 @@
                             <div th:if="${diaChiList != null and !diaChiList.isEmpty()}" class="space-y-3">
                                 <div th:each="diaChi, iterStat : ${diaChiList}"
                                      class="relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-accent"
-                                     th:classappend="${diaChi.laMacDinh} ? 'border-accent bg-accent/5' : 'border-gray-200 dark:border-gray-700'">
+                                     th:classappend="${diaChi.laMacDinh} ? 'border-accent bg-accent/5' : 'border-[#e9d5c7] dark:border-gray-700'">
                                     <input type="radio"
                                            name="diaChiId"
                                            th:id="'address-' + ${diaChi.maDiaChi}"
@@ -98,8 +98,8 @@
                     </div>
 
                     <!-- Payment Method Section -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-[#fef8f3] dark:bg-gray-800 rounded-xl shadow-sm border border-[#e9d5c7] dark:border-gray-700 overflow-hidden">
+                        <div class="p-6 border-b border-[#e9d5c7] dark:border-gray-700">
                             <h2 class="text-xl font-bold text-primary-text dark:text-white flex items-center gap-2">
                                 <span class="material-symbols-outlined">payment</span>
                                 Phương thức thanh toán
@@ -110,7 +110,7 @@
                             <!-- ✨ HIỂN THỊ ĐỘNG CÁC PHƯƠNG THỨC THANH TOÁN TỪ DATABASE -->
                             <th:block th:if="${paymentMethods != null and !paymentMethods.isEmpty()}">
                                 <div th:each="method, iterStat : ${paymentMethods}"
-                                     th:classappend="${iterStat.first} ? 'border-accent bg-accent/5' : 'border-gray-200 dark:border-gray-700'"
+                                     th:classappend="${iterStat.first} ? 'border-accent bg-accent/5' : 'border-[#e9d5c7] dark:border-gray-700'"
                                      class="relative flex items-start p-4 border-2 rounded-lg cursor-pointer hover:border-accent transition">
                                     <input type="radio"
                                            name="paymentMethod"
@@ -142,8 +142,8 @@
                     </div>
 
                     <!-- Order Notes Section -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-[#fef8f3] dark:bg-gray-800 rounded-xl shadow-sm border border-[#e9d5c7] dark:border-gray-700 overflow-hidden">
+                        <div class="p-6 border-b border-[#e9d5c7] dark:border-gray-700">
                             <h2 class="text-xl font-bold text-primary-text dark:text-white flex items-center gap-2">
                                 <span class="material-symbols-outlined">note_alt</span>
                                 Ghi chú đơn hàng
@@ -162,15 +162,15 @@
 
                 <!-- Right Column: Order Summary -->
                 <div class="lg:col-span-5">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 lg:sticky lg:top-6">
-                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                    <div class="bg-[#fef8f3] dark:bg-gray-800 rounded-xl shadow-sm border border-[#e9d5c7] dark:border-gray-700 lg:sticky lg:top-6">
+                        <div class="p-6 border-b border-[#e9d5c7] dark:border-gray-700">
                             <h2 class="text-xl font-bold text-primary-text dark:text-white">Đơn hàng của bạn</h2>
                         </div>
 
                         <!-- Cart Items -->
                         <div class="p-6 max-h-96 overflow-y-auto">
                             <div class="space-y-4">
-                                <div th:each="item : ${cartItems}" class="flex gap-4 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
+                                <div th:each="item : ${cartItems}" class="flex gap-4 pb-4 border-b border-[#e9d5c7] dark:border-gray-700 last:border-0 last:pb-0">
                                     <div class="relative flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
                                         <img th:src="@{'/img/' + ${item.anh}}"
                                              th:alt="${item.tenSP}"
