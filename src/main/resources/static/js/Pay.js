@@ -1,22 +1,23 @@
-tailwind.config = {
-    darkMode: "class",
-    theme: {
-        extend: {
-            colors: {
-                "primary": "#d5c0a4",
-                "background-light": "#FAFAFA",
-                "background-dark": "#1d1a15",
-                "text-primary-light": "#111111",
-                "text-primary-dark": "#f7f7f6",
-                "text-secondary-light": "#7e766d",
-                "text-secondary-dark": "#a39e93",
-                "border-light": "#e3e1de",
-                "border-dark": "#4d4941",
-            },
-            fontFamily: {
-                "display": ["Manrope", "sans-serif"]
-            },
-            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-        },
-    },
+/**
+ * PAY.JS - TỐI ƯU
+ * Logic cho trang thanh toán
+ */
+
+// Chỉ load khi ở trang Payment
+if (document.body.classList.contains('pay-page') || location.pathname.includes('/pay')) {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== PAYMENT PAGE LOADED ===');
+
+        // Payment method selection
+        const paymentMethods = document.querySelectorAll('input[name="paymentMethod"]');
+        if (paymentMethods.length > 0) {
+            paymentMethods.forEach(method => {
+                method.addEventListener('change', function() {
+                    // Show/hide payment-specific forms
+                    const selectedMethod = this.value;
+                    console.log('Payment method selected:', selectedMethod);
+                });
+            });
+        }
+    });
 }

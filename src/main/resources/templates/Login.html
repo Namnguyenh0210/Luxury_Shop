@@ -60,10 +60,15 @@
                                        placeholder="Nhập mật khẩu"
                                        type="password"
                                        required/>
-                                <button type="button"
-                                        id="togglePassword"
-                                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-brand-dark-gray dark:hover:text-white">
-                                    <span class="material-symbols-outlined">visibility</span>
+                                <button type="button" onclick="togglePassword('password')"
+                                        class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500 hover:text-brand-dark-gray">
+                                    <svg id="eye-icon-password" class="h-5 w-5" fill="none" stroke="currentColor"
+                                         viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M2.458 12C3.732 7.943 7.438 4.5 12 4.5c4.563 0 8.27 3.443 9.542 7.5M2.458 12c1.274 4.057 4.98 7.5 9.542 7.5 4.563 0 8.27-3.443 9.542-7.5M15 12a3 3 0 10-6 0 3 3 0 006 0z"/>
+                                    </svg>
                                 </button>
                             </div>
                         </label>
@@ -75,9 +80,10 @@
                                        type="checkbox"/>
                                 <p class="text-brand-dark-gray dark:text-gray-300 text-base font-normal leading-normal">Ghi nhớ đăng nhập</p>
                             </label>
-                            <a class="text-sm font-medium text-brand-dark-gray dark:text-gray-300 hover:text-brand-deep-black dark:hover:text-white"
-                               href="#"
-                               th:href="@{/forgot-password}">Quên mật khẩu?</a>
+                            <a class="text-sm font-medium text-brand-dark-gray dark:text-gray-300 hover:text-brand-deep-black"
+                               th:href="@{/quen-mat-khau}">
+                                Quên mật khẩu?
+                            </a>
                         </div>
 
                         <button type="submit"
@@ -99,9 +105,8 @@
                     <div class="text-center">
                         <p class="text-brand-dark-gray dark:text-gray-300 text-base font-normal">
                             Bạn chưa có tài khoản?
-                            <a class="font-bold hover:text-brand-deep-black dark:hover:text-white"
-                               href="#"
-                               th:href="@{/register}">Đăng ký ngay!</a>
+                            <a class="font-bold hover:text-brand-deep-black"
+                               th:href="@{/dang-ky}">Đăng ký ngay</a>
                         </p>
                     </div>
                 </div>

@@ -1,21 +1,16 @@
-tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#000000",
-                        "background-light": "#FAFAFA",
-                        "background-dark": "#111111",
-                        "text-primary-light": "#111111",
-                        "text-primary-dark": "#FAFAFA",
-                        "accent": "#D5BFA3",
-                        "secondary": "#CFCFCF",
-                    },
-                    fontFamily: {
-                        "display": ["Manrope", "sans-serif"],
-                        "serif": ["Playfair Display", "serif"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
+/**
+ * HOME.JS - TỐI ƯU
+ * Chỉ giữ logic đặc thù cho trang Home
+ * Tailwind config đã được gộp vào tailwind-config.js
+ */
+
+// Chỉ load khi ở trang Home
+if (document.body.classList.contains('home-page') || location.pathname === '/' || location.pathname === '/home') {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== HOME PAGE LOADED ===');
+
+        // Carousel/slider nếu có
+        // Animation effects đã có trong common.js
+    });
+}
+

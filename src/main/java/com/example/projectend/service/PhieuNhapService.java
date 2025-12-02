@@ -96,24 +96,30 @@ public class PhieuNhapService {
 
         // Xử lý sản phẩm mới
         for (NewItem item : newItems) {
-            // Tạo SanPham
-            SanPham sp = new SanPham();
-            sp.setTenSP(item.tenSP());
-            sp.setTrangThaiSP(1);
-            sp.setNgayTao(LocalDateTime.now());
+            // TÌM HOẶC TẠO SẢN PHẨM CHA (SanPham)
+            // Logic mới: Tìm theo TenSP. Nếu có thì dùng lại, không thì tạo mới.
+            LoaiSanPham lsp = item.categoryId() != null ? loaiSanPhamRepository.findById(item.categoryId().intValue()).orElse(null) : null;
+            ThuongHieu th = item.brandId() != null ? thuongHieuRepository.findById(item.brandId()).orElse(null) : null;
+
+            SanPham sp = sanPhamRepository.findByTenSP(item.tenSP())
+                    .orElseGet(() -> {
+                        SanPham newSp = new SanPham();
+                        newSp.setTenSP(item.tenSP());
+                        newSp.setLoaiSanPham(lsp);
+                        newSp.setThuongHieu(th);
+                        newSp.setTrangThaiSP(1); // Đang bán
+                        newSp.setNgayTao(LocalDateTime.now());
+                        if (item.gender() != null) {
+                            newSp.setGioiTinh(item.gender());
+                        }
+                        // Ảnh chính và mô tả có thể được cập nhật sau
+                        return sanPhamRepository.save(newSp);
+                    });
+
+            // Cập nhật ngày để biết sản phẩm vừa được thao tác
             sp.setNgayCapNhat(LocalDateTime.now());
-            if (item.gender() != null) {
-                sp.setGioiTinh(item.gender());
-            }
-            if (item.categoryId() != null) {
-                LoaiSanPham lsp = loaiSanPhamRepository.findById(item.categoryId().intValue()).orElse(null);
-                if (lsp != null) sp.setLoaiSanPham(lsp);
-            }
-            if (item.brandId() != null) {
-                ThuongHieu th = thuongHieuRepository.findById(item.brandId()).orElse(null);
-                if (th != null) sp.setThuongHieu(th);
-            }
-            sp = sanPhamRepository.save(sp);
+            sanPhamRepository.save(sp);
+
 
             // Tìm/ tạo size
             SizeSP size = sizeSPRepository.findByTenSize(item.size())
@@ -130,14 +136,25 @@ public class PhieuNhapService {
                         return mauSacSPRepository.save(m);
                     });
 
-            SanPhamChiTiet variant = new SanPhamChiTiet();
-            variant.setSanPham(sp);
-            variant.setSizeSP(size);
-            variant.setMauSacSP(mau);
-            variant.setGiaBan(item.giaBan());
+            // KIỂM TRA BIẾN THỂ ĐÃ TỒN TẠI CHƯA
+            // Tránh tạo trùng lặp biến thể (cùng sản phẩm, cùng size, cùng màu)
+            SanPhamChiTiet variant = sanPhamChiTietRepository.findBySanPhamAndSizeSPAndMauSacSP(sp, size, mau)
+                    .orElseGet(SanPhamChiTiet::new);
+
+            // Nếu là biến thể mới, thiết lập các thuộc tính cơ bản
+            if (variant.getMaBienThe() == null) {
+                variant.setSanPham(sp);
+                variant.setSizeSP(size);
+                variant.setMauSacSP(mau);
+                variant.setGiaBan(item.giaBan());
+                variant.setSoLuongDaBan(0); // Mặc định
+            }
+
+            // Cập nhật thông tin nhập kho
             variant.setGiaNhap(item.donGiaNhap());
-            variant.setSoLuongTon(item.soLuong());
+            variant.setSoLuongTon(variant.getSoLuongTon() + item.soLuong());
             variant = sanPhamChiTietRepository.save(variant);
+
 
             NhapKhoChiTiet ct = new NhapKhoChiTiet();
             ct.setPhieuNhap(phieuNhap);

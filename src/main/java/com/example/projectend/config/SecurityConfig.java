@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -28,8 +27,9 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // ⚠️ Chỉ dùng NoOp cho demo — thực tế nên dùng BCrypt
-        return NoOpPasswordEncoder.getInstance();
+        // TẠM THỜI: dùng plain-text để đăng nhập nhanh với mật khẩu "123" trong DB
+        // Lưu ý: KHÔNG dùng NoOpPasswordEncoder cho môi trường thật.
+        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
     }
 
     @Bean

@@ -26,7 +26,7 @@
             </div>
 
             <!-- Chi tiết đơn hàng -->
-            <div class="mt-12 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div class="mt-12 w-full rounded-xl border border-[#e9d5c7] dark:border-gray-700 bg-[#fef8f3] dark:bg-gray-800">
                 <div class="p-6 md:p-8">
                     <h3 class="text-xl font-bold tracking-tight text-primary-text dark:text-white">Chi tiết đơn hàng</h3>
                     <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
@@ -68,7 +68,7 @@
                 </div>
 
                 <!-- Danh sách sản phẩm -->
-                <div class="border-t border-gray-200 dark:border-gray-700 p-6 md:p-8">
+                <div class="border-t border-[#e9d5c7] dark:border-gray-700 p-6 md:p-8">
                     <h3 class="text-xl font-bold tracking-tight text-primary-text dark:text-white">Sản phẩm đã đặt</h3>
                     <ul class="mt-6 space-y-6" role="list">
                         <li th:each="item : ${chiTiet}" class="flex items-start gap-4">
@@ -99,7 +99,7 @@
                 </div>
 
                 <!-- Tổng tiền -->
-                <div class="border-t border-gray-200 dark:border-gray-700 p-6 md:p-8">
+                <div class="border-t border-[#e9d5c7] dark:border-gray-700 p-6 md:p-8">
                     <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-500 dark:text-gray-400">Tạm tính</span>
@@ -110,7 +110,7 @@
                             <span class="text-gray-500 dark:text-gray-400">Phí vận chuyển</span>
                             <span class="text-primary-text dark:text-white">Miễn phí</span>
                         </div>
-                        <div class="flex justify-between border-t border-gray-200 dark:border-gray-700 pt-3 text-base font-bold">
+                        <div class="flex justify-between border-t border-[#e9d5c7] dark:border-gray-700 pt-3 text-base font-bold">
                             <span class="text-primary-text dark:text-white">Tổng cộng</span>
                             <span class="text-primary-text dark:text-white"
                                   th:text="${#numbers.formatDecimal(donHang.tongTien, 0, 'COMMA', 0, 'POINT')} + '₫'">24,500,000₫</span>

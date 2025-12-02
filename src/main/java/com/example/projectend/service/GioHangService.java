@@ -15,7 +15,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 /**
- * GIO HANG SERVICE - VIẾT LẠI HOÀN TOÀN
+ * GIO HANG SERVICE - TỐI ƯU
  * Theo cấu trúc mới: GioHang (container) + GioHangChiTiet (items)
  */
 @Service
@@ -32,6 +32,12 @@ public class GioHangService {
 
     @Autowired
     private SanPhamChiTietRepository sanPhamChiTietRepository;
+
+    @Autowired
+    private SanPhamRepository sanPhamRepository;
+
+    @Autowired
+    private TaiKhoanRepository taiKhoanRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -187,5 +193,60 @@ public class GioHangService {
      */
     public void clearGioHang(TaiKhoan taiKhoan) {
         clearCart(taiKhoan);
+    }
+
+    /**
+     * TỐI ƯU: Lấy số lượng items trong giỏ hàng theo email
+     */
+    public int getCartItemCount(String email) {
+        TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email).orElse(null);
+        if (taiKhoan == null) return 0;
+
+        GioHang gioHang = gioHangRepository.findByTaiKhoan_MaTK(taiKhoan.getMaTK()).orElse(null);
+        if (gioHang == null) return 0;
+
+        List<GioHangChiTiet> items = gioHangChiTietRepository.findByGioHang_MaGioHang(gioHang.getMaGioHang());
+        return items.stream().mapToInt(item -> item.getSoLuong() != null ? item.getSoLuong() : 0).sum();
+    }
+
+    /**
+     * TỐI ƯU: Lấy danh sách items theo email (cho API)
+     */
+    public List<GioHangChiTiet> getCartItems(String email) {
+        TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email).orElse(null);
+        if (taiKhoan == null) return List.of();
+
+        return getCartItems(taiKhoan);
+    }
+
+    /**
+     * TỐI ƯU: Thêm sản phẩm vào giỏ hàng - tự động tìm biến thể còn hàng
+     */
+    public boolean addProductToCart(String email, Long productId, int quantity) {
+        try {
+            TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
+
+            // Tìm sản phẩm
+            SanPham sanPham = sanPhamRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+            // Tìm biến thể còn hàng đầu tiên
+            List<SanPhamChiTiet> variants = sanPhamChiTietRepository.findBySanPham_MaSP(productId);
+            SanPhamChiTiet availableVariant = variants.stream()
+                    .filter(v -> v.getSoLuongTon() != null && v.getSoLuongTon() > 0)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Sản phẩm đã hết hàng"));
+
+            // Thêm vào giỏ hàng
+            addToCart(taiKhoan, availableVariant.getMaBienThe(), quantity);
+
+            log.info("Added product {} (variant {}) to cart for user {}", productId, availableVariant.getMaBienThe(), email);
+            return true;
+
+        } catch (Exception e) {
+            log.error("Error adding product to cart: {}", e.getMessage());
+            return false;
+        }
     }
 }

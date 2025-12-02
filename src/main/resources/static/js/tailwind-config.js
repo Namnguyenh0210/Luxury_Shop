@@ -1,35 +1,45 @@
-// Global Tailwind CDN configuration (must load BEFORE CDN script)
-// Centralized to avoid duplicated configs in Product.js, Giohang.js, etc.
-// Colors match design tokens used across templates.
-if (typeof tailwind === 'undefined') { window.tailwind = {}; }
-if (!tailwind.config) {
-  tailwind.config = {
-    darkMode: 'class',
+/**
+ * TAILWIND CONFIG - Cấu hình tập trung cho toàn bộ dự án
+ * Tối ưu: Gộp tất cả config vào 1 file duy nhất
+ */
+tailwind.config = {
+    darkMode: "class",
     theme: {
-      extend: {
-        colors: {
-          primary: '#000000',
-          accent: '#D5BFA3',
-          'background-light': '#FAFAFA',
-          'background-dark': '#191919',
-          'primary-text': '#111111',
-          'secondary-gray': '#CFCFCF',
-          'hover-cta': '#000000'
-        },
-        fontFamily: {
-          display: ['Manrope','sans-serif'],
-          heading: ['Playfair Display','serif']
-        },
-        borderRadius: {
-          DEFAULT: '0.25rem',
-          lg: '0.5rem',
-          xl: '0.75rem',
-          full: '9999px'
+        extend: {
+            colors: {
+                "primary": "#000000",
+                "primary-bg": "#FAFAFA",
+                "background-light": "#FAFAFA",
+                "background-dark": "#191919",
+                "text-primary": "#111111",
+                "text-primary-light": "#111111",
+                "text-primary-dark": "#FAFAFA",
+                "text-secondary": "#CFCFCF",
+                "text-secondary-light": "#757575",
+                "text-secondary-dark": "#CFCFCF",
+                "accent": "#D5BFA3",
+                "secondary": "#CFCFCF",
+                "secondary-gray": "#CFCFCF",
+                "border-light": "#CFCFCF",
+                "border-dark": "#444444",
+                "card-light": "#FFFFFF",
+                "card-dark": "#1F1F1F",
+                "cta": "#000000",
+                "cta-hover": "#000000",
+                "hover-cta": "#000000"
+            },
+            fontFamily: {
+                "display": ["Manrope", "sans-serif"],
+                "heading": ["Playfair Display", "serif"],
+                "serif": ["Playfair Display", "serif"]
+            },
+            borderRadius: {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            }
         }
-      }
     }
-  };
-}
-// Backward compatibility alias (old typo tmtailwind.config)
-if (typeof tmtailwind === 'undefined') { window.tmtailwind = window.tailwind; }
+};
 

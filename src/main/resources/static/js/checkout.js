@@ -1,75 +1,107 @@
-// JS for checkout page: address, etc.
-// Hiệu ứng toast/thông báo đẹp
-function showToast(msg, type = 'success') {
-    let toast = document.createElement('div');
-    toast.className = 'checkout-toast ' + type;
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.classList.add('show'), 50);
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400);
-    }, 2200);
-}
+/**
+ * CHECKOUT.JS - TỐI ƯU
+ * Logic cho trang thanh toán
+ * Đã tối ưu và sử dụng showToast từ common.js
+ */
 
-function showAddAddressForm() {
-    document.getElementById('address-form-modal').style.display = 'flex';
-    setTimeout(() => {
-        let inp = document.querySelector('#addressForm input[name="name"]');
-        if (inp) inp.focus();
-    }, 100);
-}
-
-function hideAddAddressForm() {
-    document.getElementById('address-form-modal').style.display = 'none';
-}
-
-function setDefaultAddress(id) {
-    showToast('Đặt địa chỉ ' + id + ' làm mặc định!', 'success');
-    // Hiệu ứng highlight
-    let addr = document.querySelector('.address-item[data-id="' + id + '"]');
-    if (addr) {
-        addr.classList.add('highlight');
-        setTimeout(() => addr.classList.remove('highlight'), 1200);
+// Address form modal
+window.showAddAddressForm = function() {
+    const modal = document.getElementById('address-form-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            const inp = document.querySelector('#addressForm input[name="name"]');
+            if (inp) inp.focus();
+        }, 100);
     }
-}
+};
 
-function editAddress(id) {
-    // Lấy dữ liệu địa chỉ, show form sửa
-    alert('Sửa địa chỉ ' + id);
-}
+window.hideAddAddressForm = function() {
+    const modal = document.getElementById('address-form-modal');
+    if (modal) modal.style.display = 'none';
+};
 
-function deleteAddress(id) {
-    let modal = document.createElement('div');
-    modal.className = 'checkout-modal';
-    modal.innerHTML = `<div class='modal-content'>
-        <div class='modal-title'>Xác nhận xóa địa chỉ?</div>
-        <div class='modal-actions'>
-            <button class='btn btn-danger' id='confirmDel'>Xóa</button>
-            <button class='btn btn-cancel' id='cancelDel'>Hủy</button>
-        </div>
-    </div>`;
-    document.body.appendChild(modal);
-    document.getElementById('confirmDel').onclick = function () {
-        showToast('Đã xóa địa chỉ ' + id, 'success');
-        modal.remove();
-    };
-    document.getElementById('cancelDel').onclick = function () {
-        modal.remove();
-    };
-}
+// Set default address
+window.setDefaultAddress = function(id) {
+    fetch('/api/address/set-default/' + id, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', 'Thành công', 'Đã đặt địa chỉ làm mặc định');
+                const addr = document.querySelector('.address-item[data-id="' + id + '"]');
+                if (addr) {
+                    addr.classList.add('highlight');
+                    setTimeout(() => addr.classList.remove('highlight'), 1200);
+                }
+                // Reload page to update default status
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('error', 'Lỗi', data.message || 'Không thể đặt địa chỉ mặc định');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('error', 'Lỗi', 'Không thể kết nối đến server');
+        });
+};
 
-// Đóng modal khi lưu địa chỉ thành công
-if (document.getElementById('addressForm')) {
-    document.getElementById('addressForm').onsubmit = function (e) {
-        e.preventDefault();
-        showToast('Lưu địa chỉ thành công!', 'success');
-        hideAddAddressForm();
-    };
-}
+// Edit address
+window.editAddress = function(id) {
+    // TODO: Load address data and show edit form
+    console.log('Edit address:', id);
+    showToast('info', 'Thông báo', 'Tính năng đang phát triển');
+};
 
-// Scroll đến phần lỗi nếu có
-function scrollToError() {
-    let err = document.querySelector('.input-error');
-    if (err) err.scrollIntoView({behavior: 'smooth', block: 'center'});
-}
+// Delete address
+window.deleteAddress = function(id) {
+    if (!confirm('Bạn có chắc muốn xóa địa chỉ này?')) return;
+
+    fetch('/api/address/delete/' + id, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast('success', 'Thành công', 'Đã xóa địa chỉ');
+                // Remove address element from DOM
+                const addr = document.querySelector('.address-item[data-id="' + id + '"]');
+                if (addr) addr.remove();
+            } else {
+                showToast('error', 'Lỗi', data.message || 'Không thể xóa địa chỉ');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showToast('error', 'Lỗi', 'Không thể kết nối đến server');
+        });
+};
+
+// Address form submit
+document.addEventListener('DOMContentLoaded', function() {
+    const addressForm = document.getElementById('addressForm');
+    if (addressForm) {
+        addressForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            fetch('/api/address/add', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('success', 'Thành công', 'Lưu địa chỉ thành công!');
+                    hideAddAddressForm();
+                    // Reload to show new address
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast('error', 'Lỗi', data.message || 'Không thể lưu địa chỉ');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('error', 'Lỗi', 'Không thể kết nối đến server');
+            });
+        });
+    }
+});
