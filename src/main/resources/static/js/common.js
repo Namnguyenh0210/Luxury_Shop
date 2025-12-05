@@ -88,7 +88,7 @@ window.refreshCartCount = function() {
         .catch(err => console.error('Error refreshing cart count:', err));
 };
 
-// Add to cart - Hàm chung tối ưu
+// Add to cart - Hàm chung tối ưu cho trang danh sách sản phẩm
 window.addToCartFromList = function(btn) {
     const spId = btn.getAttribute('data-sp-id');
     const spName = btn.getAttribute('data-sp-name');
@@ -99,9 +99,9 @@ window.addToCartFromList = function(btn) {
         return;
     }
 
-    const originalText = btnText.textContent;
+    const originalText = btnText ? btnText.textContent : 'Thêm vào giỏ hàng';
     btn.disabled = true;
-    btnText.textContent = 'Đang thêm...';
+    if (btnText) btnText.textContent = 'Đang thêm...';
 
     // Backend sẽ tự động tìm biến thể còn hàng
     fetch('/api/cart/add-product', {
@@ -109,22 +109,36 @@ window.addToCartFromList = function(btn) {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ productId: spId, quantity: 1 })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return res.json();
+    })
     .then(data => {
         if (data.success) {
-            showToast('success', 'Thành công!', 'Đã thêm "' + spName + '" vào giỏ hàng');
+            showToast('success', 'Thành công!', data.message || 'Đã thêm "' + spName + '" vào giỏ hàng');
             refreshCartCount();
         } else {
-            showToast('error', 'Không thể thêm', data.message || 'Có lỗi xảy ra');
+            // Kiểm tra nếu chưa đăng nhập
+            if (data.message && data.message.includes('đăng nhập')) {
+                showToast('error', 'Vui lòng đăng nhập', 'Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng');
+                // Chuyển hướng đến trang đăng nhập sau 2 giây
+                setTimeout(() => {
+                    window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+                }, 2000);
+            } else {
+                showToast('error', 'Không thể thêm', data.message || 'Có lỗi xảy ra');
+            }
         }
-        btn.disabled = false;
-        btnText.textContent = originalText;
     })
     .catch(error => {
         console.error('Lỗi:', error);
         showToast('error', 'Lỗi', 'Không thể kết nối đến server');
+    })
+    .finally(() => {
         btn.disabled = false;
-        btnText.textContent = originalText;
+        if (btnText) btnText.textContent = originalText;
     });
 };
 

@@ -44,11 +44,22 @@
             background: #d4edda;
             color: #155724;
         }
+        .status-cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
         .countdown {
             font-size: 18px;
             font-weight: bold;
             color: #dc3545;
             margin: 10px 0;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -67,11 +78,11 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-sm text-gray-600">Mã đơn hàng:</p>
-                    <p class="font-bold text-lg" th:text="'#' + ${orderCode}"></p>
+                    <p class="font-bold text-lg" th:text="'#' + ${orderCode}">#20002</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600">Số tiền thanh toán:</p>
-                    <p class="font-bold text-lg text-red-600" th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p>
+                    <p class="font-bold text-lg text-red-600" th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">3,000 VNĐ</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600">Trạng thái:</p>
@@ -79,7 +90,7 @@
                 </div>
                 <div th:if="${donHang}">
                     <p class="text-sm text-gray-600">Khách hàng:</p>
-                    <p class="font-medium" th:text="${donHang.taiKhoan?.hoTen}"></p>
+                    <p class="font-medium" th:text="${donHang.taiKhoan?.hoTen}">Lê Văn Khách</p>
                 </div>
             </div>
         </div>
@@ -90,7 +101,7 @@
 
             <!-- Hiển thị QR Code nếu có -->
             <div class="qr-code" th:if="${qrCode}">
-                <img th:src="${qrCode}" alt="QR Code PayOS" style="width: 100%;">
+                <img th:src="${qrCode}" alt="QR Code PayOS" style="width: 100%; max-width: 300px;">
             </div>
 
             <!-- Hoặc hiển thị nút chuyển đến trang thanh toán -->
@@ -104,12 +115,12 @@
 
             <div class="mt-6">
                 <p class="text-sm text-gray-600 mb-2">
-                    ✅ Mở ứng dụng ngân hàng<br>
+                    ✅ Mở ứng dụng ngân hàng trên điện thoại<br>
                     ✅ Quét mã QR hoặc nhấn vào link<br>
                     ✅ Xác nhận thanh toán
                 </p>
                 <div class="countdown" id="countdown">
-                    ⏱️ Thời gian còn lại: <span id="timeLeft">15:00</span>
+                    ⏱️ Thời gian còn lại: <span id="timeLeft">14:52</span>
                 </div>
             </div>
         </div>
@@ -126,16 +137,27 @@
             </ol>
         </div>
 
-        <!-- Nút hành động -->
-        <div class="flex gap-4 justify-center">
+        <!-- ✅ CẢI THIỆN: Nút hành động đa dạng -->
+        <div class="action-buttons">
             <button onclick="checkPaymentStatus()"
                     class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition">
                 🔄 Kiểm tra thanh toán
             </button>
-            <a th:href="@{/profile}"
+            <a th:href="@{/profile#orders}"
                class="bg-gray-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-gray-700 transition inline-block">
-                📝 Xem đơn hàng
+                📋 Xem đơn hàng
             </a>
+        </div>
+
+        <!-- ✅ THÊM: Thông báo khi hết hạn hoặc bị hủy -->
+        <div id="expiredMessage" class="mt-6 p-4 bg-red-50 border border-red-300 rounded-lg hidden">
+            <h4 class="font-bold text-red-700 mb-2">⚠️ Hết thời gian thanh toán</h4>
+            <p class="text-sm text-red-600 mb-4">Link thanh toán đã hết hạn. Vui lòng tạo lại đơn hàng hoặc quay lại trang đơn hàng để tiếp tục.</p>
+            <div class="flex gap-3">
+                <a th:href="@{/profile#orders}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700">
+                    📋 Xem đơn hàng của tôi
+                </a>
+            </div>
         </div>
     </main>
 
@@ -153,7 +175,7 @@
             fetch(`/payment/payos/check/${orderCode}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Payment status:', data);
+                    console.log('✅ Payment status:', data);
 
                     if (data.success) {
                         const status = data.status;
@@ -169,17 +191,28 @@
                             clearInterval(countdownTimer);
 
                             // Thông báo và chuyển trang
-                            alert('✅ Thanh toán thành công! Cảm ơn bạn đã mua hàng.');
+                            if (typeof showToast === 'function') {
+                                showToast('success', 'Thanh toán thành công!', 'Cảm ơn bạn đã mua hàng. Đang chuyển trang...');
+                            } else {
+                                alert('✅ Thanh toán thành công! Cảm ơn bạn đã mua hàng.');
+                            }
+
                             setTimeout(() => {
                                 window.location.href = `/checkout/success?orderId=${orderCode}`;
                             }, 2000);
 
                         } else if (status === 'CANCELLED') {
                             // Thanh toán bị hủy
-                            statusElement.className = 'status-badge bg-danger';
+                            statusElement.className = 'status-badge status-cancelled';
                             statusElement.textContent = '❌ Đã hủy';
                             clearInterval(checkTimer);
                             clearInterval(countdownTimer);
+
+                            if (typeof showToast === 'function') {
+                                showToast('error', 'Thanh toán bị hủy', 'Bạn có thể quay lại trang đơn hàng để tiếp tục thanh toán.');
+                            } else {
+                                alert('❌ Thanh toán đã bị hủy. Vui lòng thử lại từ trang đơn hàng.');
+                            }
 
                         } else if (status === 'PENDING') {
                             // Vẫn đang chờ
@@ -189,7 +222,7 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Error checking payment status:', error);
+                    console.error('❌ Error checking payment status:', error);
                 });
         }
 
@@ -199,8 +232,15 @@
                 clearInterval(countdownTimer);
                 clearInterval(checkTimer);
                 document.getElementById('timeLeft').textContent = 'Hết hạn';
-                alert('⚠️ Đã hết thời gian thanh toán. Vui lòng thử lại!');
-                window.location.href = '/profile';
+                document.getElementById('expiredMessage').classList.remove('hidden');
+
+                const statusElement = document.getElementById('paymentStatus');
+                statusElement.className = 'status-badge status-cancelled';
+                statusElement.textContent = '⏱️ Hết hạn';
+
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Hết thời gian', 'Link thanh toán đã hết hạn. Vui lòng vào trang đơn hàng để tiếp tục.');
+                }
                 return;
             }
 

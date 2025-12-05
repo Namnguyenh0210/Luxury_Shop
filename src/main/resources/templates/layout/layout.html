@@ -6,9 +6,12 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title th:text="${pageTitle != null ? pageTitle : 'Rentzy'}">Rentzy</title>
-    <!-- Shared Tailwind config (must come BEFORE CDN script) -->
-    <script th:src="@{/js/tailwind-config.js}"></script>
+
+    <!-- Load Tailwind CDN FIRST -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- Then load our config -->
+    <script th:src="@{/js/tailwind-config.js}"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
     <link th:href="@{/css/Home.css}" rel="stylesheet"/>
@@ -34,32 +37,6 @@
         <link th:href="@{/css/Profile.css}" rel="stylesheet"/>
     </th:block>
 
-    <script th:src="@{/js/Home.js}"></script>
-    <!-- Product list script: broaden condition like CSS above -->
-    <th:block th:if="${pageTitle == 'Products' or currentPage == 'sanpham'}">
-        <script th:src="@{/js/Product.js}"></script>
-    </th:block>
-    <!-- Cart script broadened -->
-    <th:block th:if="${pageTitle == 'Cart' or currentPage == 'giohang' or (pageTitle != null and #strings.contains(pageTitle, 'Giỏ hàng'))}">
-        <script th:src="@{/js/Giohang.js}"></script>
-    </th:block>
-    <!-- Product detail script: broaden condition -->
-    <th:block th:if="${pageTitle == 'ProductDetail' or currentPage == 'sanpham-detail'}">
-        <script th:src="@{/js/ProductDetail.js}"></script>
-    </th:block>
-    <!-- Pay JS -->
-    <th:block th:if="${pageTitle == 'Pay'}">
-        <script th:src="@{/js/Pay.js}"></script>
-    </th:block>
-    <!-- Profile JS -->
-    <th:block th:if="${pageTitle == 'Profile'}">
-        <script th:src="@{/js/Profile.js}"></script>
-    </th:block>
-    <!-- Register JS -->
-    <th:block th:if="${pageTitle == 'Register'}">
-        <script th:src="@{/js/ĐkiTk.js}"></script>
-    </th:block>
-
     <th:block layout:fragment="head"></th:block>
 </head>
 <body class="bg-background-light dark:bg-background-dark">
@@ -79,5 +56,31 @@
 <!-- Page-specific scripts -->
 <th:block layout:fragment="scripts"></th:block>
 
+<!-- Load scripts at the end of body for better performance -->
+<!-- ✅ COMMON.JS - PHẢI LOAD TRƯỚC TẤT CẢ (chứa hàm dùng chung) -->
+<script th:src="@{/js/common.js}"></script>
+
+<script th:src="@{/js/Home.js}"></script>
+<th:block th:if="${pageTitle == 'Products' or currentPage == 'sanpham'}">
+    <script th:src="@{/js/Product.js}"></script>
+</th:block>
+<th:block th:if="${pageTitle == 'Cart' or currentPage == 'giohang' or (pageTitle != null and #strings.contains(pageTitle, 'Giỏ hàng'))}">
+    <script th:src="@{/js/Giohang.js}"></script>
+</th:block>
+<th:block th:if="${pageTitle == 'ProductDetail' or currentPage == 'sanpham-detail'}">
+    <script th:src="@{/js/ProductDetail.js}"></script>
+</th:block>
+<th:block th:if="${pageTitle == 'Pay'}">
+    <script th:src="@{/js/Pay.js}"></script>
+</th:block>
+<th:block th:if="${pageTitle == 'Profile'}">
+    <script th:src="@{/js/Profile.js}"></script>
+</th:block>
+<th:block th:if="${pageTitle == 'Register'}">
+    <script th:src="@{/js/ĐkiTk.js}"></script>
+</th:block>
+
+<!-- ✅ MAIN.JS - LOAD CUỐI CÙNG (jQuery legacy - optional) -->
+<script th:src="@{/js/main.js}"></script>
 </body>
 </html>

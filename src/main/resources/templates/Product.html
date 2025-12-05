@@ -5,6 +5,29 @@
       th:with="pageTitle='Products', currentPage='sanpham'">
 <head>
     <link th:href="@{/css/Product.css}" rel="stylesheet"/>
+    <!-- Ensure common.js is loaded on this page -->
+    <script th:src="@{/js/common.js}"></script>
+    <!-- Fallback: if addToCartFromList hasn't been defined by common.js, define a minimal version -->
+    <script>
+        if (typeof window.addToCartFromList !== 'function') {
+            window.addToCartFromList = function(btn) {
+                var spId = btn.getAttribute('data-sp-id');
+                var spName = btn.getAttribute('data-sp-name');
+                var btnText = btn.querySelector('.btn-text');
+                if (!spId) { alert('⚠️ Không tìm thấy ID sản phẩm'); return; }
+                var originalText = btnText ? btnText.textContent : 'Thêm vào giỏ hàng';
+                btn.disabled = true; if (btnText) btnText.textContent = 'Đang thêm...';
+                fetch('/api/cart/add-product', {
+                    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ productId: spId, quantity: 1 })
+                }).then(function(res){return res.json();}).then(function(data){
+                    if (data.success) { if (window.showToast) { showToast('success', 'Thêm thành công', 'Đã thêm '+ (spName||'sản phẩm') +' vào giỏ'); } else { alert('✅ Đã thêm vào giỏ'); } if (window.refreshCartCount) refreshCartCount(); }
+                    else { if (window.showToast) { showToast('error', 'Không thể thêm', data.message||'Có lỗi xảy ra'); } else { alert('❌ '+(data.message||'Có lỗi xảy ra')); } }
+                }).catch(function(e){ console.error(e); if (window.showToast) { showToast('error','Lỗi kết nối','Không thể kết nối server'); } else { alert('❌ Lỗi: '+e.message); } })
+                .finally(function(){ btn.disabled = false; if (btnText) btnText.textContent = originalText; });
+            };
+        }
+    </script>
 </head>
 <body>
 <div layout:fragment="content">
@@ -92,13 +115,22 @@
                         <div th:if="${sanPhamPage != null and sanPhamPage.totalElements > 0}" class="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
                             <div th:each="sp : ${sanPhamPage.content}" class="group flex flex-col gap-3 relative overflow-hidden">
                                 <div class="w-full aspect-[3/4] rounded-lg bg-[#F2F2F2] overflow-hidden relative">
-                                    <img th:if="${sp.anhChinh != null}"
-                                         th:src="${sp.anhChinh.startsWith('http') ? sp.anhChinh : ('/img/' + sp.anhChinh)}"
-                                         th:alt="${sp.tenSP}"
-                                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                         loading="lazy"
-                                         onerror="this.src='/img/placeholder.png'"/>
-                                    <div th:if="${sp.anhChinh == null}" class="h-full w-full flex items-center justify-center text-xs text-gray-400">No Image</div>
+                                    <!-- HIỂN THỊ HÌNH ẢNH - SỬA LẠI LOGIC -->
+                                    <a th:href="@{/sanpham/{id}(id=${sp.maSP})}">
+                                        <img th:if="${sp.anhChinh != null && !sp.anhChinh.isEmpty()}"
+                                             th:src="${sp.anhChinh}"
+                                             th:alt="${sp.tenSP}"
+                                             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                             loading="lazy"
+                                             onerror="console.error('Image error:', this.src); this.src='/img/placeholder.png'; this.onerror=null;"/>
+                                        <div th:if="${sp.anhChinh == null || sp.anhChinh.isEmpty()}"
+                                             class="h-full w-full flex items-center justify-center text-xs text-gray-400 bg-gray-100">
+                                            <div class="text-center">
+                                                <span class="material-symbols-outlined text-4xl text-gray-300">image</span>
+                                                <p class="mt-2">No Image</p>
+                                            </div>
+                                        </div>
+                                    </a>
 
                                     <span th:with="ps=${priceStockMap[sp.maSP]}"
                                           th:if="${ps != null and ps.outOfStock}"

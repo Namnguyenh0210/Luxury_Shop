@@ -270,7 +270,10 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div>
                                         <p class="text-secondary-text">Thanh toán</p>
-                                        <p class="font-medium" th:text="${dh.trangThaiThanhToanText}">Chờ thanh toán</p>
+                                        <p class="font-medium"
+                                           th:text="${(dh.hinhThucThanhToan != null and #strings.contains(#strings.toLowerCase(dh.hinhThucThanhToan.tenHinhThuc),'cod')) ? 'Thanh toán khi nhận hàng' : dh.trangThaiThanhToanText}">
+                                            Chờ thanh toán
+                                        </p>
                                     </div>
                                     <div>
                                         <p class="text-secondary-text">Phí ship</p>
@@ -280,16 +283,47 @@
                                         <p class="text-secondary-text">Ngày cập nhật</p>
                                         <p class="font-medium" th:text="${dh.ngayCapNhat != null ? #temporals.format(dh.ngayCapNhat, 'dd MMM yyyy, HH:mm') : 'N/A'}">N/A</p>
                                     </div>
+                                    <!-- NEW: Payment method badge -->
+                                    <div class="md:col-span-3 flex items-center gap-2 pt-2 border-t border-secondary/50">
+                                        <span class="text-secondary-text">Hình thức thanh toán</span>
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full"
+                                              th:classappend="${(dh.hinhThucThanhToan != null and #strings.contains(#strings.toLowerCase(dh.hinhThucThanhToan.tenHinhThuc),'cod')) ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}">
+                                            <span class="material-symbols-outlined" style="font-size: 16px;"
+                                                  th:text="${dh.hinhThucThanhToan != null ? dh.hinhThucThanhToan.icon : 'credit_card'}">credit_card</span>
+                                            <span th:text="${dh.hinhThucThanhToan != null ? dh.hinhThucThanhToan.tenHinhThuc : 'Không xác định'}">Thanh toán</span>
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="flex flex-wrap gap-3 pt-2 border-t border-secondary/50">
                                     <a class="text-cta text-sm font-bold flex items-center gap-1" th:href="@{/order-detail/{id}(id=${dh.maDH})}">
                                         <span>Xem chi tiết</span>
                                         <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
                                     </a>
-                                    <form th:if="${dh.trangThaiDH == 0}" th:action="@{/profile/order/cancel}" method="post" class="inline">
-                                        <input type="hidden" name="id" th:value="${dh.maDH}"/>
-                                        <button type="submit" class="text-red-600 text-sm font-bold" onclick="return confirm('Hủy đơn hàng #' + [[${dh.maDH}]] + '?')">Hủy đơn</button>
-                                    </form>
+
+                                    <!-- Actions for QR/online payments: show only when pending -->
+                                    <th:block th:if="${dh.hinhThucThanhToan != null and (#strings.contains(#strings.toLowerCase(dh.hinhThucThanhToan.tenHinhThuc),'qr') or #strings.contains(#strings.toLowerCase(dh.hinhThucThanhToan.tenHinhThuc),'payos')) and dh.trangThaiThanhToan == 0}">
+                                        <a th:href="@{/payment/payos/create(orderId=${dh.maDH})}"
+                                           class="bg-green-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-1">
+                                            <span class="material-symbols-outlined" style="font-size: 16px;">payment</span>
+                                            <span>Tiếp tục thanh toán</span>
+                                        </a>
+
+                                        <button th:data-order-id="${dh.maDH}"
+                                                onclick="checkOrderPaymentStatus(this)"
+                                                class="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-1">
+                                            <span class="material-symbols-outlined" style="font-size: 16px;">refresh</span>
+                                            <span>Kiểm tra thanh toán</span>
+                                        </button>
+                                    </th:block>
+
+                                    <!-- Actions for COD: only allow cancel when order is new -->
+                                    <th:block th:if="${dh.hinhThucThanhToan != null and (#strings.contains(#strings.toLowerCase(dh.hinhThucThanhToan.tenHinhThuc),'cod') or #strings.contains(#strings.toLowerCase(dh.hinhThucThanhToan.tenHinhThuc),'tiền mặt'))}">
+                                        <form th:if="${dh.trangThaiDH == 0}" th:action="@{/profile/order/cancel}" method="post" class="inline">
+                                            <input type="hidden" name="id" th:value="${dh.maDH}"/>
+                                            <button type="submit" class="text-red-600 text-sm font-bold" onclick="return confirm('Hủy đơn hàng #' + [[${dh.maDH}]] + '?')">Hủy đơn</button>
+                                        </form>
+                                    </th:block>
+
                                     <form th:if="${dh.trangThaiDH == 3}" th:action="@{/profile/order/reorder}" method="post" class="inline">
                                         <input type="hidden" name="id" th:value="${dh.maDH}"/>
                                         <button type="submit" class="text-cta text-sm font-bold">Mua lại</button>
@@ -396,4 +430,71 @@ document.addEventListener('keydown', function(e) {
         closeEditAddressModal();
     }
 });
+
+// ✅ THÊM: Hàm kiểm tra trạng thái thanh toán từ trang Profile
+function checkOrderPaymentStatus(button) {
+    const orderId = button.getAttribute('data-order-id');
+    const originalText = button.innerHTML;
+
+    button.disabled = true;
+    button.innerHTML = '<span class="material-symbols-outlined animate-spin" style="font-size: 16px;">refresh</span><span>Đang kiểm tra...</span>';
+
+    fetch(`/payment/payos/check/${orderId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('✅ Payment status check:', data);
+
+            if (data.success) {
+                const status = data.status;
+
+                if (status === 'PAID') {
+                    // Thanh toán thành công
+                    if (typeof showToast === 'function') {
+                        showToast('success', 'Thanh toán thành công!', 'Đơn hàng #' + orderId + ' đã được thanh toán. Trang sẽ tự động tải lại.');
+                    } else {
+                        alert('✅ Thanh toán thành công! Đơn hàng #' + orderId + ' đã được thanh toán.');
+                    }
+
+                    // Reload trang sau 2 giây để cập nhật trạng thái
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+
+                } else if (status === 'PENDING') {
+                    // Vẫn đang chờ thanh toán
+                    if (typeof showToast === 'function') {
+                        showToast('info', 'Chờ thanh toán', 'Đơn hàng #' + orderId + ' vẫn đang chờ thanh toán. Vui lòng quét mã QR để hoàn tất.');
+                    } else {
+                        alert('⏳ Đơn hàng #' + orderId + ' vẫn đang chờ thanh toán. Vui lòng bấm "Tiếp tục thanh toán" để quét mã QR.');
+                    }
+
+                } else if (status === 'CANCELLED') {
+                    // Thanh toán bị hủy
+                    if (typeof showToast === 'function') {
+                        showToast('error', 'Thanh toán bị hủy', 'Đơn hàng #' + orderId + ' đã bị hủy thanh toán. Vui lòng bấm "Tiếp tục thanh toán" để tạo lại.');
+                    } else {
+                        alert('❌ Thanh toán đơn hàng #' + orderId + ' đã bị hủy. Vui lòng bấm "Tiếp tục thanh toán" để thử lại.');
+                    }
+                }
+            } else {
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Lỗi kiểm tra', 'Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại.');
+                } else {
+                    alert('❌ Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại.');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error checking payment status:', error);
+            if (typeof showToast === 'function') {
+                showToast('error', 'Lỗi kết nối', 'Không thể kết nối đến server. Vui lòng thử lại.');
+            } else {
+                alert('❌ Lỗi kết nối: ' + error.message);
+            }
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = originalText;
+        });
+}
 </script>
