@@ -114,6 +114,8 @@ public class AdminSanPhamController {
                 product.setNgayTao(LocalDateTime.now());
                 // Mặc định là Còn hàng (1) nếu null
                 if (product.getTrangThaiSP() == null) product.setTrangThaiSP(1);
+                // Mặc định là Unisex (2) nếu null
+                if (product.getGioiTinh() == null) product.setGioiTinh(2);
             } else {
                 // --- CẬP NHẬT ---
                 product.setNgayCapNhat(LocalDateTime.now());
@@ -126,6 +128,11 @@ public class AdminSanPhamController {
                     // QUAN TRỌNG: Nếu form gửi lên null, giữ nguyên trạng thái cũ
                     if (product.getTrangThaiSP() == null) {
                         product.setTrangThaiSP(oldProduct.getTrangThaiSP());
+                    }
+
+                    // QUAN TRỌNG: Giữ nguyên giới tính nếu null
+                    if (product.getGioiTinh() == null) {
+                        product.setGioiTinh(oldProduct.getGioiTinh());
                     }
                 }
             }
@@ -171,3 +178,4 @@ public class AdminSanPhamController {
                 .orElse(java.util.Collections.emptyList());
     }
 }
+

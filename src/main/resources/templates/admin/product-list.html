@@ -254,6 +254,7 @@
 												th:data-category="${p.loaiSanPham?.maLoai}"
 												th:data-brand="${p.thuongHieu?.maTH}"
 												th:data-status="${p.trangThaiSP}"
+												th:data-gender="${p.gioiTinh}"
 												onclick="editProduct(this)"
 												class="text-blue-600 hover:bg-blue-50 p-2 rounded transition-colors">
 												<span class="material-symbols-outlined text-[20px]">edit</span>
@@ -320,7 +321,17 @@
 							</select>
 						</div>
 
-						<div class="col-span-2">
+						<div>
+							<label class="block text-sm font-medium mb-1">Giới tính</label>
+							<select id="gender" name="gioiTinh"
+								class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
+								<option value="0">Nam</option>
+								<option value="1">Nữ</option>
+								<option value="2">Unisex</option>
+							</select>
+						</div>
+
+						<div>
 							<label class="block text-sm font-medium mb-1">Trạng thái</label>
 							<select id="status" name="trangThaiSP"
 								class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
@@ -436,6 +447,7 @@
             const formName = document.getElementById('productName');
             const formCategory = document.getElementById('categoryId');
             const formBrand = document.getElementById('brandId');
+            const formGender = document.getElementById('gender');
             const formStatus = document.getElementById('status');
 
             // Details Modal
@@ -453,6 +465,7 @@
                 modalTitle.textContent = "Thêm Sản Phẩm Mới";
                 formId.value = "";
                 formName.value = "";
+                formGender.value = "2"; // Mặc định là Unisex
                 formStatus.value = "1"; // Mặc định là Đang bán (1)
                 modal.classList.remove('hidden');
             };
@@ -466,9 +479,8 @@
                 const name = button.getAttribute('data-name');
                 const catId = button.getAttribute('data-category');
                 const brandId = button.getAttribute('data-brand');
-
-                // Lấy trạng thái từ button
                 const status = button.getAttribute('data-status');
+                const gender = button.getAttribute('data-gender');
 
                 modalTitle.textContent = "Cập Nhật Sản Phẩm #" + id;
                 formId.value = id;
@@ -476,6 +488,13 @@
 
                 if(catId) formCategory.value = catId;
                 if(brandId) formBrand.value = brandId;
+
+                // Set gender: 0=Nam, 1=Nữ, 2=Unisex
+                if (gender !== null && gender !== undefined && gender !== "") {
+                    formGender.value = gender.toString();
+                } else {
+                    formGender.value = "2"; // Default: Unisex
+                }
 
                 // Set status: 1 = Đang bán, 0 = Ngừng bán
                 if (status !== null && status !== undefined && status !== "") {

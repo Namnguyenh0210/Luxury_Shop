@@ -23,12 +23,12 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <!-- Hình ảnh sản phẩm -->
+            <!-- Hình ảnh sản phẩm - ƯU TIÊN HIỂN THỊ ẢNH -->
             <div class="flex items-start justify-center">
                 <img class="w-full aspect-[3/4] max-h-[700px] object-cover rounded-xl shadow-lg"
-                     th:src="${sanPham.anhChinh}"
+                     th:src="${sanPham.anhChinh != null && !sanPham.anhChinh.isEmpty() ? sanPham.anhChinh : '/img/placeholder.png'}"
                      th:alt="${sanPham.tenSP}"
-                     onerror="this.src='/img/placeholder.png'"/>
+                     onerror="console.error('Image load error:', this.src); this.src='/img/placeholder.png'; this.onerror=null;"/>
             </div>
 
             <!-- Thông tin sản phẩm -->
@@ -56,18 +56,18 @@
                     </p>
                 </div>
 
-                <!-- Lựa chọn Màu sắc -->
+                <!-- Lựa chọn Màu sắc - BẮT BUỘC CHỌN -->
                 <div class="border-t border-text-secondary/30 pt-6" th:if="${variants != null and !variants.isEmpty()}">
                     <div class="flex justify-between items-center mb-3">
                         <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light">
-                            MÀU SẮC: <span class="font-normal" id="selectedColorName">Chọn màu</span>
+                            MÀU SẮC: <span class="font-normal text-primary" id="selectedColorName">Chọn màu</span>
                         </label>
                     </div>
                     <div class="flex gap-3 flex-wrap" id="colorOptions">
                         <!-- Hiển thị tất cả màu, JavaScript sẽ loại bỏ trùng -->
                         <th:block th:each="variant : ${variants}">
                             <button th:if="${variant.mauSacSP != null}"
-                                    class="relative size-10 rounded-full border-2 border-text-secondary/30 hover:border-primary transition-all duration-200 color-btn"
+                                    class="relative size-12 rounded-full border-2 border-text-secondary/30 hover:border-primary transition-all duration-200 color-btn shadow-md hover:shadow-lg"
                                     th:style="${'background-color: ' + (variant.mauSacSP.maHex != null ? variant.mauSacSP.maHex : '#ccc')}"
                                     th:attr="data-color-name=${variant.mauSacSP.tenMau},data-color-id=${variant.mauSacSP.maMau},title=${variant.mauSacSP.tenMau}"
                                     onclick="selectColor(this)">
@@ -77,26 +77,26 @@
                     </div>
                 </div>
 
-                <!-- Lựa chọn Size -->
+                <!-- Lựa chọn Size - BẮT BUỘC CHỌN -->
                 <div class="border-t border-text-secondary/30 pt-6" th:if="${variants != null and !variants.isEmpty()}">
                     <div class="flex justify-between items-center mb-3">
                         <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light">
-                            SIZE: <span class="font-normal" id="selectedSizeName">Chọn size</span>
+                            SIZE: <span class="font-normal text-primary" id="selectedSizeName">Chọn size</span>
                         </label>
-                        <a class="text-xs underline text-text-primary/70 dark:text-background-light/70 hover:text-primary" href="#" onclick="event.preventDefault(); alert('📏 Hướng dẫn chọn size:\n\nS: Ngực 86cm, Eo 70cm\nM: Ngực 90cm, Eo 74cm\nL: Ngực 94cm, Eo 78cm\nXL: Ngực 98cm, Eo 82cm');">Hướng dẫn chọn size</a>
+                        <a class="text-xs underline text-text-primary/70 dark:text-background-light/70 hover:text-primary cursor-pointer" onclick="event.preventDefault(); alert('📏 Hướng dẫn chọn size:\n\nS: Ngực 86cm, Eo 70cm\nM: Ngực 90cm, Eo 74cm\nL: Ngực 94cm, Eo 78cm\nXL: Ngực 98cm, Eo 82cm');">Hướng dẫn chọn size</a>
                     </div>
                     <div class="flex flex-wrap gap-3" id="sizeOptions">
-                        <!-- Hiển thị tất cả size, JavaScript sẽ loại bỏ trùng -->
+                        <!-- Hiển thị tất cả size, JavaScript sẽ loại bỏ trùng và cập nhật tồn kho -->
                         <th:block th:each="variant : ${variants}">
                             <button th:if="${variant.sizeSP != null}"
                                     class="min-w-[60px] px-4 py-3 border-2 border-text-secondary/30 rounded-lg text-sm font-medium hover:border-primary transition-all duration-200 size-btn disabled:opacity-40 disabled:cursor-not-allowed"
                                     th:text="${variant.sizeSP.tenSize}"
-                                    th:attr="data-size-name=${variant.sizeSP.tenSize},data-size-id=${variant.sizeSP.maSize},data-stock=${variant.soLuongTon},data-variant-id=${variant.maBienThe},data-price=${variant.giaBan}"
+                                    th:attr="data-size-name=${variant.sizeSP.tenSize},data-size-id=${variant.sizeSP.maSize},data-stock=${variant.soLuongTon},data-variant-id=${variant.maBienThe},data-price=${variant.giaBan},data-color-id=${variant.mauSacSP?.maMau}"
                                     onclick="selectSize(this)">
                             </button>
                         </th:block>
                     </div>
-                    <!-- Hiển thị tồn kho của size được chọn -->
+                    <!-- Hiển thị tồn kho của size/màu được chọn -->
                     <div id="stockInfo" class="mt-3 text-sm hidden">
                         <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -111,12 +111,12 @@
                 <div class="border-t border-text-secondary/30 pt-6">
                     <label class="text-sm font-bold uppercase tracking-wider text-text-primary dark:text-background-light block mb-3">Số lượng</label>
                     <div class="flex items-center gap-3">
-                        <button onclick="decreaseQuantity()" class="w-10 h-10 border-2 border-text-secondary/30 rounded-lg hover:border-primary transition-all duration-200 flex items-center justify-center font-bold">
+                        <button onclick="decreaseQuantity()" class="w-10 h-10 border-2 border-text-secondary/30 rounded-lg hover:border-primary transition-all duration-200 flex items-center justify-center font-bold text-xl">
                             −
                         </button>
                         <input type="number" id="quantity" value="1" min="1" max="99"
-                               class="w-20 h-10 text-center border-2 border-text-secondary/30 rounded-lg focus:border-primary focus:outline-none"/>
-                        <button onclick="increaseQuantity()" class="w-10 h-10 border-2 border-text-secondary/30 rounded-lg hover:border-primary transition-all duration-200 flex items-center justify-center font-bold">
+                               class="w-20 h-10 text-center border-2 border-text-secondary/30 rounded-lg focus:border-primary focus:outline-none font-semibold"/>
+                        <button onclick="increaseQuantity()" class="w-10 h-10 border-2 border-text-secondary/30 rounded-lg hover:border-primary transition-all duration-200 flex items-center justify-center font-bold text-xl">
                             +
                         </button>
                     </div>
@@ -130,7 +130,7 @@
                             onclick="addProductToCart()">
                         <span th:text="${totalStock != null && totalStock > 0 ? '🛒 Thêm vào giỏ hàng' : '❌ Hết hàng'}">Thêm vào giỏ hàng</span>
                     </button>
-                    <button class="w-full border-2 border-primary text-primary h-14 rounded-lg text-base font-bold tracking-wider hover:opacity-90 dark:border-accent dark:text-accent dark:hover:opacity-90 transition-all duration-200"
+                    <button class="w-full border-2 border-primary text-primary h-14 rounded-lg text-base font-bold tracking-wider hover:bg-primary hover:text-white dark:border-accent dark:text-accent dark:hover:bg-accent dark:hover:text-white transition-all duration-200"
                             th:disabled="${totalStock == null || totalStock == 0}"
                             onclick="buyNow()">
                         ⚡ Mua ngay
@@ -202,14 +202,51 @@
 <!-- Script xử lý chọn màu/size và thêm giỏ hàng -->
 <th:block layout:fragment="scripts">
     <script th:inline="javascript">
-        let selectedColorId = null;
-        let selectedSizeId = null;
-        let selectedVariantId = null;
-        let selectedStock = 0;
-        let selectedPrice = null;
-        const variants = /*[[${variants}]]*/ [];
+        // Set variants data for ProductDetail.js to use - FIX: Parse properly
+        selectedColorId = null;
+        selectedSizeId = null;
+        selectedVariantId = null;
+        selectedStock = 0;
+        selectedPrice = null;
 
-        console.log('📦 Loaded variants:', variants);
+        // Parse variants from Thymeleaf with proper structure
+        const variantsRaw = /*[[${variants}]]*/ [];
+        variants = [];
+
+        // Convert Java objects to proper JavaScript objects
+        if (variantsRaw && Array.isArray(variantsRaw)) {
+            variants = variantsRaw.map(v => ({
+                maBienThe: v.maBienThe,
+                mauSacSP: v.mauSacSP ? {
+                    maMau: v.mauSacSP.maMau,
+                    tenMau: v.mauSacSP.tenMau,
+                    maHex: v.mauSacSP.maHex
+                } : null,
+                sizeSP: v.sizeSP ? {
+                    maSize: v.sizeSP.maSize,
+                    tenSize: v.sizeSP.tenSize
+                } : null,
+                soLuongTon: v.soLuongTon || 0,
+                giaBan: v.giaBan || 0
+            }));
+        }
+
+        console.log('📦 Loaded variants (raw):', variantsRaw);
+        console.log('📦 Loaded variants (processed):', variants);
+        console.log('📊 Total variants count:', variants.length);
+
+        // Debug: In ra chi tiết từng variant
+        variants.forEach((v, index) => {
+            console.log(`Variant ${index}:`, {
+                maBienThe: v.maBienThe,
+                colorId: v.mauSacSP?.maMau,
+                colorName: v.mauSacSP?.tenMau,
+                sizeId: v.sizeSP?.maSize,
+                sizeName: v.sizeSP?.tenSize,
+                stock: v.soLuongTon,
+                price: v.giaBan
+            });
+        });
 
         // Loại bỏ trùng lặp màu sắc và size khi trang load
         document.addEventListener('DOMContentLoaded', function() {
@@ -269,44 +306,58 @@
             document.getElementById('selectedColorName').textContent = btn.getAttribute('data-color-name');
 
             console.log('🎨 Selected color:', selectedColorId, btn.getAttribute('data-color-name'));
+            console.log('🎨 Selected color ID type:', typeof selectedColorId);
 
-            // Update size availability based on selected color
+            selectedSizeId = null;
+            selectedVariantId = null;
+            selectedStock = 0;
+            document.getElementById('selectedSizeName').textContent = 'Chọn size';
+            document.getElementById('stockInfo').classList.add('hidden');
+
+            document.querySelectorAll('.size-btn').forEach(b => {
+                b.classList.remove('border-primary', 'bg-primary', 'text-white');
+                b.classList.add('border-text-secondary/30');
+            });
+
             updateSizeAvailability();
         }
 
         function updateSizeAvailability() {
             const sizeBtns = document.querySelectorAll('.size-btn:not([style*="display: none"])');
 
+            console.log('🔄 Updating size availability for color:', selectedColorId);
+            console.log('📏 Found', sizeBtns.length, 'size buttons');
+
             sizeBtns.forEach(btn => {
                 const sizeId = btn.getAttribute('data-size-id');
+                const btnColorId = btn.getAttribute('data-color-id');
+                const btnStock = parseInt(btn.getAttribute('data-stock') || '0');
+
+                console.log(`\n--- Button size ${sizeId} has color ${btnColorId}, stock ${btnStock} ---`);
 
                 if (selectedColorId) {
-                    // Find variant with this color and size
-                    const variant = variants.find(v =>
-                        v.mauSacSP && v.mauSacSP.maMau == selectedColorId &&
-                        v.sizeSP && v.sizeSP.maSize == sizeId
-                    );
-
-                    if (variant && variant.soLuongTon > 0) {
+                    // Enable only those size buttons that match selected color and have stock
+                    const colorMatch = String(btnColorId) === String(selectedColorId);
+                    if (colorMatch && btnStock > 0) {
                         btn.disabled = false;
                         btn.classList.remove('opacity-40', 'cursor-not-allowed');
-                        btn.setAttribute('data-stock', variant.soLuongTon);
-                        btn.setAttribute('data-variant-id', variant.maBienThe);
-                        btn.setAttribute('data-price', variant.giaBan);
+                        // data-variant-id, data-price đã được render sẵn từ backend cho đúng cặp color+size
+                        console.log(`✅ Enable size ${sizeId} for color ${selectedColorId} with stock ${btnStock}`);
                     } else {
                         btn.disabled = true;
                         btn.classList.add('opacity-40', 'cursor-not-allowed');
-                        btn.setAttribute('data-stock', 0);
+                        console.log(`❌ Disable size ${sizeId} (colorMatch=${colorMatch}, stock=${btnStock})`);
                     }
                 } else {
-                    // Show all available sizes
-                    const stock = parseInt(btn.getAttribute('data-stock') || '0');
-                    if (stock > 0) {
+                    // No color selected: show sizes by their stock only
+                    if (btnStock > 0) {
                         btn.disabled = false;
                         btn.classList.remove('opacity-40', 'cursor-not-allowed');
+                        console.log(`ℹ️ No color selected: size ${sizeId} available, stock ${btnStock}`);
                     } else {
                         btn.disabled = true;
                         btn.classList.add('opacity-40', 'cursor-not-allowed');
+                        console.log(`ℹ️ No color selected: size ${sizeId} unavailable`);
                     }
                 }
             });
@@ -315,13 +366,31 @@
         function selectSize(btn) {
             // Check if button is disabled
             if (btn.disabled) {
-                alert('⚠️ Size này hiện đã hết hàng với màu đã chọn');
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Hết hàng', 'Size này hiện đã hết hàng với màu đã chọn');
+                } else {
+                    alert('⚠️ Size này hiện đã hết hàng với màu đã chọn');
+                }
+                return;
+            }
+
+            // Check if color is selected
+            if (!selectedColorId) {
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Chưa chọn màu', 'Vui lòng chọn màu sắc trước');
+                } else {
+                    alert('⚠️ Vui lòng chọn màu sắc trước');
+                }
                 return;
             }
 
             const stock = parseInt(btn.getAttribute('data-stock') || '0');
             if (stock <= 0) {
-                alert('⚠️ Size này hiện đã hết hàng');
+                if (typeof showToast === 'function') {
+                    showToast('error', 'Hết hàng', 'Size này hiện đã hết hàng');
+                } else {
+                    alert('⚠️ Size này hiện đã hết hàng');
+                }
                 return;
             }
 
@@ -341,6 +410,8 @@
             selectedPrice = parseFloat(btn.getAttribute('data-price') || '0');
 
             document.getElementById('selectedSizeName').textContent = btn.getAttribute('data-size-name');
+
+            console.log('📏 Selected size:', selectedSizeId, 'Stock:', stock, 'Variant ID:', selectedVariantId, 'Price:', selectedPrice);
 
             // Update stock info
             const stockInfo = document.getElementById('stockInfo');
@@ -368,172 +439,6 @@
             if (parseInt(document.getElementById('quantity').value) > stock) {
                 document.getElementById('quantity').value = stock;
             }
-
-            console.log('📏 Selected size:', selectedSizeId, 'Stock:', stock, 'Variant ID:', selectedVariantId);
-        }
-
-        function decreaseQuantity() {
-            const input = document.getElementById('quantity');
-            const currentValue = parseInt(input.value) || 1;
-            if (currentValue > 1) {
-                input.value = currentValue - 1;
-            }
-        }
-
-        function increaseQuantity() {
-            const input = document.getElementById('quantity');
-            const currentValue = parseInt(input.value) || 1;
-            const maxValue = parseInt(input.max) || 99;
-            if (currentValue < maxValue) {
-                input.value = currentValue + 1;
-            } else {
-                alert(`⚠️ Chỉ còn ${maxValue} sản phẩm trong kho`);
-            }
-        }
-
-        function findVariantId() {
-            let variantId = null;
-
-            // Nếu đã chọn cả màu và size, tìm variant tương ứng
-            if (selectedColorId && selectedSizeId) {
-                const variant = variants.find(v =>
-                    v.mauSacSP && v.mauSacSP.maMau == selectedColorId &&
-                    v.sizeSP && v.sizeSP.maSize == selectedSizeId
-                );
-                if (variant) {
-                    variantId = variant.maBienThe;
-                    console.log('✅ Found variant by color+size:', variantId);
-                }
-            }
-            // Nếu chỉ chọn size, dùng selectedVariantId
-            else if (selectedVariantId) {
-                variantId = selectedVariantId;
-                console.log('✅ Using selected variant ID:', variantId);
-            }
-            // Nếu chưa chọn gì, lấy variant đầu tiên có tồn kho
-            else if (variants && variants.length > 0) {
-                const availableVariant = variants.find(v => v.soLuongTon > 0);
-                if (availableVariant) {
-                    variantId = availableVariant.maBienThe;
-                    console.log('✅ Using first available variant:', variantId);
-                }
-            }
-
-            return variantId;
-        }
-
-        function addProductToCart() {
-            const variantId = findVariantId();
-            const quantity = parseInt(document.getElementById('quantity').value) || 1;
-
-            if (!variantId) {
-                alert('⚠️ Vui lòng chọn màu sắc và size');
-                return;
-            }
-
-            if (!selectedColorId || !selectedSizeId) {
-                alert('⚠️ Vui lòng chọn đầy đủ màu sắc và size');
-                return;
-            }
-
-            if (quantity > selectedStock) {
-                alert(`⚠️ Chỉ còn ${selectedStock} sản phẩm trong kho`);
-                return;
-            }
-
-            console.log('🛒 Adding to cart:', { variantId, quantity });
-
-            // Disable button để tránh click nhiều lần
-            const btn = document.getElementById('addToCartBtn');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span>⏳ Đang thêm...</span>';
-
-            fetch('/api/cart/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    maBienThe: variantId,
-                    soLuong: quantity
-                })
-            })
-            .then(r => r.json())
-            .then(data => {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-
-                console.log('✅ Add to cart response:', data);
-
-                if (data.success) {
-                    // Show success message with details
-                    const colorName = document.getElementById('selectedColorName').textContent;
-                    const sizeName = document.getElementById('selectedSizeName').textContent;
-                    alert(`✅ ${data.message}\n\nSản phẩm: ${/*[[${sanPham.tenSP}]]*/ 'Sản phẩm'}\nMàu: ${colorName}\nSize: ${sizeName}\nSố lượng: ${quantity}`);
-
-                    // Cập nhật số lượng giỏ hàng trong header
-                    if (data.cartCount) {
-                        const cartBadge = document.querySelector('.cart-count');
-                        if (cartBadge) {
-                            cartBadge.textContent = data.cartCount;
-                        }
-                    }
-                } else {
-                    alert('❌ ' + (data.message || 'Có lỗi xảy ra'));
-                }
-            })
-            .catch(e => {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
-                console.error('❌ Error adding to cart:', e);
-                alert('❌ Lỗi: ' + e.message);
-            });
-        }
-
-        function buyNow() {
-            const variantId = findVariantId();
-            const quantity = parseInt(document.getElementById('quantity').value) || 1;
-
-            if (!variantId) {
-                alert('⚠️ Vui lòng chọn màu sắc và size');
-                return;
-            }
-
-            if (!selectedColorId || !selectedSizeId) {
-                alert('⚠️ Vui lòng chọn đầy đủ màu sắc và size');
-                return;
-            }
-
-            if (quantity > selectedStock) {
-                alert(`⚠️ Chỉ còn ${selectedStock} sản phẩm trong kho`);
-                return;
-            }
-
-            console.log('⚡ Buy now:', { variantId, quantity });
-
-            // Thêm vào giỏ hàng rồi chuyển đến trang thanh toán
-            fetch('/api/cart/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    maBienThe: variantId,
-                    soLuong: quantity
-                })
-            })
-            .then r => r.json())
-            .then(data => {
-                console.log('✅ Buy now response:', data);
-
-                if (data.success) {
-                    // Chuyển đến trang thanh toán
-                    window.location.href = '/checkout';
-                } else {
-                    alert('❌ ' + (data.message || 'Có lỗi xảy ra'));
-                }
-            })
-            .catch(e => {
-                console.error('❌ Error in buy now:', e);
-                alert('❌ Lỗi: ' + e.message);
-            });
         }
     </script>
 </th:block>
