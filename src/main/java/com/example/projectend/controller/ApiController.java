@@ -1,23 +1,36 @@
 package com.example.projectend.controller;
 
+import com.example.projectend.entity.SanPham;
+import com.example.projectend.entity.SanPhamChiTiet;
+import com.example.projectend.entity.DanhGia;
 import com.example.projectend.entity.TaiKhoan;
 import com.example.projectend.entity.VaiTro;
 import com.example.projectend.service.auth.UserDetailsServiceImpl;
 import com.example.projectend.service.GioHangService;
 import com.example.projectend.service.SanPhamService;
+import com.example.projectend.service.LoaiSanPhamService;
+import com.example.projectend.service.DanhGiaService;
+import com.example.projectend.repository.ThuongHieuRepository;
+import com.example.projectend.repository.SanPhamChiTietRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * REST API Controller - TỐI ƯU
- * Cung cấp các endpoint API cho frontend
+ * Cung cấp các endpoint API cho frontend Vue.js
  */
 @RestController
 @RequestMapping("/api")
@@ -32,43 +45,170 @@ public class ApiController {
     @Autowired
     private SanPhamService sanPhamService;
 
+    @Autowired
+    private LoaiSanPhamService loaiSanPhamService;
+
+    @Autowired
+    private ThuongHieuRepository thuongHieuRepository;
+
+    @Autowired
+    private DanhGiaService danhGiaService;
+
+    @Autowired
+    private SanPhamChiTietRepository sanPhamChiTietRepository;
+
+    @Autowired
+    private com.example.projectend.repository.TaiKhoanRepository taiKhoanRepository;
+
+    @Autowired
+    private com.example.projectend.repository.DiaChiRepository diaChiRepository;
+
+    @Autowired
+    private com.example.projectend.repository.PhuongThucThanhToanRepository phuongThucThanhToanRepository;
+
+    @Autowired
+    private com.example.projectend.service.DonHangService donHangService;
+
     /**
-     * API lấy thông tin vai trò của người dùng hiện tại
+     * API lấy thông tin user hiện tại
      */
-    @GetMapping("/user/role")
-    public ResponseEntity<Map<String, String>> getUserRole() {
-        Map<String, String> response = new HashMap<>();
+    @GetMapping("/auth/current-user")
+    public ResponseEntity<Map<String, Object>> getCurrentUser() {
+        Map<String, Object> response = new HashMap<>();
 
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
             if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-                response.put("role", "Guest");
+                response.put("authenticated", false);
                 return ResponseEntity.ok(response);
             }
 
             String email = auth.getName();
             TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(email);
 
-            // Lấy role đầu tiên từ Set
             Set<VaiTro> roles = taiKhoan.getRoles();
-            String roleName = roles.isEmpty() ? "KHACHHANG" : roles.iterator().next().getTenRole();
+            java.util.List<String> roleNames = new java.util.ArrayList<>();
+            for (VaiTro role : roles) {
+                roleNames.add(role.getTenRole());
+            }
 
-            response.put("role", roleName);
+            response.put("authenticated", true);
             response.put("email", email);
-            response.put("name", taiKhoan.getHoTen());
+            response.put("hoTen", taiKhoan.getHoTen());
+            response.put("soDienThoai", taiKhoan.getSoDienThoai());
+            response.put("avatar", taiKhoan.getAvatar());
+            response.put("roles", roleNames);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            response.put("role", "Guest");
+            response.put("authenticated", false);
             response.put("error", e.getMessage());
             return ResponseEntity.ok(response);
         }
     }
 
     /**
+     * API lấy danh sách sản phẩm với phân trang và filter
+     */
+    @GetMapping("/sanpham")
+    public ResponseEntity<Map<String, Object>> getProducts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Integer loai,
+            @RequestParam(required = false) Integer gioiTinh,
+            @RequestParam(required = false) Long thuongHieu,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "moi") String sort) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            PageRequest pageable = PageRequest.of(page, size);
+            Page<SanPham> sanPhamPage = sanPhamService.findWithFilters(
+                    search, loai, gioiTinh, thuongHieu, minPrice, maxPrice, sort, pageable);
+
+            response.put("success", true);
+            response.put("content", sanPhamPage.getContent());
+            response.put("priceStockMap", sanPhamService.buildPriceStockMap(sanPhamPage.getContent()));
+            response.put("totalElements", sanPhamPage.getTotalElements());
+            response.put("totalPages", sanPhamPage.getTotalPages());
+            response.put("currentPage", sanPhamPage.getNumber());
+            response.put("pageSize", sanPhamPage.getSize());
+            response.put("numberOfElements", sanPhamPage.getNumberOfElements());
+            response.put("first", sanPhamPage.isFirst());
+            response.put("last", sanPhamPage.isLast());
+            response.put("categories", loaiSanPhamService.findAll());
+            response.put("brands", thuongHieuRepository.findAll());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    /**
+     * API lấy chi tiết sản phẩm theo ID
+     */
+    @GetMapping("/sanpham/{id}")
+    public ResponseEntity<Map<String, Object>> getProductDetail(@PathVariable Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Lấy thông tin sản phẩm
+            java.util.Optional<SanPham> sanPhamOpt = sanPhamService.findById(id);
+            if (sanPhamOpt.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Sản phẩm không tồn tại");
+                return ResponseEntity.ok(response);
+            }
+
+            SanPham sanPham = sanPhamOpt.get();
+
+            // Lấy danh sách biến thể (variants)
+            java.util.List<SanPhamChiTiet> variants = sanPhamChiTietRepository.findBySanPham_MaSP(id);
+
+            // Lấy giá min/max và tồn kho
+            BigDecimal minPrice = sanPhamService.getMinPrice(id);
+            BigDecimal maxPrice = sanPhamService.getMaxPrice(id);
+            Integer totalStock = sanPhamService.getTotalStock(id);
+
+            // Lấy đánh giá
+            java.util.List<DanhGia> danhGiaList = danhGiaService.getDanhGiaBySanPham(id);
+
+            // Lấy sản phẩm liên quan
+            java.util.List<SanPham> relatedProducts = new java.util.ArrayList<>();
+            if (sanPham.getLoaiSanPham() != null) {
+                relatedProducts = sanPhamService.findRelatedProducts(
+                        sanPham.getLoaiSanPham().getMaLoai(),
+                        sanPham.getMaSP(),
+                        6);
+            }
+
+            response.put("success", true);
+            response.put("product", sanPham);
+            response.put("variants", variants);
+            response.put("minPrice", minPrice);
+            response.put("maxPrice", maxPrice);
+            response.put("totalStock", totalStock);
+            response.put("reviews", danhGiaList);
+            response.put("reviewCount", danhGiaList != null ? danhGiaList.size() : 0);
+            response.put("relatedProducts", relatedProducts);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    /**
      * API lấy số lượng sản phẩm trong giỏ hàng
-     * Tối ưu: Trả về count thay vì toàn bộ cart items
      */
     @GetMapping("/cart/count")
     public ResponseEntity<Map<String, Object>> getCartCount() {
@@ -99,28 +239,39 @@ public class ApiController {
     }
 
     /**
-     * API thêm sản phẩm vào giỏ hàng - TỐI ƯU
-     * Backend tự động tìm biến thể còn hàng
+     * API thêm sản phẩm vào giỏ hàng - HỖ TRỢ CẢ KHI CHƯA ĐĂNG NHẬP
      */
     @PostMapping("/cart/add-product")
     public ResponseEntity<Map<String, Object>> addProductToCart(
             @RequestParam("productId") Long productId,
-            @RequestParam(value = "quantity", defaultValue = "1") int quantity) {
+            @RequestParam(value = "quantity", defaultValue = "1") int quantity,
+            HttpSession session) {
 
         Map<String, Object> response = new HashMap<>();
 
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
+            // ✅ FIX: Hỗ trợ cả anonymous users qua session
             if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-                response.put("success", false);
-                response.put("message", "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
+                // Anonymous user - use session cart
+                @SuppressWarnings("unchecked")
+                Map<Long, Integer> cart = (Map<Long, Integer>) session.getAttribute("cart");
+                if (cart == null) {
+                    cart = new HashMap<>();
+                }
+                cart.put(productId, cart.getOrDefault(productId, 0) + quantity);
+                session.setAttribute("cart", cart);
+
+                long cartCount = cart.values().stream().mapToLong(Integer::longValue).sum();
+                response.put("success", true);
+                response.put("message", "Đã thêm sản phẩm vào giỏ hàng");
+                response.put("cartCount", cartCount);
                 return ResponseEntity.ok(response);
             }
 
+            // Logged in user - use database
             String email = auth.getName();
-
-            // Backend tự động tìm biến thể còn hàng đầu tiên
             boolean added = gioHangService.addProductToCart(email, productId, quantity);
 
             if (added) {
@@ -143,7 +294,7 @@ public class ApiController {
     }
 
     /**
-     * API lấy danh sách sản phẩm trong giỏ hàng (cho debug)
+     * API lấy danh sách sản phẩm trong giỏ hàng
      */
     @GetMapping("/cart/items")
     public ResponseEntity<Map<String, Object>> getCartItems() {
@@ -173,6 +324,450 @@ public class ApiController {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.ok(response);
+        }
+    }
+
+    /**
+     * API cập nhật số lượng sản phẩm trong giỏ hàng
+     */
+    @PostMapping("/cart/update")
+    public ResponseEntity<Map<String, Object>> updateCartItem(
+            @RequestParam("cartItemId") Long cartItemId,
+            @RequestParam("quantity") int quantity) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                response.put("success", false);
+                response.put("message", "Vui lòng đăng nhập");
+                return ResponseEntity.ok(response);
+            }
+
+            gioHangService.updateQuantity(cartItemId, quantity);
+
+            String email = auth.getName();
+            int cartCount = gioHangService.getCartItemCount(email);
+
+            response.put("success", true);
+            response.put("message", "Đã cập nhật giỏ hàng");
+            response.put("cartCount", cartCount);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    /**
+     * API xóa sản phẩm khỏi giỏ hàng
+     */
+    @PostMapping("/cart/remove")
+    public ResponseEntity<Map<String, Object>> removeCartItem(@RequestParam("cartItemId") Long cartItemId) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                response.put("success", false);
+                response.put("message", "Vui lòng đăng nhập");
+                return ResponseEntity.ok(response);
+            }
+
+            gioHangService.removeFromCart(cartItemId);
+
+            String email = auth.getName();
+            int cartCount = gioHangService.getCartItemCount(email);
+
+            response.put("success", true);
+            response.put("message", "Đã xóa sản phẩm");
+            response.put("cartCount", cartCount);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    /**
+     * API đăng nhập (JSON)
+     */
+    @PostMapping("/auth/login")
+    public ResponseEntity<Map<String, Object>> login(
+            @RequestParam String username,
+            @RequestParam String password,
+            jakarta.servlet.http.HttpServletRequest request) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Load user from database
+            org.springframework.security.core.userdetails.UserDetails userDetails = userDetailsService
+                    .loadUserByUsername(username);
+
+            // Check password (plain text comparison since we use NoOpPasswordEncoder)
+            if (!userDetails.getPassword().equals(password)) {
+                response.put("success", false);
+                response.put("message", "Email hoặc mật khẩu không đúng!");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            // Create authentication token
+            org.springframework.security.authentication.UsernamePasswordAuthenticationToken authToken = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+
+            // Set authentication in context
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // Create new session to persist authentication
+            jakarta.servlet.http.HttpSession session = request.getSession(true);
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+            // Get user info
+            TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(username);
+            Set<VaiTro> roles = taiKhoan.getRoles();
+            java.util.List<String> roleNames = new java.util.ArrayList<>();
+            for (VaiTro role : roles) {
+                roleNames.add(role.getTenRole());
+            }
+
+            // Determine redirect URL based on role
+            String redirectUrl = "/";
+            if (roleNames.contains("ADMIN")) {
+                redirectUrl = "/admin/dashboard";
+            } else if (roleNames.contains("NHANVIEN")) {
+                redirectUrl = "/staff/dashboard";
+            }
+
+            response.put("success", true);
+            response.put("message", "Đăng nhập thành công");
+            response.put("user", Map.of(
+                    "email", taiKhoan.getEmail(),
+                    "hoTen", taiKhoan.getHoTen(),
+                    "roles", roleNames));
+            response.put("redirectUrl", redirectUrl);
+
+            return ResponseEntity.ok(response);
+
+        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+            response.put("success", false);
+            response.put("message", "Email hoặc mật khẩu không đúng!");
+            return ResponseEntity.status(401).body(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    /**
+     * API đăng xuất
+     */
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Map<String, Object>> logout(
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response) {
+
+        try {
+            // 1. Invalidate HTTP session FIRST
+            jakarta.servlet.http.HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+                System.out.println("✅ Session invalidated");
+            }
+
+            // 2. Clear Spring Security
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null) {
+                new org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler()
+                        .logout(request, response, auth);
+            }
+            SecurityContextHolder.clearContext();
+
+            // 3. Clear JSESSIONID cookie
+            jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("JSESSIONID", null);
+            cookie.setPath("/");
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đăng xuất thành công"));
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+
+            jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie("JSESSIONID", null);
+            cookie.setPath("/");
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đăng xuất thành công"));
+        }
+    }
+
+    /**
+     * API cập nhật thông tin profile
+     */
+    @PostMapping("/profile/update")
+    public ResponseEntity<Map<String, Object>> updateProfile(
+            @RequestParam String hoTen,
+            @RequestParam(required = false) String soDienThoai) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                response.put("success", false);
+                response.put("message", "Bạn cần đăng nhập để thực hiện thao tác này");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            String email = auth.getName();
+            TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(email);
+
+            if (taiKhoan == null) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy tài khoản");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Update thông tin
+            taiKhoan.setHoTen(hoTen);
+            if (soDienThoai != null && !soDienThoai.trim().isEmpty()) {
+                taiKhoan.setSoDienThoai(soDienThoai);
+            }
+
+            taiKhoanRepository.save(taiKhoan);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật thông tin thành công!");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    /**
+     * API đổi mật khẩu
+     */
+    @PostMapping("/profile/change-password")
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword,
+            @RequestParam String confirmPassword) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                response.put("success", false);
+                response.put("message", "Bạn cần đăng nhập để thực hiện thao tác này");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            String email = auth.getName();
+            TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(email);
+
+            if (taiKhoan == null) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy tài khoản");
+                return ResponseEntity.status(404).body(response);
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!taiKhoan.getMatKhau().equals(oldPassword)) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu hiện tại không đúng!");
+                return ResponseEntity.status(400).body(response);
+            }
+
+            // Kiểm tra mật khẩu mới khớp
+            if (!newPassword.equals(confirmPassword)) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu mới không khớp!");
+                return ResponseEntity.status(400).body(response);
+            }
+
+            // Cập nhật mật khẩu mới
+            taiKhoan.setMatKhau(newPassword);
+            taiKhoanRepository.save(taiKhoan);
+
+            response.put("success", true);
+            response.put("message", "Đổi mật khẩu thành công!");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    /**
+     * API lấy thông tin checkout
+     */
+    @GetMapping("/checkout")
+    public ResponseEntity<Map<String, Object>> getCheckoutData() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                response.put("success", false);
+                response.put("message", "Vui lòng đăng nhập");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            String email = auth.getName();
+            TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
+
+            // Lấy giỏ hàng
+            List<com.example.projectend.entity.GioHangChiTiet> items = gioHangService.getGioHangByTaiKhoan(tk);
+            if (items.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Giỏ hàng trống");
+                response.put("redirectUrl", "/giohang");
+                return ResponseEntity.ok(response);
+            }
+
+            // Chuyển sang DTO
+            List<Map<String, Object>> itemDTOs = new ArrayList<>();
+            java.math.BigDecimal tongTien = java.math.BigDecimal.ZERO;
+
+            for (com.example.projectend.entity.GioHangChiTiet item : items) {
+                com.example.projectend.entity.SanPhamChiTiet spct = item.getSanPhamChiTiet();
+                java.math.BigDecimal thanhTien = spct.getGiaBan()
+                        .multiply(java.math.BigDecimal.valueOf(item.getSoLuong()));
+                tongTien = tongTien.add(thanhTien);
+
+                String anh = spct.getAnhBienThe();
+                if (anh == null || anh.isEmpty()) {
+                    anh = spct.getSanPham().getAnhChinh();
+                }
+                if (anh == null || anh.isEmpty()) {
+                    anh = "placeholder.png";
+                }
+
+                Map<String, Object> dto = new HashMap<>();
+                dto.put("id", spct.getMaBienThe());
+                dto.put("tenSP", spct.getSanPham().getTenSP());
+                dto.put("thuongHieu",
+                        spct.getSanPham().getThuongHieu() != null ? spct.getSanPham().getThuongHieu().getTenTH()
+                                : "BRAND");
+                dto.put("size", spct.getSizeSP() != null ? spct.getSizeSP().getTenSize() : "");
+                dto.put("mau", spct.getMauSacSP() != null ? spct.getMauSacSP().getTenMau() : "");
+                dto.put("soLuong", item.getSoLuong());
+                dto.put("donGia", spct.getGiaBan());
+                dto.put("thanhTien", thanhTien);
+                dto.put("anh", anh);
+
+                itemDTOs.add(dto);
+            }
+
+            // Lấy địa chỉ
+            List<com.example.projectend.entity.DiaChi> addresses = diaChiRepository.findByTaiKhoan_MaTK(tk.getMaTK());
+
+            // Lấy phương thức thanh toán
+            List<com.example.projectend.entity.PhuongThucThanhToan> paymentMethods = phuongThucThanhToanRepository
+                    .findByTrangThai(true);
+
+            response.put("success", true);
+            response.put("cartItems", itemDTOs);
+            response.put("diaChiList", addresses);
+            response.put("paymentMethods", paymentMethods);
+            response.put("orderSubtotal", tongTien);
+            response.put("orderTotal", tongTien);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    /**
+     * API đặt hàng
+     */
+    @PostMapping("/checkout/place-order")
+    public ResponseEntity<Map<String, Object>> placeOrder(
+            @RequestParam Long diaChiId,
+            @RequestParam Long paymentMethod,
+            @RequestParam(required = false) String ghiChu) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                response.put("success", false);
+                response.put("message", "Vui lòng đăng nhập");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            String email = auth.getName();
+            TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
+
+            List<com.example.projectend.entity.GioHangChiTiet> items = gioHangService.getGioHangByTaiKhoan(tk);
+            if (items.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Giỏ hàng trống");
+                return ResponseEntity.ok(response);
+            }
+
+            com.example.projectend.entity.DonHang donHang = this.donHangService.createDonHang(tk, diaChiId,
+                    paymentMethod,
+                    items, ghiChu);
+
+            if (donHang == null) {
+                response.put("success", false);
+                response.put("message", "Đặt hàng thất bại");
+                return ResponseEntity.ok(response);
+            }
+
+            // Kiểm tra PayOS
+            boolean isPayOS = this.phuongThucThanhToanRepository.findById(paymentMethod)
+                    .map(pt -> pt.getTenHinhThuc() != null && pt.getTenHinhThuc().toLowerCase().contains("payos"))
+                    .orElse(false);
+
+            if (isPayOS) {
+                response.put("success", true);
+                response.put("message", "Đơn hàng đã được tạo");
+                response.put("redirectUrl", "/payment/payos/create?orderId=" + donHang.getMaDH());
+            } else {
+                gioHangService.clearGioHang(tk);
+                response.put("success", true);
+                response.put("message", "Đặt hàng thành công!");
+                response.put("redirectUrl", "/checkout-success?orderId=" + donHang.getMaDH());
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 }

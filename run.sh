@@ -1,4 +1,194 @@
 #!/bin/bash
+# ============================================
+# RUN.SH - Chạy toàn bộ dự án (Backend + Frontend)
+# Dành cho macOS/Linux
+# ============================================
+
+# Màu sắc cho terminal
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}================================================${NC}"
+echo -e "${BLUE}  🚀 LUXURY SHOP - Full Stack Startup${NC}"
+echo -e "${BLUE}================================================${NC}"
+
+# Lưu PID để cleanup sau
+BACKEND_PID=""
+FRONTEND_PID=""
+
+# Hàm cleanup khi tắt script (Ctrl+C)
+cleanup() {
+    echo -e "\n${YELLOW}🛑 Đang dừng các services...${NC}"
+    
+    if [ ! -z "$BACKEND_PID" ]; then
+        echo -e "${YELLOW}   ⏹  Dừng Backend (PID: $BACKEND_PID)${NC}"
+        kill $BACKEND_PID 2>/dev/null || true
+    fi
+    
+    if [ ! -z "$FRONTEND_PID" ]; then
+        echo -e "${YELLOW}   ⏹  Dừng Frontend (PID: $FRONTEND_PID)${NC}"
+        kill $FRONTEND_PID 2>/dev/null || true
+    fi
+    
+    echo -e "${GREEN}✅ Đã dừng tất cả services!${NC}"
+    exit 0
+}
+
+# Bắt tín hiệu Ctrl+C
+trap cleanup SIGINT SIGTERM
+
+# ============================================
+# 1. Kiểm tra Dependencies
+# ============================================
+echo -e "\n${BLUE}📦 Kiểm tra dependencies...${NC}"
+
+# Kiểm tra Java
+if ! command -v java &> /dev/null; then
+    echo -e "${RED}❌ Không tìm thấy Java! Vui lòng cài đặt Java 17+${NC}"
+    exit 1
+fi
+echo -e "${GREEN}   ✓ Java: $(java -version 2>&1 | head -n 1)${NC}"
+
+# Kiểm tra Maven
+if ! command -v mvn &> /dev/null && ! [ -f "./mvnw" ]; then
+    echo -e "${RED}❌ Không tìm thấy Maven! Vui lòng cài đặt Maven${NC}"
+    exit 1
+fi
+echo -e "${GREEN}   ✓ Maven: OK${NC}"
+
+# Kiểm tra Node.js
+if ! command -v node &> /dev/null; then
+    echo -e "${RED}❌ Không tìm thấy Node.js! Vui lòng cài đặt Node.js 18+${NC}"
+    exit 1
+fi
+echo -e "${GREEN}   ✓ Node.js: $(node -v)${NC}"
+
+# Kiểm tra npm
+if ! command -v npm &> /dev/null; then
+    echo -e "${RED}❌ Không tìm thấy npm!${NC}"
+    exit 1
+fi
+echo -e "${GREEN}   ✓ npm: $(npm -v)${NC}"
+
+# ============================================
+# 2. Dọn dẹp Ports cũ (Kill processes cũ)
+# ============================================
+echo -e "\n${BLUE}🧹 Dọn dẹp processes cũ trên ports...${NC}"
+
+# Kill port 8080 (Backend)
+BACKEND_OLD_PIDS=$(lsof -ti:8080 2>/dev/null || true)
+if [ ! -z "$BACKEND_OLD_PIDS" ]; then
+    echo -e "${YELLOW}   ⏹  Tìm thấy process(es) cũ trên port 8080${NC}"
+    echo "$BACKEND_OLD_PIDS" | xargs kill -9 2>/dev/null || true
+    echo -e "${GREEN}   ✓ Đã kill port 8080${NC}"
+else
+    echo -e "${GREEN}   ✓ Port 8080 sạch${NC}"
+fi
+
+# Kill port 5173, 5174, 5175 (Frontend - Vite có thể dùng port dự phòng)
+for port in 5173 5174 5175; do
+    FRONTEND_OLD_PIDS=$(lsof -ti:$port 2>/dev/null || true)
+    if [ ! -z "$FRONTEND_OLD_PIDS" ]; then
+        echo -e "${YELLOW}   ⏹  Tìm thấy process(es) cũ trên port $port${NC}"
+        echo "$FRONTEND_OLD_PIDS" | xargs kill -9 2>/dev/null || true
+        echo -e "${GREEN}   ✓ Đã kill port $port${NC}"
+    fi
+done
+
+# Đợi một chút để ports được giải phóng hoàn toàn
+sleep 2
+
+# ============================================
+# 3. Install Frontend Dependencies (nếu cần)
+# ============================================
+if [ ! -d "frontend/node_modules" ]; then
+    echo -e "\n${BLUE}📥 Cài đặt dependencies cho Frontend...${NC}"
+    cd frontend
+    npm install
+    cd ..
+    echo -e "${GREEN}✅ Frontend dependencies đã được cài đặt!${NC}"
+else
+    echo -e "${GREEN}✅ Frontend dependencies đã có sẵn${NC}"
+fi
+
+# ============================================
+# 4. Khởi động Backend (Spring Boot)
+# ============================================
+echo -e "\n${BLUE}🔧 Khởi động Backend (Spring Boot)...${NC}"
+echo -e "${YELLOW}   Port: 8080${NC}"
+echo -e "${YELLOW}   API: http://localhost:8080/api${NC}"
+
+# Chạy backend ở background
+if [ -f "./mvnw" ]; then
+    ./mvnw spring-boot:run > backend.log 2>&1 &
+else
+    mvn spring-boot:run > backend.log 2>&1 &
+fi
+
+BACKEND_PID=$!
+echo -e "${GREEN}   ✓ Backend đã khởi động (PID: $BACKEND_PID)${NC}"
+
+# Đợi backend khởi động (kiểm tra health)
+echo -e "${YELLOW}   ⏳ Đang chờ Backend sẵn sàng...${NC}"
+for i in {1..30}; do
+    if curl -s http://localhost:8080/actuator/health > /dev/null 2>&1 || \
+       curl -s http://localhost:8080 > /dev/null 2>&1; then
+        echo -e "${GREEN}   ✓ Backend đã sẵn sàng!${NC}"
+        break
+    fi
+    
+    if [ $i -eq 30 ]; then
+        echo -e "${YELLOW}   ⚠️  Backend chưa phản hồi sau 30s, nhưng tiếp tục...${NC}"
+    fi
+    
+    sleep 1
+done
+
+# ============================================
+# 5. Khởi động Frontend (Vite)
+# ============================================
+echo -e "\n${BLUE}🎨 Khởi động Frontend (Vue.js)...${NC}"
+echo -e "${YELLOW}   Port: 5173${NC}"
+echo -e "${YELLOW}   URL: http://localhost:5173${NC}"
+
+cd frontend
+npm run dev > ../frontend.log 2>&1 &
+FRONTEND_PID=$!
+cd ..
+
+echo -e "${GREEN}   ✓ Frontend đã khởi động (PID: $FRONTEND_PID)${NC}"
+
+# ============================================
+# 6. Thông báo hoàn tất
+# ============================================
+sleep 2
+echo -e "\n${GREEN}================================================${NC}"
+echo -e "${GREEN}  ✅ DỰ ÁN ĐÃ KHỞI ĐỘNG THÀNH CÔNG!${NC}"
+echo -e "${GREEN}================================================${NC}"
+echo -e ""
+echo -e "  🌐 Frontend:  ${BLUE}http://localhost:5173${NC}"
+echo -e "  🔧 Backend:   ${BLUE}http://localhost:8080${NC}"
+echo -e "  📡 API:       ${BLUE}http://localhost:8080/api${NC}"
+echo -e ""
+echo -e "${YELLOW}📝 Logs:${NC}"
+echo -e "   Backend:  tail -f backend.log"
+echo -e "   Frontend: tail -f frontend.log"
+echo -e ""
+echo -e "${RED}⚠️  Nhấn Ctrl+C để dừng tất cả services${NC}"
+echo -e ""
+
+# ============================================
+# 7. Giữ script chạy và hiển thị logs
+# ============================================
+# Hiển thị logs liên tục
+tail -f backend.log frontend.log 2>/dev/null &
+TAIL_PID=$!
+
+# Đợi cho đến khi nhận Ctrl+C
+wait
 
 # PROJECTEND - SPRING BOOT APPLICATION
 # Script chạy ứng dụng Spring Boot với auto-kill port cũ

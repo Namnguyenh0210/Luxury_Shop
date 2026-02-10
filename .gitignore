@@ -26,3 +26,10 @@ src/main/resources/application-local.properties
 *.tmp
 *.bak
 cookies.txt
+
+# Archive folder
+_archive/
+
+# Frontend build
+frontend/dist/
+node_modules/

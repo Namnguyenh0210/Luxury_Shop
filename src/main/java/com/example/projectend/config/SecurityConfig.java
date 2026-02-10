@@ -60,7 +60,9 @@ public class SecurityConfig {
 
                         // ==================== PHÂN QUYỀN ADMIN (CHỈ ADMIN) ====================
                         // Admin Dashboard, Sản phẩm, Tài khoản, Báo cáo - CHỈ ADMIN
-                        .requestMatchers("/admin/dashboard", "/admin/sanpham/**", "/admin/accounts/**", "/admin/reports/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/dashboard", "/admin/sanpham/**", "/admin/accounts/**",
+                                "/admin/reports/**")
+                        .hasRole("ADMIN")
 
                         // Đơn hàng và Bài viết - CẢ ADMIN VÀ NHÂN VIÊN đều vào được
                         .requestMatchers("/admin/orders/**", "/admin/baiviet/**").hasAnyRole("ADMIN", "NHANVIEN")
@@ -70,8 +72,7 @@ public class SecurityConfig {
                         .requestMatchers("/profile", "/profile/**").authenticated()
 
                         // ==================== CÒN LẠI ====================
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().permitAll())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
@@ -105,13 +106,11 @@ public class SecurityConfig {
                             }
                         })
                         .failureUrl("/login?error=true")
-                        .permitAll()
-                )
+                        .permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
+                                .userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
                             // Xử lý sau khi đăng nhập Google thành công
                             System.out.println("=== OAUTH2 LOGIN SUCCESS ===");
@@ -121,15 +120,20 @@ public class SecurityConfig {
                             // OAuth2 user luôn là KHACHHANG, redirect về trang chủ
                             response.sendRedirect("/");
                         })
-                        .failureUrl("/login?error=true")
-                )
+                        .failureUrl("/login?error=true"))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(
+                                org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
+                        .invalidSessionUrl("/login?session=invalid")
+                        .maximumSessions(1)
+                        .maxSessionsPreventsLogin(false))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/?logout=success")
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
-                        .permitAll()
-                )
+                        .deleteCookies("JSESSIONID", "remember-me")
+                        .permitAll())
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/403"));

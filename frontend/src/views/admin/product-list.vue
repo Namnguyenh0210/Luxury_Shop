@@ -1,0 +1,649 @@
+<template>
+
+	<div class="relative flex min-h-screen w-full flex-col">
+		<div class="flex h-full w-full grow">
+
+			<aside class="flex h-screen min-h-full w-64 flex-col justify-between border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 sticky top-0">
+				<div class="flex flex-col gap-8">
+					<div class="flex items-center gap-3 px-3">
+						<div class="size-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg uppercase">
+							<span sec:authentication="name">{{ #strings.substring(#authentication.name, 0, 1) }}</span>
+						</div>
+
+						<div class="flex flex-col">
+							<h1 class="text-text-primary-light dark:text-text-primary-dark text-sm font-bold leading-normal truncate w-32" sec:authentication="name">Admin User</h1>
+							<p class="text-text-secondary-light dark:text-text-secondary-dark text-xs font-normal leading-normal">
+								<span sec:authentication="principal.authorities">ROLE_ADMIN</span>
+							</p>
+						</div>
+					</div>
+
+					<nav class="flex flex-col gap-2">
+						<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/dashboard">
+							<span class="material-symbols-outlined">dashboard</span>
+							<p class="text-sm font-medium">Dashboard</p>
+						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 bg-accent/20 text-text-primary-light dark:text-text-primary-dark transition-colors" href="/admin/products">
+							<span class="material-symbols-outlined">diamond</span>
+							<p class="text-sm font-medium">Sản Phẩm</p>
+						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/inventory">
+							<span class="material-symbols-outlined">inventory_2</span>
+							<p class="text-sm font-medium">Kho &amp; NCC</p>
+						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/orders">
+							<span class="material-symbols-outlined">receipt_long</span>
+							<p class="text-sm font-medium">Đơn Hàng</p>
+						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/customers">
+							<span class="material-symbols-outlined">group</span>
+							<p class="text-sm font-medium">Khách Hàng</p>
+						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/blogs">
+							<span class="material-symbols-outlined">article</span>
+							<p class="text-sm font-medium">Nội Dung</p>
+						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/reports">
+							<span class="material-symbols-outlined">bar_chart</span>
+							<p class="text-sm font-medium">Báo Cáo</p>
+						</a>
+					</nav>
+				</div>
+
+			</aside>
+
+			<main class="flex flex-1 flex-col">
+				<header class="sticky top-0 z-10 flex items-center justify-between whitespace-nowrap border-b border-border-light dark:border-border-dark px-10 py-3 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+					<div class="flex items-center gap-8">
+						<h2 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight">Quản
+							Lý Sản Phẩm</h2>
+					</div>
+					<div class="flex flex-1 justify-end gap-4 items-center">
+						<div class="flex gap-2">
+							<button class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-black/5 text-text-secondary-light">
+								<span class="material-symbols-outlined">notifications</span>
+							</button>
+						</div>
+						<form method="post" class="flex items-center">
+							<button type="submit" class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-red-50 text-red-500 transition-colors" title="Đăng xuất">
+								<span class="material-symbols-outlined">logout</span>
+							</button>
+						</form>
+					</div>
+				</header>
+
+				<div class="flex flex-1 flex-col p-10 gap-10">
+
+					<div class="flex justify-between items-center mb-6">
+						<h1 class="text-2xl font-bold text-slate-800 dark:text-white">Danh
+							Sách Sản Phẩm</h1>
+					</div>
+
+					<!-- Filter Section -->
+					<div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-6">
+						<form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+							<div>
+								<label class="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Tìm kiếm</label>
+								<input type="text" name="keyword" placeholder="Tên sản phẩm..." class="w-full rounded-lg border-slate-300 dark:bg-slate-900 dark:border-slate-600 py-2 px-3 text-sm">
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Danh mục</label>
+								<select name="categoryId" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 dark:border-slate-600 py-2 px-3 text-sm">
+									<option value="">Tất cả danh mục</option>
+									<option v-for="cat in categories" :key="cat.id || index">{{ cat.tenLoai }}</option>
+								</select>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Thương hiệu</label>
+								<select name="brandId" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 dark:border-slate-600 py-2 px-3 text-sm">
+									<option value="">Tất cả thương hiệu</option>
+									<option v-for="brand in brands" :key="brand.id || index">{{ brand.tenTH }}</option>
+								</select>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">Trạng thái</label>
+								<select name="status" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 dark:border-slate-600 py-2 px-3 text-sm">
+									<option value="">Tất cả trạng thái</option>
+									<option value="1">Đang bán</option>
+									<option value="0">Ngừng bán</option>
+								</select>
+							</div>
+
+							<div class="md:col-span-4 flex gap-2">
+								<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+									<span class="material-symbols-outlined text-[18px]">search</span>
+									Lọc
+								</button>
+								<a class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors" href="/admin/products">
+									<span class="material-symbols-outlined text-[18px]">refresh</span>
+									Xóa bộ lọc
+								</a>
+							</div>
+						</form>
+					</div>
+
+					<div class="p-4 bg-green-100 text-green-700 rounded-lg flex items-center gap-2" v-if="success">
+						<span class="material-symbols-outlined">check_circle</span> <span>{{ success }}</span>
+					</div>
+					<div class="p-4 bg-red-100 text-red-700 rounded-lg flex items-center gap-2" v-if="error">
+						<span class="material-symbols-outlined">error</span> <span>{{ error }}</span>
+					</div>
+
+					<div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
+						<table class="w-full text-left text-sm text-slate-600 dark:text-slate-400">
+							<thead class="bg-slate-50 dark:bg-slate-700/50 text-xs uppercase font-semibold text-slate-700 dark:text-slate-200">
+								<tr>
+									<th class="px-6 py-4">ID</th>
+									<th class="px-6 py-4">Hình Ảnh</th>
+									<th class="px-6 py-4">Tên Sản Phẩm</th>
+									<th class="px-6 py-4">Danh Mục</th>
+									<th class="px-6 py-4">Thương Hiệu</th>
+									<th class="px-6 py-4">Trạng Thái</th>
+									<th class="px-6 py-4 text-center">Thao Tác</th>
+								</tr>
+							</thead>
+							<tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+								<tr onclick="showProductDetailsFromRow(event, this)" class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer" v-for="p in products" :key="p.id || index">
+									<td class="px-6 py-4 font-mono">#<span>{{ p.maSP }}</span></td>
+									<td class="px-6 py-4"><img alt="Product image" class="size-12 rounded object-cover border border-slate-200" src="${p.anhChinh != null ? p.anhChinh : 'https://placehold.co/50'}">
+									</td>
+									<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">
+										<span>{{ p.tenSP }}</span>
+									</td>
+									<td class="px-6 py-4"><span class="bg-slate-100 px-2 py-1 rounded text-xs">{{ p.loaiSanPham?.tenLoai ?: '---' }}</span></td>
+									<td class="px-6 py-4"><span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-medium">{{ p.thuongHieu?.tenTH ?: '---' }}</span></td>
+
+									<td class="px-6 py-4">
+										<span class="text-green-600 bg-green-50 px-2 py-1 rounded-full text-xs font-medium" v-if="p.trangThaiSP == 1">
+											Đang bán
+										</span>
+										<span class="text-red-600 bg-red-50 px-2 py-1 rounded-full text-xs font-medium" v-if="p.trangThaiSP == 0">
+											Ngừng bán
+										</span>
+									</td>
+
+									<td class="px-6 py-4 text-center" onclick="event.stopPropagation()">
+										<div class="flex justify-center gap-2">
+											<button type="button" onclick="editProduct(this)" class="text-blue-600 hover:bg-blue-50 p-2 rounded transition-colors">
+												<span class="material-symbols-outlined text-[20px]">edit</span>
+											</button>
+
+											<a class="text-red-600 hover:bg-red-50 p-2 rounded transition-colors" onclick="return confirm('Xóa sản phẩm này?')" href="/admin/products/delete/{id(id=${p.maSP})}"> <span class="material-symbols-outlined text-[20px]">delete</span>
+											</a>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div class="p-8 text-center text-slate-500" v-if="#lists.isEmpty(products)">Chưa có sản phẩm
+							nào.</div>
+					</div>
+				</div>
+			</main>
+		</div>
+
+		<div id="productModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+			<div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden animate-fade-in">
+				<div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
+					<h3 class="text-lg font-bold text-slate-900 dark:text-white" id="modalTitle">Thêm Sản Phẩm Mới</h3>
+					<button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
+						<span class="material-symbols-outlined">close</span>
+					</button>
+				</div>
+
+				<form method="post" enctype="multipart/form-data" class="p-6 space-y-4">
+					<input type="hidden" id="productId" name="maSP">
+
+					<div class="grid grid-cols-2 gap-4">
+						<div class="col-span-2">
+							<label class="block text-sm font-medium mb-1">Tên sản
+								phẩm</label> <input type="text" id="productName" name="tenSP" required="" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 focus:ring-blue-500 py-2 px-3 text-sm">
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium mb-1">Danh mục</label> <select id="categoryId" name="loaiSanPham.maLoai" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
+								<option v-for="c in categories" :key="c.id || index">{{ c.tenLoai }}</option>
+							</select>
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium mb-1">Thương hiệu</label> <select id="brandId" name="thuongHieu.maTH" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
+								<option v-for="b in brands" :key="b.id || index">{{ b.tenTH }}</option>
+							</select>
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium mb-1">Giới tính</label>
+							<select id="gender" name="gioiTinh" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
+								<option value="0">Nam</option>
+								<option value="1">Nữ</option>
+								<option value="2">Unisex</option>
+							</select>
+						</div>
+
+						<div>
+							<label class="block text-sm font-medium mb-1">Trạng thái</label>
+							<select id="status" name="trangThaiSP" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
+								<option value="1">Đang bán</option>
+								<option value="0">Ngừng bán</option>
+							</select>
+						</div>
+
+						<div class="col-span-2">
+							<label class="block text-sm font-medium mb-1">Hình ảnh</label> <input type="file" name="imageFile" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+						</div>
+					</div>
+
+					<div class="pt-4 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-700 mt-4">
+						<button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium">Hủy</button>
+						<button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Lưu
+							lại</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Product Details Modal -->
+		<div id="detailsModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+			<div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-4xl overflow-hidden animate-fade-in max-h-[90vh] overflow-y-auto">
+				<div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center sticky top-0 bg-white dark:bg-slate-800 z-10">
+					<h3 class="text-lg font-bold text-slate-900 dark:text-white" id="detailsModalTitle">Chi Tiết Sản Phẩm</h3>
+					<button onclick="closeDetailsModal()" class="text-slate-400 hover:text-slate-600">
+						<span class="material-symbols-outlined">close</span>
+					</button>
+				</div>
+
+				<div class="p-6">
+					<!-- Loading Spinner -->
+					<div id="detailsLoading" class="text-center py-8">
+						<div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600"></div>
+						<p class="mt-4 text-slate-600">Đang tải...</p>
+					</div>
+
+					<!-- Product Details Content -->
+					<div id="detailsContent" class="hidden">
+						<!-- Product Info Section -->
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+							<div>
+								<img id="detailImage" src="" alt="Product Image" class="w-full h-auto rounded-lg border border-slate-200 dark:border-slate-700">
+							</div>
+							<div class="space-y-4">
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Tên sản phẩm:</label>
+									<p id="detailName" class="text-lg font-bold text-slate-900 dark:text-white"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Danh mục:</label>
+									<p id="detailCategory" class="text-slate-900 dark:text-white"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Thương hiệu:</label>
+									<p id="detailBrand" class="text-slate-900 dark:text-white"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Giới tính:</label>
+									<p id="detailGender" class="text-slate-900 dark:text-white"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Trạng thái:</label>
+									<p id="detailStatus"></p>
+								</div>
+								<div>
+									<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Mô tả:</label>
+									<p id="detailDescription" class="text-slate-700 dark:text-slate-300"></p>
+								</div>
+							</div>
+						</div>
+
+						<!-- Variants/Sizes Section -->
+						<div class="border-t border-slate-200 dark:border-slate-700 pt-6">
+							<h4 class="text-lg font-bold text-slate-900 dark:text-white mb-4">
+								<span class="material-symbols-outlined align-middle">inventory_2</span>
+								Các Size &amp; Tồn Kho
+							</h4>
+							<div id="variantsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<!-- Variants will be loaded here via JavaScript -->
+							</div>
+							<div id="noVariants" class="hidden text-center py-8 text-slate-500">
+								<span class="material-symbols-outlined text-5xl">inventory</span>
+								<p class="mt-2">Chưa có biến thể nào cho sản phẩm này</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded');
+
+            const modal = document.getElementById('productModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const formId = document.getElementById('productId');
+            const formName = document.getElementById('productName');
+            const formCategory = document.getElementById('categoryId');
+            const formBrand = document.getElementById('brandId');
+            const formGender = document.getElementById('gender');
+            const formStatus = document.getElementById('status');
+
+            // Details Modal
+            const detailsModal = document.getElementById('detailsModal');
+            const detailsLoading = document.getElementById('detailsLoading');
+            const detailsContent = document.getElementById('detailsContent');
+
+            // Check if elements exist
+            console.log('detailsModal exists:', !!detailsModal);
+            console.log('detailsLoading exists:', !!detailsLoading);
+            console.log('detailsContent exists:', !!detailsContent);
+
+            // Make functions global
+            window.openModal = function() {
+                modalTitle.textContent = "Thêm Sản Phẩm Mới";
+                formId.value = "";
+                formName.value = "";
+                formGender.value = "2"; // Mặc định là Unisex
+                formStatus.value = "1"; // Mặc định là Đang bán (1)
+                modal.classList.remove('hidden');
+            };
+
+            window.closeModal = function() {
+                modal.classList.add('hidden');
+            };
+
+            window.editProduct = function(button) {
+                const id = button.getAttribute('data-id');
+                const name = button.getAttribute('data-name');
+                const catId = button.getAttribute('data-category');
+                const brandId = button.getAttribute('data-brand');
+                const status = button.getAttribute('data-status');
+                const gender = button.getAttribute('data-gender');
+
+                modalTitle.textContent = "Cập Nhật Sản Phẩm #" + id;
+                formId.value = id;
+                formName.value = name;
+
+                if(catId) formCategory.value = catId;
+                if(brandId) formBrand.value = brandId;
+
+                // Set gender: 0=Nam, 1=Nữ, 2=Unisex
+                if (gender !== null && gender !== undefined && gender !== "") {
+                    formGender.value = gender.toString();
+                } else {
+                    formGender.value = "2"; // Default: Unisex
+                }
+
+                // Set status: 1 = Đang bán, 0 = Ngừng bán
+                if (status !== null && status !== undefined && status !== "") {
+                    formStatus.value = status.toString();
+                } else {
+                    formStatus.value = "1"; // Default: Đang bán
+                }
+
+                modal.classList.remove('hidden');
+            };
+
+            // Show Product Details - Make it global
+            window.showProductDetails = function(button) {
+                console.log('showProductDetails called'); // Debug
+                const productId = button.getAttribute('data-product-id');
+                console.log('Product ID:', productId); // Debug
+
+                if (!productId) {
+                    console.error('Product ID not found!');
+                    alert('Lỗi: Không tìm thấy ID sản phẩm');
+                    return;
+                }
+
+                if (!detailsModal) {
+                    console.error('detailsModal element not found!');
+                    alert('Lỗi: Modal không tồn tại');
+                    return;
+                }
+
+                // Show modal and loading
+                console.log('Showing modal...'); // Debug
+                detailsModal.classList.remove('hidden');
+                detailsLoading.classList.remove('hidden');
+                detailsContent.classList.add('hidden');
+
+                // Fetch product details
+                console.log('Fetching product details...'); // Debug
+                fetch('/admin/products/api/details/' + productId)
+                    .then(response => {
+                        console.log('Response status:', response.status); // Debug
+                        if (!response.ok) {
+                            throw new Error('HTTP error! status: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(product => {
+                        console.log('Product data:', product); // Debug
+                        // Hide loading, show content
+                        detailsLoading.classList.add('hidden');
+                        detailsContent.classList.remove('hidden');
+
+                    // Update product info
+                    document.getElementById('detailsModalTitle').textContent = 'Chi Tiết: ' + product.tenSP;
+                    document.getElementById('detailImage').src = product.anhChinh || 'https://placehold.co/400x400?text=No+Image';
+                    document.getElementById('detailName').textContent = product.tenSP;
+                    document.getElementById('detailCategory').textContent = product.loaiSanPham?.tenLoai || 'N/A';
+                    document.getElementById('detailBrand').textContent = product.thuongHieu?.tenTH || 'N/A';
+
+                    // Gender
+                    const genderMap = { 0: 'Nam', 1: 'Nữ', 2: 'Unisex' };
+                    document.getElementById('detailGender').textContent = genderMap[product.gioiTinh] || 'N/A';
+
+                    // Status
+                    const statusEl = document.getElementById('detailStatus');
+                    if (product.trangThaiSP === 1) {
+                        statusEl.innerHTML = '<span class="text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm font-medium">Đang bán</span>';
+                    } else {
+                        statusEl.innerHTML = '<span class="text-red-600 bg-red-50 px-3 py-1 rounded-full text-sm font-medium">Ngừng bán</span>';
+                    }
+
+                    // Description
+                    document.getElementById('detailDescription').textContent = product.moTa || 'Chưa có mô tả';
+
+                    // Display variants
+                    displayVariants(product.variants || []);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    detailsLoading.innerHTML = '<p class="text-red-600">Lỗi khi tải dữ liệu: ' + error.message + '</p>';
+                });
+            }; // End of showProductDetails
+
+            // Show Product Details from Row Click - NEW FUNCTION
+            window.showProductDetailsFromRow = function(event, row) {
+                // Prevent triggering when clicking on action buttons (edit/delete)
+                const target = event.target;
+
+                // Check if click is on action buttons or their children
+                if (target.closest('button') || target.closest('a')) {
+                    console.log('Clicked on action button, ignoring...');
+                    return;
+                }
+
+                console.log('showProductDetailsFromRow called'); // Debug
+                const productId = row.getAttribute('data-product-id');
+                console.log('Product ID from row:', productId); // Debug
+
+                if (!productId) {
+                    console.error('Product ID not found in row!');
+                    return;
+                }
+
+                if (!detailsModal) {
+                    console.error('detailsModal element not found!');
+                    return;
+                }
+
+                // Show modal and loading
+                console.log('Showing modal from row click...'); // Debug
+                detailsModal.classList.remove('hidden');
+                detailsLoading.classList.remove('hidden');
+                detailsContent.classList.add('hidden');
+
+                // Fetch product details
+                fetch('/admin/products/api/details/' + productId)
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        if (!response.ok) {
+                            throw new Error('HTTP error! status: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(product => {
+                        console.log('Product data:', product);
+                        detailsLoading.classList.add('hidden');
+                        detailsContent.classList.remove('hidden');
+
+                    // Update product info
+                    document.getElementById('detailsModalTitle').textContent = 'Chi Tiết: ' + product.tenSP;
+                    document.getElementById('detailImage').src = product.anhChinh || 'https://placehold.co/400x400?text=No+Image';
+                    document.getElementById('detailName').textContent = product.tenSP;
+                    document.getElementById('detailCategory').textContent = product.loaiSanPham?.tenLoai || 'N/A';
+                    document.getElementById('detailBrand').textContent = product.thuongHieu?.tenTH || 'N/A';
+
+                    // Gender
+                    const genderMap = { 0: 'Nam', 1: 'Nữ', 2: 'Unisex' };
+                    document.getElementById('detailGender').textContent = genderMap[product.gioiTinh] || 'N/A';
+
+                    // Status
+                    const statusEl = document.getElementById('detailStatus');
+                    if (product.trangThaiSP === 1) {
+                        statusEl.innerHTML = '<span class="text-green-600 bg-green-50 px-3 py-1 rounded-full text-sm font-medium">Đang bán</span>';
+                    } else {
+                        statusEl.innerHTML = '<span class="text-red-600 bg-red-50 px-3 py-1 rounded-full text-sm font-medium">Ngừng bán</span>';
+                    }
+
+                    // Description
+                    document.getElementById('detailDescription').textContent = product.moTa || 'Chưa có mô tả';
+
+                    // Display variants
+                    displayVariants(product.variants || []);
+                })
+                .catch(error => {
+                    console.error('Error loading product:', error);
+                    detailsLoading.innerHTML = '<p class="text-red-600">Lỗi khi tải dữ liệu: ' + error.message + '</p>';
+                });
+            }; // End of showProductDetailsFromRow
+
+        function displayVariants(variants) {
+            const container = document.getElementById('variantsContainer');
+            const noVariants = document.getElementById('noVariants');
+
+            container.innerHTML = '';
+
+            if (!variants || variants.length === 0) {
+                noVariants.classList.remove('hidden');
+                return;
+            }
+
+            noVariants.classList.add('hidden');
+
+            // Group variants by size
+            const groupedBySize = {};
+            variants.forEach(variant => {
+                const sizeName = variant.sizeSP?.tenSize || 'N/A';
+                if (!groupedBySize[sizeName]) {
+                    groupedBySize[sizeName] = [];
+                }
+                groupedBySize[sizeName].push(variant);
+            });
+
+            // Create cards for each size
+            Object.keys(groupedBySize).forEach(sizeName => {
+                const sizeVariants = groupedBySize[sizeName];
+                const totalStock = sizeVariants.reduce((sum, v) => sum + (v.soLuongTon || 0), 0);
+
+                // Determine stock status
+                let stockStatus = '';
+                let stockClass = '';
+                if (totalStock === 0) {
+                    stockStatus = 'Hết hàng';
+                    stockClass = 'bg-red-50 text-red-700 border-red-200';
+                } else if (totalStock <= 10) {
+                    stockStatus = 'Sắp hết hàng';
+                    stockClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+                } else {
+                    stockStatus = 'Còn hàng';
+                    stockClass = 'bg-green-50 text-green-700 border-green-200';
+                }
+
+                // Get price (assume same price for all colors in same size)
+                const price = sizeVariants[0]?.giaBan || 0;
+                const purchasePrice = sizeVariants[0]?.giaNhap || 0;
+                const formattedPrice = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(price);
+                const formattedPurchasePrice = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(purchasePrice);
+
+                // Build colors list
+                let colorsHTML = '';
+                sizeVariants.forEach(variant => {
+                    const colorName = variant.mauSacSP?.tenMau || 'N/A';
+                    const colorStock = variant.soLuongTon || 0;
+                    colorsHTML += `
+                        <div class="flex justify-between items-center text-xs py-1 px-2 rounded bg-slate-50 dark:bg-slate-700">
+                            <span class="font-medium">${colorName}</span>
+                            <span class="text-slate-600 dark:text-slate-400">${colorStock} sp</span>
+                        </div>
+                    `;
+                });
+
+                const card = `
+                    <div class="border ${stockClass} rounded-lg p-4 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h5 class="font-bold text-lg">Size ${sizeName}</h5>
+                                <p class="text-sm font-semibold mt-1 text-green-600">${formattedPrice}</p>
+                                <p class="text-xs text-slate-600 dark:text-slate-400">Giá nhập: ${formattedPurchasePrice}</p>
+                            </div>
+                            <span class="px-2 py-1 rounded-full text-xs font-bold ${stockClass.replace('border-', 'bg-').replace('bg-', 'border border-')}">
+                                ${stockStatus}
+                            </span>
+                        </div>
+                        <div class="border-t pt-2">
+                            <p class="text-sm font-semibold mb-2">Tồn kho: ${totalStock} sản phẩm</p>
+                            <div class="space-y-1">
+                                ${colorsHTML}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML += card;
+            });
+        }
+
+        window.closeDetailsModal = function() {
+            detailsModal.classList.add('hidden');
+        };
+
+        }); // End of DOMContentLoaded
+    </script>
+	</div>
+
+
+
+</template>
+
+<script>
+export default {
+  name: 'product-list',
+  data() {
+    return {}
+  },
+  mounted() {
+    // TODO: fetch data via axios or hydrate server state
+  }
+}
+</script>
+
+<style scoped>
+/* TODO: import or copy CSS from original static/css */
+</style>
