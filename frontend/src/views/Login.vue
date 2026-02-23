@@ -99,7 +99,7 @@
                     </div>
 
                     <!-- Submit button -->
-                    <button type="submit" :disabled="isLoading" class="btn-primary w-full py-3 rounded-lg text-white font-semibold text-base shadow-lg" :class="{ 'opacity-50 cursor-not-allowed': isLoading }">
+                    <button type="submit" :disabled="isLoading" class="bg-[#d97706] hover:bg-[#b45309] w-full py-3 rounded-lg text-white font-semibold text-base shadow-lg" :class="{ 'opacity-50 cursor-not-allowed': isLoading }">
                         <span class="flex items-center justify-center gap-2">
                             <svg v-if="!isLoading" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
