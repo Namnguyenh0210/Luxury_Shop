@@ -56,7 +56,9 @@ const routes = [
 
   // Error pages
   { path: '/403', component: () => import('./views/error/403.vue') }, // Moved to error/
-  { path: '/:pathMatch(.*)*', component: () => import('./views/error/404.vue') }
+  { path: '/:pathMatch(.*)*', component: () => import('./views/error/404.vue') },
+  {path: '/admin/dashboard', component: () => import('./views/admin/AdminDashboard.vue')},
+  { path: '/staff/dashboard', component: () => import('./views/staff/StaffDashboard.vue') },
 ]
 
 const router = createRouter({
