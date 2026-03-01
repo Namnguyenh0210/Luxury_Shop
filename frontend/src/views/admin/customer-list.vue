@@ -1,268 +1,286 @@
 <template>
+  <div class="relative flex min-h-screen w-full flex-col">
+    <div class="flex h-full w-full grow">
 
-	<div class="relative flex min-h-screen w-full flex-col">
-		<div class="flex h-full w-full grow">
+      <!-- SIDEBAR -->
+      <aside class="flex h-screen w-64 flex-col justify-between border-r p-4 sticky top-0 bg-white">
+        <div class="flex flex-col gap-8">
 
-			<aside class="flex h-screen min-h-full w-64 flex-col justify-between border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 sticky top-0">
-				<div class="flex flex-col gap-8">
-					<div class="flex items-center gap-3 px-3">
-						<div class="size-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg uppercase">
-							<span sec:authentication="name">{{ #strings.substring(#authentication.name, 0, 1) }}</span>
-						</div>
+          <!-- USER -->
+          <div class="flex items-center gap-3 px-3">
+            <div class="size-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg uppercase">
+              {{ userInitial }}
+            </div>
 
-						<div class="flex flex-col">
-							<h1 class="text-text-primary-light dark:text-text-primary-dark text-sm font-bold leading-normal truncate w-32" sec:authentication="name">Admin User</h1>
-							<p class="text-text-secondary-light dark:text-text-secondary-dark text-xs font-normal leading-normal">
-								<span sec:authentication="principal.authorities">ROLE_ADMIN</span>
-							</p>
-						</div>
-					</div>
+            <div>
+              <h1 class="text-sm font-bold truncate w-32">
+                {{ user.name || "Admin" }}
+              </h1>
+              <p class="text-xs text-gray-500">
+                {{ user.role || "ROLE_ADMIN" }}
+              </p>
+            </div>
+          </div>
 
-					<nav class="flex flex-col gap-2">
-						<a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/dashboard">
-							<span class="material-symbols-outlined">dashboard</span>
-							<p class="text-sm font-medium">Dashboard</p>
-						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/products">
-							<span class="material-symbols-outlined">diamond</span>
-							<p class="text-sm font-medium">Sản Phẩm</p>
-						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/inventory">
-							<span class="material-symbols-outlined">inventory_2</span>
-							<p class="text-sm font-medium">Kho &amp; NCC</p>
-						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/orders">
-							<span class="material-symbols-outlined">receipt_long</span>
-							<p class="text-sm font-medium">Đơn Hàng</p>
-						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 bg-accent/20 text-text-primary-light dark:text-text-primary-dark transition-colors" href="/admin/customers">
-							<span class="material-symbols-outlined">group</span>
-							<p class="text-sm font-medium">Tài Khoản</p>
-						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/blogs">
-							<span class="material-symbols-outlined">article</span>
-							<p class="text-sm font-medium">Nội Dung</p>
-						</a> <a class="flex items-center gap-3 rounded-lg px-3 py-2 text-text-secondary-light hover:bg-black/5 dark:hover:bg-white/5 transition-colors" href="/admin/reports">
-							<span class="material-symbols-outlined">bar_chart</span>
-							<p class="text-sm font-medium">Báo Cáo</p>
-						</a>
-					</nav>
-				</div>
+          <!-- NAV -->
+          <nav class="flex flex-col gap-2">
+            <router-link class="sidebar-link" to="/admin/dashboard">Dashboard</router-link>
+            <router-link class="sidebar-link" to="/admin/products">Sản Phẩm</router-link>
+            <router-link class="sidebar-link" to="/admin/inventory">Kho & NCC</router-link>
+            <router-link class="sidebar-link" to="/admin/orders">Đơn Hàng</router-link>
+            <router-link class="sidebar-link bg-blue-100" to="/admin/customers">Tài Khoản</router-link>
+            <router-link class="sidebar-link" to="/admin/blogs">Nội Dung</router-link>
+            <router-link class="sidebar-link" to="/admin/reports">Báo Cáo</router-link>
+          </nav>
 
-			</aside>
+        </div>
+      </aside>
 
-			<main class="flex flex-1 flex-col">
-				<header class="sticky top-0 z-10 flex items-center justify-between whitespace-nowrap border-b border-border-light dark:border-border-dark px-10 py-3 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
-					<div class="flex items-center gap-8">
-						<h2 class="text-text-primary-light dark:text-text-primary-dark text-lg font-bold leading-tight">Quản
-							Lý Tài Khoản</h2>
-					</div>
-					<div class="flex flex-1 justify-end gap-4 items-center">
-						<div class="flex gap-2">
-							<button class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-black/5 text-text-secondary-light">
-								<span class="material-symbols-outlined">notifications</span>
-							</button>
-						</div>
-						<form method="post" class="flex items-center">
-							<button type="submit" class="flex h-10 w-10 items-center justify-center rounded-full hover:bg-red-50 text-red-500 transition-colors" title="Đăng xuất">
-								<span class="material-symbols-outlined">logout</span>
-							</button>
-						</form>
-					</div>
-				</header>
+      <!-- MAIN -->
+      <main class="flex flex-1 flex-col bg-gray-50">
 
-				<div class="flex flex-1 flex-col p-10 gap-10">
+        <header class="sticky top-0 flex items-center justify-between px-10 py-3 bg-white border-b">
+          <h2 class="text-lg font-bold">Quản Lý Tài Khoản</h2>
+        </header>
 
-					<div class="flex justify-between items-center mb-6">
-						<h1 class="text-2xl font-bold text-slate-800 dark:text-white">Danh
-							Sách Người Dùng</h1>
+        <div class="p-10 space-y-6">
 
-						<div class="flex gap-2">
-							<form method="get" class="relative">
-								<input type="text" name="keyword" placeholder="Tìm kiếm..." class="pl-10 pr-4 py-2 rounded-lg border border-slate-300 text-sm focus:ring-blue-500 w-64">
-								<button type="submit" class="absolute left-3 top-2.5 text-slate-400">
-									<span class="material-symbols-outlined text-[18px]">search</span>
-								</button>
-							</form>
-							<button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2">
-								<span class="material-symbols-outlined">add</span> Thêm Mới
-							</button>
-						</div>
-					</div>
+          <!-- ACTION BAR -->
+          <div class="flex justify-between">
+            <input
+                v-model="keyword"
+                placeholder="Tìm kiếm..."
+                class="border px-4 py-2 rounded-lg w-64"
+            />
 
-					<div class="p-4 bg-green-100 text-green-700 rounded-lg flex items-center gap-2" v-if="success">
-						<span class="material-symbols-outlined">check_circle</span> <span>{{ success }}</span>
-					</div>
-					<div class="p-4 bg-red-100 text-red-700 rounded-lg flex items-center gap-2" v-if="error">
-						<span class="material-symbols-outlined">error</span> <span>{{ error }}</span>
-					</div>
+            <button
+                @click="openModal()"
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+              Thêm Mới
+            </button>
+          </div>
 
-					<div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm bg-white dark:bg-slate-800">
-						<table class="w-full text-left text-sm text-slate-600 dark:text-slate-400">
-							<thead class="bg-slate-50 dark:bg-slate-700/50 text-xs uppercase font-semibold text-slate-700 dark:text-slate-200">
-								<tr>
-									<th class="px-6 py-4">ID</th>
-									<th class="px-6 py-4">Họ Tên</th>
-									<th class="px-6 py-4">Email</th>
-									<th class="px-6 py-4">SĐT</th>
-									<th class="px-6 py-4">Vai Trò</th>
-									<th class="px-6 py-4">Trạng Thái</th>
-									<th class="px-6 py-4 text-center">Hành Động</th>
-								</tr>
-							</thead>
-							<tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+          <!-- TABLE -->
+          <div class="bg-white rounded-xl shadow overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-100">
+              <tr>
+                <th class="p-4">ID</th>
+                <th>Họ Tên</th>
+                <th>Email</th>
+                <th>SĐT</th>
+                <th>Vai Trò</th>
+                <th>Trạng Thái</th>
+                <th class="text-center">Hành Động</th>
+              </tr>
+              </thead>
 
-								<tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors" v-for="u in customers" :key="u.id || index">
-									<td class="px-6 py-4 font-mono">#<span>{{ u.maTK }}</span></td>
-									<td class="px-6 py-4 font-medium text-slate-900 dark:text-white">{{ u.hoTen }}</td>
-									<td class="px-6 py-4">{{ u.email }}</td>
-									<td class="px-6 py-4">{{ u.soDienThoai ?: '---' }}</td>
-									<td class="px-6 py-4">
-										<div class="flex gap-1">
-											<span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs border border-purple-200" v-for="r in u.roles" :key="r.id || index">{{ r.tenRole }}</span> <span class="text-gray-400 italic text-xs" v-if="#lists.isEmpty(u.roles)">Chưa cấp quyền</span>
-										</div>
-									</td>
-									<td class="px-6 py-4"><span class="text-green-600 bg-green-50 px-2 py-1 rounded text-xs font-bold border border-green-200" v-if="u.trangThai">Hoạt
-											động</span> <span class="text-red-600 bg-red-50 px-2 py-1 rounded text-xs font-bold border border-red-200" v-if="!(u.trangThai)">Đã
-											khóa</span></td>
-									<td class="px-6 py-4 text-center">
-										<div class="flex justify-center gap-2">
-											<button type="button" onclick="editUser(this)" class="text-blue-600 hover:bg-blue-50 p-2 rounded transition-colors" title="Sửa">
-												<span class="material-symbols-outlined text-[20px]">edit</span>
-											</button>
+              <tbody>
+              <tr
+                  v-for="u in filteredCustomers"
+                  :key="u.maTK"
+                  class="border-t">
 
-											<form method="post" class="inline">
-												<button type="submit" class="p-2 rounded transition-colors">
-													<span class="material-symbols-outlined text-[20px]">{{ u.trangThai }} ? 'lock' : 'lock_open'</span>
-												</button>
-											</form>
+                <td class="p-4 font-mono">#{{ u.maTK }}</td>
+                <td>{{ u.hoTen }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.soDienThoai || '---' }}</td>
 
-											<form method="post" class="inline">
-												<button type="submit" onclick="return confirm('Xóa tài khoản này?')" class="text-red-600 hover:bg-red-50 p-2 rounded transition-colors" title="Xóa">
-													<span class="material-symbols-outlined text-[20px]">delete</span>
-												</button>
-											</form>
-										</div>
-									</td>
-								</tr>
-							</tbody>
-						</table>
+                <td>
+                    <span
+                        v-for="r in u.roles"
+                        :key="r.id"
+                        class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs mr-1">
+                      {{ r.tenRole }}
+                    </span>
 
-						<div class="p-8 text-center text-slate-500" v-if="#lists.isEmpty(customers)">Chưa có tài khoản
-							nào.</div>
-					</div>
-				</div>
-			</main>
-		</div>
+                  <span
+                      v-if="!u.roles || u.roles.length === 0"
+                      class="text-gray-400 text-xs">
+                      Chưa cấp quyền
+                    </span>
+                </td>
 
-		<div id="userModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-			<div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden animate-fade-in">
-				<div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-					<h3 class="text-lg font-bold text-slate-900 dark:text-white" id="modalTitle">Thêm Tài Khoản Mới</h3>
-					<button onclick="closeModal()" class="text-slate-400 hover:text-slate-600">
-						<span class="material-symbols-outlined">close</span>
-					</button>
-				</div>
+                <td>
+                    <span
+                        v-if="u.trangThai"
+                        class="text-green-600 font-bold">
+                      Hoạt động
+                    </span>
 
-				<form method="post" class="p-6 space-y-4">
-					<input type="hidden" id="userId" name="maTK">
+                  <span
+                      v-else
+                      class="text-red-600 font-bold">
+                      Đã khóa
+                    </span>
+                </td>
 
-					<div class="grid grid-cols-2 gap-4">
-						<div class="col-span-2">
-							<label class="block text-sm font-medium mb-1">Họ tên</label> <input type="text" id="userName" name="hoTen" required="" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
-						</div>
-						<div>
-							<label class="block text-sm font-medium mb-1">Email</label> <input type="email" id="userEmail" name="email" required="" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
-						</div>
-						<div>
-							<label class="block text-sm font-medium mb-1">Số điện
-								thoại</label> <input type="text" id="userPhone" name="soDienThoai" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
-						</div>
-						<div class="col-span-2">
-							<label class="block text-sm font-medium mb-1">Địa chỉ</label> <input type="text" id="userAddress" name="diaChi" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
-						</div>
-						<div class="col-span-2">
-							<label class="block text-sm font-medium mb-1">Mật khẩu <span class="text-xs text-slate-400 font-normal">(Để trống nếu
-									giữ nguyên)</span></label> <input type="password" name="matKhauMoi" placeholder="******" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
-						</div>
-						<div class="col-span-2">
-							<label class="block text-sm font-medium mb-1">Vai Trò</label> <select id="userRole" name="vaiTroId" class="w-full rounded-lg border-slate-300 dark:bg-slate-900 py-2 px-3 text-sm">
-								<option value="">-- Chọn vai trò --</option>
-								<option v-for="r in vaiTros" :key="r.id || index">{{ r.tenRole }}</option>
-							</select>
-						</div>
-					</div>
+                <td class="text-center space-x-2">
+                  <button
+                      @click="editUser(u)"
+                      class="text-blue-600">
+                    Sửa
+                  </button>
 
-					<div class="pt-4 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-700 mt-4">
-						<button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium">Hủy</button>
-						<button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">Lưu
-							lại</button>
-					</div>
-				</form>
-			</div>
-		</div>
+                  <button
+                      @click="toggleStatus(u)"
+                      class="text-yellow-600">
+                    {{ u.trangThai ? 'Khóa' : 'Mở khóa' }}
+                  </button>
 
-		<script>
-        const modal = document.getElementById('userModal');
-        const modalTitle = document.getElementById('modalTitle');
-        const formId = document.getElementById('userId');
-        const formName = document.getElementById('userName');
-        const formEmail = document.getElementById('userEmail');
-        const formPhone = document.getElementById('userPhone');
-        const formAddress = document.getElementById('userAddress');
-        const formRole = document.getElementById('userRole');
+                  <button
+                      @click="deleteUser(u.maTK)"
+                      class="text-red-600">
+                    Xóa
+                  </button>
+                </td>
 
-        function openModal() {
-            modalTitle.textContent = "Thêm Tài Khoản Mới";
-            formId.value = "";
-            formName.value = "";
-            formEmail.value = "";
-            formPhone.value = "";
-            formAddress.value = "";
-            formRole.value = ""; 
-            formEmail.readOnly = false;
-            formEmail.classList.remove('bg-gray-100');
-            modal.classList.remove('hidden');
-        }
+              </tr>
+              </tbody>
+            </table>
 
-        function closeModal() {
-            modal.classList.add('hidden');
-        }
+            <div v-if="customers.length === 0" class="p-6 text-center text-gray-400">
+              Chưa có tài khoản nào.
+            </div>
+          </div>
 
-        function editUser(button) {
-            const id = button.getAttribute('data-id');
-            const name = button.getAttribute('data-name');
-            const email = button.getAttribute('data-email');
-            const phone = button.getAttribute('data-phone');
-            const address = button.getAttribute('data-address');
-            const role = button.getAttribute('data-role');
+        </div>
+      </main>
+    </div>
 
-            modalTitle.textContent = "Cập Nhật Tài Khoản #" + id;
-            formId.value = id;
-            formName.value = name;
-            formEmail.value = email;
-            formPhone.value = phone;
-            formAddress.value = address;
-            if(role) formRole.value = role;
-            
-            formEmail.readOnly = true;
-            formEmail.classList.add('bg-gray-100');
-            
-            modal.classList.remove('hidden');
-        }
-    </script>
-	</div>
+    <!-- MODAL -->
+    <div
+        v-if="showModal"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center">
 
+      <div class="bg-white p-6 rounded-xl w-[500px] space-y-4">
 
+        <h3 class="font-bold text-lg">
+          {{ form.maTK ? 'Cập nhật tài khoản' : 'Thêm tài khoản' }}
+        </h3>
+
+        <input v-model="form.hoTen" placeholder="Họ tên" class="input" />
+        <input v-model="form.email" placeholder="Email" class="input" />
+        <input v-model="form.soDienThoai" placeholder="SĐT" class="input" />
+        <input v-model="form.diaChi" placeholder="Địa chỉ" class="input" />
+        <input v-model="form.matKhauMoi" placeholder="Mật khẩu mới" class="input" />
+
+        <div class="flex justify-end gap-2">
+          <button @click="closeModal" class="px-4 py-2 bg-gray-200 rounded">
+            Hủy
+          </button>
+
+          <button
+              @click="saveUser"
+              class="px-4 py-2 bg-blue-600 text-white rounded">
+            Lưu
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
 </template>
 
 <script>
+import axios from "axios"
+
 export default {
-  name: 'customer-list',
+  name: "CustomerList",
+
   data() {
-    return {}
+    return {
+      customers: [],
+      user: { name: "", role: "" },
+      keyword: "",
+      showModal: false,
+      form: {}
+    }
   },
-  mounted() {
-    // TODO: fetch data via axios or hydrate server state
+
+  computed: {
+    userInitial() {
+      return this.user.name
+          ? this.user.name.charAt(0).toUpperCase()
+          : "A"
+    },
+
+    filteredCustomers() {
+      if (!this.keyword) return this.customers
+      return this.customers.filter(u =>
+          u.hoTen.toLowerCase().includes(this.keyword.toLowerCase())
+      )
+    }
+  },
+
+  async mounted() {
+    const res = await axios.get("http://localhost:8080/admin/customers", {
+      withCredentials: true
+    })
+    this.customers = res.data.customers
+    this.user = res.data.user
+  },
+
+  methods: {
+    openModal() {
+      this.form = {}
+      this.showModal = true
+    },
+
+    closeModal() {
+      this.showModal = false
+    },
+
+    editUser(user) {
+      this.form = { ...user }
+      this.showModal = true
+    },
+
+    async saveUser() {
+      await axios.post(
+          "http://localhost:8080/admin/customers/save",
+          this.form,
+          { withCredentials: true }
+      )
+      this.showModal = false
+      this.mounted()
+    },
+
+    async deleteUser(id) {
+      if (!confirm("Xóa tài khoản này?")) return
+      await axios.post(
+          `http://localhost:8080/admin/customers/delete/${id}`,
+          {},
+          { withCredentials: true }
+      )
+      this.mounted()
+    },
+
+    async toggleStatus(user) {
+      await axios.post(
+          `http://localhost:8080/admin/customers/toggle/${user.maTK}`,
+          {},
+          { withCredentials: true }
+      )
+      this.mounted()
+    }
   }
 }
 </script>
 
 <style scoped>
-/* TODO: import or copy CSS from original static/css */
+.sidebar-link {
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.sidebar-link:hover {
+  background: #f3f4f6;
+}
+.input {
+  width: 100%;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 8px;
+}
 </style>
