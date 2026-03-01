@@ -58,7 +58,16 @@ const routes = [
   { path: '/403', component: () => import('./views/error/403.vue') }, // Moved to error/
   { path: '/:pathMatch(.*)*', component: () => import('./views/error/404.vue') },
   {path: '/admin/dashboard', component: () => import('./views/admin/AdminDashboard.vue')},
+  { path: '/admin/products', component: () => import('./views/admin/product-list.vue') },
+  { path: '/admin/inventory', component: () => import('./views/admin/inventory.vue') },
+  { path: '/admin/orders', component: () => import('./views/admin/order-list.vue') },
+  { path: '/admin/customers', component: () => import('./views/admin/customer-list.vue') },
+  { path: '/admin/blogs', component: () => import('./views/admin/blog-list.vue') },
+  { path: '/admin/reports', component: () => import('./views/admin/report-analytics.vue') },
   { path: '/staff/dashboard', component: () => import('./views/staff/StaffDashboard.vue') },
+  { path: '/staff/dashboard', component: () => import('./views/staff/StaffBaiViet.vue') },
+  { path: '/staff/dashboard', component: () => import('./views/staff/StaffOrders.vue') },
+  { path: '/staff/dashboard', component: () => import('./views/staff/StaffOrderDetail.vue') },
 ]
 
 const router = createRouter({
