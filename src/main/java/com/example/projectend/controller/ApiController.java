@@ -756,7 +756,9 @@ public class ApiController {
             if (isPayOS) {
                 response.put("success", true);
                 response.put("message", "Đơn hàng đã được tạo");
-                response.put("redirectUrl", "/payment/payos/create?orderId=" + donHang.getMaDH());
+                // ✅ Dùng absolute URL → trỏ thẳng về Spring Boot (8080)
+                // Spring Boot sẽ gọi PayOS API rồi redirect về Vue /payment?...
+                response.put("redirectUrl", "http://localhost:8080/payment/payos/create?orderId=" + donHang.getMaDH());
             } else {
                 gioHangService.clearGioHang(tk);
                 response.put("success", true);
