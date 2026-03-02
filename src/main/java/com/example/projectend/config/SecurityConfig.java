@@ -17,123 +17,146 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
+        @Autowired
+        private CustomOAuth2UserService customOAuth2UserService;
 
-    // ⚠️ Chỉ dùng tạm thời cho demo (password plain text "123")
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
-    }
+        // ⚠️ Chỉ dùng tạm thời cho demo (password plain text "123")
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return NoOpPasswordEncoder.getInstance();
+        }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http
-                // ======================= AUTHORIZE =======================
-                .authorizeHttpRequests(auth -> auth
+                http
+                                // ======================= AUTHORIZE =======================
+                                .authorizeHttpRequests(auth -> auth
 
-                        // ===== PUBLIC =====
-                        .requestMatchers(
-                                "/", "/home",
-                                "/sanpham/**",
-                                "/gioithieu", "/kienthuc", "/lienhe",
-                                "/login", "/register", "/403",
-                                "/css/**", "/js/**", "/img/**",
-                                "/images/**", "/static/**",
-                                "/error"
-                        ).permitAll()
+                                                // ===== PUBLIC =====
+                                                .requestMatchers(
+                                                                "/", "/home",
+                                                                "/sanpham/**",
+                                                                "/gioithieu", "/kienthuc", "/lienhe",
+                                                                "/login", "/register", "/403",
+                                                                "/css/**", "/js/**", "/img/**",
+                                                                "/images/**", "/static/**",
+                                                                "/error")
+                                                .permitAll()
 
-                        // ===== STAFF (ADMIN vào được luôn) =====
-                        .requestMatchers("/staff/**")
-                        .hasAnyRole("ADMIN", "NHANVIEN")
+                                                // ===== STAFF (ADMIN vào được luôn) =====
+                                                .requestMatchers("/staff/**")
+                                                .hasAnyRole("ADMIN", "NHANVIEN")
 
-                        // ===== ADMIN =====
-                        .requestMatchers("/admin/**")
-                        .hasRole("ADMIN")
+                                                // ===== ADMIN =====
+                                                .requestMatchers("/admin/**")
+                                                .hasRole("ADMIN")
 
-                        // ===== CẦN LOGIN =====
-                        .requestMatchers(
-                                "/checkout/**",
-                                "/profile/**",
-                                "/payment/**"
-                        ).authenticated()
+                                                // ===== CẦN LOGIN =====
+                                                .requestMatchers(
+                                                                "/checkout/**",
+                                                                "/profile/**",
+                                                                "/payment/**")
+                                                .authenticated()
 
-                        // ===== CÒN LẠI =====
-                        .anyRequest().permitAll()
-                )
+                                                // ===== CÒN LẠI =====
+                                                .anyRequest().permitAll())
 
-                // ======================= FORM LOGIN =======================
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .loginProcessingUrl("/login")
-                        .usernameParameter("username")
-                        .passwordParameter("password")
+                                // ======================= FORM LOGIN =======================
+                                .formLogin(form -> form
+                                                .loginPage("/login")
+                                                .loginProcessingUrl("/login")
+                                                .usernameParameter("username")
+                                                .passwordParameter("password")
 
-                        .successHandler((request, response, authentication) -> {
+                                                .successHandler((request, response, authentication) -> {
+                                                        System.out.println("=== FORM LOGIN SUCCESS ===");
 
-                            System.out.println("=== LOGIN SUCCESS ===");
-                            System.out.println("User: " + authentication.getName());
-                            System.out.println("Authorities: " + authentication.getAuthorities());
+                                                        boolean isAdmin = authentication.getAuthorities().stream()
+                                                                        .anyMatch(a -> a.getAuthority()
+                                                                                        .equals("ROLE_ADMIN"));
+                                                        boolean isStaff = authentication.getAuthorities().stream()
+                                                                        .anyMatch(a -> a.getAuthority()
+                                                                                        .equals("ROLE_NHANVIEN"));
 
-                            boolean isAdmin = authentication.getAuthorities().stream()
-                                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                                                        String redirectPath;
+                                                        if (isAdmin) {
+                                                                redirectPath = "/admin/dashboard";
+                                                        } else if (isStaff) {
+                                                                redirectPath = "/staff/dashboard";
+                                                        } else {
+                                                                redirectPath = "/";
+                                                        }
 
-                            boolean isStaff = authentication.getAuthorities().stream()
-                                    .anyMatch(a -> a.getAuthority().equals("ROLE_NHANVIEN"));
+                                                        // Dev: redirect to Vite frontend
+                                                        String referer = request.getHeader("Referer");
+                                                        String origin = request.getHeader("Origin");
+                                                        boolean isDevMode = (referer != null
+                                                                        && referer.contains("5173"))
+                                                                        || (origin != null && origin.contains("5173"));
+                                                        if (isDevMode) {
+                                                                response.sendRedirect(
+                                                                                "http://localhost:5173" + redirectPath);
+                                                        } else {
+                                                                response.sendRedirect(redirectPath);
+                                                        }
+                                                })
 
-                            if (isAdmin) {
-                                response.sendRedirect("/admin/dashboard");
-                            } else if (isStaff) {
-                                response.sendRedirect("/staff/dashboard");
-                            } else {
-                                response.sendRedirect("/");
-                            }
-                        })
+                                                .failureUrl("/login?error=true")
+                                                .permitAll())
 
-                        .failureUrl("/login?error=true")
-                        .permitAll()
-                )
+                                // ======================= OAUTH2 LOGIN =======================
+                                .oauth2Login(oauth2 -> oauth2
+                                                .loginPage("/login")
+                                                .userInfoEndpoint(userInfo -> userInfo
+                                                                .userService(customOAuth2UserService))
+                                                .successHandler((request, response, authentication) -> {
+                                                        System.out.println("=== GOOGLE OAuth2 LOGIN SUCCESS ===");
 
-                // ======================= OAUTH2 LOGIN =======================
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .userInfoEndpoint(userInfo ->
-                                userInfo.userService(customOAuth2UserService)
-                        )
-                        .successHandler((request, response, authentication) -> {
-                            // OAuth2 mặc định là KHACHHANG
-                            response.sendRedirect("/");
-                        })
-                        .failureUrl("/login?error=true")
-                )
+                                                        boolean isAdmin = authentication.getAuthorities().stream()
+                                                                        .anyMatch(a -> a.getAuthority()
+                                                                                        .equals("ROLE_ADMIN"));
+                                                        boolean isStaff = authentication.getAuthorities().stream()
+                                                                        .anyMatch(a -> a.getAuthority()
+                                                                                        .equals("ROLE_NHANVIEN"));
 
-                // ======================= SESSION =======================
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .invalidSessionUrl("/login?session=invalid")
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
-                )
+                                                        String redirectPath;
+                                                        if (isAdmin) {
+                                                                redirectPath = "/admin/dashboard";
+                                                        } else if (isStaff) {
+                                                                redirectPath = "/staff/dashboard";
+                                                        } else {
+                                                                redirectPath = "/";
+                                                        }
 
-                // ======================= LOGOUT =======================
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/?logout=success")
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll()
-                )
+                                                        // Hỗ trợ Vite dev server (:5173)
+                                                        String referer = request.getHeader("Referer");
+                                                        if (referer != null && referer.contains("localhost:5173")) {
+                                                                response.sendRedirect(
+                                                                                "http://localhost:5173" + redirectPath);
+                                                        } else {
+                                                                response.sendRedirect(redirectPath);
+                                                        }
+                                                })
+                                                .failureUrl("/login?error=true"))
 
-                // ======================= EXCEPTION =======================
-                .exceptionHandling(ex -> ex
-                        .accessDeniedPage("/403")
-                )
+                                // ======================= SESSION =======================
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                                                .invalidSessionUrl("/login?session=invalid").maximumSessions(1)
+                                                .maxSessionsPreventsLogin(false))
 
-                // ======================= CSRF (tạm disable cho ASM) =====
-                .csrf(csrf -> csrf.disable());
+                                // ======================= LOGOUT =======================
+                                .logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/?logout=success")
+                                                .invalidateHttpSession(true).clearAuthentication(true)
+                                                .deleteCookies("JSESSIONID").permitAll())
 
-        return http.build();
-    }
+                                // ======================= EXCEPTION =======================
+                                .exceptionHandling(ex -> ex.accessDeniedPage("/403"))
+
+                                // ======================= CSRF (tạm disable cho ASM) =====
+                                .csrf(csrf -> csrf.disable());
+
+                return http.build();
+        }
 }

@@ -1,6 +1,4 @@
 <template>
-
-<div layout:fragment="content">
     <main class="flex-1 px-4 sm:px-6 lg:px-8 xl:px-20 py-10">
             <div class="mx-auto max-w-7xl">
                 <!-- HeroSection -->
@@ -124,10 +122,6 @@
                 </section>
             </div>
         </main>
-</div>
-
-
-
 </template>
 
 <script>
