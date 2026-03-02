@@ -12,61 +12,60 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // ====================================================
-      // CHỈ PROXY CÁC ENDPOINT THỰC SỰ CỦA SPRING BOOT
-      // Các route Vue (/login, /admin, /staff...) KHÔNG proxy
-      // vì Vue Router tự xử lý chúng
-      // ====================================================
-
-      // ✅ REST API
+      // ✅ /api → Spring Boot (checkout data: /api/checkout, /api/checkout/place-order)
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
 
-      // ✅ Google OAuth2 - PHẢI proxy qua Spring Boot (port 8080)
-      // Khi user click "Đăng nhập với Google", Spring Security xử lý
+      // ✅ Google OAuth2
       '/oauth2': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
 
-      // ✅ Google OAuth2 callback từ Google → Spring Boot nhận
+      // ✅ Google OAuth2 callback
       '/login/oauth2': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
 
-      // ✅ Spring Security logout (invalidate session phía server)
+      // ✅ Spring Security logout
       '/logout': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
 
-      // ✅ PayOS Payment
-      '/payment': {
+      // ✅ PayOS API endpoints (check, webhook, return, cancel)
+      // /payment Vue page → KHÔNG proxy (Vue Router xử lý)
+      // /payment/payos/* → Spring Boot xử lý
+      '/payment/payos': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false
       },
 
-      // ✅ Register POST (form submit) - GET /register xử lý bởi Vue Router
+      // ✅ Register POST only — GET /register là Vue Router route
       '/register': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        // Chỉ proxy POST (form submit), không proxy GET
         bypass(req) {
           if (req.method === 'GET') return req.url
         }
       }
+
+      // ❌ KHÔNG proxy /checkout — Vue Router xử lý
+      // Data fetch qua /api/checkout (đã có trong /api proxy trên)
     }
   }
 })
+
+
 
 
 
