@@ -98,7 +98,9 @@ public class ApiController {
             response.put("hoTen", taiKhoan.getHoTen());
             response.put("soDienThoai", taiKhoan.getSoDienThoai());
             response.put("avatar", taiKhoan.getAvatar());
+            response.put("provider", taiKhoan.getProvider() != null ? taiKhoan.getProvider() : "LOCAL");
             response.put("roles", roleNames);
+            response.put("isGoogleUser", "GOOGLE".equals(taiKhoan.getProvider()));
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
