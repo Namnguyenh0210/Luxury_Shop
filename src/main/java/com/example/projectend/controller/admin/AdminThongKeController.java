@@ -5,18 +5,17 @@ import com.example.projectend.repository.DonHangRepository;
 import com.example.projectend.repository.TaiKhoanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/admin/reports")
 @PreAuthorize("hasRole('ADMIN')")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminThongKeController {
 
     @Autowired
@@ -29,33 +28,27 @@ public class AdminThongKeController {
     private TaiKhoanRepository taiKhoanRepository;
 
     @GetMapping
-    public String showDashboard(Model model) {
-        // 1. Lấy số liệu thống kê thực tế
+    public Map<String, Object> getDashboard() {
+
         BigDecimal totalRevenue = donHangRepository.sumTotalRevenue();
-        long newOrders = donHangRepository.countByTrangThaiDH(0); // 0: Chờ xác nhận
+        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+
+        long newOrders = donHangRepository.countByTrangThaiDH(0);
         long soldProducts = donHangChiTietRepository.countTotalSold();
         long totalCustomers = taiKhoanRepository.count();
 
-        // Xử lý nếu chưa có doanh thu (null) -> trả về 0
-        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+        // TODO: Sau này query thật theo ngày/tháng
+        List<Integer> chartData = List.of(15, 25, 18, 30, 22, 40, 55);
+        List<String> chartLabels = List.of("T2", "T3", "T4", "T5", "T6", "T7", "CN");
 
-        // 2. Đẩy số liệu sang View
-        model.addAttribute("totalRevenue", totalRevenue);
-        model.addAttribute("newOrders", newOrders);
-        model.addAttribute("soldProducts", soldProducts);
-        model.addAttribute("totalCustomers", totalCustomers);
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalRevenue", totalRevenue);
+        response.put("newOrders", newOrders);
+        response.put("soldProducts", soldProducts);
+        response.put("totalCustomers", totalCustomers);
+        response.put("chartData", chartData);
+        response.put("chartLabels", chartLabels);
 
-        // 3. Dữ liệu biểu đồ (Giả lập cho Demo - Thực tế cần query theo tháng/ngày)
-        // Gửi list số liệu doanh thu 7 ngày gần nhất
-        List<Integer> chartData = Arrays.asList(15, 25, 18, 30, 22, 40, 55); 
-        List<String> chartLabels = Arrays.asList("T2", "T3", "T4", "T5", "T6", "T7", "CN");
-        
-        model.addAttribute("chartData", chartData);
-        model.addAttribute("chartLabels", chartLabels);
-
-        model.addAttribute("currentPage", "reports");
-        
-        // Trả về file: templates/admin/report-analytics.html
-        return "admin/report-analytics"; 
+        return response;
     }
 }

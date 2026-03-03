@@ -6,11 +6,11 @@ import com.example.projectend.repository.TaiKhoanRepository;
 import com.example.projectend.repository.VaiTroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 
@@ -27,28 +27,43 @@ public class AuthController extends BaseController {
     private VaiTroRepository vaiTroRepository;
 
     /**
-     * Hiển thị trang đăng nhập
+     * GET /login — Redirect về Vue SPA
+     * (SPA Vue tự xử lý route /login via Vue Router)
      */
     @GetMapping("/login")
-    public String loginPage(@RequestParam(value = "error", required = false) String error,
-                            @RequestParam(value = "logout", required = false) String logout,
-                            Model model) {
-        if (error != null) {
-            model.addAttribute("errorMessage", "Email hoặc mật khẩu không đúng!");
+    public String loginPage(
+            @RequestParam(value = "error", required = false) String error,
+            @RequestParam(value = "logout", required = false) String logout,
+            HttpServletRequest request) {
+        // Detect Vite dev server (port 5173) vs production
+        String origin = request.getHeader("Origin");
+        String referer = request.getHeader("Referer");
+        boolean isDevMode = (origin != null && origin.contains("5173"))
+                || (referer != null && referer.contains("5173"));
+
+        String suffix = "";
+        if (error != null)
+            suffix = "?error=true";
+        else if (logout != null)
+            suffix = "?logout=success";
+
+        if (isDevMode) {
+            return "redirect:http://localhost:5173/login" + suffix;
         }
-        if (logout != null) {
-            model.addAttribute("successMessage", "Đăng xuất thành công!");
-        }
-        return "Login";
+        // Production: Vue SPA served from Spring Boot, forward to SPA index
+        return "redirect:/login" + suffix;
     }
 
     /**
-     * Hiển thị trang đăng ký
+     * GET /register — Redirect về Vue SPA
      */
     @GetMapping("/register")
-    public String registerPage(Model model) {
-        model.addAttribute("taiKhoan", new TaiKhoan());
-        return "register";
+    public String registerPage(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        if (referer != null && referer.contains("5173")) {
+            return "redirect:http://localhost:5173/register";
+        }
+        return "redirect:/register";
     }
 
     /**
@@ -56,11 +71,11 @@ public class AuthController extends BaseController {
      */
     @PostMapping("/register")
     public String registerSubmit(@RequestParam String hoTen,
-                                 @RequestParam String email,
-                                 @RequestParam String matKhau,
-                                 @RequestParam String confirmPassword,
-                                 @RequestParam(required = false) String soDienThoai,
-                                 RedirectAttributes redirectAttributes) {
+            @RequestParam String email,
+            @RequestParam String matKhau,
+            @RequestParam String confirmPassword,
+            @RequestParam(required = false) String soDienThoai,
+            RedirectAttributes redirectAttributes) {
 
         // Kiểm tra họ tên
         if (hoTen == null || hoTen.trim().isEmpty()) {
@@ -124,10 +139,14 @@ public class AuthController extends BaseController {
     }
 
     /**
-     * Hiển thị trang lỗi 403 - Không có quyền truy cập
+     * GET /403 — Redirect về Vue SPA error page
      */
     @GetMapping("/403")
-    public String accessDenied() {
-        return "403";
+    public String accessDenied(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        if (referer != null && referer.contains("5173")) {
+            return "redirect:http://localhost:5173/403";
+        }
+        return "redirect:/403";
     }
 }

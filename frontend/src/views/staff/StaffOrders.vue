@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout page-title="Quản Lý Đơn Hàng">
+  <StaffLayout page-title="Quản Lý Đơn Hàng">
     <div class="p-8 space-y-6">
 
       <!-- ACTION BAR -->
@@ -12,12 +12,12 @@
             v-model="keyword"
             @input="fetchOrders"
             placeholder="Tìm kiếm đơn hàng..."
-            class="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            class="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
 
         <select v-model="status" @change="fetchOrders"
-          class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
+          class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
           <option value="">Tất cả trạng thái</option>
           <option value="0">Chờ xác nhận</option>
           <option value="1">Đã xác nhận</option>
@@ -41,11 +41,11 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="order in orders" :key="order.id" class="hover:bg-yellow-50/50 transition-colors">
-              <td class="px-6 py-4 font-mono text-xs text-yellow-700 font-bold">#{{ order.maDH }}</td>
+            <tr v-for="order in orders" :key="order.maDH" class="hover:bg-blue-50/30 transition-colors">
+              <td class="px-6 py-4 font-mono text-xs text-blue-700 font-bold">#{{ order.maDH }}</td>
               <td class="px-6 py-4">
-                <p class="font-semibold text-gray-800">{{ order.taiKhoan?.hoTen || 'Khách vãng lai' }}</p>
-                <p class="text-xs text-gray-400">{{ order.taiKhoan?.email }}</p>
+                <p class="font-semibold text-gray-800">{{ order.khachHang?.hoTen || 'Khách vãng lai' }}</p>
+                <p class="text-xs text-gray-400">{{ order.khachHang?.email }}</p>
               </td>
               <td class="px-6 py-4 text-gray-600">{{ formatDate(order.ngayDat) }}</td>
               <td class="px-6 py-4 font-bold text-gray-800">{{ fmtCurrency(order.tongTien) }}</td>
@@ -56,8 +56,8 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-right">
-                <router-link :to="`/admin/orders/${order.id}`"
-                  class="text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1">
+                <router-link :to="`/staff/orders/${order.maDH}`"
+                  class="text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1">
                   Xem
                   <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                 </router-link>
@@ -79,7 +79,7 @@
           <span class="material-symbols-outlined text-[16px]">chevron_left</span>
           Trước
         </button>
-        <span class="px-4 py-2 bg-yellow-600 text-white rounded-xl text-sm font-bold">{{ page + 1 }}</span>
+        <span class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold">{{ page + 1 }}</span>
         <button v-if="page < totalPages - 1" @click="changePage(page + 1)"
           class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium transition-colors">
           Sau
@@ -87,16 +87,16 @@
         </button>
       </div>
     </div>
-  </AdminLayout>
+  </StaffLayout>
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
+import StaffLayout from './StaffLayout.vue'
 import axios from 'axios'
 
 export default {
-  name: 'OrderList',
-  components: { AdminLayout },
+  name: 'StaffOrders',
+  components: { StaffLayout },
 
   data() {
     return {
@@ -111,11 +111,11 @@ export default {
   methods: {
     async fetchOrders() {
       try {
-        const res = await axios.get('/admin/orders/list', {
+        const res = await axios.get('/staff/orders', {
           params: { keyword: this.keyword, status: this.status, page: this.page },
           withCredentials: true
         })
-        this.orders     = res.data.orders     || res.data || []
+        this.orders     = res.data.content || res.data.orders || res.data || []
         this.totalPages = res.data.totalPages || 1
       } catch (e) { console.error(e) }
     },
@@ -124,9 +124,7 @@ export default {
 
     formatDate(d) { return d ? new Date(d).toLocaleDateString('vi-VN') : '---' },
 
-    fmtCurrency(v) {
-      return new Intl.NumberFormat('vi-VN').format(v || 0) + ' đ'
-    },
+    fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v || 0) + ' đ' },
 
     statusText(s) {
       return { 0: 'Chờ xác nhận', 1: 'Đã xác nhận', 2: 'Đang giao', 3: 'Hoàn tất', 4: 'Đã hủy' }[s] ?? 'Không xác định'

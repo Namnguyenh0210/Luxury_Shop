@@ -1,6 +1,4 @@
 <template>
-
-<div layout:fragment="content">
             <div class="layout-content-container flex flex-col w-full max-w-5xl flex-1 px-4 sm:px-6 lg:px-8">
                 <!-- Breadcrumbs Component -->
                 <div class="flex flex-wrap gap-2 px-4 py-4">
@@ -81,9 +79,6 @@
                 </div>
             </div>
         
-</div>
-
-
 
 </template>
 
