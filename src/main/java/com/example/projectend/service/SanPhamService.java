@@ -2,11 +2,11 @@ package com.example.projectend.service;
 
 import com.example.projectend.entity.LoaiSanPham;
 import com.example.projectend.entity.SanPham;
-import com.example.projectend.entity.KhuyenMai;
+//import com.example.projectend.entity.KhuyenMai;
 import com.example.projectend.repository.LoaiSanPhamRepository;
 import com.example.projectend.repository.SanPhamRepository;
 import com.example.projectend.repository.SanPhamChiTietRepository;
-import com.example.projectend.repository.KhuyenMaiRepository;
+//import com.example.projectend.repository.KhuyenMaiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,8 +37,8 @@ public class SanPhamService {
     @Autowired
     private SanPhamChiTietRepository sanPhamChiTietRepository;
 
-    @Autowired
-    private KhuyenMaiRepository khuyenMaiRepository;
+//    @Autowired
+//    private KhuyenMaiRepository khuyenMaiRepository;
 
     /**
      * Lấy danh sách sản phẩm nổi bật cho trang chủ
@@ -237,33 +237,70 @@ public class SanPhamService {
         return sanPhamRepository.findAll(Sort.by(Sort.Direction.DESC, "ngayTao"));
     }
 
+//    public Map<Long, PriceStockInfo> buildPriceStockMap(List<SanPham> products) {
+//        Map<Long, PriceStockInfo> map = new java.util.HashMap<>();
+//        if (products == null || products.isEmpty()) return map;
+//        List<Long> ids = products.stream().map(SanPham::getMaSP).toList();
+//        List<com.example.projectend.repository.SanPhamChiTietRepository.PriceStockProjection> rows = sanPhamChiTietRepository.aggregateForProducts(ids);
+//
+//        // Lấy thông tin khuyến mãi cho tất cả sản phẩm
+//        LocalDateTime now = LocalDateTime.now();
+//        Map<Long, KhuyenMai> promotionMap = new java.util.HashMap<>();
+//        for (Long id : ids) {
+//            List<KhuyenMai> promotions = khuyenMaiRepository.findActivePromotionsByProduct(id, now);
+//            if (!promotions.isEmpty()) {
+//                // Lấy khuyến mãi có % giảm cao nhất
+//                promotionMap.put(id, promotions.stream()
+//                    .filter(km -> km.getLoaiGiaTri() == 0) // Chỉ lấy loại giảm %
+//                    .max((a, b) -> a.getGiaTri().compareTo(b.getGiaTri()))
+//                    .orElse(null));
+//            }
+//        }
+//
+//        for (var r : rows) {
+//            KhuyenMai promo = promotionMap.get(r.getMaSP());
+//            map.put(r.getMaSP(), new PriceStockInfo(r.getMinPrice(), r.getMaxPrice(), r.getTotalStock(), promo));
+//        }
+//        // Fill missing products (no variant yet)
+//        for (Long id : ids) {
+//            map.putIfAbsent(id, new PriceStockInfo(BigDecimal.ZERO, BigDecimal.ZERO, 0, null));
+//        }
+//        return map;
+
     public Map<Long, PriceStockInfo> buildPriceStockMap(List<SanPham> products) {
         Map<Long, PriceStockInfo> map = new java.util.HashMap<>();
-        if (products == null || products.isEmpty()) return map;
-        List<Long> ids = products.stream().map(SanPham::getMaSP).toList();
-        List<com.example.projectend.repository.SanPhamChiTietRepository.PriceStockProjection> rows = sanPhamChiTietRepository.aggregateForProducts(ids);
 
-        // Lấy thông tin khuyến mãi cho tất cả sản phẩm
-        LocalDateTime now = LocalDateTime.now();
-        Map<Long, KhuyenMai> promotionMap = new java.util.HashMap<>();
-        for (Long id : ids) {
-            List<KhuyenMai> promotions = khuyenMaiRepository.findActivePromotionsByProduct(id, now);
-            if (!promotions.isEmpty()) {
-                // Lấy khuyến mãi có % giảm cao nhất
-                promotionMap.put(id, promotions.stream()
-                    .filter(km -> km.getLoaiGiaTri() == 0) // Chỉ lấy loại giảm %
-                    .max((a, b) -> a.getGiaTri().compareTo(b.getGiaTri()))
-                    .orElse(null));
-            }
+        if (products == null || products.isEmpty()) {
+            return map;
         }
+
+        List<Long> ids = products.stream()
+                .map(SanPham::getMaSP)
+                .toList();
+
+        List<com.example.projectend.repository.SanPhamChiTietRepository.PriceStockProjection> rows =
+                sanPhamChiTietRepository.aggregateForProducts(ids);
 
         for (var r : rows) {
-            KhuyenMai promo = promotionMap.get(r.getMaSP());
-            map.put(r.getMaSP(), new PriceStockInfo(r.getMinPrice(), r.getMaxPrice(), r.getTotalStock(), promo));
+            map.put(
+                    r.getMaSP(),
+                    new PriceStockInfo(
+                            r.getMinPrice(),
+                            r.getMaxPrice(),
+                            r.getTotalStock()
+                    )
+            );
         }
-        // Fill missing products (no variant yet)
+
         for (Long id : ids) {
-            map.putIfAbsent(id, new PriceStockInfo(BigDecimal.ZERO, BigDecimal.ZERO, 0, null));
+            map.putIfAbsent(
+                    id,
+                    new PriceStockInfo(
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO,
+                            0
+                    )
+            );
         }
         return map;
     }
@@ -272,34 +309,17 @@ public class SanPhamService {
         private BigDecimal minPrice;
         private BigDecimal maxPrice;
         private Integer totalStock;
-        private KhuyenMai promotion;
 
-        public PriceStockInfo(BigDecimal minPrice, BigDecimal maxPrice, Integer totalStock, KhuyenMai promotion) {
+        public PriceStockInfo(BigDecimal minPrice, BigDecimal maxPrice, Integer totalStock) {
             this.minPrice = minPrice != null ? minPrice : BigDecimal.ZERO;
             this.maxPrice = maxPrice != null ? maxPrice : this.minPrice;
             this.totalStock = totalStock != null ? totalStock : 0;
-            this.promotion = promotion;
         }
 
         public BigDecimal getMinPrice() { return minPrice; }
         public BigDecimal getMaxPrice() { return maxPrice; }
         public Integer getTotalStock() { return totalStock; }
-        public boolean isOutOfStock() { return totalStock == null || totalStock <= 0; }
-        public KhuyenMai getPromotion() { return promotion; }
-        public boolean hasPromotion() { return promotion != null && promotion.isActive(); }
-
-        public BigDecimal getDiscountPercent() {
-            if (hasPromotion()) {
-                return promotion.getDiscountPercent();
-            }
-            return BigDecimal.ZERO;
-        }
-
-        public BigDecimal getDiscountedMinPrice() {
-            if (hasPromotion()) {
-                return promotion.calculateDiscountedPrice(minPrice);
-            }
-            return minPrice;
-        }
+        public boolean isOutOfStock() { return totalStock <= 0; }
     }
+
 }
