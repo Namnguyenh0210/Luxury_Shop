@@ -12,7 +12,7 @@
     <artifactId>projectend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>projectend</name>
-    <description>Website Bán Đồ Tết Nguyên Đán</description>
+    <description>Website Bán Quần Áo</description>
     <properties>
         <java.version>17</java.version>
     </properties>

@@ -127,7 +127,7 @@ export default {
 
   async created() {
     try {
-      const res = await axios.get('/admin/dashboard-data', { withCredentials: true })
+      const res = await axios.get('/admin/reports', { withCredentials: true })
       this.adminUser = res.data.user || { name: 'Admin', role: 'ROLE_ADMIN' }
     } catch {
       this.adminUser = { name: 'Admin', role: 'ROLE_ADMIN' }

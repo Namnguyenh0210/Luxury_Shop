@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin/reports")
+@RequestMapping("/api/admin/reports")
 @PreAuthorize("hasRole('ADMIN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminThongKeController {
@@ -31,7 +31,8 @@ public class AdminThongKeController {
     public Map<String, Object> getDashboard() {
 
         BigDecimal totalRevenue = donHangRepository.sumTotalRevenue();
-        if (totalRevenue == null) totalRevenue = BigDecimal.ZERO;
+        if (totalRevenue == null)
+            totalRevenue = BigDecimal.ZERO;
 
         long newOrders = donHangRepository.countByTrangThaiDH(0);
         long soldProducts = donHangChiTietRepository.countTotalSold();
