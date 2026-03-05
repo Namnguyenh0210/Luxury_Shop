@@ -3,7 +3,7 @@
 	<div class="relative flex min-h-screen w-full flex-col">
 		<div class="flex h-full w-full grow">
 
-<!--			<aside class="flex h-screen min-h-full w-64 flex-col justify-between border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 sticky top-0">-->
+			<aside class="flex h-screen min-h-full w-64 flex-col justify-between border-r border-border-light dark:border-border-dark bg-card-light dark:bg-card-dark p-4 sticky top-0">
 				<div class="flex flex-col gap-8">
 					<div class="flex items-center gap-3 px-3">
 						<div class="size-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-lg uppercase">
