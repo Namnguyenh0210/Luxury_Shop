@@ -96,7 +96,7 @@ export default {
 
   async mounted() {
     try {
-      const res = await axios.get('/admin/dashboard-data', { withCredentials: true })
+      const res = await axios.get('/admin/reports', { withCredentials: true })
       this.totalRevenue   = res.data.totalRevenue   || 0
       this.newOrdersCount = res.data.newOrdersCount || 0
       this.uniqueVisitors = res.data.uniqueVisitors || 0

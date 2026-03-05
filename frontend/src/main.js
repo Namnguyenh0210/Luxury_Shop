@@ -31,10 +31,11 @@ const routes = [
   { path: '/product/:id', component: () => import('./views/ProductDetail.vue') },
   { path: '/sanpham/:id', component: () => import('./views/ProductDetail.vue') },
 
-  // Blog - Using ComingSoon wrapper
-  { path: '/blog', component: ComingSoon, props: { title: 'Blog' } },
-  { path: '/kienthuc', component: ComingSoon, props: { title: 'Kiến thức' } },
-  { path: '/blog/:id', component: ComingSoon, props: { title: 'Blog Detail' } },
+  // Blog - Kết nối DB thật ✅
+  { path: '/blog', component: () => import('./views/BlogPage.vue') },
+  { path: '/kienthuc', component: () => import('./views/BlogPage.vue') },
+  { path: '/blog/:id', component: () => import('./views/BlogDetail.vue') },
+  { path: '/kienthuc/:id', component: () => import('./views/BlogDetail.vue') },
 
   // Cart & Checkout - Cart converted ✅
   { path: '/giohang', component: () => import('./views/Cart.vue') },

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin/products")
+@RequestMapping("/api/admin/products")
 @PreAuthorize("hasRole('ADMIN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminSanPhamController {

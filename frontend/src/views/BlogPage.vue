@@ -1,141 +1,255 @@
 <template>
-    <main class="flex-1 px-4 sm:px-6 lg:px-8 xl:px-20 py-10">
-            <div class="mx-auto max-w-7xl">
-                <!-- HeroSection -->
-                <section class="mb-16 md:mb-24">
-                    <div class="@container">
-                        <div class="flex min-h-[60vh] flex-col gap-6 bg-cover bg-center bg-no-repeat @[480px]:gap-8 @[480px]:rounded-xl items-center justify-center p-4 text-center" data-alt="A high-fashion model posing in a dramatic, flowing gown against a minimalist background" style="background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDMTNoi4GK3bD9_L6V5FInuIltPBhQaSgp9c6pJSXVVUFUOGbaLX5qWkS6PapTywk-PdfIvXbWzRqUb3QneLD78UoPfJz5Dq8XeTi8kX8jZ53hkE4ZTXgUlj6xHyiDNLF9as7HR-iA1otrrbjasvZZgnXDANWvdgkKTRzSlTQVEmUyk-hQDsqmxL88bCEzONW515DyTOXaMbWXgDDbR2ABRhKE23E--uCxI0HH0_5PwvO_1vdM2ZDUKdW5lvRPEvLjVjY9ymCsxrPk&quot;);">
-                            <div class="flex flex-col gap-4">
-                                <h1 class="font-serif text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">The Essence of Timeless Style</h1>
-                                <h2 class="text-base font-normal leading-normal text-white/90 sm:text-lg">Explore the latest trends, designer interviews, and stories from the world of luxury fashion.</h2>
-                            </div>
-                            <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-primary text-text-primary-light text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-all duration-300">
-                                <span class="truncate">Đọc bài mới nhất</span>
-                            </button>
-                        </div>
-                    </div>
-                </section>
-                <!-- Featured Articles Section -->
-                <section class="mb-16 md:mb-24">
-                    <h2 class="mb-8 text-center font-serif text-3xl font-bold tracking-tight text-text-primary-light dark:text-text-primary-dark md:text-4xl">Bài viết nổi bật</h2>
-                    <div class="grid grid-cols-1 gap-12 md:grid-cols-2">
-                        <!-- Featured Card 1 -->
-                        <div class="flex flex-col group">
-                            <div class="w-full overflow-hidden rounded-lg bg-center bg-no-repeat aspect-[4/3] bg-cover" data-alt="Close up of a designer handbag with intricate stitching details" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAms7ASKIhLUIsLA7P6Lwn-WmVTT01gO8W-vr2_G-EhdtbSYoXTws7SdWEkXjeMnBODSybx57KK-fZsCFubkI2AlJex1_jX0m5nxsCakZY-LhkB0J1F1qnE0ttctyg2v3nVgloZtN71pZDOO_wLt7jnAvOYH83E9SBUV6SuY4H8QMSchLmu5wSr1VsENKuPYdG2oKJYA5YpHny5vKs8SR-pRiMaDPQeDnxR0e0_ehcPEEAdpU3-R9jllfdDYcrM9zovqMOcs6AvVKs&quot;);"></div>
-                            <div class="flex flex-col items-start gap-2 py-4">
-                                <p class="text-lg font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark group-hover:text-cta-hover dark:group-hover:text-white transition-colors">An Interview with a Visionary Designer</p>
-                                <p class="text-base font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">Discover the inspiration behind the latest groundbreaking collection that's captivating the fashion world.</p>
-                                <a class="mt-2 inline-block text-sm font-bold text-primary hover:text-cta-hover" href="#">Read Full Story →</a>
-                            </div>
-                        </div>
-                        <!-- Featured Card 2 -->
-                        <div class="flex flex-col group">
-                            <div class="w-full overflow-hidden rounded-lg bg-center bg-no-repeat aspect-[4/3] bg-cover" data-alt="A model wearing a striking seasonal outfit on a runway" style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAhbE_IoJ-Qob16O6E_AocZMCT_1_UBpuJzSTs3jkS0Cus6cwef-mzGsnYDGlQBfP90Dz6LpjVniMApiRWHarXzEDst8jYHy5X1nYBNzxDHalYmNJ9Udn5jdR5XXtkriuC0BA1gHQmY8GTR3bGJ9NOWChkFY9wKOJVYkRwK7UnXTJKnHCu3H3vKE5nm8aKnKqyP7ZRdeJYkmomW7aExElCUpiEH7JGf7yGpseNl2-yiF3n4wXmkxa0MR4egrEvGy8ZcUKbFD8n7VgI&quot;);"></div>
-                            <div class="flex flex-col items-start gap-2 py-4">
-                                <p class="text-lg font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark group-hover:text-cta-hover dark:group-hover:text-white transition-colors">Autumn/Winter 2024: A Lookbook Analysis</p>
-                                <p class="text-base font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">Breaking down the key trends and must-have pieces from this season's most anticipated collections.</p>
-                                <a class="mt-2 inline-block text-sm font-bold text-primary hover:text-cta-hover" href="#">Read Full Story →</a>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                <!-- Brands Section -->
-                <section class="mb-16 md:mb-24">
-                    <h2 class="mb-8 text-center font-serif text-3xl font-bold tracking-tight text-text-primary-light dark:text-text-primary-dark md:text-4xl">Bài viết về các Brand</h2>
-                    <div class="grid grid-cols-2 gap-8 sm:grid-cols-3 md:grid-cols-6 items-center">
-                        <a class="grayscale hover:grayscale-0 transition duration-300 opacity-60 hover:opacity-100" data-alt="Chanel logo" href="#"><img alt="Chanel Logo" class="mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5JzUSo_4qYBEBxNS9e6j-KPYo88P9z0drWpaGYZ1XurfMThLX1zJcckL11jnE-VWujG_6rvOeHUBNuJVOiz0zT9O9WyiEVUgVHVofhnlqYWGNUoTKGWJ7XYVpYth5zY8qD9UHm2ODD9o64E1iIPLVU-ndiEFx8ulF11YGAuDwALakFrfsBGpUId0iXlbNepGHAiWZqmMFlF_lHuHoCTYJsLOVzQsKJR45A5t9Dw7GQS-NocZt_8u6iIzSCUVYyN1hrtskBuWM-sw"></a>
-                        <a class="grayscale hover:grayscale-0 transition duration-300 opacity-60 hover:opacity-100" data-alt="Dior logo" href="#"><img alt="Dior Logo" class="mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDiBA1FvBezHUd1EdnnKpgxJjECeP9AkRaWpU4aRWieq7V47_gU4IUbDYGoH0Qv5Ln7Lqjy7C5ywFdM-96twWzFmrcr9LCDHxS0PENyCdqlIO6z_0YU6KR_joyqYwEywit6jfF3ywtVXhvK8N0z435HLhXQhG7deD685PeR_AxFpEmWZRMJFtkKGSAOKVM6bt2szKSuKg8IOy-Osg4O0iEs4mAPbuiIYKNGbnUOTJzE3nkvVyVunCDAWtzusOVE6QRzvHcqQKlFOME"></a>
-                        <a class="grayscale hover:grayscale-0 transition duration-300 opacity-60 hover:opacity-100" data-alt="Gucci logo" href="#"><img alt="Gucci Logo" class="mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHYxHuhyRhSkXBSKFarDdtBQFyLZyQYl6mrkzgAY7KVrE4Jjuun268oTum2GLOK_W41lT5khExuTLshILU6Xtv1TgqV8jAGQFHPEKerdoJr3uOCRJoEG5yezrT0yBp_LqovPxNsvyMxAVOueMk4EUOz63rJwUnS9eYlAyNe2Sxb6_wdk9JonIBxC0LDRnOiI3m91GE9Oftc6GXAkXh9pQa3u-pw1RrW652xB81EyAowWWSzMb5h1DM0X2m_ABdIKkJCGmTzbt_h48"></a>
-                        <a class="grayscale hover:grayscale-0 transition duration-300 opacity-60 hover:opacity-100" data-alt="Prada logo" href="#"><img alt="Prada Logo" class="mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCN3HTtZerPZNpBoI4IyN8bqKKhuDTiuJAw4yH8LCq4GvVWikHiGCh9PhzXgJtQ0QYAP5IIKhSq9PV7mX8pA1kYXYhn8FBYLdzxRWV7TpURNvx02JnfQxT1LMRwR7QHRYt1HdNwhB8_zzLGtONzao9YIC0h1Nb6jCguoZTYqp9Xco-TrVGsXzwnW1JduANeTeM__4ZixXbP4DfBlt8mshycKIAM9XlN89rlxWrnIuY2W65pOG1S1UwjGuqKvS85YbPuIKj_yWc2gJM"></a>
-                        <a class="grayscale hover:grayscale-0 transition duration-300 opacity-60 hover:opacity-100" data-alt="Versace logo" href="#"><img alt="Versace Logo" class="mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMmroDsBI9lOiZoykwG2vQ36TrVesLfOvyzZTPHzBgRihAT5pjD2JtjpNYouByNLdk5rhpDJ_isfOkbl1Uf1474n5Q4TaUjIwZ0MJNKataiJUAkaq-_CmOxvOF7oyu0YTzZdBU0z5tTAPjEbxj0m23CJYa5AJCimvCrHTnwyw7V_yul8nK7Cyww_mKr3PU30qzd_ZQ0Tn9hpaVL0mU3eXHRsxsuYDJqEu2Q4TEWK4O987ACf4pRorV5KJXLX3UhtIZy89_uWh4q58"></a>
-                        <a class="grayscale hover:grayscale-0 transition duration-300 opacity-60 hover:opacity-100" data-alt="Fendi logo" href="#"><img alt="Fendi Logo" class="mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbGnz9fDc4LqX5M7lKAOHgbXZyfj_Aa68X7BCcqFcsMCsSKXeO-O96zwvLLGAu1Z9ixAWTJAQUUMSWZgIhg0xkfKEvbmMtwczEs_t3WlkPxy2Ye40gOqG7PBxAB5R0p2PH9xKH9sUCKC2CyCVudVmknvGuKovqB6WxZROIdxvHElK8aglsAANRS0rUj9CelN65d2XAq6IKYhHvZdsVmpU5v-1jOEOfFai2DDvU0Vb-2Wdl9TvyinxV8_ff8vEfEbL97rdGLDpIwNc"></a>
-                    </div>
-                </section>
-                <!-- Fashion News Blog Section -->
-                <section>
-                    <h2 class="mb-4 text-center font-serif text-3xl font-bold tracking-tight text-text-primary-light dark:text-text-primary-dark md:text-4xl">Blog Tin tức thời trang</h2>
-                    <div class="mb-8 flex justify-center border-b border-border-light dark:border-border-dark">
-                        <div class="flex items-center justify-center p-4">
-                            <div class="flex min-w-72 max-w-[480px] flex-1 flex-col gap-4 py-4">
-                                <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-primary text-text-primary-light text-base font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-all duration-300">
-                                    <span class="truncate">Đọc bài mới nhất</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                        <!-- Article Card 1 -->
-                        <div class="flex flex-col group">
-                            <div class="w-full overflow-hidden rounded-lg bg-center bg-no-repeat aspect-[4/3] bg-cover" data-alt="A man in a stylish suit walking down a city street." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuCNt23MRJe6yInAdsYaJG9lVj_IkAz_M_Q6ow1f2ImBZagzEXmLXEKkQAxcRHvtRnNCKrXSZWtlQnr6wpvRTibnwmoqQ0PHNLoSqqlPh4vgbOaJVVnSw_LiTIqR5MpGpIXcsMAH8ygTCElgadXLk5h54GKyeeDiS3xUABzo8uRX35yQ0GR4ztugOVTAPQHQd3QQLO7GIj4Fp7f99NQK0b3n1rBGnJcIk67sWTv78Fp2I3NM5zHKgIcAd8GhcEacagi5vUL4YSEntjY&quot;);"></div>
-                            <div class="flex flex-col items-start gap-1 py-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-primary">Thời trang Nam</p>
-                                <p class="text-lg font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark group-hover:text-cta-hover dark:group-hover:text-white transition-colors">The Modern Gentleman's Wardrobe</p>
-                                <p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">Essential pieces that define contemporary men's fashion and elevate any look.</p>
-                            </div>
-                        </div>
-                        <!-- Article Card 2 -->
-                        <div class="flex flex-col group">
-                            <div class="w-full overflow-hidden rounded-lg bg-center bg-no-repeat aspect-[4/3] bg-cover" data-alt="A woman poses in a vibrant, colorful dress outdoors." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuC00nusM5QDvya229GoJ8zpIBG1l7Csk6__l0GpGhL3IAPscNUq1n2WSvTH67fN0IAVxmVP6Uo5Ub3raOJzdNMAAGXpB5FRr4gmsjAlctWDdxj8LYRLSQnG5YqX_veNsmSpo2UBwrh8gdtBkzyllZWqIzwvtGgcWvOmYalTN_ZDnEvzKy2YELkuPJW_M7sOWCb0u-Z7g3yyAuY8Xwh89cBqNe4rflRRwcDo6RXt19W4WJid9YKkGpvaaBndNTPARFFVP6iKpNJ-oMU&quot;);"></div>
-                            <div class="flex flex-col items-start gap-1 py-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-primary">Thời trang Nữ</p>
-                                <p class="text-lg font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark group-hover:text-cta-hover dark:group-hover:text-white transition-colors">Bold Colors and Power Dressing</p>
-                                <p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-text-secondary-dark">How to incorporate vibrant hues into your wardrobe for a confident statement.</p>
-                            </div>
-                        </div>
-                        <!-- Article Card 3 -->
-                        <div class="flex flex-col group">
-                            <div class="w-full overflow-hidden rounded-lg bg-center bg-no-repeat aspect-[4/3] bg-cover" data-alt="Close up of luxury watches on display." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBTDw5EpQFDOahcgt73MDejTV3iFx8S-KpdFADBCc8IdshJ126L-h2MkQfM4XCk4qXWWeIwNMm51LefLIqHXnLYkYjlX62r6d0L8mLFCGGHX63TuQQw4IVyi6xcylbTePpHSHXi_vaEnSvmexCslRmL-OS6ba-o4CubkvS3O5wWuIOu-6uJz0v4_pdQEIoAdkD_HogiWErosTCu8gzBfdIkj0TgC7UtynfPxYz79dzjKHeZwst29-70tBYHCYWqyoMDuKsOaOZ15d0&quot;);"></div>
-                            <div class="flex flex-col items-start gap-1 py-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-primary">Accessories</p>
-                                <p class="text-lg font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark group-hover:text-cta-hover dark:group-hover:text-white transition-colors">The Art of Horology: A Guide to Luxury Watches</p>
-                                <p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-textsecondary-dark">Exploring the craftsmanship and heritage behind iconic timepieces.</p>
-                            </div>
-                        </div>
-                        <!-- Article Card 4 -->
-                        <div class="flex flex-col group">
-                            <div class="w-full overflow-hidden rounded-lg bg-center bg-no-repeat aspect-[4/3] bg-cover" data-alt="A woman with elegant make up and jewelry." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuAxafyaKC_qH34gNue917zZ4Qz7U-QvbZNMR8tiDj5_sFlEIHaIIJJDCDiWDZkK3Zb9l_1DBy4gAogs4QBtP_vC8pVupyzGuNyNvYkXYRqyAdMgyWPRWDaZchJuiqH_oFaCjWvG_LmaimwnS_ZjJugcIIq025KClU7AWAaqUE1XEdMc6THkWgGVpC-pOwIn9ZA5JaahxcJ5fvTXBxwobONI8h2XK8GUlGXCv-QfjNV4faXfjRspZAeN-yykmWW9FlbrYZpUEmbPfzc&quot;);"></div>
-                            <div class="flex flex-col items-start gap-1 py-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-primary">Thời trang Nữ</p>
-                                <p class="text-lg font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark group-hover:text-cta-hover dark:group-hover:text-white transition-colors">Minimalist Jewelry: Less is More</p>
-                                <p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-textsecondary-dark">The subtle power of delicate jewelry and how to style it for maximum impact.</p>
-                            </div>
-                        </div>
-                        <!-- Article Card 5 -->
-                        <div class="flex flex-col group">
-                            <div class="w-full overflow-hidden rounded-lg bg-center bg-no-repeat aspect-[4/3] bg-cover" data-alt="A collection of high-end leather shoes for men." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBhUd6gSv89xkvf44_qQp7JhDZsJB9a2EUb_GrFStWoZRKipzzQTQa9QSkbOfbnb4vE1LxoUBGuAu6fKeQlvyD7ozngzQDFyvqTte8481VsoyGs7Zn5KWcyBZEd8dxoGdZbOJEJbcngQz8sBaRnhZnHOC-byfDckMfWf6QCD2hn9LgUx1rRuhQgNgf7yV6fStUxBKoCjskTp6Jowi7Co4NV1kZeugfvn43br8VYgAZdwLbd-hXaI4qbBjmujxTxun8VhmtElMv2X9A&quot;);"></div>
-                            <div class="flex flex-col items-start gap-1 py-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-primary">Thời trang Nam</p>
-                                <p class="text-lg font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark group-hover:text-cta-hover dark:group-hover:text-white transition-colors">The Ultimate Guide to Men's Footwear</p>
-                                <p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-textsecondary-dark">From classic Oxfords to modern sneakers, a look at essential shoe styles.</p>
-                            </div>
-                        </div>
-                        <!-- Article Card 6 -->
-                        <div class="flex flex-col group">
-                            <div class="w-full overflow-hidden rounded-lg bg-center bg-no-repeat aspect-[4/3] bg-cover" data-alt="Perfume bottles arranged aesthetically on a surface." style="background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuDe0w6QaMgNWKkyI92z9gXnsbYhKRHt7u_TLabu3ueYrV0lYZwxE82q2PEJSe2zAM_iwsdxVaIKYe7BWyNjhU1Wmly2i7lfyCtzk1Je8olDcELNdpWhvrvYGgJ_3I7GA3H0YwgWjo7Skr6SKtbNSA5DDbbAIkpWC35UZvGq_vJh03lpsPlHjkdn1N2HhmNNSC2O7nlVYD0_9J8eJ4akjQBs56AY3O8nWkFkdj1df_892KcMak5-SDVsPQ2qTxwh0Kdh0wIe0KBzedo&quot;);"></div>
-                            <div class="flex flex-col items-start gap-1 py-4">
-                                <p class="text-xs font-bold uppercase tracking-widest text-primary">Beauty</p>
-                                <p class="text-lg font-bold leading-tight tracking-tight text-text-primary-light dark:text-text-primary-dark group-hover:text-cta-hover dark:group-hover:text-white transition-colors">Finding Your Signature Scent</p>
-                                <p class="text-sm font-normal leading-normal text-text-secondary-light dark:text-textsecondary-dark">An expert's advice on navigating the world of haute parfumerie.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </main>
+  <div class="relative flex min-h-screen w-full flex-col group/design-root bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark font-display">
+    <AppHeader />
+    <div class="flex-grow">
+
+    <!-- HERO SECTION -->
+    <section class="relative min-h-[60vh] flex items-center justify-center overflow-hidden">
+      <div class="absolute inset-0 bg-cover bg-center"
+        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMTNoi4GK3bD9_L6V5FInuIltPBhQaSgp9c6pJSXVVUFUOGbaLX5qWkS6PapTywk-PdfIvXbWzRqUb3QneLD78UoPfJz5Dq8XeTi8kX8jZ53hkE4ZTXgUlj6xHyiDNLF9as7HR-iA1otrrbjasvZZgnXDANWvdgkKTRzSlTQVEmUyk-hQDsqmxL88bCEzONW515DyTOXaMbWXgDDbR2ABRhKE23E--uCxI0HH0_5PwvO_1vdM2ZDUKdW5lvRPEvLjVjY9ymCsxrPk');">
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/70"></div>
+      <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        <p class="text-yellow-400 text-sm font-bold uppercase tracking-widest mb-4">✦ Luxury Fashion Blog ✦</p>
+        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+          Phong Cách Sống<br><span class="text-yellow-400">Đẳng Cấp</span>
+        </h1>
+        <p class="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
+          Khám phá xu hướng thời trang, phong cách sống xa hoa và những câu chuyện đằng sau các thương hiệu luxury hàng đầu thế giới.
+        </p>
+        <a href="#bai-viet" class="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105">
+          Đọc Ngay
+          <span class="material-symbols-outlined">arrow_downward</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16" id="bai-viet">
+
+      <!-- Loading -->
+      <div v-if="dangTai" class="flex flex-col items-center justify-center py-24">
+        <div class="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-gray-400">Đang tải bài viết...</p>
+      </div>
+
+      <template v-else>
+
+        <!-- BÀI VIẾT NỔI BẬT -->
+        <section v-if="noiBat.length > 0" class="mb-16">
+          <div class="flex items-center gap-3 mb-8">
+            <div class="w-1 h-8 bg-yellow-500 rounded-full"></div>
+            <h2 class="text-2xl font-bold text-gray-900">Bài Viết Nổi Bật</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <router-link v-for="bv in noiBat.slice(0,2)" :key="bv.maBV"
+              :to="`/blog/${bv.maBV}`"
+              class="group relative overflow-hidden rounded-2xl bg-gray-100 block"
+              style="aspect-ratio: 4/3;">
+              <img v-if="bv.hinhAnh" :src="bv.hinhAnh" :alt="bv.tieuDe"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div v-else class="w-full h-full bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center">
+                <span class="material-symbols-outlined text-6xl text-yellow-400">article</span>
+              </div>
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+              <div class="absolute bottom-0 left-0 right-0 p-6">
+                <span v-if="bv.loaiBaiViet" class="inline-block bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full mb-3">
+                  {{ bv.loaiBaiViet.tenLoaiBV }}
+                </span>
+                <h3 class="text-white font-bold text-xl leading-tight mb-2 group-hover:text-yellow-300 transition-colors">
+                  {{ bv.tieuDe }}
+                </h3>
+                <p class="text-white/70 text-sm">{{ bv.tacGia }} • {{ formatDate(bv.ngayDang) }}</p>
+              </div>
+            </router-link>
+          </div>
+        </section>
+
+        <!-- TÌM KIẾM -->
+        <div class="flex items-center gap-3 mb-8">
+          <div class="relative flex-1 max-w-md">
+            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+              <span class="material-symbols-outlined text-[18px]">search</span>
+            </span>
+            <input v-model="tuKhoaTim" @input="timKiem" placeholder="Tìm kiếm bài viết..."
+              class="w-full border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+          </div>
+        </div>
+
+        <!-- DANH SÁCH BÀI VIẾT -->
+        <section>
+          <div class="flex items-center gap-3 mb-8">
+            <div class="w-1 h-8 bg-yellow-500 rounded-full"></div>
+            <h2 class="text-2xl font-bold text-gray-900">Tất Cả Bài Viết</h2>
+            <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium">{{ tongSo }} bài</span>
+          </div>
+
+          <!-- Không có bài viết -->
+          <div v-if="danhSach.length === 0" class="flex flex-col items-center justify-center py-24 text-gray-400">
+            <span class="material-symbols-outlined text-6xl mb-4">article</span>
+            <p class="text-lg">Không có bài viết nào</p>
+            <p class="text-sm mt-1">Hãy quay lại sau nhé!</p>
+          </div>
+
+          <!-- Grid bài viết -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <router-link v-for="bv in danhSach" :key="bv.maBV"
+              :to="`/blog/${bv.maBV}`"
+              class="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+
+              <!-- Ảnh bài viết -->
+              <div class="relative overflow-hidden aspect-[4/3] bg-gray-100">
+                <img v-if="bv.hinhAnh" :src="bv.hinhAnh" :alt="bv.tieuDe"
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div v-else class="w-full h-full bg-gradient-to-br from-yellow-50 to-yellow-100 flex items-center justify-center">
+                  <span class="material-symbols-outlined text-5xl text-yellow-300">article</span>
+                </div>
+                <div v-if="bv.loaiBaiViet" class="absolute top-3 left-3">
+                  <span class="bg-yellow-500 text-black text-xs font-bold px-2.5 py-1 rounded-full">
+                    {{ bv.loaiBaiViet.tenLoaiBV }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Nội dung card -->
+              <div class="flex flex-col flex-1 p-5">
+                <h3 class="font-bold text-gray-900 text-base mb-2 line-clamp-2 group-hover:text-yellow-700 transition-colors leading-tight">
+                  {{ bv.tieuDe }}
+                </h3>
+                <p class="text-gray-500 text-sm line-clamp-3 flex-1 mb-4 leading-relaxed">
+                  {{ bv.tomTat || 'Nhấn để đọc bài viết đầy đủ...' }}
+                </p>
+                <div class="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-gray-100">
+                  <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">person</span>
+                    <span class="font-medium">{{ bv.tacGia || 'Luxury Fashion' }}</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[14px]">visibility</span>
+                      {{ bv.luotXem || 0 }}
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[14px]">chat_bubble</span>
+                      {{ bv.soLuongBinhLuan || 0 }}
+                    </span>
+                    <span>{{ formatDate(bv.ngayDang) }}</span>
+                  </div>
+                </div>
+              </div>
+            </router-link>
+          </div>
+
+          <!-- PHÂN TRANG -->
+          <div v-if="tongTrang > 1" class="flex justify-center gap-2 mt-12">
+            <button @click="doiTrang(trangHienTai - 1)" :disabled="trangHienTai === 0"
+              class="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+              ← Trước
+            </button>
+            <button v-for="t in tongTrang" :key="t"
+              @click="doiTrang(t - 1)"
+              class="px-4 py-2 rounded-xl border text-sm font-medium transition-colors"
+              :class="trangHienTai === t - 1
+                ? 'bg-yellow-500 border-yellow-500 text-black font-bold'
+                : 'border-gray-200 text-gray-600 hover:bg-gray-50'">
+              {{ t }}
+            </button>
+            <button @click="doiTrang(trangHienTai + 1)" :disabled="trangHienTai >= tongTrang - 1"
+              class="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+              Sau →
+            </button>
+          </div>
+        </section>
+
+      </template>
+    </main>
+
+    </div><!-- end flex-grow -->
+    <AppFooter />
+  </div>
 </template>
 
 <script>
+import axios from 'axios'
+import AppHeader from './fragments/AppHeader.vue'
+import AppFooter from './fragments/AppFooter.vue'
+
 export default {
   name: 'BlogPage',
+  components: { AppHeader, AppFooter },
+
   data() {
-    return {}
+    return {
+      danhSach: [],
+      noiBat: [],
+      dangTai: true,
+      tuKhoaTim: '',
+      tongSo: 0,
+      tongTrang: 1,
+      trangHienTai: 0,
+      demTim: null
+    }
   },
-  mounted() {
-    // TODO: fetch data via axios or hydrate server state
+
+  async mounted() {
+    await this.taiDuLieu()
+  },
+
+  methods: {
+    async taiDuLieu(trang = 0) {
+      this.dangTai = true
+      try {
+        const params = { page: trang, size: 9 }
+        if (this.tuKhoaTim.trim()) params.search = this.tuKhoaTim.trim()
+
+        const res = await axios.get('/blog', { params })
+        if (res.data.thanhCong !== false) {
+          this.danhSach = res.data.danhSach || []
+          this.noiBat = res.data.noiBat || []
+          this.tongSo = res.data.tongSo || 0
+          this.tongTrang = res.data.tongTrang || 1
+          this.trangHienTai = res.data.trangHienTai || 0
+        }
+      } catch (e) {
+        console.error('Lỗi tải bài viết:', e)
+      } finally {
+        this.dangTai = false
+      }
+    },
+
+    timKiem() {
+      clearTimeout(this.demTim)
+      this.demTim = setTimeout(() => this.taiDuLieu(0), 400)
+    },
+
+    doiTrang(trang) {
+      if (trang < 0 || trang >= this.tongTrang) return
+      this.trangHienTai = trang
+      this.taiDuLieu(trang)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+
+    formatDate(d) {
+      if (!d) return ''
+      return new Date(d).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    }
   }
 }
 </script>
 
 <style scoped>
-/* TODO: import or copy CSS from original static/css */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 </style>

@@ -4,18 +4,6 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-/**
- * ENTITY BÀI VIẾT - ASM Web Bán Hàng Tết
- * Quản lý bài viết kiến thức cho website
- * <p>
- * PHÂN CÔNG:
- * - THÀNH VIÊN 1: Mapping gốc (ĐÃ HOÀN THÀNH)
- * - THÀNH VIÊN 3: Hiển thị bài viết phía khách (list, detail, search, featured)
- * - THÀNH VIÊN 4: CRUD quản trị (toggleStatus, thêm/sửa/xóa)
- * <p>
- * TODO THÀNH VIÊN 3 (Optional): Viết DTO rút gọn (id, tieuDe, ngayDang) cho quick list
- * TODO THÀNH VIÊN 4 (Optional): Thêm field SEO (MetaTitle) nếu mở rộng (KHÔNG sửa schema hiện tại theo yêu cầu đề bài)
- */
 @Entity
 @Table(name = "BaiViet")
 public class BaiViet {
@@ -66,41 +54,98 @@ public class BaiViet {
     }
 
     // Getters & Setters
-    public Long getMaBV() { return maBV; }
-    public void setMaBV(Long maBV) { this.maBV = maBV; }
+    public Long getMaBV() {
+        return maBV;
+    }
 
-    public TaiKhoan getTaiKhoan() { return taiKhoan; }
-    public void setTaiKhoan(TaiKhoan taiKhoan) { this.taiKhoan = taiKhoan; }
+    public void setMaBV(Long maBV) {
+        this.maBV = maBV;
+    }
 
-    public LoaiBaiViet getLoaiBaiViet() { return loaiBaiViet; }
-    public void setLoaiBaiViet(LoaiBaiViet loaiBaiViet) { this.loaiBaiViet = loaiBaiViet; }
+    public TaiKhoan getTaiKhoan() {
+        return taiKhoan;
+    }
 
-    public String getTieuDe() { return tieuDe; }
-    public void setTieuDe(String tieuDe) { this.tieuDe = tieuDe; }
+    public void setTaiKhoan(TaiKhoan taiKhoan) {
+        this.taiKhoan = taiKhoan;
+    }
 
-    public String getNoiDung() { return noiDung; }
-    public void setNoiDung(String noiDung) { this.noiDung = noiDung; }
+    public LoaiBaiViet getLoaiBaiViet() {
+        return loaiBaiViet;
+    }
 
-    public String getHinhAnh() { return hinhAnh; }
-    public void setHinhAnh(String hinhAnh) { this.hinhAnh = hinhAnh; }
+    public void setLoaiBaiViet(LoaiBaiViet loaiBaiViet) {
+        this.loaiBaiViet = loaiBaiViet;
+    }
 
-    public Integer getLuotXem() { return luotXem; }
-    public void setLuotXem(Integer luotXem) { this.luotXem = luotXem; }
+    public String getTieuDe() {
+        return tieuDe;
+    }
 
-    public Boolean getTrangThai() { return trangThai; }
-    public void setTrangThai(Boolean trangThai) { this.trangThai = trangThai; }
+    public void setTieuDe(String tieuDe) {
+        this.tieuDe = tieuDe;
+    }
 
-    public String getSlug() { return slug; }
-    public void setSlug(String slug) { this.slug = slug; }
+    public String getNoiDung() {
+        return noiDung;
+    }
 
-    public LocalDateTime getNgayDang() { return ngayDang; }
-    public void setNgayDang(LocalDateTime ngayDang) { this.ngayDang = ngayDang; }
+    public void setNoiDung(String noiDung) {
+        this.noiDung = noiDung;
+    }
+
+    public String getHinhAnh() {
+        return hinhAnh;
+    }
+
+    public void setHinhAnh(String hinhAnh) {
+        this.hinhAnh = hinhAnh;
+    }
+
+    public Integer getLuotXem() {
+        return luotXem;
+    }
+
+    public void setLuotXem(Integer luotXem) {
+        this.luotXem = luotXem;
+    }
+
+    public Boolean getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Boolean trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public void setSlug(String slug) {
+        this.slug = slug;
+    }
+
+    public LocalDateTime getNgayDang() {
+        return ngayDang;
+    }
+
+    public void setNgayDang(LocalDateTime ngayDang) {
+        this.ngayDang = ngayDang;
+    }
 
     // Convenience / backward compatibility
-    public Long getId() { return maBV; }
-    public LocalDateTime getNgayTao() { return ngayDang; }
+    public Long getId() {
+        return maBV;
+    }
 
-    public String getTrangThaiText() { return Boolean.TRUE.equals(trangThai) ? "Hiển thị" : "Ẩn"; }
+    public LocalDateTime getNgayTao() {
+        return ngayDang;
+    }
+
+    public String getTrangThaiText() {
+        return Boolean.TRUE.equals(trangThai) ? "Hiển thị" : "Ẩn";
+    }
 
     /**
      * Lấy tóm tắt bài viết (200 ký tự đầu tiên từ nội dung)
