@@ -7,10 +7,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * ENTITY DON HANG - LUXURY FASHION (FIXED)
  * Bảng: DonHang (theo SQL)
  */
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Entity
 @Table(name = "DonHang")
 public class DonHang {
@@ -20,10 +23,12 @@ public class DonHang {
     @Column(name = "MaDH")
     private Long maDH;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaTK")
     private TaiKhoan taiKhoan;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNhanVien")
     private TaiKhoan nhanVien;
@@ -37,9 +42,7 @@ public class DonHang {
     @Column(name = "PhiShip", precision = 18, scale = 2)
     private BigDecimal phiShip = BigDecimal.ZERO;
 
-    @Column(name = "MaKM")
-    private Long maKM;
-
+    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDiaChiGiao")
     private DiaChi diaChiGiao;
@@ -70,6 +73,7 @@ public class DonHang {
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
 
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("donHang")
     private List<DonHangChiTiet> chiTietList = new ArrayList<>();
 
     // Constructors
@@ -129,14 +133,6 @@ public class DonHang {
 
     public void setPhiShip(BigDecimal phiShip) {
         this.phiShip = phiShip;
-    }
-
-    public Long getMaKM() {
-        return maKM;
-    }
-
-    public void setMaKM(Long maKM) {
-        this.maKM = maKM;
     }
 
     public DiaChi getDiaChiGiao() {
