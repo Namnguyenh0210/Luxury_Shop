@@ -44,8 +44,8 @@
             <tr v-for="order in orders" :key="order.maDH" class="hover:bg-blue-50/30 transition-colors">
               <td class="px-6 py-4 font-mono text-xs text-blue-700 font-bold">#{{ order.maDH }}</td>
               <td class="px-6 py-4">
-                <p class="font-semibold text-gray-800">{{ order.khachHang?.hoTen || 'Khách vãng lai' }}</p>
-                <p class="text-xs text-gray-400">{{ order.khachHang?.email }}</p>
+                <p class="font-semibold text-gray-800">{{ order.taiKhoan?.hoTen || 'Khách vãng lai' }}</p>
+                <p class="text-xs text-gray-400">{{ order.taiKhoan?.email }}</p>
               </td>
               <td class="px-6 py-4 text-gray-600">{{ formatDate(order.ngayDat) }}</td>
               <td class="px-6 py-4 font-bold text-gray-800">{{ fmtCurrency(order.tongTien) }}</td>
@@ -112,10 +112,14 @@ export default {
     async fetchOrders() {
       try {
         const res = await axios.get('/staff/orders', {
-          params: { keyword: this.keyword, status: this.status, page: this.page },
+          params: {
+            keyword: this.keyword || undefined,
+            status: this.status !== '' ? this.status : undefined,
+            page: this.page
+          },
           withCredentials: true
         })
-        this.orders     = res.data.content || res.data.orders || res.data || []
+        this.orders     = res.data.content || res.data || []
         this.totalPages = res.data.totalPages || 1
       } catch (e) { console.error(e) }
     },

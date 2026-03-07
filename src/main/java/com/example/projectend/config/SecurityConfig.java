@@ -49,6 +49,10 @@ public class SecurityConfig {
                         .requestMatchers("/staff/**")
                         .hasAnyRole("ADMIN", "NHANVIEN")
 
+                        // API /api/admin/** có @PreAuthorize riêng — cho phép cả NHANVIEN
+                        .requestMatchers("/api/admin/**")
+                        .hasAnyRole("ADMIN", "NHANVIEN")
+
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
 
