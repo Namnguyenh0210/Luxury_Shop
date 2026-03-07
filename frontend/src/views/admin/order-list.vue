@@ -110,7 +110,6 @@ export default {
 
   methods: {
     async fetchOrders() {
-		console.log("Đang bắt đầu gọi API...");
       try {
         const res = await axios.get('http://localhost:8080/admin/orders', {
           params: { keyword: this.keyword, status: this.status, page: this.page },

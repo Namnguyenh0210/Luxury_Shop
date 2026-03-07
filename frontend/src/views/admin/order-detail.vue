@@ -73,29 +73,48 @@
 
           <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-wrap gap-3">
             <h4 class="w-full mb-2 text-sm font-bold text-gray-400 uppercase tracking-widest">Cập nhật trạng thái</h4>
-            
-            <button v-if="order.trangThaiDH === 0" @click="updateStatus(1)"
-              class="flex-1 min-w-[150px] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined">check_circle</span> Xác nhận đơn
-            </button>
 
-            <button v-if="order.trangThaiDH === 1" @click="updateStatus(2)"
-              class="flex-1 min-w-[150px] bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined">local_shipping</span> Giao hàng
-            </button>
+            <!-- Chỉ hiện nút hành động phù hợp với trạng thái hiện tại -->
+            <template v-if="order.trangThaiDH < 3 && order.trangThaiDH !== 4">
 
-            <button v-if="order.trangThaiDH === 2" @click="updateStatus(3)"
-              class="flex-1 min-w-[150px] bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined">verified</span> Hoàn tất đơn
-            </button>
+              <!-- 0: Chờ xác nhận → nút Xác nhận + HỦY (chưa xử lý nên còn cho hủy) -->
+              <template v-if="order.trangThaiDH === 0">
+                <button @click="updateStatus(1)"
+                  class="flex-1 min-w-[150px] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                  <span class="material-symbols-outlined">check_circle</span> Xác nhận đơn
+                </button>
+                <button @click="updateStatus(4)"
+                  class="flex-1 min-w-[150px] border-2 border-red-200 text-red-600 hover:bg-red-50 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                  <span class="material-symbols-outlined">cancel</span> Hủy đơn hàng
+                </button>
+              </template>
 
-            <button v-if="order.trangThaiDH < 3" @click="updateStatus(4)"
-              class="flex-1 min-w-[150px] border-2 border-red-100 text-red-600 hover:bg-red-50 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined">cancel</span> Hủy đơn hàng
-            </button>
-            
+              <!-- 1: Đã xác nhận → chỉ được Giao hàng, KHÔNG được hủy -->
+              <template v-if="order.trangThaiDH === 1">
+                <button @click="updateStatus(2)"
+                  class="flex-1 min-w-[150px] bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                  <span class="material-symbols-outlined">local_shipping</span> Bắt đầu giao hàng
+                </button>
+                <p class="w-full text-xs text-orange-500 font-medium text-center">
+                  ⚠️ Đơn đã xác nhận — Không thể hủy. Liên hệ trực tiếp với khách nếu cần.
+                </p>
+              </template>
+
+              <!-- 2: Đang giao → chỉ được Hoàn tất, KHÔNG được hủy -->
+              <template v-if="order.trangThaiDH === 2">
+                <button @click="updateStatus(3)"
+                  class="flex-1 min-w-[150px] bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+                  <span class="material-symbols-outlined">verified</span> Xác nhận hoàn tất
+                </button>
+                <p class="w-full text-xs text-orange-500 font-medium text-center">
+                  ⚠️ Đang vận chuyển — Không thể hủy.
+                </p>
+              </template>
+
+            </template>
+
             <div v-else class="w-full text-center py-2 text-gray-400 italic text-sm">
-              Đơn hàng đã kết thúc, không thể thay đổi trạng thái.
+              {{ order.trangThaiDH === 3 ? '✅ Đơn hàng đã hoàn tất.' : '❌ Đơn hàng đã bị hủy.' }}
             </div>
           </div>
         </div>
@@ -190,15 +209,15 @@ export default {
       }
     },
     async updateStatus(newStatus) {
-      if (!confirm("Bạn có chắc chắn muốn chuyển trạng thái đơn hàng này?")) return
+      if (!confirm('Bạn có chắc chắn muốn chuyển trạng thái đơn hàng này?')) return
       try {
         await axios.put(`http://localhost:8080/admin/orders/${this.order.maDH}/status`, null, {
           params: { status: newStatus },
           withCredentials: true
         })
-        this.fetchOrderDetail() // Reload data
+        await this.fetchOrderDetail()
       } catch (e) {
-        alert("Lỗi: " + (e.response?.data || "Không thể cập nhật trạng thái"))
+        alert('Lỗi: ' + (e.response?.data?.message || e.response?.data || 'Không thể cập nhật trạng thái'))
       }
     },
     fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v || 0) + ' đ' },
