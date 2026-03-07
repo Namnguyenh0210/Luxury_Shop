@@ -3,6 +3,8 @@ package com.example.projectend.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * ENTITY SAN PHAM - LUXURY FASHION
  * Bảng: SanPham
@@ -48,6 +50,7 @@ public class SanPham {
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
 
     @OneToMany(mappedBy = "sanPham", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("sanPham") // THÊM DÒNG NÀY ĐỂ CHẠY ĐƯỢC JSON
     private java.util.List<SanPhamChiTiet> variants = new java.util.ArrayList<>();
 
     // Constructors

@@ -91,50 +91,72 @@
     </div>
 
     <!-- MODAL -->
-    <div v-if="showModal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" @click.self="closeModal">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h3 class="text-base font-bold text-gray-800">
-            {{ form.maTK ? 'Cập nhật tài khoản' : 'Thêm tài khoản mới' }}
-          </h3>
-          <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <div class="p-6 space-y-4">
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Họ Tên</label>
-            <input v-model="form.hoTen" placeholder="Nguyễn Văn A"
-              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
-            <input v-model="form.email" placeholder="email@example.com" type="email"
-              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Số Điện Thoại</label>
-            <input v-model="form.soDienThoai" placeholder="0912 345 678"
-              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mật Khẩu Mới</label>
-            <input v-model="form.matKhauMoi" placeholder="Để trống nếu không đổi" type="password"
-              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
-          </div>
-        </div>
-        <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-          <button @click="closeModal"
-            class="px-5 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
-            Hủy
-          </button>
-          <button @click="saveUser"
-            class="px-5 py-2.5 rounded-xl bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-semibold shadow-sm transition-colors">
-            Lưu
-          </button>
-        </div>
-      </div>
-    </div>
+	<div v-if="showModal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" @click.self="closeModal">
+	  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+	    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+	      <h3 class="text-base font-bold text-gray-800">
+	        {{ form.maTK ? 'Cập nhật tài khoản' : 'Thêm tài khoản mới' }}
+	      </h3>
+	      <button @click="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+	        <span class="material-symbols-outlined">close</span>
+	      </button>
+	    </div>
+	    
+	    <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+	      <div class="space-y-1.5">
+	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Họ Tên</label>
+	        <input v-model="form.hoTen" placeholder="Nguyễn Văn A"
+	          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
+	      </div>
+
+	      <div class="space-y-1.5">
+	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
+	        <input v-model="form.email" placeholder="email@example.com" type="email"
+	          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
+	      </div>
+
+	      <div class="space-y-1.5">
+	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Số Điện Thoại</label>
+	        <input v-model="form.soDienThoai" placeholder="0912 345 678"
+	          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
+	      </div>
+
+	      <div class="space-y-1.5">
+	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mật Khẩu Mới</label>
+	        <input v-model="form.matKhauMoi" placeholder="Để trống nếu không đổi" type="password"
+	          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
+	      </div>
+
+	      <div class="space-y-2">
+	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Vai Trò Hệ Thống</label>
+	        <div class="grid grid-cols-2 gap-2 p-3 border border-gray-100 rounded-xl bg-gray-50/50">
+	          <label v-for="role in allRoles" :key="role.id" 
+	            class="flex items-center gap-2 cursor-pointer bg-white p-2 rounded-lg border border-gray-200 hover:border-yellow-400 transition-colors">
+	            <input 
+	              type="checkbox" 
+	              :value="role" 
+	              v-model="form.roles" 
+	              class="size-4 rounded accent-yellow-600 border-gray-300"
+	            />
+	            <span class="text-sm font-medium text-gray-700">{{ role.tenRole }}</span>
+	          </label>
+	        </div>
+	        <p v-if="form.roles && form.roles.length === 0" class="text-[10px] text-red-400 italic">* Vui lòng chọn ít nhất 1 vai trò</p>
+	      </div>
+	    </div>
+
+	    <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+	      <button @click="closeModal"
+	        class="px-5 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
+	        Hủy
+	      </button>
+	      <button @click="saveUser"
+	        class="px-5 py-2.5 rounded-xl bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-semibold shadow-sm transition-colors">
+	        Lưu
+	      </button>
+	    </div>
+	  </div>
+	</div>
   </AdminLayout>
 </template>
 
@@ -142,19 +164,25 @@
 import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
+const api = axios.create({
+  baseURL: 'http://localhost:8080', 
+  withCredentials: true
+});
+
 export default {
   name: 'CustomerList',
   components: { AdminLayout },
-
   data() {
     return {
       customers: [],
+      allRoles: [], // Danh sách tất cả các Role từ Database
       keyword: '',
       showModal: false,
-      form: {}
+      form: {
+        roles: [] // Khởi tạo mảng roles rỗng
+      }
     }
   },
-
   computed: {
     filteredCustomers() {
       if (!this.keyword) return this.customers
@@ -165,36 +193,59 @@ export default {
       )
     }
   },
-
   async mounted() {
-    try {
-      const res = await axios.get('/admin/customers', { withCredentials: true })
-      this.customers = res.data.customers || res.data || []
-    } catch (e) { console.error(e) }
+    this.loadData();
+    this.fetchRoles(); // Lấy danh sách role khi component được gắn vào
   },
-
   methods: {
-    openModal()  { this.form = {}; this.showModal = true },
-    closeModal() { this.showModal = false },
-    editUser(u)  { this.form = { ...u }; this.showModal = true },
+    async loadData() {
+      try {
+        const res = await api.get('/admin/customers')
+        this.customers = res.data.customers || []
+      } catch (e) { console.error("Lỗi load khách hàng:", e) }
+    },
+    async fetchRoles() {
+      try {
+        const res = await api.get('/admin/customers/roles-list')
+        this.allRoles = res.data
+      } catch (e) { console.error("Lỗi load vai trò:", e) }
+    },
+    openModal()  { 
+      this.form = { roles: [] }; 
+      this.showModal = true 
+    },
+    closeModal() { 
+      this.showModal = false 
+    },
+    editUser(u)  { 
+      // Dùng JSON parse/stringify để tránh làm thay đổi trực tiếp dữ liệu trên bảng
+      this.form = JSON.parse(JSON.stringify(u));
+      if(!this.form.roles) this.form.roles = [];
+      this.showModal = true 
+    },
 
     async saveUser() {
       try {
-        await axios.post('/admin/customers/save', this.form, { withCredentials: true })
+        await api.post('/admin/customers/save', this.form)
         this.closeModal()
-        location.reload()
-      } catch (e) { console.error(e) }
+        this.loadData() 
+      } catch (e) { 
+        alert("Lỗi lưu dữ liệu! Kiểm tra console để biết thêm chi tiết.")
+        console.error(e)
+      }
     },
-
     async deleteUser(id) {
       if (!confirm('Xóa tài khoản này?')) return
-      await axios.post(`/admin/customers/delete/${id}`, {}, { withCredentials: true })
-      this.customers = this.customers.filter(u => u.maTK !== id)
+      try {
+        await api.post(`/admin/customers/delete/${id}`)
+        this.loadData()
+      } catch (e) { console.error(e) }
     },
-
     async toggleStatus(u) {
-      await axios.post(`/admin/customers/toggle/${u.maTK}`, {}, { withCredentials: true })
-      u.trangThai = !u.trangThai
+      try {
+        await api.post(`/admin/customers/toggle/${u.maTK}`)
+        u.trangThai = !u.trangThai
+      } catch (e) { console.error(e) }
     }
   }
 }

@@ -20,13 +20,13 @@
           <select v-model="filters.categoryId" @change="fetchProducts"
             class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
             <option value="">Tất cả danh mục</option>
-            <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.tenLoai }}</option>
+            <option v-for="c in categories" :key="c.maLoai" :value="c.maLoai">{{ c.tenLoai }}</option>
           </select>
 
           <select v-model="filters.brandId" @change="fetchProducts"
             class="border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400">
             <option value="">Tất cả thương hiệu</option>
-            <option v-for="b in brands" :key="b.id" :value="b.id">{{ b.tenTH }}</option>
+            <option v-for="b in brands" :key="b.maTH" :value="b.maTH">{{ b.tenTH }}</option>
           </select>
 
           <select v-model="filters.status" @change="fetchProducts"
@@ -56,7 +56,7 @@
               v-for="p in products"
               :key="p.id"
               class="hover:bg-yellow-50/50 transition-colors cursor-pointer"
-              @click="openDetails(p.id)"
+              @click="openDetails(p.maSP)"
             >
               <td class="px-6 py-4 font-mono text-xs text-gray-500">#{{ p.maSP }}</td>
               <td class="px-6 py-4 font-semibold text-gray-800">{{ p.tenSP }}</td>
@@ -75,7 +75,7 @@
                   class="text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg transition-colors mr-2">
                   Sửa
                 </button>
-                <button @click="deleteProduct(p.id)"
+                <button @click="deleteProduct(p.maSP)"
                   class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
                   Xóa
                 </button>
@@ -133,7 +133,7 @@
 <script>
 import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
-
+axios.defaults.baseURL = 'http://localhost:8080';
 export default {
   name: 'ProductList',
   components: { AdminLayout },
@@ -151,9 +151,10 @@ export default {
   },
 
   methods: {
+	
     async fetchProducts() {
       try {
-        const res = await axios.get('/api/products', { params: this.filters })
+        const res = await axios.get('/api/admin/products', { params: this.filters })
         this.products = res.data
       } catch (e) { console.error(e) }
     },
@@ -162,19 +163,19 @@ export default {
       this.showDetails = true
       this.loadingDetails = true
       try {
-        const res = await axios.get(`/api/products/${id}`)
+        const res = await axios.get(`/api/admin/products/${id}`)
         this.selectedProduct = res.data
       } catch (e) { console.error(e) }
       finally { this.loadingDetails = false }
     },
 
     editProduct(product) {
-      this.$router.push(`/admin/products/edit/${product.id}`)
+      this.$router.push(`/admin/products/edit/${product.maSP}`)
     },
 
     async deleteProduct(id) {
       if (!confirm('Xóa sản phẩm này?')) return
-      await axios.delete(`/api/products/${id}`)
+      await axios.delete(`/api/admin/products/${id}`)
       this.fetchProducts()
     }
   },

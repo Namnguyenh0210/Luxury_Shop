@@ -41,7 +41,7 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
-            <tr v-for="order in orders" :key="order.id" class="hover:bg-yellow-50/50 transition-colors">
+            <tr v-for="order in orders" :key="order.maDH" class="hover:bg-yellow-50/50 transition-colors">
               <td class="px-6 py-4 font-mono text-xs text-yellow-700 font-bold">#{{ order.maDH }}</td>
               <td class="px-6 py-4">
                 <p class="font-semibold text-gray-800">{{ order.taiKhoan?.hoTen || 'Khách vãng lai' }}</p>
@@ -56,7 +56,7 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-right">
-                <router-link :to="`/admin/orders/${order.id}`"
+                <router-link :to="`/admin/orders/${order.maDH}`"
                   class="text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1">
                   Xem
                   <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -110,12 +110,13 @@ export default {
 
   methods: {
     async fetchOrders() {
+		console.log("Đang bắt đầu gọi API...");
       try {
-        const res = await axios.get('/admin/orders/list', {
+        const res = await axios.get('http://localhost:8080/admin/orders', {
           params: { keyword: this.keyword, status: this.status, page: this.page },
           withCredentials: true
         })
-        this.orders     = res.data.orders     || res.data || []
+        this.orders     = res.data.content      || res.data || []
         this.totalPages = res.data.totalPages || 1
       } catch (e) { console.error(e) }
     },
@@ -143,6 +144,6 @@ export default {
     }
   },
 
-  mounted() { this.fetchOrders() }
+  mounted() { console.log("Vào tới mounted rồi!");this.fetchOrders() }
 }
 </script>

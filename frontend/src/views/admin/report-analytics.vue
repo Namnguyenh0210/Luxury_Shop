@@ -85,28 +85,35 @@ export default {
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v || 0)
     },
 
-    async loadData() {
-      try {
-        const res = await axios.get('/api/reports/overview')
-        this.totalRevenue   = res.data.totalRevenue   || 0
-        this.newOrders      = res.data.newOrders      || 0
-        this.soldProducts   = res.data.soldProducts   || 0
-        this.totalCustomers = res.data.totalCustomers || 0
-      } catch (e) { console.error(e) }
+	async loadData() {
+	  try {
+	    const res = await axios.get(
+	      'http://localhost:8080/api/admin/reports',
+	      { withCredentials: true }
+	    )
 
-      try {
-        const res = await axios.get('/api/reports/revenue-7days')
-        this.chartLabels = res.data.labels
-        this.chartData   = res.data.data
-        this.$nextTick(() => this.renderRevenueChart())
-      } catch (e) { console.error(e) }
+	    this.totalRevenue   = res.data.totalRevenue
+	    this.newOrders      = res.data.newOrders
+	    this.soldProducts   = res.data.soldProducts
+	    this.totalCustomers = res.data.totalCustomers
 
-      try {
-        const res = await axios.get('/api/reports/category')
-        this.categoryData = res.data
-        this.$nextTick(() => this.renderCategoryChart())
-      } catch (e) { console.error(e) }
-    },
+	    this.chartLabels = res.data.chartLabels
+	    this.chartData   = res.data.chartData
+
+	    this.categoryData = {
+	      labels: ['Áo', 'Quần', 'Giày', 'Phụ kiện'],
+	      data: [30, 25, 20, 25]
+	    }
+
+	    this.$nextTick(() => {
+	      this.renderRevenueChart()
+	      this.renderCategoryChart()
+	    })
+
+	  } catch (e) {
+	    console.error(e)
+	  }
+	},
 
     renderRevenueChart() {
       new Chart(this.$refs.revenueChart, {
