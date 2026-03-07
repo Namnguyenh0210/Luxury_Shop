@@ -28,8 +28,8 @@
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr v-for="phieu in danhSachPhieu" :key="phieu.id" class="hover:bg-yellow-50/50 transition-colors">
-              <td class="px-6 py-4 font-mono text-xs text-gray-500">#{{ phieu.id }}</td>
-              <td class="px-6 py-4 font-medium text-gray-800">{{ phieu.tenNCC }}</td>
+              <td class="px-6 py-4 font-mono text-xs text-gray-500">#{{ phieu.maPN }}</td>
+              <td class="px-6 py-4 font-medium text-gray-800">{{ phieu.nhaCungCap?.tenNCC }}</td>
               <td class="px-6 py-4 text-gray-600">{{ formatDate(phieu.ngayNhap) }}</td>
               <td class="px-6 py-4 font-bold text-gray-800">{{ fmtCurrency(phieu.tongTien) }}</td>
               <td class="px-6 py-4 text-gray-500">{{ phieu.ghiChu || '---' }}</td>
@@ -85,7 +85,7 @@
               <select v-model="newItem.productId"
                 class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 flex-1 min-w-[160px]">
                 <option value="">-- Sản phẩm --</option>
-                <option v-for="p in products" :key="p.id" :value="p.id">{{ p.tenSP }}</option>
+                <option v-for="p in products" :key="p.maSP" :value="p.maSP">{{ p.tenSP }}</option>
               </select>
               <input v-model="newItem.size" placeholder="Size"
                 class="border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 w-20"/>
@@ -189,13 +189,16 @@ export default {
 
   async mounted() {
     try {
-      const [supRes, proRes] = await Promise.all([
-        axios.get('/admin/inventory/suppliers', { withCredentials: true }),
-        axios.get('/api/products', { withCredentials: true })
-      ])
-      this.suppliers = supRes.data || []
-      this.products  = proRes.data || []
-    } catch (e) { console.error(e) }
+      // Gọi đúng địa chỉ Backend (thêm http://localhost:8080 nếu cần)
+      const res = await axios.get('http://localhost:8080/admin/inventory', { withCredentials: true });
+      
+      // Gán dữ liệu từ Map trả về
+      this.suppliers = res.data.suppliers;
+      this.products = res.data.products;
+      this.danhSachPhieu = res.data.phieuNhaps;
+    } catch (e) { 
+      console.error("Lỗi lấy dữ liệu:", e); 
+    }
   },
 
   methods: {
@@ -212,10 +215,10 @@ export default {
       this.newItem = { productId: '', size: '', color: '', qty: 1, price: 0 }
     },
     removeItem(index) { this.form.items.splice(index, 1) },
-    getProductName(id) {
-      const p = this.products.find(x => x.id === id)
-      return p ? p.tenSP : ''
-    },
+	getProductName(id) {
+	  const p = this.products.find(x => x.maSP === id)
+	  return p ? p.tenSP : ''
+	},
     fmtCurrency(v) {
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v || 0)
     },
@@ -226,7 +229,11 @@ export default {
       if (!this.form.maNCC) { alert('Chọn nhà cung cấp'); return }
       if (this.form.items.length === 0) { alert('Thêm ít nhất 1 sản phẩm'); return }
       try {
-        await axios.post('/admin/inventory/import', this.form, { withCredentials: true })
+		await axios.post(
+		  'http://localhost:8080/admin/inventory/import',
+		  this.form,
+		  { withCredentials: true }
+		)
         alert('Tạo phiếu thành công!')
         this.closeModal()
       } catch (e) { console.error(e); alert('Lỗi khi lưu phiếu') }

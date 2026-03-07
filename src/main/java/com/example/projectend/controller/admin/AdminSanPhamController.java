@@ -20,10 +20,18 @@ public class AdminSanPhamController {
 
     // =============================
     // LẤY DANH SÁCH
+    // Sử dụng hàm findAll() đã có sẵn trong Service của bạn
     // =============================
     @GetMapping
-    public List<SanPham> getAllProducts() {
-        return sanPhamService.findAll();
+    public List<SanPham> getAllProducts(@RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Long brandId,
+            @RequestParam(required = false) Integer status) {
+    	// BỔ SUNG DÒNG NÀY: Khởi tạo pageable để lấy dữ liệu trang đầu tiên
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
+        
+        // Gọi hàm có sẵn trong Service của bạn
+        return sanPhamService.findWithFilters(keyword, categoryId, null, brandId, null, null, null, pageable).getContent();
     }
 
     // =============================
@@ -31,6 +39,7 @@ public class AdminSanPhamController {
     // =============================
     @GetMapping("/{id}")
     public SanPham getProduct(@PathVariable Long id) {
+        // Service của bạn đã có hàm findById
         return sanPhamService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
     }
@@ -40,7 +49,7 @@ public class AdminSanPhamController {
     // =============================
     @PostMapping
     public SanPham saveProduct(@RequestBody SanPham product) {
-
+        // Logic xử lý ngày tạo và trạng thái
         if (product.getMaSP() == null) {
             product.setNgayTao(LocalDateTime.now());
             if (product.getTrangThaiSP() == null)
@@ -49,6 +58,7 @@ public class AdminSanPhamController {
             product.setNgayCapNhat(LocalDateTime.now());
         }
 
+        // Service của bạn đã có hàm save
         return sanPhamService.save(product);
     }
 
@@ -57,6 +67,7 @@ public class AdminSanPhamController {
     // =============================
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
+        // Service của bạn đã có hàm deleteById
         sanPhamService.deleteById(id);
     }
 }

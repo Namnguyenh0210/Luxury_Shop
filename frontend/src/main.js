@@ -60,6 +60,7 @@ const routes = [
   { path: '/:pathMatch(.*)*', component: () => import('./views/error/404.vue') },
   { path: '/admin/dashboard', component: () => import('./views/admin/admin.vue') },
   { path: '/admin/products', component: () => import('./views/admin/product-list.vue') },
+  { path: '/admin/products/edit/:id', component: () => import('./views/admin/EditProduct.vue') },
   { path: '/admin/inventory', component: () => import('./views/admin/inventory.vue') },
   { path: '/admin/orders', component: () => import('./views/admin/order-list.vue') },
   { path: '/admin/orders/:id', component: () => import('./views/admin/order-detail.vue') },
