@@ -1,10 +1,6 @@
 package com.example.projectend.controller;
 
-import com.example.projectend.entity.SanPham;
-import com.example.projectend.entity.SanPhamChiTiet;
-import com.example.projectend.entity.DanhGia;
-import com.example.projectend.entity.TaiKhoan;
-import com.example.projectend.entity.VaiTro;
+import com.example.projectend.entity.*;
 import com.example.projectend.service.auth.UserDetailsServiceImpl;
 import com.example.projectend.service.GioHangService;
 import com.example.projectend.service.SanPhamService;
@@ -773,5 +769,50 @@ public class ApiController {
             response.put("message", "Có lỗi xảy ra: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
+    }
+
+    @GetMapping("/profile/addresses")
+    public ResponseEntity<?> getAddresses() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+
+        String email = auth.getName();
+        TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
+
+        List<DiaChi> addresses = diaChiRepository.findByTaiKhoan_MaTK(tk.getMaTK());
+
+        return ResponseEntity.ok(addresses);
+    }
+
+    @PostMapping("/profile/address/add")
+    public ResponseEntity<?> addAddress(
+            @RequestParam String hoTenNguoiNhan,
+            @RequestParam String soDienThoai,
+            @RequestParam String diaChiChiTiet
+    ) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+
+        String email = auth.getName();
+        TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
+
+        DiaChi dc = new DiaChi();
+        dc.setTaiKhoan(tk);
+        dc.setHoTenNguoiNhan(hoTenNguoiNhan);
+        dc.setSoDienThoai(soDienThoai);
+        dc.setDiaChiChiTiet(diaChiChiTiet);
+        dc.setLaMacDinh(false);
+
+        diaChiRepository.save(dc);
+
+        return ResponseEntity.ok("OK");
     }
 }

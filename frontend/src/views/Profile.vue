@@ -1,7 +1,7 @@
 <template>
   <div class="relative flex min-h-screen w-full flex-col bg-gray-50">
     <AppHeader />
-    
+
     <main class="flex-grow">
       <div class="flex flex-1 max-w-7xl mx-auto w-full">
         <!-- Sidebar -->
@@ -12,40 +12,66 @@
               <p class="text-sm text-gray-500">Quản lý thông tin cá nhân</p>
             </div>
             <div class="flex flex-col gap-1">
-              <button @click="activeTab = 'info'" 
-                      :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all', 
+              <button @click="activeTab = 'info'"
+                      :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all',
                                activeTab === 'info' ? 'bg-yellow-50 border-l-4 border-yellow-600' : 'hover:bg-gray-50']">
-                <span class="material-symbols-outlined" 
-                      :class="[activeTab === 'info' ? 'text-yellow-600' : 'text-gray-600']" 
+                <span class="material-symbols-outlined"
+                      :class="[activeTab === 'info' ? 'text-yellow-600' : 'text-gray-600']"
                       style="font-size: 20px;">person</span>
                 <p :class="['text-sm font-medium', activeTab === 'info' ? 'text-yellow-600' : 'text-gray-700']">
                   Thông tin tài khoản
                 </p>
               </button>
-              
-              <button @click="activeTab = 'password'" 
-                      :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all', 
+
+              <button @click="activeTab = 'password'"
+                      :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all',
                                activeTab === 'password' ? 'bg-yellow-50 border-l-4 border-yellow-600' : 'hover:bg-gray-50']">
-                <span class="material-symbols-outlined" 
-                      :class="[activeTab === 'password' ? 'text-yellow-600' : 'text-gray-600']" 
+                <span class="material-symbols-outlined"
+                      :class="[activeTab === 'password' ? 'text-yellow-600' : 'text-gray-600']"
                       style="font-size: 20px;">lock</span>
                 <p :class="['text-sm font-medium', activeTab === 'password' ? 'text-yellow-600' : 'text-gray-700']">
                   Đổi mật khẩu
                 </p>
               </button>
-              
-              <button @click="activeTab = 'orders'" 
-                      :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all', 
+
+              <button @click="activeTab = 'orders'"
+                      :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all',
                                activeTab === 'orders' ? 'bg-yellow-50 border-l-4 border-yellow-600' : 'hover:bg-gray-50']">
-                <span class="material-symbols-outlined" 
-                      :class="[activeTab === 'orders' ? 'text-yellow-600' : 'text-gray-600']" 
+                <span class="material-symbols-outlined"
+                      :class="[activeTab === 'orders' ? 'text-yellow-600' : 'text-gray-600']"
                       style="font-size: 20px;">receipt_long</span>
                 <p :class="['text-sm font-medium', activeTab === 'orders' ? 'text-yellow-600' : 'text-gray-700']">
                   Đơn hàng của tôi
                 </p>
               </button>
+              <button
+                  @click="activeTab = 'address'; window.location.hash='address'"
+                  :class="[
+    'flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all',
+    activeTab === 'address'
+      ? 'bg-yellow-50 border-l-4 border-yellow-600'
+      : 'hover:bg-gray-50'
+  ]"
+              >
+  <span
+      class="material-symbols-outlined"
+      :class="activeTab === 'address' ? 'text-yellow-600' : 'text-gray-600'"
+      style="font-size:20px"
+  >
+    location_on
+  </span>
+
+                <p
+                    :class="[
+      'text-sm font-medium',
+      activeTab === 'address' ? 'text-yellow-600' : 'text-gray-700'
+    ]"
+                >
+                  Số địa chỉ
+                </p>
+              </button>
             </div>
-            
+
             <div class="mt-auto pt-6 border-t border-gray-200">
               <a href="/api/auth/logout" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 group transition-all">
                 <span class="material-symbols-outlined text-red-600 group-hover:text-red-700" style="font-size: 20px;">logout</span>
@@ -72,7 +98,7 @@
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Có lỗi xảy ra</h3>
                 <p class="text-red-600 mb-6">{{ error }}</p>
-                <button @click="fetchUserData" 
+                <button @click="fetchUserData"
                         class="px-6 py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium">
                   Thử lại
                 </button>
@@ -82,12 +108,12 @@
             <!-- Content Tabs -->
             <div v-else class="space-y-6">
               <!-- Account Information Tab -->
-              <section v-show="activeTab === 'info'" class="space-y-6">
+              <section v-if="activeTab === 'info'">
                 <div>
                   <h1 class="text-3xl font-bold text-gray-900 mb-2">Thông tin tài khoản</h1>
                   <p class="text-gray-600">Cập nhật thông tin cá nhân của bạn</p>
                 </div>
-                
+
                 <!-- Success/Error Messages -->
                 <div v-if="successMessage" class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-3 animate-fade-in">
                   <span class="material-symbols-outlined text-green-600">check_circle</span>
@@ -120,7 +146,7 @@
                           </p>
                         </div>
                       </div>
-                      <button type="submit" :disabled="isUpdating" 
+                      <button type="submit" :disabled="isUpdating"
                               class="px-6 py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-sm">
                         <span v-if="!isUpdating">Lưu thay đổi</span>
                         <span v-else class="flex items-center gap-2">
@@ -147,7 +173,7 @@
                              class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:border-transparent transition-all"
                              placeholder="Nhập số điện thoại" />
                     </div>
-                    
+
                     <div class="p-6 flex flex-col md:flex-row md:items-center gap-4">
                       <div class="md:w-1/3">
                         <label class="text-sm font-medium text-gray-700 flex items-center gap-2">
@@ -157,7 +183,7 @@
                       </div>
                       <div class="flex-1 flex justify-between items-center">
                         <p class="text-gray-500">••••••••</p>
-                        <button type="button" @click="activeTab = 'password'" 
+                        <button type="button" @click="activeTab = 'password'"
                                 class="text-yellow-600 hover:text-yellow-700 font-medium text-sm">
                           Đổi mật khẩu →
                         </button>
@@ -173,7 +199,7 @@
                   <h1 class="text-3xl font-bold text-gray-900 mb-2">Đổi mật khẩu</h1>
                   <p class="text-gray-600">Cập nhật mật khẩu để bảo mật tài khoản</p>
                 </div>
-                
+
                 <div v-if="passwordSuccess" class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-3 animate-fade-in">
                   <span class="material-symbols-outlined text-green-600">check_circle</span>
                   <p class="font-medium">{{ passwordSuccess }}</p>
@@ -222,7 +248,7 @@
                   <h1 class="text-3xl font-bold text-gray-900 mb-2">Đơn hàng của tôi</h1>
                   <p class="text-gray-600">Theo dõi trạng thái đơn hàng của bạn</p>
                 </div>
-                
+
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                   <div class="flex flex-col items-center">
                     <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -236,6 +262,110 @@
                   </div>
                 </div>
               </section>
+
+              <!-- Address Tab -->
+              <section v-show="activeTab === 'address'" class="space-y-6">
+
+                <div>
+                  <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                    Số địa chỉ
+                  </h1>
+                  <p class="text-gray-600">
+                    Quản lý địa chỉ giao hàng của bạn
+                  </p>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+                  <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                      Danh sách địa chỉ
+                    </h3>
+
+                    <button
+                        @click="showAddAddress = true"
+                        class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm"
+                    >
+                      + Thêm địa chỉ
+                    </button>
+                  </div>
+
+                  <!-- Address item -->
+                  <div
+                      v-for="addr in addresses"
+                      :key="addr.maDiaChi"
+                      class="border rounded-lg p-4 mb-3"
+                  >
+
+                    <p class="font-semibold">{{ addr.hoTenNguoiNhan }}</p>
+                    <p class="text-gray-600">{{ addr.soDienThoai }}</p>
+                    <p class="text-gray-600">{{ addr.diaChiChiTiet }}</p>
+
+                    <span
+                        v-if="addr.laMacDinh"
+                        class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded mt-2 inline-block"
+                    >
+                      Mặc định
+                    </span>
+
+                  </div>
+
+                </div>
+
+              </section>
+              <!-- Popup Add Address -->
+              <div v-if="showAddAddress" class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+
+                <div class="bg-white rounded-xl shadow-lg p-6 w-96">
+
+                  <h3 class="text-lg font-semibold mb-4">
+                    Thêm địa chỉ mới
+                  </h3>
+
+                  <div class="space-y-3">
+                    <input
+                        v-model="newAddress.ten"
+                        type="text"
+                        placeholder="Họ tên"
+                        class="w-full border rounded-lg px-3 py-2"
+                    />
+
+                    <input
+                        v-model="newAddress.phone"
+                        type="text"
+                        placeholder="Số điện thoại"
+                        class="w-full border rounded-lg px-3 py-2"
+                    />
+
+                    <input
+                        v-model="newAddress.diaChi"
+                        type="text"
+                        placeholder="Địa chỉ"
+                        class="w-full border rounded-lg px-3 py-2"
+                    />
+                  </div>
+
+                  <div class="flex justify-end gap-2 mt-5">
+
+                    <button
+                        @click="showAddAddress = false"
+                        class="px-4 py-2 border rounded-lg"
+                    >
+                      Hủy
+                    </button>
+
+                    <button
+                        @click="saveAddress"
+                        class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                    >
+                      Lưu
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
@@ -268,6 +398,13 @@ export default {
       passwordError: '',
       isUpdating: false,
       isChangingPassword: false,
+      showAddAddress: false,
+      addresses: [],
+      newAddress: {
+        ten: '',
+        phone: '',
+        diaChi: ''
+      },
       user: {
         hoTen: '',
         email: '',
@@ -285,10 +422,10 @@ export default {
     async fetchUserData() {
       this.loading = true
       this.error = null
-      
+
       try {
         const response = await axios.get('/auth/current-user')
-        
+
         if (response.data.authenticated) {
           // API trả về direct fields, không phải nested trong user object
           this.user = {
@@ -312,12 +449,12 @@ export default {
         this.loading = false
       }
     },
-    
+
     async updateProfile() {
       this.isUpdating = true
       this.successMessage = ''
       this.errorMessage = ''
-      
+
       try {
         const response = await axios.post('/profile/update', null, {
           params: {
@@ -325,7 +462,7 @@ export default {
             soDienThoai: this.user.soDienThoai
           }
         })
-        
+
         if (response.data.success) {
           this.successMessage = 'Cập nhật thông tin thành công!'
           setTimeout(() => {
@@ -341,18 +478,18 @@ export default {
         this.isUpdating = false
       }
     },
-    
+
     async changePassword() {
       this.isChangingPassword = true
       this.passwordSuccess = ''
       this.passwordError = ''
-      
+
       if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
         this.passwordError = 'Mật khẩu mới không khớp!'
         this.isChangingPassword = false
         return
       }
-      
+
       try {
         const response = await axios.post('/profile/change-password', null, {
           params: {
@@ -361,7 +498,7 @@ export default {
             confirmPassword: this.passwordForm.confirmPassword
           }
         })
-        
+
         if (response.data.success) {
           this.passwordSuccess = 'Đổi mật khẩu thành công!'
           this.passwordForm = {
@@ -381,18 +518,42 @@ export default {
       } finally {
         this.isChangingPassword = false
       }
+    },
+    async fetchAddresses() {
+      const res = await axios.get("/profile/addresses")
+      this.addresses = res.data
+    },
+
+    async saveAddress() {
+
+      const formData = new FormData()
+
+      formData.append("hoTenNguoiNhan", this.newAddress.ten)
+      formData.append("soDienThoai", this.newAddress.phone)
+      formData.append("diaChiChiTiet", this.newAddress.diaChi)
+
+      await axios.post("/profile/address/add", formData)
+
+      this.showAddAddress = false
+      this.fetchAddresses()
     }
+
   },
-  
+
   mounted() {
     this.fetchUserData()
-    
-    // Check URL hash for tab
+    this.fetchAddresses()
     const hash = window.location.hash.substring(1)
-    if (['info', 'password', 'orders'].includes(hash)) {
+
+    if (['info','password','orders','address'].includes(hash)) {
       this.activeTab = hash
     }
+
+    if (this.activeTab === "address") {
+      this.fetchAddresses()
+    }
   }
+
 }
 </script>
 
