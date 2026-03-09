@@ -17,6 +17,8 @@ import java.util.Optional;
 @Repository
 public interface DonHangRepository extends JpaRepository<DonHang, Long> {
 
+    List<DonHang> findTop10ByTrangThaiDHInOrderByNgayDatDesc(List<Integer> statuses);
+
     // Tìm đơn hàng theo khách hàng
     List<DonHang> findByTaiKhoan_MaTKOrderByNgayDatDesc(Long maTK);
 
@@ -45,4 +47,6 @@ public interface DonHangRepository extends JpaRepository<DonHang, Long> {
  // Tính tổng doanh thu (Chỉ tính các đơn Hoàn tất = 3)
     @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH = 3")
     BigDecimal sumTotalRevenue();
+
+
 }

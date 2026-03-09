@@ -7,7 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -132,11 +136,32 @@ public class DonHangService {
         return donHangChiTietRepository.findByDonHang_MaDH(donHang.getMaDH());
     }
 
+    public List<DonHang> findAll() {
+        return donHangRepository.findAllByOrderByNgayDatDesc();
+    }
+
+    public void updateStatus(Long id, Integer status){
+
+        DonHang dh = donHangRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn"));
+
+        Integer currentStatus = dh.getTrangThaiDH();
+
+        if(status < currentStatus){
+            throw new RuntimeException("Không thể quay lại trạng thái cũ");
+        }
+
+        dh.setTrangThaiDH(status);
+
+        donHangRepository.save(dh);
+
+    }
+
     /**
      * LẤY TẤT CẢ ĐƠN HÀNG CỦA KHÁCH HÀNG
      */
-    public List<DonHang> getDonHangByKhachHang(TaiKhoan taiKhoan) {
-        return donHangRepository.findByTaiKhoan_MaTKOrderByNgayDatDesc(taiKhoan.getMaTK());
+    public List<DonHang> getDonHangByKhachHang(TaiKhoan tk) {
+        return donHangRepository.findByTaiKhoan_MaTKOrderByNgayDatDesc(tk.getMaTK());
     }
 
     /**
@@ -338,6 +363,12 @@ public class DonHangService {
         return list.size() <= limit ? list : list.subList(0, limit);
     }
 
+    public List<DonHang> getRecentOrdersForStaff(int limit) {
+
+        return donHangRepository
+                .findTop10ByTrangThaiDHInOrderByNgayDatDesc(List.of(0,1,2));
+
+    }
     /**
      * Chi tiết đơn hàng qua ID đơn hàng.
      */
