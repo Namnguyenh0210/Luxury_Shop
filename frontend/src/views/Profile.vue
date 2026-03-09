@@ -681,10 +681,13 @@ export default {
 
     async fetchOrders() {
       try {
-        const res = await axios.get("/orders/my", {
+
+        const res = await axios.get("http://localhost:8080/api/orders/my", {
           withCredentials: true
         })
+
         this.orders = res.data
+
       } catch (err) {
         console.error("Error loading orders", err)
       }
