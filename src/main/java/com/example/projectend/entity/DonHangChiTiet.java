@@ -1,15 +1,14 @@
 package com.example.projectend.entity;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 
-/**
- * ENTITY DON HANG CHI TIET - LUXURY FASHION
- * Bảng: DonHangCT (theo SQL)
- */
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "DonHangCT")
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class DonHangChiTiet {
 
     @Id
@@ -19,10 +18,11 @@ public class DonHangChiTiet {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDH", nullable = false)
+    @JsonIgnore
     private DonHang donHang;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "MaBienThe", nullable = false)
+    @JoinColumn(name = "MaBienThe")
     private SanPhamChiTiet sanPhamChiTiet;
 
     @Column(name = "SoLuong")
@@ -31,9 +31,7 @@ public class DonHangChiTiet {
     @Column(name = "DonGia", precision = 18, scale = 2)
     private BigDecimal donGia;
 
-    // Constructors
-    public DonHangChiTiet() {
-    }
+    public DonHangChiTiet() {}
 
     public DonHangChiTiet(DonHang donHang, SanPhamChiTiet sanPhamChiTiet, Integer soLuong, BigDecimal donGia) {
         this.donHang = donHang;
@@ -42,7 +40,6 @@ public class DonHangChiTiet {
         this.donGia = donGia;
     }
 
-    // Getters and Setters
     public Long getMaCT() {
         return maCT;
     }
@@ -83,7 +80,6 @@ public class DonHangChiTiet {
         this.donGia = donGia;
     }
 
-    // Calculated field: ThanhTien = DonGia * SoLuong (không lưu DB)
     @Transient
     public BigDecimal getThanhTien() {
         if (donGia != null && soLuong != null) {

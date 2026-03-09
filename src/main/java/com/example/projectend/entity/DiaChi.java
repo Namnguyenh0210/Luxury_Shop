@@ -1,11 +1,14 @@
 package com.example.projectend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 /**
  * ENTITY SO DIA CHI - LUXURY FASHION
  * Bảng: SoDiaChi (theo SQL)
  */
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "SoDiaChi")
 public class DiaChi {
@@ -16,6 +19,7 @@ public class DiaChi {
     private Long maDiaChi;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
     @JoinColumn(name = "MaTK", nullable = false)
     private TaiKhoan taiKhoan;
 

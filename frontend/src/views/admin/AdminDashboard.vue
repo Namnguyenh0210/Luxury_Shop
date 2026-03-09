@@ -4,7 +4,13 @@
 
       <!-- SIDEBAR -->
       <aside class="flex h-screen w-64 flex-col justify-between border-r p-4 sticky top-0 bg-white">
-
+        <div class="flex items-center justify-center py-4 border-b mb-4">
+          <router-link to="/">
+            <h1 class="text-4xl font-serif text-black hover:text-gray-700 transition-colors cursor-pointer">
+              Luxury
+            </h1>
+          </router-link>
+        </div>
         <div class="flex flex-col gap-8">
 
           <!-- USER INFO -->

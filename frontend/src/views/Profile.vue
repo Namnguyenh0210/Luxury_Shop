@@ -45,7 +45,7 @@
                 </p>
               </button>
               <button
-                  @click="activeTab = 'address'; window.location.hash='address'"
+                  @click="changeTab('address')"
                   :class="[
     'flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all',
     activeTab === 'address'
@@ -243,24 +243,133 @@
               </section>
 
               <!-- Orders Tab -->
-              <section v-show="activeTab === 'orders'" class="space-y-6">
+              <section v-if="activeTab === 'orders'">
+
                 <div>
                   <h1 class="text-3xl font-bold text-gray-900 mb-2">Đơn hàng của tôi</h1>
                   <p class="text-gray-600">Theo dõi trạng thái đơn hàng của bạn</p>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                  <div class="flex flex-col items-center">
-                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                      <span class="material-symbols-outlined text-4xl text-gray-400">shopping_bag</span>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Chưa có đơn hàng</h3>
-                    <p class="text-gray-500 mb-6">Bạn chưa có đơn hàng nào. Hãy bắt đầu mua sắm ngay!</p>
-                    <a href="/sanpham" class="px-6 py-2.5 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-medium shadow-sm">
-                      Khám phá sản phẩm
-                    </a>
-                  </div>
+                <!-- Tabs trạng thái -->
+                <div class="flex gap-6 border-b pb-2 mt-4">
+
+                  <button
+                      @click="orderStatus='all'"
+                      :class="orderStatus==='all'
+        ? 'text-yellow-600 border-b-2 border-yellow-600 pb-2 font-semibold'
+        : 'text-gray-600'">
+                    Tất cả
+                  </button>
+
+                  <button
+                      @click="orderStatus='0'"
+                      :class="orderStatus==='0'
+        ? 'text-yellow-600 border-b-2 border-yellow-600 pb-2 font-semibold'
+        : 'text-gray-600'">
+                    Chờ xác nhận
+                  </button>
+
+                  <button
+                      @click="orderStatus='1'"
+                      :class="orderStatus==='1'
+        ? 'text-yellow-600 border-b-2 border-yellow-600 pb-2 font-semibold'
+        : 'text-gray-600'">
+                    Đang giao
+                  </button>
+
+                  <button
+                      @click="orderStatus='2'"
+                      :class="orderStatus==='2'
+        ? 'text-yellow-600 border-b-2 border-yellow-600 pb-2 font-semibold'
+        : 'text-gray-600'">
+                    Hoàn thành
+                  </button>
+
+                  <button
+                      @click="orderStatus='3'"
+                      :class="orderStatus==='3'
+        ? 'text-yellow-600 border-b-2 border-yellow-600 pb-2 font-semibold'
+        : 'text-gray-600'">
+                    Đã huỷ
+                  </button>
+
                 </div>
+
+                <!-- Không có đơn -->
+                <div
+                    v-if="filteredOrders.length === 0"
+                    class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center mt-6">
+
+                  <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                    Chưa có đơn hàng
+                  </h3>
+
+                  <a href="/sanpham"
+                     class="px-6 py-2 bg-yellow-600 text-white rounded-lg">
+                    Khám phá sản phẩm
+                  </a>
+
+                </div>
+
+                <!-- Danh sách đơn -->
+                <div v-else class="space-y-4 mt-6">
+
+                  <div
+                      v-for="order in filteredOrders"
+                      :key="order.maDH"
+                      class="bg-white border rounded-lg p-5 shadow-sm">
+
+                    <div class="flex justify-between mb-2">
+
+                      <p class="font-semibold">
+                        Mã đơn: #{{ order.maDH }}
+                      </p>
+
+                      <!-- Badge trạng thái -->
+                      <span v-if="order.trangThaiDH == 0" class="text-yellow-600 font-medium">
+          Chờ xác nhận
+        </span>
+
+                      <span v-if="order.trangThaiDH == 1" class="text-blue-600 font-medium">
+          Đang giao
+        </span>
+
+                      <span v-if="order.trangThaiDH == 2" class="text-green-600 font-medium">
+          Hoàn thành
+        </span>
+
+                      <span v-if="order.trangThaiDH == 3" class="text-red-600 font-medium">
+          Đã huỷ
+        </span>
+
+                    </div>
+
+                    <p class="text-gray-600 text-sm">
+                      Ngày đặt: {{ new Date(order.ngayDat).toLocaleString() }}
+                    </p>
+
+                    <p class="text-gray-800 font-semibold mt-2">
+                      Tổng tiền: {{ order.tongTien?.toLocaleString() }}₫
+                    </p>
+
+                    <!-- Nút huỷ đơn -->
+                    <button
+                        v-if="order.trangThaiDH == 0"
+                        @click="cancelOrder(order.maDH)"
+                        class="bg-red-500 text-white px-3 py-1 rounded mt-3">
+                      Huỷ đơn
+                    </button>
+
+                    <button
+                        v-if="order.trangThaiDH == 1"
+                        @click="updateOrderStatus(order.maDH, 2)"
+                        class="bg-green-500 text-white px-3 py-1 rounded">
+                      Đã nhận hàng
+                    </button>
+                  </div>
+
+                </div>
+
               </section>
 
               <!-- Address Tab -->
@@ -363,7 +472,10 @@
 
                   </div>
 
+
+
                 </div>
+
 
               </div>
             </div>
@@ -390,6 +502,7 @@ export default {
   data() {
     return {
       activeTab: 'info',
+
       loading: true,
       error: null,
       successMessage: '',
@@ -400,6 +513,8 @@ export default {
       isChangingPassword: false,
       showAddAddress: false,
       addresses: [],
+      orders: [],
+      orderStatus: "all",
       newAddress: {
         ten: '',
         phone: '',
@@ -418,33 +533,59 @@ export default {
       }
     }
   },
+
+  computed: {
+    filteredOrders() {
+      if (this.orderStatus === "all") {
+        return this.orders
+      }
+
+      return this.orders.filter(
+          order => order.trangThaiDH == this.orderStatus
+      )
+    }
+  },
+
   methods: {
+
+    changeTab(tab) {
+      this.activeTab = tab
+      window.location.hash = tab
+
+      if (tab === "orders") {
+        this.fetchOrders()
+      }
+
+      if (tab === "address") {
+        this.fetchAddresses()
+      }
+    },
+
     async fetchUserData() {
       this.loading = true
       this.error = null
 
       try {
-        const response = await axios.get('/auth/current-user')
+        const response = await axios.get("/auth/current-user")
 
-        if (response.data.authenticated) {
-          // API trả về direct fields, không phải nested trong user object
+        if (response.data) {
           this.user = {
             hoTen: response.data.hoTen || '',
             email: response.data.email || '',
             soDienThoai: response.data.soDienThoai || '',
             avatar: response.data.avatar || null
           }
-        } else {
-          // Not authenticated, redirect to login
-          window.location.href = '/login'
         }
+
       } catch (err) {
         console.error('Error fetching user data:', err)
+
         if (err.response?.status === 401) {
           window.location.href = '/login'
         } else {
           this.error = 'Không thể tải thông tin tài khoản. Vui lòng thử lại.'
         }
+
       } finally {
         this.loading = false
       }
@@ -536,24 +677,80 @@ export default {
 
       this.showAddAddress = false
       this.fetchAddresses()
-    }
+    },
 
+    async fetchOrders() {
+      try {
+        const res = await axios.get("/orders/my", {
+          withCredentials: true
+        })
+        this.orders = res.data
+      } catch (err) {
+        console.error("Error loading orders", err)
+      }
+    },
+
+    async cancelOrder(orderId) {
+  try {
+
+    await axios.put(
+        `http://localhost:8080/api/orders/update-status/${orderId}`,
+        null,
+        {
+          params: { status: 3 },
+          withCredentials: true
+        }
+    )
+
+    this.fetchOrders()
+
+  } catch (err) {
+    console.error("Cancel order error", err)
+  }
+},
+
+    async updateOrderStatus(orderId, status) {
+
+      try {
+
+        await axios.put(
+            `http://localhost:8080/api/orders/update-status/${orderId}`,
+            null,
+            {
+              params: { status: status },
+              withCredentials: true
+            }
+        )
+
+        this.fetchOrders()
+
+      } catch (err) {
+
+        console.error("Update status error", err)
+
+      }
+
+    }
   },
 
   mounted() {
     this.fetchUserData()
-    this.fetchAddresses()
-    const hash = window.location.hash.substring(1)
+    this.fetchOrders()
 
-    if (['info','password','orders','address'].includes(hash)) {
+    const hash = window.location.hash.replace("#", "")
+
+    if (hash) {
       this.activeTab = hash
     }
 
-    if (this.activeTab === "address") {
-      this.fetchAddresses()
-    }
-  }
+    if (hash === "address") this.fetchAddresses()
 
+    window.addEventListener("hashchange", () => {
+      const newHash = window.location.hash.replace("#", "")
+      this.activeTab = newHash
+
+    })
+  }
 }
 </script>
 

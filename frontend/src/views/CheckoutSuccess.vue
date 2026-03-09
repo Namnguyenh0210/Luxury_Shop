@@ -1,6 +1,6 @@
 <template>
 
-<div layout:fragment="content">
+<div>
     <main class="flex flex-1 justify-center py-10 md:py-16 px-4 sm:px-6 lg:px-8">
         <div class="layout-content-container flex w-full flex-col max-w-4xl flex-1">
             <div class="flex flex-col items-center text-center">
@@ -22,25 +22,25 @@
                     <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                         <div class="flex flex-col gap-1">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Mã đơn hàng</p>
-                            <p class="text-sm font-medium text-primary-text dark:text-white">'#' + {{ donHang.maDH }}</p>
+                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ '#' + donHang?.maDH }}</p>
                         </div>
                         <div class="flex flex-col gap-1">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Ngày đặt hàng</p>
-                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ #temporals.format(donHang.ngayDat, 'dd/MM/yyyy HH:mm') }}</p>
+                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ formatDate(donHang?.ngayDat) }}</p>
                         </div>
                         <div class="flex flex-col gap-1">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Tên khách hàng</p>
-                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ donHang.taiKhoan.hoTen }}</p>
+                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ donHang?.taiKhoan?.hoTen }}</p>
                         </div>
                         <div class="flex flex-col gap-1">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Địa chỉ giao hàng</p>
-                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ donHang.diaChiGiao != null ? donHang.diaChiGiao.diaChiChiTiet : 'N/A' }}</p>
+                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ donHang?.diaChiGiao?.diaChiChiTiet || 'N/A' }}</p>
                         </div>
                         <div class="flex flex-col gap-1 sm:col-span-2">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Phương thức thanh toán</p>
-                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ donHang.hinhThucThanhToan != null ? donHang.hinhThucThanhToan.tenPhuongThuc : 'COD' }}</p>
+                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ donHang?.hinhThucThanhToan?.tenPhuongThuc || 'COD' }}</p>
                         </div>
-                        <div class="flex flex-col gap-1 sm:col-span-2" v-if="donHang.ghiChu != null and !donHang.ghiChu.isEmpty()">
+                        <div class="flex flex-col gap-1 sm:col-span-2" v-if="donHang.ghiChu && donHang.ghiChu.length > 0">
                             <p class="text-sm text-gray-500 dark:text-gray-400">Ghi chú</p>
                             <p class="text-sm font-medium text-primary-text dark:text-white">{{ donHang.ghiChu }}</p>
                         </div>
@@ -51,9 +51,14 @@
                 <div class="border-t border-[#e9d5c7] dark:border-gray-700 p-6 md:p-8">
                     <h3 class="text-xl font-bold tracking-tight text-primary-text dark:text-white">Sản phẩm đã đặt</h3>
                     <ul class="mt-6 space-y-6" role="list">
-                        <li class="flex items-start gap-4" v-for="item in chiTiet" :key="item.id || index">
-                            <img class="h-20 w-20 flex-shrink-0 rounded-lg object-cover" onerror="this.src='/img/placeholder.png'" src="${item.sanPhamChiTiet.anhBienThe != null ? item.sanPhamChiTiet.anhBienThe :
-                                          (item.sanPhamChiTiet.sanPham.anhChinh != null ? item.sanPhamChiTiet.sanPham.anhChinh : '/img/placeholder.png')}">
+                        <li class="flex items-start gap-4" v-for="(item,index) in chiTiet" :key="item.id || index">
+                          <img
+                              class="h-20 w-20 flex-shrink-0 rounded-lg object-cover"
+                              :src="item.sanPhamChiTiet.anhBienThe
+                              || item.sanPhamChiTiet.sanPham.anhChinh
+                              || '/img/placeholder.png'"
+                              @error="e => e.target.src='/img/placeholder.png'"
+                          />
                             <div class="flex-1">
                                 <p class="text-sm font-bold text-primary-text dark:text-white">{{ item.sanPhamChiTiet.sanPham.thuongHieu != null ? item.sanPhamChiTiet.sanPham.thuongHieu.tenTH : 'BRAND' }}</p>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">{{ item.sanPhamChiTiet.sanPham.tenSP }}</p>
@@ -67,7 +72,9 @@
                                     / Số lượng: <span>{{ item.soLuong }}</span>
                                 </p>
                             </div>
-                            <p class="text-sm font-medium text-primary-text dark:text-white">{{ #numbers.formatDecimal(item.donGia, 0, 'COMMA', 0, 'POINT') }} + '₫'</p>
+                          <p class="text-sm font-medium text-primary-text dark:text-white">
+                            {{ donHang?.taiKhoan?.hoTen }}
+                          </p>
                         </li>
                     </ul>
                 </div>
@@ -75,18 +82,24 @@
                 <!-- Tổng tiền -->
                 <div class="border-t border-[#e9d5c7] dark:border-gray-700 p-6 md:p-8">
                     <div class="space-y-3 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-500 dark:text-gray-400">Tạm tính</span>
-                            <span class="text-primary-text dark:text-white">{{ #numbers.formatDecimal(donHang.tongTien, 0, 'COMMA', 0, 'POINT') }} + '₫'</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-500 dark:text-gray-400">Phí vận chuyển</span>
-                            <span class="text-primary-text dark:text-white">Miễn phí</span>
-                        </div>
-                        <div class="flex justify-between border-t border-[#e9d5c7] dark:border-gray-700 pt-3 text-base font-bold">
-                            <span class="text-primary-text dark:text-white">Tổng cộng</span>
-                            <span class="text-primary-text dark:text-white">{{ #numbers.formatDecimal(donHang.tongTien, 0, 'COMMA', 0, 'POINT') }} + '₫'</span>
-                        </div>
+                      <div class="flex justify-between">
+                        <span class="text-gray-500 dark:text-gray-400">Tạm tính</span>
+                        <span class="text-primary-text dark:text-white">
+    {{ formatPrice(donHang.tongTien) }} ₫
+  </span>
+                      </div>
+
+                      <div class="flex justify-between">
+                        <span class="text-gray-500 dark:text-gray-400">Phí vận chuyển</span>
+                        <span class="text-primary-text dark:text-white">Miễn phí</span>
+                      </div>
+
+                      <div class="flex justify-between border-t border-[#e9d5c7] dark:border-gray-700 pt-3 text-base font-bold">
+                        <span class="text-primary-text dark:text-white">Tổng cộng</span>
+                        <span class="text-primary-text dark:text-white">
+    {{ formatPrice(donHang.tongTien) }} ₫
+  </span>
+                      </div>
                     </div>
                 </div>
             </div>
@@ -110,12 +123,42 @@
 
 <script>
 export default {
-  name: 'Checkout-success',
+  name: "Checkout-success",
+
   data() {
-    return {}
+    return {
+      donHang: {},
+      chiTiet: []
+    }
   },
+
+  methods: {
+
+    formatDate(date) {
+      if (!date) return ""
+
+      const d = new Date(date)
+
+      const day = String(d.getDate()).padStart(2,'0')
+      const month = String(d.getMonth()+1).padStart(2,'0')
+      const year = d.getFullYear()
+
+      const hours = String(d.getHours()).padStart(2,'0')
+      const minutes = String(d.getMinutes()).padStart(2,'0')
+
+      return `${day}/${month}/${year} ${hours}:${minutes}`
+    },
+
+    formatPrice(price) {
+      if (!price) return "0"
+      return new Intl.NumberFormat('vi-VN').format(price)
+    }
+
+  },
+
   mounted() {
-    // TODO: fetch data via axios or hydrate server state
+    const orderId = this.$route.query.orderId
+    console.log(orderId)
   }
 }
 </script>

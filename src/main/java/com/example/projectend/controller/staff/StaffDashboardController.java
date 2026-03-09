@@ -43,7 +43,7 @@ public class StaffDashboardController {
 
         long orderCount = donHangService.countAll();
 
-        List<DonHang> pendingOrders = donHangService.getPendingOrders(10);
+        List<DonHang> pendingOrders = donHangService.getRecentOrdersForStaff(10);
 
         long pendingCount = pendingOrders.size();
 
@@ -54,16 +54,19 @@ public class StaffDashboardController {
                 .count();
 
         // ⚠ Tránh trả full entity
-        List<Map<String, Object>> recentOrders = pendingOrders.stream()
-                .map(dh -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("maDH", dh.getMaDH());
-                    map.put("tenKhach", dh.getMaKM());
-                    map.put("tongTien", dh.getTongTien());
-                    map.put("trangThai", dh.getTrangThaiDH());
-                    return map;
-                })
-                .collect(Collectors.toList());
+        List<Map<String, Object>> recentOrders = new ArrayList<>();
+
+        for (DonHang dh : pendingOrders) {
+
+            Map<String, Object> map = new HashMap<>();
+
+            map.put("maDH", dh.getMaDH());
+            map.put("tenKhach", dh.getTaiKhoan() != null ? dh.getTaiKhoan().getHoTen() : "N/A");
+            map.put("tongTien", dh.getTongTien());
+            map.put("trangThai", dh.getTrangThaiDH());
+
+            recentOrders.add(map);
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("orderCount", orderCount);
