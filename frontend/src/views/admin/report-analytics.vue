@@ -1,65 +1,61 @@
 <template>
-  <div class="flex flex-col min-h-screen p-10 bg-gray-50">
+  <AdminLayout page-title="Báo Cáo & Thống Kê">
+    <div class="p-8 space-y-8">
 
-    <h1 class="text-2xl font-bold mb-6">Báo Cáo Thống Kê</h1>
-
-    <!-- Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-
-      <div class="bg-blue-600 text-white p-6 rounded-xl">
-        <p class="text-sm">Tổng Doanh Thu</p>
-        <h3 class="text-2xl font-bold mt-2">
-          {{ formatMoney(totalRevenue) }}
-        </h3>
+      <!-- STAT CARDS -->
+      <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div v-for="stat in stats" :key="stat.label"
+          class="flex flex-col gap-2 rounded-2xl p-6 border border-gray-200 bg-white shadow-sm">
+          <div class="flex items-center justify-between">
+            <p class="text-gray-500 text-sm font-medium">{{ stat.label }}</p>
+            <div class="flex items-center justify-center size-10 rounded-xl" :style="{ background: stat.iconBg }">
+              <span class="material-symbols-outlined text-[22px]" :style="{ color: stat.iconColor }">{{ stat.icon }}</span>
+            </div>
+          </div>
+          <p class="text-2xl font-extrabold text-gray-900">{{ stat.value }}</p>
+        </div>
       </div>
 
-      <div class="bg-white p-6 rounded-xl shadow">
-        <p class="text-sm text-gray-500">Đơn hàng mới</p>
-        <h3 class="text-2xl font-bold mt-2">
-          {{ newOrders }}
-        </h3>
-      </div>
+      <!-- CHARTS ROW -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-      <div class="bg-white p-6 rounded-xl shadow">
-        <p class="text-sm text-gray-500">Sản phẩm đã bán</p>
-        <h3 class="text-2xl font-bold mt-2">
-          {{ soldProducts }}
-        </h3>
-      </div>
+        <!-- Revenue Chart -->
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="font-bold text-gray-800">Doanh Thu 7 Ngày</h3>
+              <p class="text-xs text-gray-400 mt-0.5">Thống kê theo ngày gần nhất</p>
+            </div>
+            <span class="material-symbols-outlined text-yellow-600 text-2xl">show_chart</span>
+          </div>
+          <canvas ref="revenueChart" height="200"></canvas>
+        </div>
 
-      <div class="bg-white p-6 rounded-xl shadow">
-        <p class="text-sm text-gray-500">Tổng khách hàng</p>
-        <h3 class="text-2xl font-bold mt-2">
-          {{ totalCustomers }}
-        </h3>
-      </div>
+        <!-- Category Pie Chart -->
+        <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="font-bold text-gray-800">Tỷ Trọng Danh Mục</h3>
+              <p class="text-xs text-gray-400 mt-0.5">Phân bố doanh thu theo danh mục</p>
+            </div>
+            <span class="material-symbols-outlined text-yellow-600 text-2xl">donut_large</span>
+          </div>
+          <canvas ref="categoryChart" height="200"></canvas>
+        </div>
 
+      </div>
     </div>
-
-    <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-      <div class="bg-white p-6 rounded-xl shadow">
-        <h3 class="font-bold mb-4">Doanh Thu 7 Ngày</h3>
-        <canvas ref="revenueChart"></canvas>
-      </div>
-
-      <div class="bg-white p-6 rounded-xl shadow">
-        <h3 class="font-bold mb-4">Tỷ Trọng Danh Mục</h3>
-        <canvas ref="categoryChart"></canvas>
-      </div>
-
-    </div>
-
-  </div>
+  </AdminLayout>
 </template>
 
 <script>
-import axios from "axios"
-import { Chart } from "chart.js/auto"
+import AdminLayout from './AdminLayout.vue'
+import axios from 'axios'
+import { Chart } from 'chart.js/auto'
 
 export default {
-  name: "report-analytics",
+  name: 'ReportAnalytics',
+  components: { AdminLayout },
 
   data() {
     return {
@@ -73,70 +69,96 @@ export default {
     }
   },
 
+  computed: {
+    stats() {
+      return [
+        { label: 'Tổng Doanh Thu',   icon: 'payments',       iconBg: '#fef9c3', iconColor: '#a16207', value: this.fmtMoney(this.totalRevenue) },
+        { label: 'Đơn Hàng Mới',     icon: 'receipt_long',   iconBg: '#dbeafe', iconColor: '#1d4ed8', value: this.newOrders },
+        { label: 'Sản Phẩm Đã Bán',  icon: 'shopping_bag',   iconBg: '#dcfce7', iconColor: '#15803d', value: this.soldProducts },
+        { label: 'Tổng Khách Hàng',  icon: 'group',           iconBg: '#fce7f3', iconColor: '#be185d', value: this.totalCustomers },
+      ]
+    }
+  },
+
   methods: {
-    formatMoney(value) {
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND"
-      }).format(value)
+    fmtMoney(v) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v || 0)
     },
 
-    loadData() {
-      axios.get("/api/reports/overview")
-          .then(res => {
-            const data = res.data
-            this.totalRevenue = data.totalRevenue
-            this.newOrders = data.newOrders
-            this.soldProducts = data.soldProducts
-            this.totalCustomers = data.totalCustomers
-          })
+	async loadData() {
+	  try {
+	    const res = await axios.get(
+	      'http://localhost:8080/api/admin/reports',
+	      { withCredentials: true }
+	    )
 
-      axios.get("/api/reports/revenue-7days")
-          .then(res => {
-            this.chartLabels = res.data.labels
-            this.chartData = res.data.data
-            this.renderRevenueChart()
-          })
+	    this.totalRevenue   = res.data.totalRevenue
+	    this.newOrders      = res.data.newOrders
+	    this.soldProducts   = res.data.soldProducts
+	    this.totalCustomers = res.data.totalCustomers
 
-      axios.get("/api/reports/category")
-          .then(res => {
-            this.categoryData = res.data
-            this.renderCategoryChart()
-          })
-    },
+	    this.chartLabels = res.data.chartLabels
+	    this.chartData   = res.data.chartData
+
+	    this.categoryData = {
+	      labels: ['Áo', 'Quần', 'Giày', 'Phụ kiện'],
+	      data: [30, 25, 20, 25]
+	    }
+
+	    this.$nextTick(() => {
+	      this.renderRevenueChart()
+	      this.renderCategoryChart()
+	    })
+
+	  } catch (e) {
+	    console.error(e)
+	  }
+	},
 
     renderRevenueChart() {
       new Chart(this.$refs.revenueChart, {
-        type: "line",
+        type: 'line',
         data: {
           labels: this.chartLabels,
           datasets: [{
-            label: "Doanh thu",
+            label: 'Doanh thu (đ)',
             data: this.chartData,
-            borderColor: "#2563eb",
-            backgroundColor: "rgba(37, 99, 235, 0.1)",
+            borderColor: '#d97706',
+            backgroundColor: 'rgba(217,119,6,0.08)',
             fill: true,
-            tension: 0.4
+            tension: 0.4,
+            pointBackgroundColor: '#d97706',
+            pointRadius: 4
           }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, grid: { color: '#f3f4f6' } }, x: { grid: { display: false } } }
         }
       })
     },
 
     renderCategoryChart() {
       new Chart(this.$refs.categoryChart, {
-        type: "doughnut",
+        type: 'doughnut',
         data: {
-          labels: this.categoryData.labels,
+          labels: this.categoryData.labels || [],
           datasets: [{
-            data: this.categoryData.data
+            data: this.categoryData.data || [],
+            backgroundColor: ['#d97706','#3b82f6','#10b981','#8b5cf6','#ef4444','#f59e0b'],
+            borderWidth: 0
           }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom', labels: { padding: 16, font: { size: 12 } } } },
+          cutout: '65%'
         }
       })
     }
   },
 
-  mounted() {
-    this.loadData()
-  }
+  mounted() { this.loadData() }
 }
 </script>

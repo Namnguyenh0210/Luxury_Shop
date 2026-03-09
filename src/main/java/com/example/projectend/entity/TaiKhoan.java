@@ -6,6 +6,9 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * ENTITY TAI KHOAN - LUXURY FASHION
  * Bảng: TaiKhoan (theo SQL)
@@ -13,6 +16,7 @@ import java.util.Set;
  *
  * CẬP NHẬT: Thêm field Provider cho Google OAuth2 Login
  */
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Entity
 @Table(name = "TaiKhoan")
 public class TaiKhoan {
@@ -20,9 +24,11 @@ public class TaiKhoan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MaTK")
+    @JsonProperty("maTK")
     private Long maTK;
 
     @Column(name = "HoTen", nullable = false, length = 100)
+    @JsonProperty("hoTen")
     private String hoTen;
 
     @Column(name = "Email", nullable = false, unique = true, length = 100)
@@ -32,6 +38,7 @@ public class TaiKhoan {
     private String matKhau;
 
     @Column(name = "SoDienThoai", length = 20)
+    @JsonProperty("soDienThoai")
     private String soDienThoai;
 
     @Column(name = "DiaChi", length = 255)
@@ -44,6 +51,7 @@ public class TaiKhoan {
     private LocalDateTime lastLogin;
 
     @Column(name = "TrangThai", nullable = false)
+    @JsonProperty("trangThai")
     private Boolean trangThai = true;
 
     @Column(name = "NgayTao")
@@ -73,6 +81,13 @@ public class TaiKhoan {
         this.email = email;
         this.matKhau = matKhau;
     }
+    
+    // Trường tạm để nhận mật khẩu từ giao diện, không lưu vào DB
+    @Transient
+    @JsonProperty("matKhauMoi")
+    private String matKhauMoi;
+    public String getMatKhauMoi() { return matKhauMoi; }
+    public void setMatKhauMoi(String matKhauMoi) { this.matKhauMoi = matKhauMoi; }
 
     // Getters and Setters
     public Long getMaTK() {
@@ -199,4 +214,5 @@ public class TaiKhoan {
                 ", trangThai=" + trangThai +
                 '}';
     }
+    
 }

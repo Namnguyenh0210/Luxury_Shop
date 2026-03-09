@@ -1,13 +1,12 @@
 package com.example.projectend.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * ENTITY DON HANG - LUXURY FASHION (FIXED)
  * Bảng: DonHang (theo SQL)
@@ -16,10 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "DonHang")
 public class DonHang {
 
-    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<DonHangChiTiet> chiTietList = new ArrayList<>();
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MaDH")
@@ -27,12 +22,10 @@ public class DonHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaTK")
-    @JsonIgnore
     private TaiKhoan taiKhoan;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaNhanVien")
-    @JsonIgnore
     private TaiKhoan nhanVien;
 
     @Column(name = "NgayDat")
@@ -49,7 +42,6 @@ public class DonHang {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaDiaChiGiao")
-    @JsonIgnoreProperties({"taiKhoan"})
     private DiaChi diaChiGiao;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -76,6 +68,9 @@ public class DonHang {
 
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<DonHangChiTiet> chiTietList = new ArrayList<>();
 
     // Constructors
     public DonHang() {
@@ -247,11 +242,4 @@ public class DonHang {
             default: return "Không xác định";
         }
     }
-
-    @Transient
-    public Long getMaTK() {
-        return taiKhoan != null ? taiKhoan.getMaTK() : null;
-    }
-
-
 }

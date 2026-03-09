@@ -1,6 +1,7 @@
 package com.example.projectend.controller.admin;
 
 import com.example.projectend.entity.DonHang;
+import com.example.projectend.repository.DonHangRepository;
 import com.example.projectend.service.DonHangService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -8,6 +9,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/orders")
@@ -17,6 +21,9 @@ public class AdminDonHangController {
 
     @Autowired
     private DonHangService donHangService;
+
+    @Autowired
+    private DonHangRepository donHangRepository;
 
     // ==========================================
     // 1. DANH SÁCH ĐƠN HÀNG (JSON)
@@ -47,15 +54,50 @@ public class AdminDonHangController {
     // 3. CẬP NHẬT TRẠNG THÁI
     // ==========================================
     @PutMapping("/{id}/status")
-    public String updateStatus(@PathVariable Long id,
-                               @RequestParam Integer status) {
+    public Map<String, Object> updateStatus(
+            @PathVariable Long id,
+            @RequestParam Integer status) {
 
-        boolean success = donHangService.updateOrderStatus(id, status, "ADMIN");
+        Map<String, Object> res = new HashMap<>();
 
-        if (success) {
-            return "Cập nhật thành công";
-        } else {
-            throw new RuntimeException("Cập nhật thất bại");
+        DonHang donHang = donHangRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        Integer trangThaiHienTai = donHang.getTrangThaiDH();
+
+        // Đơn đã kết thúc → không thay đổi
+        if (trangThaiHienTai == 3 || trangThaiHienTai == 4) {
+            res.put("success", false);
+            res.put("message", "Đơn hàng đã kết thúc, không thể thay đổi!");
+            return res;
         }
+
+        // Chỉ hủy (4) khi đang chờ xác nhận (0)
+        if (status == 4 && trangThaiHienTai >= 1) {
+            res.put("success", false);
+            res.put("message", "Không thể hủy đơn đã xác nhận! Liên hệ khách hàng trực tiếp.");
+            return res;
+        }
+
+        // Bắt buộc tuần tự: 0→1→2→3
+        if (status != 4 && status != trangThaiHienTai + 1) {
+            res.put("success", false);
+            res.put("message", "Chỉ được chuyển sang trạng thái kế tiếp!");
+            return res;
+        }
+
+        donHang.setTrangThaiDH(status);
+        donHang.setNgayCapNhat(java.time.LocalDateTime.now());
+
+        if (status == 3) {
+            donHang.setTrangThaiThanhToan(1);
+            donHang.setNgayThanhToan(java.time.LocalDateTime.now());
+        }
+
+        donHangRepository.save(donHang);
+
+        res.put("success", true);
+        res.put("message", "Cập nhật trạng thái thành công!");
+        return res;
     }
 }

@@ -1,6 +1,9 @@
+
 package com.example.projectend.config;
 
 import com.example.projectend.service.auth.CustomOAuth2UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +23,6 @@ public class SecurityConfig {
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
 
-    // ⚠️ Chỉ dùng tạm thời cho demo (password plain text "123")
     @Bean
     public PasswordEncoder passwordEncoder() {
         return NoOpPasswordEncoder.getInstance();
@@ -30,10 +32,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                // ======================= AUTHORIZE =======================
+
+                // ================= AUTHORIZE =================
                 .authorizeHttpRequests(auth -> auth
 
-                        // ===== PUBLIC =====
                         .requestMatchers(
                                 "/", "/home",
                                 "/sanpham/**",
@@ -41,99 +43,136 @@ public class SecurityConfig {
                                 "/login", "/register", "/403",
                                 "/css/**", "/js/**", "/img/**",
                                 "/images/**", "/static/**",
-                                "/error"
-                        ).permitAll()
+                                "/error")
+                        .permitAll()
 
-                        // ===== STAFF (ADMIN vào được luôn) =====
                         .requestMatchers("/staff/**")
                         .hasAnyRole("ADMIN", "NHANVIEN")
 
-                        // ===== ADMIN =====
+                        // API /api/admin/** có @PreAuthorize riêng — cho phép cả NHANVIEN
+                        .requestMatchers("/api/admin/**")
+                        .hasAnyRole("ADMIN", "NHANVIEN")
+
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
 
-                        // ===== CẦN LOGIN =====
                         .requestMatchers(
                                 "/checkout/**",
                                 "/profile/**",
-                                "/payment/**"
-                        ).authenticated()
+                                "/payment/**")
+                        .authenticated()
 
-                        // ===== CÒN LẠI =====
-                        .anyRequest().permitAll()
-                )
+                        .anyRequest().permitAll())
 
-                // ======================= FORM LOGIN =======================
+                // ================= FORM LOGIN =================
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
                         .usernameParameter("username")
                         .passwordParameter("password")
-
                         .successHandler((request, response, authentication) -> {
-
-                            System.out.println("=== LOGIN SUCCESS ===");
-                            System.out.println("User: " + authentication.getName());
-                            System.out.println("Authorities: " + authentication.getAuthorities());
 
                             boolean isAdmin = authentication.getAuthorities().stream()
                                     .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-
                             boolean isStaff = authentication.getAuthorities().stream()
                                     .anyMatch(a -> a.getAuthority().equals("ROLE_NHANVIEN"));
 
+                            String redirectPath;
                             if (isAdmin) {
-                                response.sendRedirect("/admin/dashboard");
+                                redirectPath = "/admin/dashboard";
                             } else if (isStaff) {
-                                response.sendRedirect("/staff/dashboard");
+                                redirectPath = "/staff/dashboard";
                             } else {
-                                response.sendRedirect("/");
+                                redirectPath = "/";
+                            }
+
+                            boolean isDevMode = isFromVue(request);
+
+                            if (isDevMode) {
+                                response.sendRedirect("http://localhost:5173" + redirectPath);
+                            } else {
+                                response.sendRedirect(redirectPath);
                             }
                         })
-
                         .failureUrl("/login?error=true")
-                        .permitAll()
-                )
+                        .permitAll())
 
-                // ======================= OAUTH2 LOGIN =======================
+                // ================= OAUTH2 LOGIN =================
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .userInfoEndpoint(userInfo ->
-                                userInfo.userService(customOAuth2UserService)
-                        )
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
-                            // OAuth2 mặc định là KHACHHANG
-                            response.sendRedirect("/");
-                        })
-                        .failureUrl("/login?error=true")
-                )
 
-                // ======================= SESSION =======================
+                            boolean isAdmin = authentication.getAuthorities().stream()
+                                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                            boolean isStaff = authentication.getAuthorities().stream()
+                                    .anyMatch(a -> a.getAuthority().equals("ROLE_NHANVIEN"));
+
+                            String redirectPath;
+                            if (isAdmin) {
+                                redirectPath = "/admin/dashboard";
+                            } else if (isStaff) {
+                                redirectPath = "/staff/dashboard";
+                            } else {
+                                redirectPath = "/";
+                            }
+
+                            boolean isDevMode = isFromVue(request);
+
+                            if (isDevMode) {
+                                response.sendRedirect("http://localhost:5173" + redirectPath);
+                            } else {
+                                response.sendRedirect(redirectPath);
+                            }
+                        })
+                        .failureUrl("/login?error=true"))
+
+                // ================= SESSION =================
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .invalidSessionUrl("/login?session=invalid")
                         .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false)
-                )
+                        .maxSessionsPreventsLogin(false))
 
-                // ======================= LOGOUT =======================
+                // ================= LOGOUT (ĐÃ FIX CHUẨN) =================
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/?logout=success")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+
+                            boolean isDevMode = isFromVue(request);
+
+                            if (isDevMode) {
+                                response.sendRedirect("http://localhost:5173/login?logout=success");
+                            } else {
+                                response.sendRedirect("/login?logout=success");
+                            }
+                        })
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
-                        .permitAll()
-                )
+                        .permitAll())
 
-                // ======================= EXCEPTION =======================
+                // ================= EXCEPTION =================
                 .exceptionHandling(ex -> ex
                         .accessDeniedPage("/403")
-                )
+                        .defaultAuthenticationEntryPointFor(
+                                new org.springframework.security.web.authentication.HttpStatusEntryPoint(
+                                        org.springframework.http.HttpStatus.UNAUTHORIZED),
+                                new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/api/**")))
 
-                // ======================= CSRF (tạm disable cho ASM) =====
+                // ================= CSRF =================
                 .csrf(csrf -> csrf.disable());
 
         return http.build();
+    }
+
+    // ================= HELPER METHOD =================
+    private boolean isFromVue(HttpServletRequest request) {
+        String referer = request.getHeader("Referer");
+        String origin = request.getHeader("Origin");
+
+        return (referer != null && referer.contains("5173"))
+                || (origin != null && origin.contains("5173"));
     }
 }

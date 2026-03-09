@@ -1,13 +1,12 @@
+
 package com.example.projectend.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 /**
- * ENTITY DANH GIA - FIXED
+ * ENTITY DANH GIA
  * Bảng: DanhGia
- * Khóa ngoại: MaCT (từ DonHangCT) - khách chỉ đánh giá sản phẩm đã mua
  */
 @Entity
 @Table(name = "DanhGia")
@@ -30,22 +29,14 @@ public class DanhGia {
     private String noiDung;
 
     @Column(name = "Diem", nullable = false)
-    private Integer diem; // 1-5 sao
-
-    @Column(name = "HinhAnh", length = 255)
-    private String hinhAnh;
+    private Integer diem;
 
     @Column(name = "NgayDanhGia")
-    private LocalDateTime ngayDanhGia = LocalDateTime.now();
+    private LocalDateTime ngayDanhGia;
 
-    @Column(name = "SoLuongLike")
-    private Integer soLuongLike = 0;
-
-    @Column(name = "SoLuongPhanHoi")
-    private Integer soLuongPhanHoi = 0;
-
-    // Constructors
+    // ===== Constructor =====
     public DanhGia() {
+        this.ngayDanhGia = LocalDateTime.now();
     }
 
     public DanhGia(DonHangChiTiet donHangChiTiet, TaiKhoan taiKhoan, Integer diem, String noiDung) {
@@ -53,9 +44,10 @@ public class DanhGia {
         this.taiKhoan = taiKhoan;
         this.diem = diem;
         this.noiDung = noiDung;
+        this.ngayDanhGia = LocalDateTime.now();
     }
 
-    // Getters and Setters
+    // ===== Getter & Setter =====
     public Long getMaDG() {
         return maDG;
     }
@@ -96,35 +88,11 @@ public class DanhGia {
         this.diem = diem;
     }
 
-    public String getHinhAnh() {
-        return hinhAnh;
-    }
-
-    public void setHinhAnh(String hinhAnh) {
-        this.hinhAnh = hinhAnh;
-    }
-
     public LocalDateTime getNgayDanhGia() {
         return ngayDanhGia;
     }
 
     public void setNgayDanhGia(LocalDateTime ngayDanhGia) {
         this.ngayDanhGia = ngayDanhGia;
-    }
-
-    public Integer getSoLuongLike() {
-        return soLuongLike;
-    }
-
-    public void setSoLuongLike(Integer soLuongLike) {
-        this.soLuongLike = soLuongLike;
-    }
-
-    public Integer getSoLuongPhanHoi() {
-        return soLuongPhanHoi;
-    }
-
-    public void setSoLuongPhanHoi(Integer soLuongPhanHoi) {
-        this.soLuongPhanHoi = soLuongPhanHoi;
     }
 }

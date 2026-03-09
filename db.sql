@@ -39,9 +39,6 @@ IF
 OBJECT_ID('dbo.PhongChat', 'U') IS NOT NULL
 DROP TABLE dbo.PhongChat;
 IF
-OBJECT_ID('dbo.DangKyThanhVien', 'U') IS NOT NULL
-DROP TABLE dbo.DangKyThanhVien;
-IF
 OBJECT_ID('dbo.NhapKhoChiTiet', 'U') IS NOT NULL
 DROP TABLE dbo.NhapKhoChiTiet;
 IF
@@ -80,15 +77,6 @@ DROP TABLE dbo.DonHang;
 IF
 OBJECT_ID('dbo.HinhThucThanhToan', 'U') IS NOT NULL
 DROP TABLE dbo.HinhThucThanhToan;
-IF
-OBJECT_ID('dbo.KhuyenMai_ChiTiet', 'U') IS NOT NULL
-DROP TABLE dbo.KhuyenMai_ChiTiet;
-IF
-OBJECT_ID('dbo.KhuyenMai', 'U') IS NOT NULL
-DROP TABLE dbo.KhuyenMai;
-IF
-OBJECT_ID('dbo.GoiThanhVien', 'U') IS NOT NULL
-DROP TABLE dbo.GoiThanhVien;
 IF
 OBJECT_ID('dbo.HinhAnhSP', 'U') IS NOT NULL
 DROP TABLE dbo.HinhAnhSP;
@@ -137,8 +125,7 @@ GO
 */
 
 -- Bảng: TaiKhoan
-CREATE TABLE TaiKhoan
-(
+CREATE TABLE TaiKhoan (
     MaTK BIGINT IDENTITY(1,1) PRIMARY KEY,
     HoTen NVARCHAR(100) NOT NULL,
     Email VARCHAR(100) UNIQUE NOT NULL,
@@ -153,23 +140,20 @@ CREATE TABLE TaiKhoan
 );
 
 -- Bảng: Role (Phân Quyền)
-CREATE TABLE Role
-(
+CREATE TABLE Role (
     MaRole BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenRole VARCHAR(50) UNIQUE NOT NULL
 );
 
 -- Bảng: TaiKhoan_Role (Nối Tài Khoản - Quyền)
-CREATE TABLE TaiKhoan_Role
-(
+CREATE TABLE TaiKhoan_Role (
     MaTK BIGINT NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK),
     MaRole BIGINT NOT NULL FOREIGN KEY REFERENCES Role(MaRole),
     PRIMARY KEY (MaTK, MaRole)
 );
 
 -- Bảng: SoDiaChi
-CREATE TABLE SoDiaChi
-(
+CREATE TABLE SoDiaChi (
     MaDiaChi BIGINT IDENTITY(1,1) PRIMARY KEY,
     MaTK BIGINT NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK),
     HoTenNguoiNhan NVARCHAR(100) NOT NULL,
@@ -179,64 +163,55 @@ CREATE TABLE SoDiaChi
 );
 
 -- Bảng: ThuongHieu
-CREATE TABLE ThuongHieu
-(
+CREATE TABLE ThuongHieu (
     MaTH BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenTH NVARCHAR(100) NOT NULL,
     MoTa NVARCHAR(255)
 );
 
 -- Bảng: LoaiSanPham
-CREATE TABLE LoaiSanPham
-(
-    MaLoai  BIGINT IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE LoaiSanPham (
+    MaLoai BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenLoai NVARCHAR(100) NOT NULL,
-    MoTa    NVARCHAR(255)
+    MoTa NVARCHAR(255)
 );
 
 -- Bảng: SizeSP
-CREATE TABLE SizeSP
-(
-    MaSize  BIGINT IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE SizeSP (
+    MaSize BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenSize NVARCHAR(20) UNIQUE NOT NULL
 );
-
 -- Bảng: MauSacSP
-CREATE TABLE MauSacSP
-(
-    MaMau  BIGINT IDENTITY(1,1) PRIMARY KEY,
+CREATE TABLE MauSacSP (
+    MaMau BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenMau NVARCHAR(50) UNIQUE NOT NULL,
-    MaHex  VARCHAR(7)
+    MaHex VARCHAR(7)
 );
 
 -- Bảng: SanPham
-CREATE TABLE SanPham
-(
+CREATE TABLE SanPham (
     MaSP BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenSP NVARCHAR(255) NOT NULL,
     MaLoai BIGINT FOREIGN KEY REFERENCES LoaiSanPham(MaLoai) ON DELETE SET NULL,
     MaTH BIGINT FOREIGN KEY REFERENCES ThuongHieu(MaTH) ON DELETE SET NULL,
     MoTa NVARCHAR(MAX),
     AnhChinh NVARCHAR(255),
-    GioiTinh INT NOT NULL DEFAULT 2,
-    -- 0=Nam, 1=Nữ, 2=Unisex
+    GioiTinh INT NOT NULL DEFAULT 2, -- 0=Nam, 1=Nữ, 2=Unisex
     TrangThaiSP INT NOT NULL DEFAULT 1,
-    -- 1: Đang bán, 0: Ngừng bán
     NgayTao DATETIME DEFAULT GETDATE(),
     NgayCapNhat DATETIME DEFAULT GETDATE()
 );
 
 -- Bảng: SanPhamChiTiet (Biến thể SKU)
-CREATE TABLE SanPhamChiTiet
-(
+CREATE TABLE SanPhamChiTiet (
     MaBienThe BIGINT IDENTITY(1,1) PRIMARY KEY,
     MaSP BIGINT NOT NULL FOREIGN KEY REFERENCES SanPham(MaSP) ON DELETE CASCADE,
-    MaSize     BIGINT FOREIGN KEY REFERENCES SizeSP(MaSize) ON DELETE SET NULL,
-    MaMau      BIGINT FOREIGN KEY REFERENCES MauSacSP(MaMau) ON DELETE SET NULL,
-    GiaBan     DECIMAL(18, 2) NOT NULL,
-    GiaNhap    DECIMAL(18, 2) DEFAULT 0,
+    MaSize BIGINT FOREIGN KEY REFERENCES SizeSP(MaSize) ON DELETE SET NULL,
+    MaMau BIGINT FOREIGN KEY REFERENCES MauSacSP(MaMau) ON DELETE SET NULL,
+    GiaBan DECIMAL(18, 2) NOT NULL,
+    GiaNhap DECIMAL(18, 2) DEFAULT 0,
     SoLuongTon INT DEFAULT 0,
-    SoLuongDaBan INT DEFAULT 0, -- Thêm cột số lượng đã bán
+    SoLuongDaBan INT DEFAULT 0,
     AnhBienThe NVARCHAR(255),
     CONSTRAINT UK_SanPham_Variant UNIQUE (MaSP, MaSize, MaMau)
 );
@@ -249,46 +224,9 @@ CREATE TABLE HinhAnhSP
     DuongDan NVARCHAR(255)
 );
 
--- Bảng: GoiThanhVien
-CREATE TABLE GoiThanhVien
-(
-    MaGoi BIGINT IDENTITY(1,1) PRIMARY KEY,
-    TenGoi NVARCHAR(100),
-    Gia DECIMAL(18, 2),
-    ThoiHan INT,
-    -- Số ngày
-    UuDai NVARCHAR(255)
-);
-
--- Bảng: KhuyenMai
-CREATE TABLE KhuyenMai
-(
-    MaKM BIGINT IDENTITY(1,1) PRIMARY KEY,
-    TenKM NVARCHAR(100) NOT NULL,
-    MaCode VARCHAR(50) UNIQUE NOT NULL,
-    LoaiKM VARCHAR(50),
-    LoaiGiaTri INT DEFAULT 0,
-    -- 0: %, 1: VND
-    GiaTri DECIMAL(18, 2),
-    NgayBatDau DATETIME NOT NULL,
-    NgayKetThuc DATETIME,
-    MaGoi BIGINT FOREIGN KEY REFERENCES GoiThanhVien(MaGoi) ON DELETE SET NULL,
-    TrangThai BIT DEFAULT 1,
-    SoLanSuDung INT DEFAULT 0
-);
-
--- Bảng: KhuyenMai_ChiTiet (Nối Khuyến Mãi - Sản phẩm/Biến thể)
-CREATE TABLE KhuyenMai_ChiTiet
-(
-    MaKM BIGINT NOT NULL FOREIGN KEY REFERENCES KhuyenMai(MaKM) ON DELETE CASCADE,
-    MaSP BIGINT FOREIGN KEY REFERENCES SanPham(MaSP) ON DELETE NO ACTION, -- Không xóa sản phẩm khi chi tiết KM bị xóa
-    MaBienThe BIGINT FOREIGN KEY REFERENCES SanPhamChiTiet(MaBienThe) ON DELETE CASCADE, -- Xóa chi tiết KM khi biến thể bị xóa
-    CONSTRAINT UK_KhuyenMai_ChiTiet UNIQUE (MaKM, MaSP, MaBienThe)
-);
 
 -- Bảng: HinhThucThanhToan
-CREATE TABLE HinhThucThanhToan
-(
+CREATE TABLE HinhThucThanhToan (
     MaHinhThucTT BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenHinhThuc NVARCHAR(100) UNIQUE NOT NULL,
     MoTa NVARCHAR(255),
@@ -296,31 +234,26 @@ CREATE TABLE HinhThucThanhToan
 );
 
 -- Bảng: DonHang
-CREATE TABLE DonHang
-(
-    MaDH               BIGINT IDENTITY(1,1) PRIMARY KEY,
-    MaTK               BIGINT FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE SET NULL,
-    MaNhanVien         BIGINT FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE NO ACTION,
-    NgayDat            DATETIME       DEFAULT GETDATE(),
-    TongTien           DECIMAL(18, 2) DEFAULT 0,
-    PhiShip            DECIMAL(18, 2) DEFAULT 0,
-    MaKM               BIGINT FOREIGN KEY REFERENCES KhuyenMai(MaKM) ON DELETE SET NULL,
-    MaDiaChiGiao      BIGINT FOREIGN KEY REFERENCES SoDiaChi(MaDiaChi) ON DELETE SET NULL,
-    MaHinhThucTT      BIGINT FOREIGN KEY REFERENCES HinhThucThanhToan(MaHinhThucTT) ON DELETE SET NULL,
-    GhiChu             NVARCHAR(500),
-    LyDoHuy            NVARCHAR(255), -- Thêm lý do hủy
-    MaGiaoDich         VARCHAR(100),  -- Thêm mã giao dịch từ cổng thanh toán
-    TrangThaiDH         INT NOT NULL DEFAULT 0,
-    -- 0: Chờ xác nhận, 1: Đã xác nhận, 2: Đang giao, 3: Hoàn tất, 4: Đã hủy
+CREATE TABLE DonHang (
+    MaDH BIGINT IDENTITY(1,1) PRIMARY KEY,
+    MaTK BIGINT FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE SET NULL,
+    MaNhanVien BIGINT FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE NO ACTION,
+    NgayDat DATETIME DEFAULT GETDATE(),
+    TongTien DECIMAL(18, 2) DEFAULT 0,
+    PhiShip DECIMAL(18, 2) DEFAULT 0,
+    MaDiaChiGiao BIGINT FOREIGN KEY REFERENCES SoDiaChi(MaDiaChi) ON DELETE SET NULL,
+    MaHinhThucTT BIGINT FOREIGN KEY REFERENCES HinhThucThanhToan(MaHinhThucTT) ON DELETE SET NULL,
+    GhiChu NVARCHAR(500),
+    LyDoHuy NVARCHAR(255),
+    MaGiaoDich VARCHAR(100),
+    TrangThaiDH INT NOT NULL DEFAULT 0, -- 0: Chờ, 1: Xác nhận, 2: Giao, 3: Hoàn tất, 4: Hủy
     TrangThaiThanhToan INT NOT NULL DEFAULT 0,
-    -- 0=Chờ,1=Đã TT,2=Lỗi,3=Hoàn tiền
     NgayThanhToan DATETIME NULL,
     NgayCapNhat DATETIME DEFAULT GETDATE()
 );
 
 -- Bảng: DonHangCT (Chi tiết đơn hàng)
-CREATE TABLE DonHangCT
-(
+CREATE TABLE DonHangCT (
     MaCT BIGINT IDENTITY(1,1) PRIMARY KEY,
     MaDH BIGINT NOT NULL FOREIGN KEY REFERENCES DonHang(MaDH) ON DELETE CASCADE,
     MaBienThe BIGINT FOREIGN KEY REFERENCES SanPhamChiTiet(MaBienThe) ON DELETE SET NULL,
@@ -342,18 +275,13 @@ CREATE TABLE LichSuDonHang
 );
 
 -- Bảng: DanhGia
-CREATE TABLE DanhGia
-(
+CREATE TABLE DanhGia (
     MaDG BIGINT IDENTITY(1,1) PRIMARY KEY,
     MaCT BIGINT UNIQUE NOT NULL FOREIGN KEY REFERENCES DonHangCT(MaCT) ON DELETE CASCADE,
-    -- Chỉ review SP đã mua
     MaTK BIGINT NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE CASCADE,
     NoiDung NVARCHAR(500),
     Diem INT NOT NULL CHECK (Diem >= 1 AND Diem <= 5),
-    HinhAnh NVARCHAR(255),
-    NgayDanhGia DATETIME DEFAULT GETDATE(),
-    SoLuongLike INT DEFAULT 0,
-    SoLuongPhanHoi INT DEFAULT 0
+    NgayDanhGia DATETIME DEFAULT GETDATE()
 );
 
 -- Bảng: LoaiBaiViet
@@ -395,12 +323,10 @@ CREATE TABLE BinhLuan
 );
 
 -- Bảng: GioHang
-CREATE TABLE GioHang
-(
+CREATE TABLE GioHang (
     MaGioHang BIGINT IDENTITY(1,1) PRIMARY KEY,
     MaTK BIGINT UNIQUE NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE CASCADE
 );
-
 -- Bảng: GioHangChiTiet
 CREATE TABLE GioHangChiTiet
 (
@@ -442,17 +368,6 @@ CREATE TABLE NhapKhoChiTiet
     SoLuong INT,
     DonGiaNhap DECIMAL(18, 2),
     ThanhTien DECIMAL(18, 2)
-);
-
--- Bảng: DangKyThanhVien
-CREATE TABLE DangKyThanhVien
-(
-    MaDK BIGINT IDENTITY(1,1) PRIMARY KEY,
-    MaTK BIGINT NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE CASCADE,
-    MaGoi BIGINT NOT NULL FOREIGN KEY REFERENCES GoiThanhVien(MaGoi) ON DELETE CASCADE,
-    NgayBatDau DATETIME DEFAULT GETDATE(),
-    NgayKetThuc DATETIME,
-    TrangThai INT DEFAULT 1
 );
 
 -- Bảng: PhongChat
@@ -617,13 +532,7 @@ VALUES
 SET IDENTITY_INSERT dbo.NhaCungCap OFF;
 GO
 
-SET IDENTITY_INSERT dbo.GoiThanhVien ON;
-INSERT INTO GoiThanhVien
-(MaGoi, TenGoi, Gia, ThoiHan, UuDai)
-VALUES
-    (1, N'VIP Gold', 5000000, 365, N'Giảm 10% mọi đơn hàng');
-SET IDENTITY_INSERT dbo.GoiThanhVien OFF;
-GO
+
 
 SET IDENTITY_INSERT dbo.LoaiBaiViet ON;
 INSERT INTO LoaiBaiViet
@@ -633,13 +542,6 @@ VALUES
 SET IDENTITY_INSERT dbo.LoaiBaiViet OFF;
 GO
 
-SET IDENTITY_INSERT dbo.KhuyenMai ON;
-INSERT INTO KhuyenMai
-(MaKM, TenKM, MaCode, LoaiKM, LoaiGiaTri, GiaTri, NgayBatDau, NgayKetThuc, TrangThai)
-VALUES
-    (1, N'Giảm giá 10% toàn cửa hàng', 'HE2025', N'Toàn cửa hàng', 0, 10.00, GETDATE() - 1, GETDATE() + 30, 1);
-SET IDENTITY_INSERT dbo.KhuyenMai OFF;
-GO
 
 -- 2. Chèn Sản Phẩm (Phụ thuộc các bảng trên)
 
@@ -848,13 +750,6 @@ INSERT INTO GioHangChiTiet
     (MaGioHang, MaBienThe, SoLuong)
 VALUES
     (1, 1, 2); -- Khách có 2 cái Áo Polo Gucci Cotton S Đen (MaBienThe=1) trong giỏ
-GO
-
--- 4.3.3. Khách đăng ký gói VIP
-INSERT INTO DangKyThanhVien
-    (MaTK, MaGoi, NgayBatDau, NgayKetThuc, TrangThai)
-VALUES
-    (3, 1, GETDATE(), DATEADD(day, 365, GETDATE()), 1);
 GO
 
 -- 4.3.4. Khách chat với CSKH
@@ -1090,23 +985,6 @@ PRINT N'========================================';
 PRINT N'3. BẢNG KHUYẾN MÃI';
 PRINT N'========================================';
 
--- Bảng GoiThanhVien
-SELECT '=== GOI THANH VIEN ===' AS [Table];
-SELECT *
-FROM GoiThanhVien;
-GO
-
--- Bảng KhuyenMai
-SELECT '=== KHUYEN MAI ===' AS [Table];
-SELECT *
-FROM KhuyenMai;
-GO
-
--- Bảng KhuyenMai_ChiTiet
-SELECT '=== KHUYEN MAI CHI TIET ===' AS [Table];
-SELECT *
-FROM KhuyenMai_ChiTiet;
-GO
 
 PRINT N'========================================';
 PRINT N'4. BẢNG ĐỠN HÀNG';
@@ -1206,11 +1084,6 @@ PRINT N'========================================';
 PRINT N'8. BẢNG THÀNH VIÊN';
 PRINT N'========================================';
 
--- Bảng DangKyThanhVien
-SELECT '=== DANG KY THANH VIEN ===' AS [Table];
-SELECT *
-FROM DangKyThanhVien;
-GO
 
 PRINT N'========================================';
 PRINT N'9. BẢNG CHAT';
@@ -1258,9 +1131,7 @@ UNION ALL
 SELECT 'BaiViet', COUNT(*)
 FROM BaiViet
 UNION ALL
-SELECT 'KhuyenMai', COUNT(*)
-FROM KhuyenMai
-UNION ALL
+
 SELECT 'PhieuNhap', COUNT(*)
 FROM PhieuNhap
 ORDER BY TableName;
@@ -1374,11 +1245,6 @@ END
 GO
 
 -- Cập nhật các tài khoản hiện tại thành LOCAL
-UPDATE TaiKhoan
-SET Provider = 'LOCAL'
-WHERE Provider IS NULL;
-GO
-
 -- Cho phép MatKhau có thể NULL (vì Google OAuth không có password)
 ALTER TABLE TaiKhoan
 ALTER COLUMN MatKhau VARCHAR(255) NULL;

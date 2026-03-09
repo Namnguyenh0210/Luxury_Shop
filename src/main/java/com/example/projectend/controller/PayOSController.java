@@ -15,26 +15,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ✨ PAYOS PAYMENT CONTROLLER
- * Controller xử lý thanh toán qua PayOS
- *
- * Endpoints:
- * - POST /payment/payos/create: Tạo link thanh toán và hiển thị QR code
- * - GET /payment/payos/return: Xử lý khi khách hàng quay lại sau khi thanh toán
- * - GET /payment/payos/cancel: Xử lý khi khách hàng hủy thanh toán
- * - POST /payment/payos/webhook: Nhận thông báo từ PayOS (IPN)
- * - GET /payment/payos/check/{orderId}: Kiểm tra trạng thái thanh toán
  */
 @Controller
 @RequestMapping("/payment/payos")
@@ -42,94 +33,99 @@ public class PayOSController {
 
     private static final Logger logger = LoggerFactory.getLogger(PayOSController.class);
 
+    // Cache dữ liệu thanh toán tạm thời theo orderId
+    // orderId → {checkoutUrl, qrDataUri, orderCode, amount}
+    private static final Map<Long, Map<String, Object>> paymentCache = new ConcurrentHashMap<>();
+
     @Autowired
     private PayOSService payOSService;
-
     @Autowired
     private DonHangService donHangService;
-
     @Autowired
     private TaiKhoanService taiKhoanService;
-
     @Autowired
     private GioHangService gioHangService;
 
     /**
-     * ✅ TẠO LINK THANH TOÁN VÀ HIỂN THỊ QR CODE
-     * Endpoint này được gọi từ trang checkout khi khách chọn thanh toán PayOS
+     * ✅ TẠO LINK THANH TOÁN
+     * Gọi PayOS API → cache data → redirect Vue /payment?orderId=X
      */
-    @RequestMapping(value = "/create", method = {RequestMethod.GET, RequestMethod.POST})
-    public String createPayment(
-            @RequestParam Long orderId,
-            Principal principal,
-            Model model,
-            RedirectAttributes redirectAttributes) {
-
+    @RequestMapping(value = "/create", method = { RequestMethod.GET, RequestMethod.POST })
+    public String createPayment(@RequestParam Long orderId, Principal principal) {
         try {
             logger.info("🎯 Tạo thanh toán PayOS cho đơn hàng #{}", orderId);
 
-            // Bước 1: Kiểm tra đăng nhập
-            if (principal == null) {
-                return "redirect:/login";
-            }
+            if (principal == null)
+                return "redirect:http://localhost:5173/login";
 
             TaiKhoan taiKhoan = taiKhoanService.findByEmail(principal.getName());
-            if (taiKhoan == null) {
-                return "redirect:/login";
-            }
+            if (taiKhoan == null)
+                return "redirect:http://localhost:5173/login";
 
-            // Bước 2: Lấy thông tin đơn hàng
             Optional<DonHang> donHangOpt = donHangService.findByIdAndKhachHang(orderId, taiKhoan);
             if (donHangOpt.isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng!");
-                return "redirect:/profile";
+                logger.warn("Không tìm thấy đơn hàng #{} cho user {}", orderId, taiKhoan.getEmail());
+                return "redirect:http://localhost:5173/profile?error=order-not-found";
             }
 
             DonHang donHang = donHangOpt.get();
 
-            // Bước 3: Kiểm tra đơn hàng đã thanh toán chưa
             if (donHang.getTrangThaiThanhToan() == 1) {
-                // Đã thanh toán: chuyển thẳng tới trang cảm ơn
-                return "redirect:/checkout/success?orderId=" + orderId;
+                return "redirect:http://localhost:5173/checkout-success?orderId=" + orderId;
             }
 
-            // Bước 4: Gọi PayOS API để tạo link thanh toán
             PayOSResponse payOSResponse = payOSService.createPaymentLink(donHang);
-
             if (payOSResponse == null || !payOSResponse.isSuccess()) {
-                redirectAttributes.addFlashAttribute("error",
-                    "Không thể tạo link thanh toán. Vui lòng thử lại!");
-                return "redirect:/checkout?orderId=" + orderId;
+                logger.error("PayOS tạo link thất bại cho đơn hàng #{}", orderId);
+                return "redirect:http://localhost:5173/checkout?error=payos-failed";
             }
 
-            // Lưu thông tin giao dịch (sử dụng orderCode trả về để truy vết chính xác)
             donHang.setMaGiaoDich("PAYOS_" + payOSResponse.getData().getOrderCode());
             donHang.setNgayCapNhat(LocalDateTime.now());
             donHangService.save(donHang);
 
+            // ✅ Convert QR string → renderable image (data URI hoặc URL)
             String rawQr = payOSResponse.getData().getQrCode();
             String renderQr = rawQr;
-            if (!QRCodeUtil.isRenderableDirect(rawQr)) {
+            if (rawQr != null && !QRCodeUtil.isRenderableDirect(rawQr)) {
                 String base64 = QRCodeUtil.generateBase64Png(rawQr, 300);
                 if (base64 != null) {
                     renderQr = QRCodeUtil.toDataUri(base64);
                 }
             }
-            // Bước 6: Hiển thị trang thanh toán với QR code
-            model.addAttribute("donHang", donHang);
-            model.addAttribute("checkoutUrl", payOSResponse.getData().getCheckoutUrl());
-            model.addAttribute("qrCode", renderQr); // always renderable
-            model.addAttribute("orderCode", payOSResponse.getData().getOrderCode());
-            model.addAttribute("amount", payOSResponse.getData().getAmount());
-            model.addAttribute("pageTitle", "Thanh toán PayOS");
 
-            return "Pay"; // Hiển thị trang Pay.html với QR code
+            // ✅ Lưu vào cache theo orderId
+            Map<String, Object> cacheData = new HashMap<>();
+            cacheData.put("checkoutUrl", payOSResponse.getData().getCheckoutUrl());
+            cacheData.put("qrCode", renderQr);
+            cacheData.put("orderCode", payOSResponse.getData().getOrderCode());
+            cacheData.put("amount", payOSResponse.getData().getAmount());
+            cacheData.put("orderId", orderId);
+            paymentCache.put(orderId, cacheData);
+
+            // ✅ Chỉ redirect với orderId — Vue sẽ fetch data từ
+            // /payment/payos/data/{orderId}
+            return "redirect:http://localhost:5173/payment?orderId=" + orderId;
 
         } catch (Exception e) {
-            logger.error("❌ Lỗi khi tạo thanh toán PayOS", e);
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-            return "redirect:/checkout";
+            logger.error("❌ Lỗi tạo thanh toán PayOS cho đơn #{}", orderId, e);
+            return "redirect:http://localhost:5173/checkout?error=server-error";
         }
+    }
+
+    /**
+     * ✅ API: Lấy dữ liệu thanh toán từ cache (Vue gọi sau khi redirect)
+     * GET /payment/payos/data/{orderId}
+     */
+    @GetMapping("/data/{orderId}")
+    @ResponseBody
+    public ResponseEntity<?> getPaymentData(@PathVariable Long orderId) {
+        Map<String, Object> data = paymentCache.get(orderId);
+        if (data == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Không tìm thấy dữ liệu thanh toán. Vui lòng thử lại."));
+        }
+        return ResponseEntity.ok(data);
     }
 
     /**
@@ -139,65 +135,44 @@ public class PayOSController {
     @GetMapping("/return")
     public String paymentReturn(
             @RequestParam(required = false) Long orderCode,
-            @RequestParam(required = false) String status,
-            Principal principal,
-            Model model,
-            RedirectAttributes redirectAttributes) {
+            @RequestParam(required = false) String status) {
 
         try {
-            logger.info("🔙 Khách hàng quay lại từ PayOS - OrderCode: {}, Status: {}",
-                orderCode, status);
+            logger.info("Khách hàng quay lại từ PayOS - OrderCode: {}, Status: {}", orderCode, status);
 
             if (orderCode == null) {
-                redirectAttributes.addFlashAttribute("error", "Thiếu thông tin đơn hàng!");
-                return "redirect:/profile";
+                return "redirect:http://localhost:5173/profile?error=missing-order";
             }
 
-            // Kiểm tra trạng thái thanh toán từ PayOS
             PayOSResponse payOSResponse = payOSService.getPaymentStatus(orderCode);
 
             if (payOSResponse != null && payOSResponse.isSuccess()) {
                 String paymentStatus = payOSResponse.getData().getStatus();
 
                 if ("PAID".equalsIgnoreCase(paymentStatus)) {
-                    // Thanh toán thành công
                     logger.info("✅ Thanh toán thành công cho đơn hàng #{}", orderCode);
-
                     boolean updated = updateOrderPaymentStatus(orderCode, true);
                     if (updated) {
-                        // Clear cart sau khi thanh toán thành công (nếu còn items do chưa clear ở checkout)
                         Optional<DonHang> dhOpt = donHangService.findById(orderCode);
                         dhOpt.ifPresent(dh -> gioHangService.clearGioHang(dh.getTaiKhoan()));
                     }
-
-                    redirectAttributes.addFlashAttribute("success",
-                        "Thanh toán thành công! Cảm ơn bạn.");
-                    return "redirect:/checkout/success?orderId=" + orderCode;
+                    return "redirect:http://localhost:5173/checkout-success?orderId=" + orderCode;
 
                 } else if ("CANCELLED".equalsIgnoreCase(paymentStatus)) {
-                    // Thanh toán bị hủy
                     logger.warn("⚠️ Thanh toán bị hủy cho đơn hàng #{}", orderCode);
-                    redirectAttributes.addFlashAttribute("warning",
-                        "Thanh toán đã bị hủy. Vui lòng thử lại!");
-                    return "redirect:/profile";
+                    return "redirect:http://localhost:5173/profile?warning=payment-cancelled";
 
                 } else {
-                    // Chờ thanh toán
                     logger.info("⏳ Đơn hàng #{} đang chờ thanh toán", orderCode);
-                    redirectAttributes.addFlashAttribute("info",
-                        "Đơn hàng đang chờ thanh toán. Vui lòng kiểm tra lại sau.");
-                    return "redirect:/payment/payos/create?orderId=" + orderCode;
+                    return "redirect:http://localhost:5173/payment?orderId=" + orderCode + "&status=PENDING";
                 }
             } else {
-                redirectAttributes.addFlashAttribute("error",
-                    "Không thể kiểm tra trạng thái thanh toán!");
-                return "redirect:/profile";
+                return "redirect:http://localhost:5173/profile?error=payment-check-failed";
             }
 
         } catch (Exception e) {
             logger.error("❌ Lỗi khi xử lý payment return", e);
-            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-            return "redirect:/profile";
+            return "redirect:http://localhost:5173/profile?error=server-error";
         }
     }
 
@@ -205,16 +180,9 @@ public class PayOSController {
      * ✅ XỬ LÝ KHI KHÁCH HÀNG HỦY THANH TOÁN
      */
     @GetMapping("/cancel")
-    public String paymentCancel(
-            @RequestParam(required = false) Long orderCode,
-            RedirectAttributes redirectAttributes) {
-
+    public String paymentCancel(@RequestParam(required = false) Long orderCode) {
         logger.info("❌ Khách hàng hủy thanh toán cho đơn hàng #{}", orderCode);
-
-        redirectAttributes.addFlashAttribute("warning",
-            "Bạn đã hủy thanh toán. Vui lòng thử lại nếu muốn tiếp tục đặt hàng.");
-
-        return "redirect:/profile";
+        return "redirect:http://localhost:5173/profile?warning=payment-cancelled";
     }
 
     /**
@@ -228,7 +196,7 @@ public class PayOSController {
 
         try {
             logger.info("📩 Nhận webhook từ PayOS cho đơn hàng #{}",
-                webhookData.getOrderCode());
+                    webhookData.getOrderCode());
             logger.debug("Webhook data: {}", webhookData);
 
             // Bước 1: Xác thực chữ ký webhook
@@ -237,51 +205,48 @@ public class PayOSController {
             if (!isValid) {
                 logger.error("⚠️ Chữ ký webhook KHÔNG hợp lệ! Có thể là giả mạo.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Invalid signature"));
+                        .body(Map.of("error", "Invalid signature"));
             }
 
             // Bước 2: Kiểm tra trạng thái thanh toán
             if (webhookData.isSuccess()) {
                 logger.info("✅ Webhook xác nhận thanh toán thành công cho đơn hàng #{}",
-                    webhookData.getOrderCode());
+                        webhookData.getOrderCode());
 
                 // Bước 3: Cập nhật trạng thái đơn hàng trong database
                 boolean updated = updateOrderPaymentStatus(
-                    webhookData.getOrderCode(),
-                    true
-                );
+                        webhookData.getOrderCode(),
+                        true);
 
                 if (updated) {
                     logger.info("✅ Đã cập nhật trạng thái đơn hàng #{} thành PAID",
-                        webhookData.getOrderCode());
+                            webhookData.getOrderCode());
 
                     // Clear cart khi webhook xác nhận thành công
                     Optional<DonHang> dhOpt = donHangService.findById(webhookData.getOrderCode());
                     dhOpt.ifPresent(dh -> gioHangService.clearGioHang(dh.getTaiKhoan()));
 
                     return ResponseEntity.ok(Map.of(
-                        "success", true,
-                        "message", "Webhook processed successfully"
-                    ));
+                            "success", true,
+                            "message", "Webhook processed successfully"));
                 } else {
                     logger.error("❌ Không thể cập nhật đơn hàng #{}",
-                        webhookData.getOrderCode());
+                            webhookData.getOrderCode());
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(Map.of("error", "Failed to update order"));
+                            .body(Map.of("error", "Failed to update order"));
                 }
             } else {
                 logger.warn("⚠️ Webhook báo thanh toán KHÔNG thành công: Code = {}",
-                    webhookData.getCode());
+                        webhookData.getCode());
                 return ResponseEntity.ok(Map.of(
-                    "success", false,
-                    "message", "Payment not successful"
-                ));
+                        "success", false,
+                        "message", "Payment not successful"));
             }
 
         } catch (Exception e) {
             logger.error("❌ Lỗi khi xử lý webhook PayOS", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -321,13 +286,13 @@ public class PayOSController {
                 return ResponseEntity.ok(result);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Không tìm thấy thông tin thanh toán"));
+                        .body(Map.of("error", "Không tìm thấy thông tin thanh toán"));
             }
 
         } catch (Exception e) {
             logger.error("❌ Lỗi khi kiểm tra trạng thái thanh toán", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -350,7 +315,8 @@ public class PayOSController {
 
             if (isPaid) {
                 donHang.setNgayThanhToan(LocalDateTime.now());
-                // KHÔNG tự chuyển trạng thái đơn hàng sang "Đã xác nhận" để giữ nguyên "Chờ xác nhận" như yêu cầu
+                // KHÔNG tự chuyển trạng thái đơn hàng sang "Đã xác nhận" để giữ nguyên "Chờ xác
+                // nhận" như yêu cầu
             }
 
             donHang.setNgayCapNhat(LocalDateTime.now());
@@ -364,4 +330,3 @@ public class PayOSController {
         }
     }
 }
-

@@ -2,11 +2,7 @@ package com.example.projectend.entity;
 
 import jakarta.persistence.*;
 
-/**
- * ENTITY SIZE SAN PHAM
- * Bảng: SizeSP
- * Mô tả: Lưu các size (S, M, L, XL...)
- */
+
 @Entity
 @Table(name = "SizeSP")
 public class SizeSP {
