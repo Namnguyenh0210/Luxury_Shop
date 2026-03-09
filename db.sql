@@ -1587,3 +1587,52 @@ PRINT N'5. Quét QR code để thanh toán 3.000 VNĐ';
 PRINT N'';
 GO
 
+-- =====================================================
+-- SCRIPT THÊM BẢNG AI CHATBOT
+-- =====================================================
+
+PRINT N'========================================';
+PRINT N'AI CHATBOT: TẠO BẢNG CONVERSATIONS & MESSAGES';
+PRINT N'========================================';
+GO
+
+-- Bảng lưu cuộc hội thoại
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Conversations')
+BEGIN
+    CREATE TABLE Conversations (
+        MaCuocTroChuyen INT IDENTITY(1,1) PRIMARY KEY,
+        MaTK            BIGINT NULL,
+        TrangThai       NVARCHAR(10) DEFAULT 'AI' NOT NULL,
+        NgayTao         DATETIME DEFAULT GETDATE(),
+        NgayCapNhat     DATETIME DEFAULT GETDATE(),
+        FOREIGN KEY (MaTK) REFERENCES TaiKhoan(MaTK)
+    );
+    PRINT N'✅ Đã tạo bảng Conversations';
+END
+ELSE
+BEGIN
+    PRINT N'⚠️ Bảng Conversations đã tồn tại';
+END
+GO
+
+-- Bảng lưu từng tin nhắn
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Messages')
+BEGIN
+    CREATE TABLE Messages (
+        MaTinNhan       INT IDENTITY(1,1) PRIMARY KEY,
+        MaCuocTroChuyen INT NOT NULL,
+        LoaiNguoiGui    NVARCHAR(10) NOT NULL,
+        NoiDung         NVARCHAR(MAX) NOT NULL,
+        NgayGui         DATETIME DEFAULT GETDATE(),
+        FOREIGN KEY (MaCuocTroChuyen) REFERENCES Conversations(MaCuocTroChuyen)
+    );
+    PRINT N'✅ Đã tạo bảng Messages';
+END
+ELSE
+BEGIN
+    PRINT N'⚠️ Bảng Messages đã tồn tại';
+END
+GO
+
+PRINT N'✅ HOÀN TẤT KHỞI TẠO BẢNG AI CHATBOT!';
+GO

@@ -67,10 +67,12 @@ const routes = [
   { path: '/admin/customers', component: () => import('./views/admin/customer-list.vue') },
   { path: '/admin/blogs', component: () => import('./views/admin/blog-list.vue') },
   { path: '/admin/reports', component: () => import('./views/admin/report-analytics.vue') },
+  { path: '/admin/chat', component: () => import('./views/admin/admin-chat.vue') },
   { path: '/staff/dashboard', component: () => import('./views/staff/StaffDashboard.vue') },
   { path: '/staff/blogs', component: () => import('./views/staff/StaffBaiViet.vue') },
   { path: '/staff/orders', component: () => import('./views/staff/StaffOrders.vue') },
   { path: '/staff/orders/:id', component: () => import('./views/staff/StaffOrderDetail.vue') },
+  { path: '/staff/chat', component: () => import('./views/staff/StaffChat.vue') },
 ]
 
 const router = createRouter({

@@ -124,6 +124,7 @@ export default {
       navItems: [
         { to: '/staff/dashboard', icon: 'dashboard',    label: 'Dashboard'    },
         { to: '/staff/orders',    icon: 'receipt_long', label: 'Đơn Hàng'    },
+        { to: '/staff/chat',      icon: 'support_agent',label: 'Hỗ Trợ Online'},
         { to: '/staff/blogs',     icon: 'article',      label: 'Bài Viết'    },
       ],
 

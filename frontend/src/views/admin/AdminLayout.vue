@@ -113,6 +113,7 @@ export default {
         { to: '/admin/inventory', icon: 'inventory_2',  label: 'Kho & NCC' },
         { to: '/admin/orders',    icon: 'receipt_long', label: 'Đơn Hàng'  },
         { to: '/admin/customers', icon: 'group',        label: 'Tài Khoản' },
+        { to: '/admin/chat',      icon: 'chat',         label: 'Hỗ Trợ Chat' },
         { to: '/admin/blogs',     icon: 'article',      label: 'Nội Dung'  },
         { to: '/admin/reports',   icon: 'bar_chart',    label: 'Báo Cáo'   },
       ]

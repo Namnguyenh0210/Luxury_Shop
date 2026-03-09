@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 "/sanpham/**",
                                 "/gioithieu", "/kienthuc", "/lienhe",
                                 "/login", "/register", "/403",
+                                "/api/chat/**",
                                 "/css/**", "/js/**", "/img/**",
                                 "/images/**", "/static/**",
                                 "/error")
@@ -131,7 +132,6 @@ public class SecurityConfig {
                 // ================= SESSION =================
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .invalidSessionUrl("/login?session=invalid")
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false))
 
