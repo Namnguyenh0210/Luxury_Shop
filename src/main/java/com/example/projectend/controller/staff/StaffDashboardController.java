@@ -58,7 +58,7 @@ public class StaffDashboardController {
                 .map(dh -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("maDH", dh.getMaDH());
-                    //map.put("tenKhach", dh.getMaKM());
+                    map.put("tenKhach", dh.getTaiKhoan());
                     map.put("tongTien", dh.getTongTien());
                     map.put("trangThai", dh.getTrangThaiDH());
                     return map;
