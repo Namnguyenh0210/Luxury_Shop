@@ -2,12 +2,14 @@ package com.example.projectend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * Class khởi động ứng dụng Spring Boot
- * Website bán đồ Tết Nguyên Đán
+ * Website bán Luxury Fashion
  */
 @SpringBootApplication
+@EnableAsync
 public class ProjectendApplication {
 
     /**

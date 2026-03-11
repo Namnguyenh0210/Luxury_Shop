@@ -32,6 +32,8 @@ import java.util.Set;
 @RequestMapping("/api")
 public class ApiController {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ApiController.class);
+
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
@@ -64,6 +66,9 @@ public class ApiController {
 
     @Autowired
     private com.example.projectend.service.DonHangService donHangService;
+
+    @Autowired
+    private com.example.projectend.service.EmailService emailService;
 
     /**
      * API lấy thông tin user hiện tại
@@ -748,6 +753,16 @@ public class ApiController {
             boolean isPayOS = this.phuongThucThanhToanRepository.findById(paymentMethod)
                     .map(pt -> pt.getTenHinhThuc() != null && pt.getTenHinhThuc().toLowerCase().contains("payos"))
                     .orElse(false);
+
+            // ✅ Gửi email xác nhận đơn hàng (async - không chặn)
+            try {
+                List<com.example.projectend.entity.DonHangChiTiet> chiTietList =
+                    donHangService.getOrderDetails(donHang.getMaDH());
+                emailService.sendOrderConfirmationEmail(donHang, chiTietList);
+            } catch (Exception emailEx) {
+                // Email lỗi không được phép hủy đơn hàng
+                log.warn("Không gửi được email xác nhận: {}", emailEx.getMessage());
+            }
 
             if (isPayOS) {
                 response.put("success", true);
