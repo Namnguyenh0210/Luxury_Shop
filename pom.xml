@@ -99,6 +99,12 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
 
+        <!-- Spring Boot Starter Mail - Gửi email xác nhận đơn hàng -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- ZXing for generating QR code PNG as fallback when PayOS returns raw payload -->
         <dependency>
             <groupId>com.google.zxing</groupId>
