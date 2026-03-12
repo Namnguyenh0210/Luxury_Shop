@@ -118,4 +118,43 @@ public class BinhLuan {
     public void setSoLuongPhanHoi(Integer soLuongPhanHoi) {
         this.soLuongPhanHoi = soLuongPhanHoi;
     }
+
+    // ===== ADMIN MODERATION =====
+    @Column(name = "PhanHoiAdmin", length = 1000)
+    private String phanHoiAdmin;
+
+    @Column(name = "NgayPhanHoiAdmin")
+    private LocalDateTime ngayPhanHoiAdmin;
+
+    @Column(name = "ReportCount")
+    private Integer reportCount = 0;
+
+    public void incrementReport() {
+        if (this.reportCount == null) this.reportCount = 0;
+        this.reportCount++;
+    }
+
+    public String getPhanHoiAdmin() {
+        return phanHoiAdmin;
+    }
+
+    public void setPhanHoiAdmin(String phanHoiAdmin) {
+        this.phanHoiAdmin = phanHoiAdmin;
+    }
+
+    public LocalDateTime getNgayPhanHoiAdmin() {
+        return ngayPhanHoiAdmin;
+    }
+
+    public void setNgayPhanHoiAdmin(LocalDateTime ngayPhanHoiAdmin) {
+        this.ngayPhanHoiAdmin = ngayPhanHoiAdmin;
+    }
+
+    public Integer getReportCount() {
+        return reportCount;
+    }
+
+    public void setReportCount(Integer reportCount) {
+        this.reportCount = reportCount;
+    }
 }

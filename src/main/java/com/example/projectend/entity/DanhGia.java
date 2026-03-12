@@ -95,4 +95,54 @@ public class DanhGia {
     public void setNgayDanhGia(LocalDateTime ngayDanhGia) {
         this.ngayDanhGia = ngayDanhGia;
     }
+
+    // ===== New Fields for Moderation =====
+    @Column(name = "TrangThai")
+    private Integer trangThai = 0; // 0 = Pending, 1 = Approved, 2 = Hidden
+
+    @Column(name = "PhanHoi", length = 1000)
+    private String phanHoi;
+
+    @Column(name = "NgayPhanHoi")
+    private LocalDateTime ngayPhanHoi;
+
+    @Column(name = "ReportCount")
+    private Integer reportCount = 0;
+
+    public void incrementReport() {
+        if (this.reportCount == null) this.reportCount = 0;
+        this.reportCount++;
+    }
+
+    public Integer getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Integer trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public String getPhanHoi() {
+        return phanHoi;
+    }
+
+    public void setPhanHoi(String phanHoi) {
+        this.phanHoi = phanHoi;
+    }
+
+    public LocalDateTime getNgayPhanHoi() {
+        return ngayPhanHoi;
+    }
+
+    public void setNgayPhanHoi(LocalDateTime ngayPhanHoi) {
+        this.ngayPhanHoi = ngayPhanHoi;
+    }
+
+    public Integer getReportCount() {
+        return reportCount;
+    }
+
+    public void setReportCount(Integer reportCount) {
+        this.reportCount = reportCount;
+    }
 }
