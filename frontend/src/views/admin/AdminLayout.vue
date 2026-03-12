@@ -115,6 +115,8 @@ export default {
         { to: '/admin/customers', icon: 'group',        label: 'Tài Khoản' },
         { to: '/admin/chat',      icon: 'chat',         label: 'Hỗ Trợ Chat' },
         { to: '/admin/blogs',     icon: 'article',      label: 'Nội Dung'  },
+        { to: '/admin/reviews',   icon: 'star_rate',    label: 'Đánh Giá (SP)' },
+        { to: '/admin/comments',  icon: 'forum',        label: 'Bình Luận (Blog)' },
         { to: '/admin/reports',   icon: 'bar_chart',    label: 'Báo Cáo'   },
       ]
     }

@@ -129,6 +129,8 @@ public class BlogApiController {
                 blDTO.put("soLuongLike", bl.getSoLuongLike());
                 blDTO.put("tenNguoiDung", bl.getTaiKhoan() != null ? bl.getTaiKhoan().getHoTen() : "Khách");
                 blDTO.put("avatar", bl.getTaiKhoan() != null ? bl.getTaiKhoan().getAvatar() : null);
+                blDTO.put("phanHoiAdmin", bl.getPhanHoiAdmin());
+                blDTO.put("ngayPhanHoiAdmin", bl.getNgayPhanHoiAdmin());
                 binhLuanDTOs.add(blDTO);
             }
 
@@ -188,7 +190,7 @@ public class BlogApiController {
             binhLuan.setTaiKhoan(taiKhoan);
             binhLuan.setNoiDung(noiDung.trim());
             binhLuan.setNgayBinhLuan(LocalDateTime.now());
-            binhLuan.setTrangThai(true);
+            binhLuan.setTrangThai(false); // Pending approval
             binhLuan.setSoLuongLike(0);
 
             BinhLuan saved = binhLuanRepository.save(binhLuan);
@@ -227,6 +229,28 @@ public class BlogApiController {
 
             response.put("thanhCong", true);
             response.put("soLuongLike", bl.getSoLuongLike());
+        } catch (Exception e) {
+            response.put("thanhCong", false);
+            response.put("thongBao", "Lỗi: " + e.getMessage());
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    // =============================
+    // 5. REPORT BÌNH LUẬN
+    // =============================
+    @PostMapping("/binh-luan/{maBL}/report")
+    public ResponseEntity<Map<String, Object>> reportBinhLuan(@PathVariable Long maBL) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            BinhLuan bl = binhLuanRepository.findById(maBL)
+                    .orElseThrow(() -> new RuntimeException("Bình luận không tồn tại"));
+
+            bl.incrementReport();
+            binhLuanRepository.save(bl);
+
+            response.put("thanhCong", true);
+            response.put("thongBao", "Đã báo cáo bình luận. Quản trị viên sẽ xem xét.");
         } catch (Exception e) {
             response.put("thanhCong", false);
             response.put("thongBao", "Lỗi: " + e.getMessage());

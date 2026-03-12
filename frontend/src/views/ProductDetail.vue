@@ -159,21 +159,11 @@
                 </div>
             </div>
 
-            <!-- Reviews Section -->
-            <div v-if="reviews.length > 0" class="border-t border-gray-200 pt-12 mb-16">
-                <h2 class="text-2xl font-bold mb-6">Customer Reviews ({{ reviewCount }})</h2>
-                <div class="space-y-6">
-                    <div v-for="review in reviews.slice(0, 5)" :key="review.maDanhGia" class="border-b border-gray-200 pb-6">
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400">
-                                <span v-for="i in 5" :key="i">{{ i <= review.danhGia ? '★' : '☆' }}</span>
-                            </div>
-                            <span class="ml-2 text-sm text-gray-600">{{ review.taiKhoan?.hoTen || 'Anonymous' }}</span>
-                        </div>
-                        <p class="text-gray-700">{{ review.noiDung }}</p>
-                    </div>
-                </div>
+            <!-- Reviews Section - Component mới -->
+            <div class="mt-16 max-w-4xl">
+                <ProductReviews :productId="product.maSP" />
             </div>
+
 
             <!-- Related Products -->
             <div v-if="relatedProducts.length > 0" class="border-t border-gray-200 pt-12">
@@ -207,13 +197,15 @@
 <script>
 import AppHeader from './fragments/AppHeader.vue'
 import AppFooter from './fragments/AppFooter.vue'
+import ProductReviews from './fragments/ProductReviews.vue'
 import axios from 'axios'
 
 export default {
   name: 'ProductDetail',
   components: {
     AppHeader,
-    AppFooter
+    AppFooter,
+    ProductReviews
   },
   data() {
     return {

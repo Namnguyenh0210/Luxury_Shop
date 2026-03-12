@@ -17,4 +17,21 @@ public interface BinhLuanRepository extends JpaRepository<BinhLuan, Long> {
 
     // Đếm số bình luận của bài viết
     long countByBaiViet_MaBVAndTrangThaiTrue(Long maBV);
+
+    // ADMIN: Query tìm kiếm bình luận
+    @org.springframework.data.jpa.repository.Query("SELECT b FROM BinhLuan b WHERE " +
+           "(:tuKhoa IS NULL OR LOWER(b.noiDung) LIKE LOWER(CONCAT('%', :tuKhoa, '%')) " +
+           "OR LOWER(b.taiKhoan.hoTen) LIKE LOWER(CONCAT('%', :tuKhoa, '%')) " +
+           "OR LOWER(b.baiViet.tieuDe) LIKE LOWER(CONCAT('%', :tuKhoa, '%'))) " +
+           "AND (:trangThai IS NULL OR b.trangThai = :trangThai) " +
+           "ORDER BY b.ngayBinhLuan DESC")
+    org.springframework.data.domain.Page<BinhLuan> searchBinhLuanAdmin(@org.springframework.data.repository.query.Param("tuKhoa") String tuKhoa, @org.springframework.data.repository.query.Param("trangThai") Boolean trangThai, org.springframework.data.domain.Pageable pageable);
+
+    // ADMIN: Thống kê số lượng bài viết nào được comment nhiều nhất
+    @org.springframework.data.jpa.repository.Query("SELECT b.baiViet.tieuDe as tieuDe, COUNT(b) as tongBL " +
+           "FROM BinhLuan b " +
+           "WHERE b.trangThai = true " +
+           "GROUP BY b.baiViet.tieuDe " +
+           "ORDER BY COUNT(b) DESC")
+    List<Object[]> getTopBlogsByComments();
 }
