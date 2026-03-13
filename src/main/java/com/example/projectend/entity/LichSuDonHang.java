@@ -123,8 +123,9 @@ public class LichSuDonHang {
             case 0: return "Chờ xác nhận";
             case 1: return "Đã xác nhận";
             case 2: return "Đang giao";
-            case 3: return "Hoàn tất";
-            case 4: return "Đã hủy";
+            case 3: return "Đã giao";
+            case 4: return "Hoàn tất";
+            case 5: return "Đã hủy";
             default: return "Không xác định";
         }
     }

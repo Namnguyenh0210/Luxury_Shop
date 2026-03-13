@@ -71,11 +71,13 @@ public class StaffDonHangController {
     // 3. Cập nhật trạng thái
     // =============================
     @PutMapping("/{id}/status")
-    public Map<String, String> capNhatTrangThai(
+    public Map<String, Object> capNhatTrangThai(
             @PathVariable Long id,
             @RequestParam Integer trangThaiMoi,
+            @RequestParam(required = false) String reason,
             Authentication auth) {
 
+        Map<String, Object> res = new HashMap<>();
         String email = auth.getName();
         TaiKhoan currentUser = taiKhoanRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
@@ -85,19 +87,22 @@ public class StaffDonHangController {
 
         Integer trangThaiHienTai = donHang.getTrangThaiDH();
 
-        // Đơn đã kết thúc (Hoàn tất=3 hoặc Đã hủy=4) → không thay đổi được
-        if (trangThaiHienTai == 3 || trangThaiHienTai == 4) {
+        // Đơn đã kết thúc (Hoàn tất=4 hoặc Đã hủy=5) → không thay đổi được
+        if (trangThaiHienTai == 4 || trangThaiHienTai == 5) {
             throw new RuntimeException("Đơn hàng đã kết thúc, không thể thay đổi trạng thái!");
         }
 
-        // Chỉ được hủy (status=4) khi đang ở "Chờ xác nhận" (status=0)
-        // Sau khi đã xác nhận thì KHÔNG được hủy
-        if (trangThaiMoi == 4 && trangThaiHienTai >= 1) {
+        // Chỉ được hủy (status=5) khi đang ở "Chờ xác nhận" (status=0) HOẶC khi khách báo chưa nhận hàng
+        boolean canCancel = (trangThaiMoi == 5 && (trangThaiHienTai == 0 || donHang.getKhachBaoChuaNhan()));
+
+        if (trangThaiMoi == 5 && !canCancel) {
             throw new RuntimeException("Không thể hủy đơn đã xác nhận! Liên hệ khách hàng trực tiếp.");
         }
 
-        // Bắt buộc đi tuần tự: 0→1→2→3 (không nhảy bước)
-        if (trangThaiMoi != 4 && trangThaiMoi != trangThaiHienTai + 1) {
+        // Bắt buộc đi tuần tự: 0→1→2→3→4
+        boolean isSequence = (trangThaiMoi == trangThaiHienTai + 1);
+
+        if (trangThaiMoi != 5 && !isSequence) {
             throw new RuntimeException("Chỉ được chuyển sang trạng thái kế tiếp!");
         }
 
@@ -116,17 +121,21 @@ public class StaffDonHangController {
 
         donHang.setTrangThaiDH(trangThaiMoi);
         donHang.setNgayCapNhat(LocalDateTime.now());
+        
+        if (reason != null && !reason.isBlank()) {
+            donHang.setLyDoHuy(reason);
+        }
 
         // Hoàn tất → tự động đánh dấu đã thanh toán
-        if (trangThaiMoi == 3) {
+        if (trangThaiMoi == 4) {
             donHang.setTrangThaiThanhToan(1);
             donHang.setNgayThanhToan(LocalDateTime.now());
         }
 
         donHangRepository.save(donHang);
 
-        Map<String, String> res = new HashMap<>();
         res.put("message", "Cập nhật thành công!");
+        res.put("success", true);
         return res;
     }
 

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -102,6 +103,8 @@ public class ApiController {
             response.put("provider", taiKhoan.getProvider() != null ? taiKhoan.getProvider() : "LOCAL");
             response.put("roles", roleNames);
             response.put("isGoogleUser", "GOOGLE".equals(taiKhoan.getProvider()));
+            response.put("trangThai", taiKhoan.getTrangThai());
+            response.put("ngayTao", taiKhoan.getNgayTao());
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -518,12 +521,14 @@ public class ApiController {
     }
 
     /**
-     * API cập nhật thông tin profile
+     * API cập nhật thông tin profile (hỗ trợ upload avatar)
      */
     @PostMapping("/profile/update")
     public ResponseEntity<Map<String, Object>> updateProfile(
             @RequestParam String hoTen,
-            @RequestParam(required = false) String soDienThoai) {
+            @RequestParam(required = false) String soDienThoai,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) org.springframework.web.multipart.MultipartFile avatar) {
 
         Map<String, Object> response = new HashMap<>();
 
@@ -536,8 +541,8 @@ public class ApiController {
                 return ResponseEntity.status(401).body(response);
             }
 
-            String email = auth.getName();
-            TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(email);
+            String currentEmail = auth.getName();
+            TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(currentEmail);
 
             if (taiKhoan == null) {
                 response.put("success", false);
@@ -545,16 +550,41 @@ public class ApiController {
                 return ResponseEntity.status(404).body(response);
             }
 
-            // Update thông tin
-            taiKhoan.setHoTen(hoTen);
+            // Cập nhật họ tên
+            if (hoTen != null && !hoTen.trim().isEmpty()) {
+                taiKhoan.setHoTen(hoTen.trim());
+            }
+
+            // Cập nhật số điện thoại
             if (soDienThoai != null && !soDienThoai.trim().isEmpty()) {
-                taiKhoan.setSoDienThoai(soDienThoai);
+                taiKhoan.setSoDienThoai(soDienThoai.trim());
+            }
+
+            // Xử lý upload avatar
+            if (avatar != null && !avatar.isEmpty()) {
+                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/avatars/";
+                java.io.File dir = new java.io.File(uploadDir);
+                if (!dir.exists())
+                    dir.mkdirs();
+
+                String originalName = avatar.getOriginalFilename();
+                String ext = originalName != null && originalName.contains(".")
+                        ? originalName.substring(originalName.lastIndexOf("."))
+                        : ".jpg";
+                String fileName = "avatar_" + taiKhoan.getMaTK() + "_" + System.currentTimeMillis() + ext;
+
+                java.nio.file.Path filePath = java.nio.file.Paths.get(uploadDir + fileName);
+                java.nio.file.Files.write(filePath, avatar.getBytes());
+
+                taiKhoan.setAvatar("/avatars/" + fileName);
             }
 
             taiKhoanRepository.save(taiKhoan);
 
             response.put("success", true);
             response.put("message", "Cập nhật thông tin thành công!");
+            response.put("avatar", taiKhoan.getAvatar());
+            response.put("hoTen", taiKhoan.getHoTen());
 
             return ResponseEntity.ok(response);
 
@@ -756,8 +786,8 @@ public class ApiController {
 
             // ✅ Gửi email xác nhận đơn hàng (async - không chặn)
             try {
-                List<com.example.projectend.entity.DonHangChiTiet> chiTietList =
-                    donHangService.getOrderDetails(donHang.getMaDH());
+                List<com.example.projectend.entity.DonHangChiTiet> chiTietList = donHangService
+                        .getOrderDetails(donHang.getMaDH());
                 emailService.sendOrderConfirmationEmail(donHang, chiTietList);
             } catch (Exception emailEx) {
                 // Email lỗi không được phép hủy đơn hàng
@@ -788,28 +818,64 @@ public class ApiController {
 
     @GetMapping("/profile/addresses")
     public ResponseEntity<?> getAddresses() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                return ResponseEntity.status(401).body("Not authenticated");
+            }
 
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            return ResponseEntity.status(401).body("Not authenticated");
+            String email = auth.getName();
+            TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
+
+            List<DiaChi> addresses = diaChiRepository.findByTaiKhoan_MaTK(tk.getMaTK());
+
+            return ResponseEntity.ok(addresses);
+        } catch (Exception e) {
+            log.error("Error fetching addresses: ", e);
+            return ResponseEntity.status(500).body("Server Error: " + e.getMessage());
         }
-
-        String email = auth.getName();
-        TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
-
-        List<DiaChi> addresses = diaChiRepository.findByTaiKhoan_MaTK(tk.getMaTK());
-
-        return ResponseEntity.ok(addresses);
     }
 
     @PostMapping("/profile/address/add")
     public ResponseEntity<?> addAddress(
             @RequestParam String hoTenNguoiNhan,
             @RequestParam String soDienThoai,
-            @RequestParam String diaChiChiTiet
-    ) {
+            @RequestParam String diaChiChiTiet,
+            @RequestParam(required = false) String ghiChu) {
 
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                return ResponseEntity.status(401).body("Not authenticated");
+            }
+
+            String email = auth.getName();
+            TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
+
+            log.info("Adding address for user: {}, Name: {}, Phone: {}", email, hoTenNguoiNhan, soDienThoai);
+
+            DiaChi dc = new DiaChi();
+            dc.setTaiKhoan(tk);
+            dc.setHoTenNguoiNhan(hoTenNguoiNhan);
+            dc.setSoDienThoai(soDienThoai);
+            dc.setDiaChiChiTiet(diaChiChiTiet);
+            dc.setGhiChu(ghiChu);
+            dc.setLaMacDinh(false);
+
+            DiaChi saved = diaChiRepository.save(dc);
+            log.info("Saved address with ID: {}", saved.getMaDiaChi());
+
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            log.error("Error adding address: ", e);
+            return ResponseEntity.status(500).body("Error adding address: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/profile/address/set-default")
+    public ResponseEntity<?> setDefaultAddress(@RequestParam Long id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
@@ -819,15 +885,49 @@ public class ApiController {
         String email = auth.getName();
         TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
 
-        DiaChi dc = new DiaChi();
-        dc.setTaiKhoan(tk);
-        dc.setHoTenNguoiNhan(hoTenNguoiNhan);
-        dc.setSoDienThoai(soDienThoai);
-        dc.setDiaChiChiTiet(diaChiChiTiet);
-        dc.setLaMacDinh(false);
+        try {
+            // Lấy tất cả địa chỉ của user này
+            List<DiaChi> addresses = diaChiRepository.findByTaiKhoan_MaTK(tk.getMaTK());
+            for (DiaChi addr : addresses) {
+                if (addr.getMaDiaChi() != null && addr.getMaDiaChi().equals(id)) {
+                    addr.setLaMacDinh(true);
+                } else {
+                    addr.setLaMacDinh(false);
+                }
+            }
+            diaChiRepository.saveAll(addresses);
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
 
-        diaChiRepository.save(dc);
+    @PostMapping("/profile/address/delete")
+    public ResponseEntity<?> deleteAddress(@RequestParam Long id) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        return ResponseEntity.ok("OK");
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+            return ResponseEntity.status(401).body("Not authenticated");
+        }
+
+        String email = auth.getName();
+        TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(email);
+
+        try {
+            Optional<DiaChi> dcOpt = diaChiRepository.findById(id);
+            if (dcOpt.isPresent()) {
+                DiaChi dc = dcOpt.get();
+                if (dc.getTaiKhoan() != null && dc.getTaiKhoan().getMaTK() != null && tk.getMaTK() != null && 
+                    dc.getTaiKhoan().getMaTK().equals(tk.getMaTK())) {
+                    diaChiRepository.delete(dc);
+                    return ResponseEntity.ok("OK");
+                }
+                return ResponseEntity.status(403).body("Unauthorized");
+            } else {
+                return ResponseEntity.status(404).body("Not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,9 +45,10 @@ public interface DonHangRepository extends JpaRepository<DonHang, Long> {
     Page<DonHang> findByTrangThaiDHOrderByNgayDatDesc(Integer trangThai, Pageable pageable);
     Page<DonHang> findByTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(String email, Pageable pageable);
     Page<DonHang> findByTrangThaiDHAndTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(Integer trangThai, String email, Pageable pageable);
- // Tính tổng doanh thu (Chỉ tính các đơn Hoàn tất = 3)
-    @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH = 3")
+    // Tính tổng doanh thu (Chỉ tính các đơn Hoàn tất = 4)
+    @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH = 4")
     BigDecimal sumTotalRevenue();
 
-
+    // Tìm đơn hàng để auto-complete
+    List<DonHang> findByTrangThaiDHAndNgayCapNhatBefore(Integer trangThai, LocalDateTime ngayCapNhat);
 }
