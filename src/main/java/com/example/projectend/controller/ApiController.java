@@ -115,6 +115,14 @@ public class ApiController {
     }
 
     /**
+     * API lấy danh sách danh mục (loại sản phẩm)
+     */
+    @GetMapping("/categories")
+    public ResponseEntity<List<LoaiSanPham>> getAllCategories() {
+        return ResponseEntity.ok(loaiSanPhamService.findAll());
+    }
+
+    /**
      * API lấy danh sách sản phẩm với phân trang và filter
      */
     @GetMapping("/sanpham")

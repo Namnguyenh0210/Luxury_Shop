@@ -22,7 +22,7 @@
                     <span class="hidden md:inline text-secondary">|</span>
                     <a v-if="isAuthenticated" class="hidden md:flex items-center gap-1.5 hover:text-primary dark:hover:text-white" href="/profile">
                         <span class="material-symbols-outlined text-base">local_shipping</span>
-                        <span>Theo Dõi Đơn Hàng</span>
+                        <span>Theo dõi đơn hàng</span>
                     </a>
                     <span v-if="!isAuthenticated" class="hidden lg:inline text-secondary">|</span>
                     <a v-if="!isAuthenticated" class="hidden lg:flex items-center gap-1.5 hover:text-primary dark:hover:text-white" href="/login">
@@ -37,37 +37,81 @@
     <!-- Main Header -->
     <div class="border-y border-secondary/50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex h-24 items-center justify-between gap-4">
+            <div class="flex h-32 items-center justify-between gap-4">
                 <!-- Logo -->
-                <div class="flex items-center">
-                    <a href="/">
-                        <h1 class="text-4xl font-serif text-text-primary-light dark:text-text-primary-dark hover:text-black dark:hover:text-white transition-colors cursor-pointer">
-                            Luxury</h1>
+                <div class="h-full flex-shrink-0">
+                    <a href="/" class="block h-full">
+                        <img src="@/assets/img/freepik-vintage-ornamental-royal-place-hotel-logo-20260313155730GfDx (1).png" 
+                             alt="LUXURY SHOP" 
+                             class="h-full w-auto object-contain hover:scale-105 transition-transform duration-300 filter dark:brightness-110" />
                     </a>
                 </div>
 
                 <!-- Navigation -->
-                <nav class="hidden lg:flex items-center gap-6">
-                    <a class="text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:text-black dark:hover:text-white" href="/">Home</a>
-                    <a class="flex items-center gap-2 text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:text-black dark:hover:text-white" href="/sanpham">
-                        <span class="material-symbols-outlined">menu</span>
-                        <span>Sản phẩm</span>
-                    </a>
-                    <a class="text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:text-black dark:hover:text-white" href="/nam">Nam</a>
-                    <a class="text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:text-black dark:hover:text-white" href="/nu">Nữ</a>
-                    <a class="text-sm font-medium text-text-primary-light dark:text-text-primary-dark hover:text-black dark:hover:text-white" href="/kienthuc">Blog</a>
+                <nav class="hidden lg:flex items-center gap-8 ml-8">
+                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/">Trang chủ</a>
+                    
+                    <!-- Dropdown Sản phẩm -->
+                    <div class="relative group h-full flex items-center">
+                        <a class="flex items-center gap-1 text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/sanpham">
+                            <span>Sản phẩm</span>
+                            <span class="material-symbols-outlined text-lg transition-transform group-hover:rotate-180">expand_more</span>
+                        </a>
+                        
+                        <!-- Dropdown Danh mục -->
+                        <div class="absolute left-0 top-full pt-2 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                            <div class="bg-white rounded-xl shadow-2xl border-2 border-[papayawhip] overflow-hidden transform origin-top scale-95 group-hover:scale-100 transition-transform">
+                                <!-- Header: Nền be chữ đen -->
+                                <div class="px-4 py-3 bg-[papayawhip] border-b border-[papayawhip]">
+                                    <p class="text-xs font-bold uppercase tracking-wider text-black">Khám phá bộ sưu tập</p>
+                                </div>
+                                
+                                <div class="p-2 space-y-1">
+                                    <!-- Mục Tất cả sản phẩm -->
+                                    <a href="/sanpham" class="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-900 rounded-lg hover:bg-gray-100 transition-all border border-transparent hover:text-accent hover:ring-1 hover:ring-blue-950/10 active:ring-1 active:ring-blue-950">
+                                        <span class="material-symbols-outlined text-xl">grid_view</span>
+                                        <span>Tất cả sản phẩm</span>
+                                    </a>
+                                    
+                                    <div class="max-h-64 overflow-y-auto custom-scrollbar pr-1">
+                                        <!-- Các mục danh mục được bo góc trong khung -->
+                                        <a v-for="cat in categories" :key="cat.maLoai" :href="`/sanpham?loai=${cat.maLoai}`" 
+                                           class="flex items-center gap-3 px-3 py-2 text-sm text-gray-800 rounded-lg transition-all border border-transparent hover:bg-gray-50 hover:text-accent hover:ring-1 hover:ring-blue-950/10 group active:ring-1 active:ring-blue-950">
+                                            <span class="material-symbols-outlined text-xl text-gray-400 group-hover:text-accent transition-colors">label</span>
+                                            <span class="group-hover:font-medium">{{ cat.tenLoai }}</span>
+                                        </a>
+                                        
+                                        <!-- Fallback nếu rỗng -->
+                                        <template v-if="categories.length === 0">
+                                            <a href="/sanpham?loai=1" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-800 rounded-lg transition-all border border-transparent hover:bg-gray-50 hover:text-accent hover:ring-1 hover:ring-blue-950/10 group active:ring-1 active:ring-blue-950">
+                                                <span class="material-symbols-outlined text-xl text-gray-500 group-hover:text-accent">apparel</span>
+                                                <span class="group-hover:font-medium">Áo Polo / T-Shirt</span>
+                                            </a>
+                                            <a href="/sanpham?loai=2" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-800 rounded-lg transition-all border border-transparent hover:bg-gray-50 hover:text-accent hover:ring-1 hover:ring-blue-950/10 group active:ring-1 active:ring-blue-950">
+                                                <span class="material-symbols-outlined text-xl text-gray-500 group-hover:text-accent">straighten</span>
+                                                <span class="group-hover:font-medium">Quần thời trang</span>
+                                            </a>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/nam">Nam</a>
+                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/nu">Nữ</a>
+                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/kienthuc">Blog</a>
                 </nav>
 
                 <!-- Right Section -->
                 <div class="flex flex-1 items-center justify-end gap-2 md:gap-4">
                     <!-- Search Bar -->
                     <div class="hidden md:flex max-w-xs flex-1">
-                        <form class="flex w-full" @submit.prevent="handleSearch">
+                        <form class="flex w-full border border-secondary rounded-md overflow-hidden focus-within:border-accent group transition-all" @submit.prevent="handleSearch">
                             <label class="sr-only" for="search-header">Tìm kiếm</label>
-                            <input v-model="searchQuery" class="w-full border-r-0 border-secondary bg-transparent py-2 pl-4 text-sm focus:border-accent focus:ring-accent" id="search-header" name="search-header" placeholder="Nhập nội dung..." type="search">
-                            <button class="flex items-center justify-center bg-accent px-4 text-sm font-semibold text-text-primary-light hover:bg-accent/90" type="submit">
-                                <span class="material-symbols-outlined text-lg mr-1">search</span>
-                                <span>Search</span>
+                            <input v-model="searchQuery" class="w-full border-none bg-transparent py-2 pl-4 text-sm focus:ring-0" id="search-header" name="search-header" placeholder="Nhập nội dung..." type="search">
+                            <button class="flex items-center justify-center bg-accent px-3 text-text-primary-light hover:bg-accent/90 transition-colors" type="submit">
+                                <span class="material-symbols-outlined text-xl">search</span>
                             </button>
                         </form>
                     </div>
@@ -85,22 +129,26 @@
                         </a>
 
                         <!-- Shopping Cart with badge -->
-                        <a class="relative flex items-center gap-2 cursor-pointer hover:text-black dark:hover:text-white p-2 rounded-md hover:bg-black/10 dark:hover:bg-white/10" href="/giohang">
-                            <span class="material-symbols-outlined text-2xl">shopping_bag</span>
-                            <span class="hidden sm:inline text-sm font-medium">Giỏ Hàng</span>
-                            <span v-if="cartCount > 0" class="cart-count absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full bg-accent text-primary text-[11px] font-bold flex items-center justify-center">{{ cartCount }}</span>
+                        <a class="flex items-center gap-2 group px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950" href="/giohang">
+                            <div class="relative">
+                                <span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">shopping_bag</span>
+                                <span v-if="cartCount > 0" class="absolute -right-3 -top-3 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-black text-black ring-2 ring-white shadow-lg">
+                                    {{ cartCount }}
+                                </span>
+                            </div>
+                            <span class="hidden text-sm font-bold xl:block">Giỏ Hàng</span>
                         </a>
 
                         <!-- User Avatar Dropdown (Only when authenticated) -->
                         <div v-if="isAuthenticated" class="relative" id="userDropdown">
-                            <button @click="toggleUserMenu" class="flex items-center gap-2 cursor-pointer hover:opacity-80 p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10">
+                            <button @click="toggleUserMenu" class="flex items-center gap-2 px-2 py-1 rounded-md transition-all hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none group">
                                 <!-- Avatar with fallback -->
-                                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-[#D5BFA3] to-[#111111] flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-[#D5BFA3] to-[#111111] flex items-center justify-center text-white font-bold overflow-hidden shadow-sm">
                                     <img v-if="currentUser && currentUser.avatar" :src="currentUser.avatar" :alt="currentUser.hoTen" class="h-full w-full object-cover" @error="handleImageError">
-                                    <span v-else class="flex items-center justify-center h-full w-full">{{ userInitial }}</span>
+                                    <span v-else>{{ userInitial }}</span>
                                 </div>
-                                <span class="hidden lg:inline text-sm font-medium">{{ userName }}</span>
-                                <span class="material-symbols-outlined text-lg">expand_more</span>
+                                <span class="text-sm font-bold text-black group-hover:text-accent">{{ userName }}</span>
+                                <span class="material-symbols-outlined text-lg text-black group-hover:text-accent transition-transform group-hover:rotate-180">expand_more</span>
                             </button>
 
                             <!-- Dropdown Menu -->
@@ -127,15 +175,15 @@
                                     </a>
                                     <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" href="/profile#orders">
                                         <span class="material-symbols-outlined text-xl">shopping_bag</span>
-                                        <span>Đơn hàng của tôi</span>
+                                        <span>Theo dõi đơn hàng</span>
                                     </a>
                                     <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" href="/profile#wishlist">
                                         <span class="material-symbols-outlined text-xl">favorite</span>
-                                        <span>Danh sách yêu thích</span>
+                                        <span>Sản phẩm yêu thích</span>
                                     </a>
                                     <a class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" href="/profile#address">
                                         <span class="material-symbols-outlined text-xl">location_on</span>
-                                        <span>Địa chỉ giao hàng</span>
+                                        <span>Địa chỉ nhận hàng</span>
                                     </a>
 
                                     <!-- Admin Dashboard (Only for Admin) -->
@@ -176,12 +224,13 @@ export default {
       showUserMenu: false,
       currentUser: null,
       cartCount: 0,
-      isAuthenticated: false
+      isAuthenticated: false,
+      categories: []
     }
   },
   computed: {
     userName() {
-      return this.currentUser?.hoTen || 'User'
+      return this.currentUser?.hoTen || 'Khách'
     },
     userEmail() {
       return this.currentUser?.email || 'email@example.com'
@@ -206,6 +255,16 @@ export default {
     handleSearch() {
       if (this.searchQuery.trim()) {
         window.location.href = `/sanpham?search=${encodeURIComponent(this.searchQuery)}`
+      }
+    },
+    async fetchCategories() {
+      try {
+        const res = await fetch('/api/categories')
+        if (res.ok) {
+          this.categories = await res.json()
+        }
+      } catch (err) {
+        console.warn('Không lấy được danh mục', err)
       }
     },
     async fetchCartCount() {
@@ -307,6 +366,7 @@ export default {
     // Fetch user data and cart count
     this.fetchCurrentUser()
     this.fetchCartCount()
+    this.fetchCategories()
     
     // Close dropdown when clicking outside
     document.addEventListener('click', this.handleClickOutside)
