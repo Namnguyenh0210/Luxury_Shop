@@ -175,7 +175,8 @@ CREATE TABLE ThuongHieu (
 CREATE TABLE LoaiSanPham (
     MaLoai BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenLoai NVARCHAR(100) NOT NULL,
-    MoTa NVARCHAR(255)
+    MoTa NVARCHAR(255),
+    TrangThai INT NOT NULL DEFAULT 1
 );
 
 -- Bảng: SizeSP

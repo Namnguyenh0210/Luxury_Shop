@@ -2,11 +2,9 @@ package com.example.projectend.service;
 
 import com.example.projectend.entity.LoaiSanPham;
 import com.example.projectend.entity.SanPham;
-//import com.example.projectend.entity.KhuyenMai;
 import com.example.projectend.repository.LoaiSanPhamRepository;
 import com.example.projectend.repository.SanPhamRepository;
 import com.example.projectend.repository.SanPhamChiTietRepository;
-//import com.example.projectend.repository.KhuyenMaiRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +14,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,9 +33,6 @@ public class SanPhamService {
 
     @Autowired
     private SanPhamChiTietRepository sanPhamChiTietRepository;
-
-//    @Autowired
-//    private KhuyenMaiRepository khuyenMaiRepository;
 
     /**
      * Lấy danh sách sản phẩm nổi bật cho trang chủ
@@ -100,17 +94,30 @@ public class SanPhamService {
     }
 
     /**
-     * Tìm kiếm sản phẩm với phân trang và bộ lọc đầy đủ - CẢI THIỆN SORT THEO MINPRICE
+     * Tìm kiếm sản phẩm với phân trang và bộ lọc đầy đủ - CẢI THIỆN SORT THEO
+     * MINPRICE
      */
-    public Page<SanPham> findWithFilters(String search, Integer loaiId, Integer gioiTinh, Long thuongHieuId,
-                                         BigDecimal minPrice, BigDecimal maxPrice,
-                                         String sort, Pageable pageable) {
+    public Page<SanPham> findWithFilters(String search, Long loaiId, Integer gioiTinh, Long thuongHieuId,
+            BigDecimal minPrice, BigDecimal maxPrice,
+            Integer status, String sort, Pageable pageable) {
         Specification<SanPham> spec = Specification.where(null);
 
-        spec = spec.and((root, query, cb) -> cb.equal(root.get("trangThaiSP"), 1));
+        // Filter by status if provided
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("trangThaiSP"), status));
+
+            // NEW: If showing active products (for customers), only show products
+            // from active categories (or products with no category)
+            if (status == 1) {
+                spec = spec.and((root, query, cb) -> cb.or(
+                        cb.isNull(root.get("loaiSanPham")),
+                        cb.equal(root.get("loaiSanPham").get("trangThai"), 1)));
+            }
+        }
 
         if (search != null && !search.isEmpty()) {
-            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("tenSP")), "%" + search.toLowerCase() + "%"));
+            spec = spec
+                    .and((root, query, cb) -> cb.like(cb.lower(root.get("tenSP")), "%" + search.toLowerCase() + "%"));
         }
         if (loaiId != null) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("loaiSanPham").get("maLoai"), loaiId));
@@ -142,33 +149,20 @@ public class SanPhamService {
         }
 
         // IMPROVED SORTING: Sort by actual minPrice instead of date
-        Sort sortObj;
         if ("gia-tang".equals(sort)) {
-            // Sort by minimum price ascending - use native query approach
             Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
             Page<SanPham> result = sanPhamRepository.findAll(spec, sortedPageable);
-            // Post-process to sort by minPrice
-            List<SanPham> content = result.getContent();
-            content.sort((a, b) -> {
-                BigDecimal priceA = getMinPrice(a.getMaSP());
-                BigDecimal priceB = getMinPrice(b.getMaSP());
-                return priceA.compareTo(priceB);
-            });
-            return result;
+            List<SanPham> content = new java.util.ArrayList<>(result.getContent());
+            content.sort((a, b) -> getMinPrice(a.getMaSP()).compareTo(getMinPrice(b.getMaSP())));
+            return new org.springframework.data.domain.PageImpl<>(content, pageable, result.getTotalElements());
         } else if ("gia-giam".equals(sort)) {
-            // Sort by minimum price descending
             Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
             Page<SanPham> result = sanPhamRepository.findAll(spec, sortedPageable);
-            // Post-process to sort by minPrice
-            List<SanPham> content = result.getContent();
-            content.sort((a, b) -> {
-                BigDecimal priceA = getMinPrice(a.getMaSP());
-                BigDecimal priceB = getMinPrice(b.getMaSP());
-                return priceB.compareTo(priceA);
-            });
-            return result;
+            List<SanPham> content = new java.util.ArrayList<>(result.getContent());
+            content.sort((a, b) -> getMinPrice(b.getMaSP()).compareTo(getMinPrice(a.getMaSP())));
+            return new org.springframework.data.domain.PageImpl<>(content, pageable, result.getTotalElements());
         } else {
-            sortObj = Sort.by(Sort.Direction.DESC, "ngayTao");
+            Sort sortObj = Sort.by(Sort.Direction.DESC, "ngayTao");
             Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortObj);
             return sanPhamRepository.findAll(spec, sortedPageable);
         }
@@ -208,7 +202,6 @@ public class SanPhamService {
         return sanPhamRepository.findAll(pageable);
     }
 
-
     /**
      * Lưu hoặc cập nhật sản phẩm
      */
@@ -237,36 +230,6 @@ public class SanPhamService {
         return sanPhamRepository.findAll(Sort.by(Sort.Direction.DESC, "ngayTao"));
     }
 
-//    public Map<Long, PriceStockInfo> buildPriceStockMap(List<SanPham> products) {
-//        Map<Long, PriceStockInfo> map = new java.util.HashMap<>();
-//        if (products == null || products.isEmpty()) return map;
-//        List<Long> ids = products.stream().map(SanPham::getMaSP).toList();
-//        List<com.example.projectend.repository.SanPhamChiTietRepository.PriceStockProjection> rows = sanPhamChiTietRepository.aggregateForProducts(ids);
-//
-//        // Lấy thông tin khuyến mãi cho tất cả sản phẩm
-//        LocalDateTime now = LocalDateTime.now();
-//        Map<Long, KhuyenMai> promotionMap = new java.util.HashMap<>();
-//        for (Long id : ids) {
-//            List<KhuyenMai> promotions = khuyenMaiRepository.findActivePromotionsByProduct(id, now);
-//            if (!promotions.isEmpty()) {
-//                // Lấy khuyến mãi có % giảm cao nhất
-//                promotionMap.put(id, promotions.stream()
-//                    .filter(km -> km.getLoaiGiaTri() == 0) // Chỉ lấy loại giảm %
-//                    .max((a, b) -> a.getGiaTri().compareTo(b.getGiaTri()))
-//                    .orElse(null));
-//            }
-//        }
-//
-//        for (var r : rows) {
-//            KhuyenMai promo = promotionMap.get(r.getMaSP());
-//            map.put(r.getMaSP(), new PriceStockInfo(r.getMinPrice(), r.getMaxPrice(), r.getTotalStock(), promo));
-//        }
-//        // Fill missing products (no variant yet)
-//        for (Long id : ids) {
-//            map.putIfAbsent(id, new PriceStockInfo(BigDecimal.ZERO, BigDecimal.ZERO, 0, null));
-//        }
-//        return map;
-
     public Map<Long, PriceStockInfo> buildPriceStockMap(List<SanPham> products) {
         Map<Long, PriceStockInfo> map = new java.util.HashMap<>();
 
@@ -278,8 +241,8 @@ public class SanPhamService {
                 .map(SanPham::getMaSP)
                 .toList();
 
-        List<com.example.projectend.repository.SanPhamChiTietRepository.PriceStockProjection> rows =
-                sanPhamChiTietRepository.aggregateForProducts(ids);
+        List<com.example.projectend.repository.SanPhamChiTietRepository.PriceStockProjection> rows = sanPhamChiTietRepository
+                .aggregateForProducts(ids);
 
         for (var r : rows) {
             map.put(
@@ -287,9 +250,7 @@ public class SanPhamService {
                     new PriceStockInfo(
                             r.getMinPrice(),
                             r.getMaxPrice(),
-                            r.getTotalStock()
-                    )
-            );
+                            r.getTotalStock()));
         }
 
         for (Long id : ids) {
@@ -298,9 +259,7 @@ public class SanPhamService {
                     new PriceStockInfo(
                             BigDecimal.ZERO,
                             BigDecimal.ZERO,
-                            0
-                    )
-            );
+                            0));
         }
         return map;
     }
@@ -316,10 +275,21 @@ public class SanPhamService {
             this.totalStock = totalStock != null ? totalStock : 0;
         }
 
-        public BigDecimal getMinPrice() { return minPrice; }
-        public BigDecimal getMaxPrice() { return maxPrice; }
-        public Integer getTotalStock() { return totalStock; }
-        public boolean isOutOfStock() { return totalStock <= 0; }
+        public BigDecimal getMinPrice() {
+            return minPrice;
+        }
+
+        public BigDecimal getMaxPrice() {
+            return maxPrice;
+        }
+
+        public Integer getTotalStock() {
+            return totalStock;
+        }
+
+        public boolean isOutOfStock() {
+            return totalStock <= 0;
+        }
     }
 
 }

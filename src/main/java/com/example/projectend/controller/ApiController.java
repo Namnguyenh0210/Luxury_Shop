@@ -130,7 +130,7 @@ public class ApiController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) Integer loai,
+            @RequestParam(required = false) Long loai,
             @RequestParam(required = false) Integer gioiTinh,
             @RequestParam(required = false) Long thuongHieu,
             @RequestParam(required = false) BigDecimal minPrice,
@@ -142,7 +142,7 @@ public class ApiController {
         try {
             PageRequest pageable = PageRequest.of(page, size);
             Page<SanPham> sanPhamPage = sanPhamService.findWithFilters(
-                    search, loai, gioiTinh, thuongHieu, minPrice, maxPrice, sort, pageable);
+                    search, loai, gioiTinh, thuongHieu, minPrice, maxPrice, 1, sort, pageable);
 
             response.put("success", true);
             response.put("content", sanPhamPage.getContent());

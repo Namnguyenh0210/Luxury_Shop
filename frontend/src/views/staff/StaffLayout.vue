@@ -1,5 +1,5 @@
 <template>
-  <div class="relative flex min-h-screen w-full flex-col bg-gray-50">
+  <div class="relative flex min-h-screen w-full flex-col bg-gray-50 staff-breakout">
     <div class="flex h-full w-full grow">
 
       <!-- ====== SIDEBAR ====== -->
@@ -76,7 +76,8 @@
       <main class="flex flex-1 flex-col min-w-0">
 
         <!-- Header -->
-        <header class="sticky top-0 z-10 flex items-center justify-between whitespace-nowrap border-b border-gray-200 px-8 py-3 bg-white/90 backdrop-blur-sm shadow-sm">
+        <!-- Header -->
+        <header class="sticky top-0 z-10 flex h-[84px] items-center justify-between whitespace-nowrap border-b border-gray-200 bg-white/90 backdrop-blur-sm shadow-sm px-8">
           <div class="flex items-center gap-3">
             <h2 class="text-base font-bold text-gray-800 tracking-tight">{{ pageTitle }}</h2>
           </div>
@@ -158,3 +159,28 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.staff-breakout {
+  margin-left: -2cm;
+  margin-right: -2cm;
+  width: calc(100% + 4cm);
+  max-width: none;
+}
+
+@media (max-width: 1024px) {
+  .staff-breakout {
+    margin-left: -1.5cm;
+    margin-right: -1.5cm;
+    width: calc(100% + 3cm);
+  }
+}
+
+@media (max-width: 640px) {
+  .staff-breakout {
+    margin-left: -0.75cm;
+    margin-right: -0.75cm;
+    width: calc(100% + 1.5cm);
+  }
+}
+</style>

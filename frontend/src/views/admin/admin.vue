@@ -44,7 +44,7 @@
               </div>
               <p class="text-gray-500 text-sm leading-relaxed">{{ module.desc }}</p>
               <div class="mt-auto flex items-center gap-1 text-sm font-semibold text-yellow-700 group-hover:gap-2 transition-all">
-                <span>Truy cập module</span>
+                <span>Truy cập</span>
                 <span class="material-symbols-outlined text-base">arrow_forward</span>
               </div>
             </div>
