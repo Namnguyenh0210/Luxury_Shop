@@ -1,67 +1,67 @@
 <template>
 <footer class="bg-[papayawhip] border-t border-secondary/50">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+    <div class="w-full px-[2cm] py-8 w-full max-w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+            <!-- Col 1: Logo & Info -->
+            <div class="flex flex-col items-center text-center -mt-16">
+                <a href="/" class="block -mb-10">
+                    <img src="@/assets/img/freepik-vintage-ornamental-royal-place-hotel-logo-20260313155730GfDx (1).png" alt="Luxury Shop Logo" class="h-64 object-contain mix-blend-multiply" />
+                </a>
+                <p class="text-[15px] md:text-[16px] whitespace-nowrap font-bold text-text-primary-light dark:text-text-primary-dark tracking-wide leading-relaxed">
+                    Cửa hàng<br/>Chuyên bán quần áo cao cấp
+                </p>
+            </div>
+
+            <!-- Col 2: Support & Payment -->
             <div>
-                <h3 class="text-sm font-semibold uppercase tracking-wider">Shop</h3>
-                <ul class="mt-4 space-y-2">
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/nam">Nam</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/nu">Nữ</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/sanpham">Tất cả sản phẩm</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/sanpham?sort=newest">Sản phẩm mới</a></li>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-5 border-l-2 border-gray-900 pl-2">Bạn cần hỗ trợ</h3>
+                <div class="space-y-1 mb-8 text-[15px] text-text-primary-light/80 dark:text-text-primary-dark/80">
+                    <p class="font-black text-2xl text-gray-900 mb-2">0799 191 940</p>
+                    <p><span class="font-bold mr-1">Email:</span> luxury@fashion.vn</p>
+                </div>
+                
+                <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-4 border-l-2 border-gray-900 pl-2">Hỗ trợ hình thức thanh toán</h3>
+                <div class="flex gap-2 items-center">
+                    <span class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-black text-gray-800 shadow-sm flex items-center justify-center">COD</span>
+                    <span class="px-3 py-1.5 bg-gradient-to-r from-blue-700 to-blue-500 border border-transparent rounded-lg text-xs font-black text-white shadow-sm flex items-center justify-center italic tracking-wider">PayOS</span>
+                </div>
+            </div>
+
+            <!-- Col 3: Hướng dẫn mua hàng -->
+            <div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-5 border-l-2 border-gray-900 pl-2">Hướng dẫn mua hàng</h3>
+                <ul class="space-y-3">
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline underline-offset-4" href="/">Trang chủ</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline underline-offset-4" href="/sanpham">Tất cả sản phẩm</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline underline-offset-4" href="/kienthuc">Báo chí</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline cursor-pointer underline-offset-4" @click.prevent="openChatBox">Hỏi đáp cùng AI</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline cursor-pointer underline-offset-4" @click.prevent="openChatBox">Liên hệ</a></li>
                 </ul>
             </div>
+
+            <!-- Col 4: Chăm sóc khách hàng -->
             <div>
-                <h3 class="text-sm font-semibold uppercase tracking-wider">Công ty</h3>
-                <ul class="mt-4 space-y-2">
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/gioithieu">Giới thiệu</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/gioithieu">Tuyển dụng</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/gioithieu">Tin tức</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/gioithieu">Báo chí</a></li>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-5 border-l-2 border-gray-900 pl-2">Chăm sóc khách hàng</h3>
+                <ul class="space-y-3">
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline underline-offset-4" href="/">Trang chủ</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline cursor-pointer underline-offset-4" @click.prevent="openChatBox">Hỏi đáp cùng AI</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline cursor-pointer underline-offset-4" @click.prevent="openChatBox">Liên hệ</a></li>
                 </ul>
             </div>
+
+            <!-- Col 5: Đăng ký -->
             <div>
-                <h3 class="text-sm font-semibold uppercase tracking-wider">Hỗ trợ khách hàng</h3>
-                <ul class="mt-4 space-y-2">
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/gioithieu">Liên hệ</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/gioithieu">Vận chuyển</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/gioithieu">Đổi trả</a></li>
-                    <li><a class="text-sm text-text-primary-light/70 dark:text-text-primary-dark/70 hover:text-primary" href="/gioithieu">FAQ</a></li>
-                </ul>
-            </div>
-            <div class="col-span-2 md:col-span-1">
-                <h3 class="text-sm font-semibold uppercase tracking-wider">Đăng ký nhận bản tin</h3>
-                <p class="mt-4 text-sm text-text-primary-light/70 dark:text-text-primary-dark/70">Nhận thông tin cập nhật độc quyền, sản phẩm mới và ưu đãi nội bộ.</p>
-                <form class="mt-4 flex w-full">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-5 border-l-2 border-gray-900 pl-2">Đăng ký nhận bản tin</h3>
+                <p class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 leading-relaxed mb-5">Nhận thông tin cập nhật độc quyền, sản phẩm mới và ưu đãi nội bộ.</p>
+                <form class="flex w-full flex-col gap-3">
                     <label class="sr-only" for="email-address">Địa chỉ Email</label>
-                    <input autocomplete="email" class="min-w-0 flex-auto appearance-none rounded-l-md border border-secondary bg-transparent px-3.5 py-2 text-text-primary-light dark:text-text-primary-dark shadow-sm focus:border-accent focus:ring-accent sm:text-sm" id="email-address" name="email-address" placeholder="Nhập email của bạn" required="" type="email">
-                    <button class="flex-none rounded-r-md bg-accent px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" type="submit">Đăng ký</button>
+                    <input autocomplete="email" class="w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-3 text-[14.5px] text-gray-900 shadow-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none transition-all placeholder-gray-400" id="email-address" name="email-address" placeholder="Địa chỉ Email" required="" type="email">
+                    <button class="w-full rounded-xl bg-gray-900 px-4 py-3 text-[14.5px] font-bold text-white shadow-sm hover:bg-black transition-colors" type="submit">Đăng ký</button>
                 </form>
             </div>
         </div>
-        <div class="mt-6 border-t border-secondary/50 pt-4 flex flex-col items-center justify-between sm:flex-row">
-            <p class="text-sm text-text-primary-light/60 dark:text-text-primary-dark/60">© 2025 LUXURY SHOP. Bảo lưu mọi quyền.</p>
-            <div class="mt-2 flex space-x-4 sm:mt-0">
-                <a class="text-text-primary-light/60 dark:text-text-primary-dark/60 hover:text-primary dark:hover:text-white" href="#">
-                    <span class="sr-only">Instagram</span>
-                    <svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path clip-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.155s-.012 3.09-.06 4.155c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.155.06s-3.09-.012-4.155-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.067-.06-1.407-.06-4.155s.012-3.09.06-4.155c.049 1.064.218 1.791.465 2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.345 2.525c.636-.247 1.363-.416 2.427-.465C9.792 2.013 10.146 2 12.315 2zm-1.003 3.903a1.2 1.2 0 100 2.4 1.2 1.2 0 000-2.4zM12 7.846c-2.413 0-4.363 1.95-4.363 4.363s1.95 4.363 4.363 4.363 4.363-1.95 4.363-4.363S14.413 7.846 12 7.846z" fill-rule="evenodd"></path>
-                        <path d="M10.893 12a1.107 1.107 0 112.213 0 1.107 1.107 0 01-2.213 0z"></path>
-                    </svg>
-                </a>
-                <a class="text-text-primary-light/60 dark:text-text-primary-dark/60 hover:text-primary dark:hover:text-white" href="#">
-                    <span class="sr-only">Facebook</span>
-                    <svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-
-                        </svg>
-                </a>
-                <a class="text-text-primary-light/60 dark:text-text-primary-dark/60 hover:text-primary dark:hover:text-white" href="#">
-                    <span class="sr-only">Twitter</span>
-                    <svg aria-hidden="true" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                    </svg>
-                </a>
-            </div>
+        <div class="mt-8 border-t border-secondary/50 pt-6 flex justify-center text-center items-center">
+            <p class="text-sm font-medium text-text-primary-light/60 dark:text-text-primary-dark/60">© 2026 LUXURY SHOP. Bảo lưu mọi quyền.</p>
         </div>
     </div>
 </footer>
@@ -73,6 +73,11 @@ export default {
   name: 'AppFooter',
   data() {
     return {}
+  },
+  methods: {
+      openChatBox() {
+          window.dispatchEvent(new Event('open-chat'));
+      }
   },
   mounted() {
     // TODO: fetch data via axios or hydrate server state

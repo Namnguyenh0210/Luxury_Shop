@@ -59,6 +59,28 @@ public class DonHangController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOrderById(@PathVariable Long id, Principal principal) {
+        try {
+            if (principal == null) {
+                return ResponseEntity.status(401).body("Not logged in");
+            }
+            DonHang order = donHangRepository.findById(id).orElse(null);
+            if (order == null) {
+                return ResponseEntity.status(404).body("Order not found");
+            }
+            // Verify order belongs to current user
+            TaiKhoan tk = taiKhoanService.findByEmail(principal.getName());
+            if (tk == null || !order.getTaiKhoan().getMaTK().equals(tk.getMaTK())) {
+                return ResponseEntity.status(403).body("Forbidden");
+            }
+            return ResponseEntity.ok(order);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+
     @PutMapping("/update-status/{id}")
     public ResponseEntity<?> updateStatus(
             @PathVariable Long id,

@@ -1,0 +1,107 @@
+/* =============================================
+   LUXURY SHOP — GLOBAL STYLES
+   Font: Playfair Display (toàn bộ nội dung)
+   Margin: 2cm hai bên
+   ============================================= */
+
+/* --- Font toàn cục cho mọi element --- */
+*,
+*::before,
+*::after {
+  font-family: 'Playfair Display', 'Manrope', Georgia, serif;
+  box-sizing: border-box;
+}
+
+/* Material Symbols giữ nguyên icon font */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined' !important;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 300,
+    'GRAD' 0,
+    'opsz' 24;
+}
+
+/* --- Base body --- */
+body {
+  font-family: 'Playfair Display', 'Manrope', Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Wrapper toàn app: padding 2cm hai bên --- */
+#app {
+  padding-left: 2cm;
+  padding-right: 2cm;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  #app {
+    padding-left: 1.5cm;
+    padding-right: 1.5cm;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  #app {
+    padding-left: 0.75cm;
+    padding-right: 0.75cm;
+  }
+}
+
+/* -----------------------------------------------
+   Breakout: Header, Footer, Chat widget, Modals,
+   và bất kỳ element nào cần full-width
+   ----------------------------------------------- */
+#app > div > header,
+header,
+footer,
+.chat-widget-wrapper,
+[class*="fixed"],
+.fixed {
+  margin-left: -2cm;
+  margin-right: -2cm;
+  width: calc(100% + 4cm);
+  max-width: none;
+}
+
+@media (max-width: 1024px) {
+  #app > div > header,
+  header,
+  footer,
+  .chat-widget-wrapper,
+  [class*="fixed"],
+  .fixed {
+    margin-left: -1.5cm;
+    margin-right: -1.5cm;
+    width: calc(100% + 3cm);
+  }
+}
+
+@media (max-width: 640px) {
+  #app > div > header,
+  header,
+  footer,
+  .chat-widget-wrapper,
+  [class*="fixed"],
+  .fixed {
+    margin-left: -0.75cm;
+    margin-right: -0.75cm;
+    width: calc(100% + 1.5cm);
+  }
+}
+
+/* --- Tailwind font overrides --- */
+.font-sans {
+  font-family: 'Playfair Display', 'Manrope', serif !important;
+}
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+.font-mono {
+  font-family: 'Courier New', Courier, monospace !important;
+}

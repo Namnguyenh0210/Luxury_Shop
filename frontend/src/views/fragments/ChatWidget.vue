@@ -111,6 +111,7 @@
         <form @submit.prevent="sendMessage" class="chat-input-wrapper">
           <input 
             type="text" 
+            ref="chatInput"
             class="chat-input" 
             placeholder="Nhập tin nhắn..." 
             v-model="newMessage"
@@ -151,15 +152,27 @@ export default {
     }
   },
   methods: {
+    handleOpenChat() {
+      if (!this.isOpen) {
+        this.toggleChat()
+      }
+    },
     toggleChat() {
       this.isOpen = !this.isOpen
-      if (this.isOpen && this.conversationId === null && this.messages.length === 0) {
-        this.fetchConversation()
-      }
-      
-      // Bật/tắt polling khi mở/đóng
-      if (this.isOpen && this.status === 'HUMAN') {
-        this.startPolling()
+      if (this.isOpen) {
+        if (this.conversationId === null && this.messages.length === 0) {
+          this.fetchConversation()
+        }
+        
+        // Auto focus input and scroll
+        this.scrollToBottom()
+        setTimeout(() => {
+          if (this.$refs.chatInput) this.$refs.chatInput.focus()
+        }, 300)
+
+        if (this.status === 'HUMAN') {
+          this.startPolling()
+        }
       } else {
         this.stopPolling()
       }
@@ -291,7 +304,12 @@ export default {
       return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     }
   },
+  mounted() {
+    this._openChatHandler = this.handleOpenChat.bind(this)
+    window.addEventListener('open-chat', this._openChatHandler)
+  },
   beforeUnmount() {
+    window.removeEventListener('open-chat', this._openChatHandler)
     this.stopPolling()
   }
 }

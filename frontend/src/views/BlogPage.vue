@@ -11,8 +11,9 @@
       <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/70"></div>
       <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
         <p class="text-yellow-400 text-sm font-bold uppercase tracking-widest mb-4">✦ Luxury Fashion Blog ✦</p>
-        <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-          Phong Cách Sống<br><span class="text-yellow-400">Đẳng Cấp</span>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-[1.5]">
+          Phong Cách Sống <br>
+          <span class="text-yellow-400 mt-4 inline-block">Đẳng Cấp</span>
         </h1>
         <p class="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
           Khám phá xu hướng thời trang, phong cách sống xa hoa và những câu chuyện đằng sau các thương hiệu luxury hàng đầu thế giới.
@@ -25,7 +26,7 @@
     </section>
 
     <!-- NỘI DUNG CHÍNH -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16" id="bai-viet">
+    <main class="w-full mx-auto py-16" id="bai-viet">
 
       <!-- Loading -->
       <div v-if="dangTai" class="flex flex-col items-center justify-center py-24">
@@ -92,7 +93,7 @@
           </div>
 
           <!-- Grid bài viết -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             <router-link v-for="bv in danhSach" :key="bv.maBV"
               :to="`/blog/${bv.maBV}`"
               class="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
@@ -199,7 +200,7 @@ export default {
     async taiDuLieu(trang = 0) {
       this.dangTai = true
       try {
-        const params = { page: trang, size: 9 }
+        const params = { page: trang, size: 12 }
         if (this.tuKhoaTim.trim()) params.search = this.tuKhoaTim.trim()
 
         const res = await axios.get('/blog', { params })

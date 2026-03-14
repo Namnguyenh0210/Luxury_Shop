@@ -160,7 +160,7 @@ export default {
 @import '@/assets/css/Home.css';
 
 body {
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Playfair Display', 'Manrope', Georgia, serif;
 }
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
