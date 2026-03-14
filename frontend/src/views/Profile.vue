@@ -327,7 +327,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                       <span v-if="latestOrder.trangThaiDH === 5" class="bg-red-50 text-red-600 px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-100">Đã hủy</span>
-                      <button @click="viewOrderDetails(latestOrder)" class="px-6 py-3 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-yellow-600 transition-all shadow-lg active:scale-95">Chi tiết</button>
+                      <button @click="$router.push(`/profile/orders/${latestOrder.maDH}`)" class="px-6 py-3 bg-gray-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-yellow-600 transition-all shadow-lg active:scale-95">Chi tiết</button>
                     </div>
                   </div>
 
@@ -496,7 +496,7 @@
 
                       <!-- Row Action -->
                       <div class="shrink-0 flex items-center">
-                        <button @click="viewOrderDetails(order)" class="whitespace-nowrap px-6 py-3 bg-white border border-gray-200 text-black hover:bg-black hover:text-white hover:border-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm">
+                        <button @click="$router.push(`/profile/orders/${order.maDH}`)" class="whitespace-nowrap px-6 py-3 bg-white border border-gray-200 text-black hover:bg-black hover:text-white hover:border-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm">
                           Xem đơn hàng
                         </button>
                       </div>
@@ -844,169 +844,9 @@
       </div>
     </div>
 
-    <!-- Order Details Modal -->
-    <div v-if="showOrderDetailModal && selectedOrder" class="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[20000] p-4 md:p-8 animate-fade-in">
-      <div class="bg-white rounded-[3rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
-        <!-- Header -->
-        <div class="px-10 py-8 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-          <div class="flex items-center gap-6">
-            <div class="w-16 h-16 bg-yellow-500 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-yellow-500/20">
-              <span class="material-symbols-outlined text-3xl font-bold">receipt_long</span>
-            </div>
-            <div>
-              <h3 class="text-3xl font-black text-gray-900 italic">Chi tiết: #{{ selectedOrder.maDH }}</h3>
-              <p class="text-xs font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Đã đặt vào {{ new Date(selectedOrder.ngayDat).toLocaleString('vi-VN') }}</p>
-            </div>
-          </div>
-          <button @click="showOrderDetailModal = false" class="w-12 h-12 rounded-2xl border-2 border-gray-100 flex items-center justify-center hover:bg-red-50 hover:border-red-100 hover:text-red-500 transition-all active:scale-95 group">
-            <span class="material-symbols-outlined font-black">close</span>
-          </button>
-        </div>
-
-        <!-- Content -->
-        <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
-          <!-- Multi-column Layout -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <!-- Customer Info -->
-            <div class="space-y-6">
-              <h4 class="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] flex items-center gap-2">
-                <span class="w-8 h-[2px] bg-yellow-500"></span> Thông tin giao hàng
-              </h4>
-              <div class="bg-gray-50 rounded-3xl p-8 space-y-4 border border-gray-100">
-                <div class="flex items-start gap-4">
-                  <span class="material-symbols-outlined text-gray-400 mt-1">person</span>
-                  <p class="text-sm font-black text-gray-700">{{ selectedOrder.diaChiGiao?.hoTenNguoiNhan || user.hoTen }}</p>
-                </div>
-                <div class="flex items-start gap-4">
-                  <span class="material-symbols-outlined text-gray-400 mt-1">call</span>
-                  <p class="text-sm font-black text-gray-700">{{ selectedOrder.diaChiGiao?.soDienThoai || user.soDienThoai }}</p>
-                </div>
-                <div class="flex items-start gap-4">
-                  <span class="material-symbols-outlined text-gray-400 mt-1">location_on</span>
-                  <p class="text-sm font-bold text-gray-600 leading-relaxed">{{ selectedOrder.diaChiGiao?.diaChiChiTiet || 'Chưa xác định' }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Payment Info -->
-            <div class="space-y-6">
-              <h4 class="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] flex items-center gap-2">
-                <span class="w-8 h-[2px] bg-yellow-500"></span> Thanh toán
-              </h4>
-              <div class="bg-gray-900 rounded-3xl p-8 text-white space-y-4 shadow-xl">
-                <div class="flex justify-between items-center pb-4 border-b border-white/10">
-                  <p class="text-xs font-black text-gray-500 tracking-widest uppercase">Phương thức</p>
-                  <p class="text-sm font-black text-yellow-500">{{ selectedOrder.hinhThucThanhToan?.tenHinhThuc || 'Tiền mặt' }}</p>
-                </div>
-                <div class="flex justify-between items-center pt-2">
-                  <p class="text-xs font-black text-gray-500 tracking-widest uppercase">Trạng thái</p>
-                  <span :class="['px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest', 
-                                selectedOrder.trangThaiThanhToan === 1 ? 'bg-green-500 text-white' : 'bg-red-500/20 text-red-500 border border-red-500/30']">
-                    {{ selectedOrder.trangThaiThanhToan === 1 ? 'Đã thanh toán' : 'Chưa thanh toán' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Product Table -->
-          <div class="space-y-6">
-            <h4 class="text-[10px] font-black text-gray-300 uppercase tracking-[0.4em] flex items-center gap-2">
-              <span class="w-8 h-[2px] bg-yellow-500"></span> Danh sách sản phẩm ({{ selectedOrder.chiTietList?.length || 0 }})
-            </h4>
-            <div class="bg-white border-2 border-gray-50 rounded-[2.5rem] overflow-hidden">
-               <table class="w-full text-left">
-                  <thead class="bg-gray-50">
-                    <tr class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100">
-                      <th class="px-8 py-4">Sản phẩm</th>
-                      <th class="px-8 py-4 text-center">SL</th>
-                      <th class="px-8 py-4 text-right">Đơn giá</th>
-                      <th class="px-8 py-4 text-right">Thành tiền</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-50">
-                    <tr v-for="item in selectedOrder.chiTietList" :key="item.maCT" class="hover:bg-gray-50/30 transition-colors">
-                      <td class="px-8 py-6">
-                        <div class="flex items-center gap-4">
-                          <div class="w-16 h-16 bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shrink-0 flex items-center justify-center">
-                             <img v-if="item.sanPhamChiTiet?.sanPham?.mainImage" 
-                                  :src="item.sanPhamChiTiet?.sanPham?.mainImage" 
-                                  class="w-full h-full object-cover">
-                             <span v-else class="material-symbols-outlined text-gray-300">image</span>
-                          </div>
-                          <div class="min-w-0">
-                            <p class="text-sm font-black text-gray-900 truncate">{{ item.sanPhamChiTiet?.sanPham?.tenSP }}</p>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ item.sanPhamChiTiet?.kichThuoc?.tenKichThuoc }} / {{ item.sanPhamChiTiet?.mauSac?.tenMauSac }}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td class="px-8 py-6 text-center">
-                        <span class="text-sm font-black text-gray-900">x{{ item.soLuong }}</span>
-                      </td>
-                      <td class="px-8 py-6 text-right">
-                        <span class="text-sm font-bold text-gray-600">{{ item.donGia?.toLocaleString() }}₫</span>
-                      </td>
-                      <td class="px-8 py-6 text-right">
-                        <span class="text-base font-black text-gray-900">{{ (item.donGia * item.soLuong).toLocaleString() }}₫</span>
-                      </td>
-                    </tr>
-                  </tbody>
-               </table>
-            </div>
-          </div>
-
-          <!-- Total Summary -->
-          <div class="bg-gray-900 rounded-[2.5rem] p-10 flex flex-col md:flex-row items-center justify-between gap-8 text-white">
-            <div class="space-y-1 text-center md:text-left">
-              <p class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Tổng tiền cần thanh toán</p>
-              <p class="text-sm font-medium text-gray-400 italic">Vui lòng kiểm tra kỹ trước khi nhận hàng</p>
-            </div>
-            <div class="flex items-baseline gap-2">
-              <span class="text-4xl font-[900] text-yellow-500 tracking-tighter">{{ selectedOrder.tongTien?.toLocaleString() }}</span>
-              <span class="text-xl font-black text-yellow-600">₫</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Sticky Modal Footer Actions -->
-        <div class="px-10 py-6 bg-gray-50 border-t border-gray-100 flex flex-wrap items-center justify-end gap-3 shrink-0">
-          <!-- Cancel Button -->
-          <button v-if="selectedOrder.trangThaiDH === 0" 
-                  @click="cancelOrder(selectedOrder.maDH)" 
-                  class="px-5 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all transform active:scale-95 flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm font-bold">cancel</span> Hủy đơn
-          </button>
-
-          <!-- Received Button -->
-          <button v-if="!selectedOrder.khachBaoChuaNhan && selectedOrder.trangThaiDH === 3" 
-                  @click="updateOrderStatus(selectedOrder.maDH, 4)" 
-                  class="px-5 py-2.5 bg-yellow-500 text-white rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-yellow-600 transition-all shadow-md transform active:scale-95 flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm font-bold">check_circle</span> Đã nhận hàng
-          </button>
-
-          <!-- Report Button -->
-          <button v-if="!selectedOrder.khachBaoChuaNhan && selectedOrder.trangThaiDH === 3" 
-                  @click="openReportModal(selectedOrder.maDH)" 
-                  class="px-5 py-2.5 bg-white border border-gray-100 text-gray-400 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:border-red-500 hover:text-red-500 transition-all transform active:scale-95 flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm font-bold">feedback</span> Chưa nhận hàng
-          </button>
-
-          <!-- Status Indicator for Reports -->
-          <div v-if="selectedOrder.khachBaoChuaNhan" class="flex items-center gap-3 bg-orange-50 px-4 py-2 rounded-xl border border-orange-100">
-            <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white animate-pulse">
-              <span class="material-symbols-outlined text-sm font-black">warning</span>
-            </div>
-            <p class="text-[10px] font-black text-orange-700 uppercase tracking-widest leading-tight">Đang chờ xử lý khiếu nại</p>
-          </div>
-
-          <button @click="showOrderDetailModal = false" class="px-6 py-2.5 bg-gray-900 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gray-700 transition-all active:scale-95">
-            Đóng
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
+
 
 <script>
 import AppHeader from './fragments/AppHeader.vue'
@@ -1095,10 +935,30 @@ export default {
         // By default show everything in the list
       }
 
-      // Search by Order ID
+      // Search by Order ID, Product Name, Brand, Category
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(order => order.maDH.toString().includes(query));
+        filtered = filtered.filter(order => {
+          // Check matching order ID
+          if (order.maDH.toString().includes(query)) return true;
+
+          // Check matching product details inside order
+          if (order.chiTietList) {
+            return order.chiTietList.some(item => {
+              const sanPham = item.sanPhamChiTiet?.sanPham;
+              if (!sanPham) return false;
+              
+              const brandName = sanPham.thuongHieu?.tenTH?.toLowerCase() || '';
+              const categoryName = sanPham.loaiSanPham?.tenLoai?.toLowerCase() || '';
+              const productName = sanPham.tenSP?.toLowerCase() || '';
+              
+              return brandName.includes(query) || 
+                     categoryName.includes(query) || 
+                     productName.includes(query);
+            });
+          }
+          return false;
+        });
       }
 
       // Filter by time

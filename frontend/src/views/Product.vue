@@ -17,8 +17,8 @@
             </div>
         </div>
 
-        <div class="px-4 sm:px-10 lg:px-20 py-10 flex-1">
-            <div class="mx-auto max-w-7xl">
+        <div class="py-10 flex-1 w-full">
+            <div class="mx-auto w-full">
 
                 <!-- Loading State -->
                 <div v-if="loading" class="text-center py-24">
@@ -42,45 +42,124 @@
                         <div class="sticky top-28 space-y-1">
                             <!-- Filter Header -->
                             <div class="pb-6 border-b border-gray-100">
-                                <h2 class="text-xl font-bold text-gray-900 mb-1">Bộ lọc</h2>
-                                <p class="text-sm text-gray-500">{{ totalElements }} sản phẩm</p>
+                                <h2 class="text-2xl font-bold text-gray-900 mb-1">Bộ lọc</h2>
+                                <p class="text-base text-gray-500">{{ totalElements }} sản phẩm</p>
                             </div>
 
                             <!-- Sort -->
                             <div class="py-5 border-b border-gray-100">
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-gray-700 mb-3">Sắp xếp</h3>
-                                <select v-model="filters.sort" @change="fetchProducts" class="w-full bg-white border border-gray-200 rounded-xl py-2.5 px-4 text-sm text-gray-800 focus:ring-2 focus:ring-gray-900 focus:border-transparent outline-none transition cursor-pointer hover:border-gray-400">
-                                    <option value="moi">Mới nhất</option>
-                                    <option value="gia-tang">Giá: Thấp → Cao</option>
-                                    <option value="gia-giam">Giá: Cao → Thấp</option>
-                                    <option value="ten">Tên A → Z</option>
-                                </select>
+                                <h3 class="text-base font-bold uppercase tracking-wider text-gray-700 mb-3">Sắp xếp</h3>
+                                <div class="relative custom-dropdown" @click="toggleSortDropdown">
+                                    <div class="w-full bg-white border border-gray-200 rounded-xl py-3 px-4 text-base text-gray-800 focus:ring-2 focus:ring-gray-900 focus:border-transparent transition flex justify-between items-center cursor-pointer hover:border-gray-400">
+                                        <span>{{ selectedSortLabel }}</span>
+                                        <span class="material-symbols-outlined text-[18px] transition-transform duration-200" :class="{ 'rotate-180': sortDropdownOpen }">expand_more</span>
+                                    </div>
+                                    
+                                    <!-- Dropdown menu -->
+                                    <transition name="fade">
+                                        <div v-if="sortDropdownOpen" class="absolute z-20 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg py-2 overflow-hidden">
+                                            <div 
+                                                v-for="option in sortOptions" 
+                                                :key="option.value"
+                                                @click.stop="selectSortOption(option)"
+                                                class="px-4 py-2.5 hover:bg-gray-100 cursor-pointer text-base transition-colors flex items-center justify-between"
+                                                :class="{ 'text-gray-900 font-bold bg-gray-50': filters.sort === option.value, 'text-gray-700': filters.sort !== option.value }"
+                                            >
+                                                {{ option.label }}
+                                                <span v-if="filters.sort === option.value" class="material-symbols-outlined text-[18px]">check</span>
+                                            </div>
+                                        </div>
+                                    </transition>
+                                </div>
                             </div>
 
                             <!-- Gender Filter -->
                             <div class="py-5 border-b border-gray-100">
-                                <h3 class="text-sm font-bold uppercase tracking-wider text-gray-700 mb-4">Giới tính</h3>
-                                <div class="space-y-2.5">
+                                <h3 class="text-base font-bold uppercase tracking-wider text-gray-700 mb-4">Giới tính</h3>
+                                <div class="space-y-3">
                                     <label v-for="g in genderOptions" :key="g.val" class="flex items-center gap-3 cursor-pointer group">
                                         <input
                                             v-model="filters.gioiTinh"
                                             type="radio"
                                             :value="g.val"
                                             @change="fetchProducts"
-                                            class="h-4 w-4 accent-gray-900 cursor-pointer"
+                                            class="h-5 w-5 accent-gray-900 cursor-pointer"
                                         >
-                                        <span class="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">{{ g.label }}</span>
+                                        <span class="text-base text-gray-700 group-hover:text-gray-900 transition-colors">{{ g.label }}</span>
                                     </label>
                                 </div>
+                            </div>
+
+                            <!-- Brand Filter -->
+                            <div class="py-5 border-b border-gray-100" v-if="brands && brands.length > 0">
+                                <h3 class="text-base font-bold uppercase tracking-wider text-gray-700 mb-4">Hãng sản xuất</h3>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button 
+                                        v-for="brand in (showAllBrands ? brands : brands.slice(0, 4))" 
+                                        :key="brand.maTH"
+                                        @click="toggleBrand(brand.maTH)"
+                                        class="py-2.5 px-2 border rounded-xl text-[13px] font-bold transition-colors flex items-center justify-center tracking-wider uppercase"
+                                        :class="filters.thuongHieu === brand.maTH ? 'border-gray-900 text-gray-900 bg-gray-100' : 'border-gray-200 text-gray-600 hover:border-gray-900 hover:text-gray-900'"
+                                    >
+                                        {{ brand.tenTH }}
+                                    </button>
+                                </div>
+                                <button v-if="brands.length > 4" @click="showAllBrands = !showAllBrands" class="mt-3 text-blue-600 font-bold text-[13px] hover:underline transition-all">
+                                    {{ showAllBrands ? 'Ẩn bớt' : 'Xem thêm' }}
+                                </button>
+                            </div>
+
+                            <!-- Price Filter -->
+                            <div class="py-5 border-b border-gray-100">
+                                <h3 class="text-base font-bold uppercase tracking-wider text-gray-700 mb-4">Mức giá</h3>
+                                <div class="space-y-3 mb-5">
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" value="all" v-model="selectedPriceLevel" @change="setPriceLevel('all')" class="h-5 w-5 accent-red-600 cursor-pointer">
+                                        <span class="text-base text-gray-700 group-hover:text-gray-900">Tất cả</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" value="<2m" v-model="selectedPriceLevel" @change="setPriceLevel('<2m')" class="h-5 w-5 accent-red-600 cursor-pointer">
+                                        <span class="text-base text-gray-700 group-hover:text-gray-900">Dưới 2 triệu</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" value="2-4m" v-model="selectedPriceLevel" @change="setPriceLevel('2-4m')" class="h-5 w-5 accent-red-600 cursor-pointer">
+                                        <span class="text-base text-gray-700 group-hover:text-gray-900">Từ 2 - 4 triệu</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" value="4-7m" v-model="selectedPriceLevel" @change="setPriceLevel('4-7m')" class="h-5 w-5 accent-red-600 cursor-pointer">
+                                        <span class="text-base text-gray-700 group-hover:text-gray-900">Từ 4 - 7 triệu</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" value="7-13m" v-model="selectedPriceLevel" @change="setPriceLevel('7-13m')" class="h-5 w-5 accent-red-600 cursor-pointer">
+                                        <span class="text-base text-gray-700 group-hover:text-gray-900">Từ 7 - 13 triệu</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" value="13-20m" v-model="selectedPriceLevel" @change="setPriceLevel('13-20m')" class="h-5 w-5 accent-red-600 cursor-pointer">
+                                        <span class="text-base text-gray-700 group-hover:text-gray-900">Từ 13 - 20 triệu</span>
+                                    </label>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <input type="radio" value=">20m" v-model="selectedPriceLevel" @change="setPriceLevel('>20m')" class="h-5 w-5 accent-red-600 cursor-pointer">
+                                        <span class="text-base text-gray-700 group-hover:text-gray-900">Trên 20 triệu</span>
+                                    </label>
+                                </div>
+                                <p class="text-[13px] font-bold text-gray-800 mb-3">Hoặc nhập khoảng giá phù hợp với bạn:</p>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <input type="text" v-model="customMinPrice" @blur="formatInputPrice('min')" placeholder="0đ" class="w-full border border-gray-300 rounded-lg py-2 px-1 text-sm text-center outline-none focus:border-gray-900 transition-colors">
+                                    <span class="text-gray-500 font-bold">~</span>
+                                    <input type="text" v-model="customMaxPrice" @blur="formatInputPrice('max')" placeholder="100.000.000đ" class="w-full border border-gray-300 rounded-lg py-2 px-1 text-sm text-center outline-none focus:border-gray-900 transition-colors">
+                                </div>
+                                <button @click="applyCustomPrice" class="w-full py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm font-bold text-gray-800 hover:bg-gray-200 hover:border-gray-300 transition-colors">
+                                    Áp dụng khoảng giá
+                                </button>
                             </div>
 
                             <!-- Clear Button -->
                             <div class="pt-5">
                                 <button
                                     @click="resetFilters"
-                                    class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-200"
+                                    class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-gray-200 text-base font-semibold text-gray-700 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-200"
                                 >
-                                    <span class="material-symbols-outlined text-base">filter_list_off</span>
+                                    <span class="material-symbols-outlined text-lg">filter_list_off</span>
                                     Xóa bộ lọc
                                 </button>
                             </div>
@@ -90,20 +169,11 @@
                     <!-- Products Area -->
                     <div class="w-full lg:w-[72%]">
                         <!-- Top Bar -->
-                        <div class="flex justify-between items-center gap-4 pb-6 border-b border-gray-100 mb-8">
+                        <div class="pb-6 border-b border-gray-100 mb-8">
                             <p class="text-sm text-gray-500">
                                 Hiển thị <span class="font-semibold text-gray-800">{{ products.length }}</span>
                                 / <span class="font-semibold text-gray-800">{{ totalElements }}</span> sản phẩm
                             </p>
-                            <!-- View mode toggle (aesthetic) -->
-                            <div class="hidden sm:flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
-                                <button class="p-1.5 rounded-md bg-white shadow-sm text-gray-700">
-                                    <span class="material-symbols-outlined text-base">grid_view</span>
-                                </button>
-                                <button class="p-1.5 rounded-md text-gray-400 hover:text-gray-600 transition-colors">
-                                    <span class="material-symbols-outlined text-base">view_list</span>
-                                </button>
-                            </div>
                         </div>
 
                         <!-- Empty State -->
@@ -117,14 +187,14 @@
                         </div>
 
                         <!-- Product Grid -->
-                        <div v-else class="grid grid-cols-2 md:grid-cols-3 gap-5 lg:gap-6">
+                        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">
                             <div
                                 v-for="product in products"
                                 :key="product.maSP"
-                                class="product-card group flex flex-col gap-0 relative"
+                                class="product-card group flex flex-col gap-0 relative bg-white rounded-2xl border border-transparent hover:border-blue-900 overflow-hidden transition-all duration-300"
                             >
                                 <!-- Image Container -->
-                                <div class="relative overflow-hidden rounded-xl bg-gray-100 aspect-[3/4]">
+                                <div class="relative overflow-hidden bg-gray-100 aspect-[3/4]">
                                     <a :href="`/sanpham/${product.maSP}`">
                                         <img
                                             v-if="product.anhChinh"
@@ -164,36 +234,44 @@
                                     </button>
                                 </div>
 
-                                <!-- Product Info -->
-                                <div class="flex flex-col flex-1 mt-3 px-0.5">
-                                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-1">
-                                        {{ product.thuongHieu?.tenTH || 'Brand' }}
-                                    </p>
-                                    <h4 class="text-gray-900 text-sm font-semibold leading-snug flex-1 line-clamp-2">
-                                        <a :href="`/sanpham/${product.maSP}`" class="hover:underline underline-offset-2">
-                                            {{ product.tenSP }}
-                                        </a>
-                                    </h4>
-
-                                    <!-- Price Row -->
-                                    <div class="flex items-center gap-2 mt-2">
-                                        <p v-if="getPriceStock(product.maSP)?.hasPromotion" class="text-gray-400 text-xs line-through">
-                                            {{ formatPrice(getPriceStock(product.maSP)?.minPrice) }}
+                                <!-- Product Info Area -->
+                                <div class="flex flex-col flex-1 p-4">
+                                    <!-- Brand and Title -->
+                                    <div class="mb-2 w-full">
+                                        <p class="text-[13px] text-gray-500 uppercase tracking-widest font-bold mb-1">
+                                            {{ product.thuongHieu?.tenTH || 'Brand' }}
                                         </p>
-                                        <p :class="['text-sm font-bold', getPriceStock(product.maSP)?.hasPromotion ? 'text-red-600' : 'text-gray-900']">
-                                            {{ formatPrice(getPriceStock(product.maSP)?.finalPrice || getPriceStock(product.maSP)?.minPrice) }}
-                                        </p>
+                                        <h4 class="text-gray-900 text-[17px] md:text-[18px] font-semibold leading-snug truncate w-full" :title="product.tenSP">
+                                            <a :href="`/sanpham/${product.maSP}`" class="hover:underline underline-offset-2">
+                                                {{ product.tenSP }}
+                                            </a>
+                                        </h4>
                                     </div>
 
-                                    <!-- Add to Cart Button -->
-                                    <button
-                                        @click="openQuickView(product.maSP)"
-                                        :disabled="getPriceStock(product.maSP)?.outOfStock"
-                                        class="add-cart-btn mt-3"
-                                    >
-                                        <span class="material-symbols-outlined text-sm">shopping_bag</span>
-                                        {{ getPriceStock(product.maSP)?.outOfStock ? 'Hết hàng' : 'Chọn sản phẩm' }}
-                                    </button>
+                                    <!-- Bottom Row: Price (Left) & Add Button (Right) -->
+                                    <div class="flex flex-row justify-between items-end mt-auto pt-1">
+                                        <!-- Price -->
+                                        <div class="flex flex-col justify-end">
+                                            <p v-if="getPriceStock(product.maSP)?.hasPromotion" class="text-gray-400 text-sm line-through mb-0.5">
+                                                {{ formatPrice(getPriceStock(product.maSP)?.minPrice) }}
+                                            </p>
+                                            <p :class="['text-[17px] md:text-[19px] font-bold', getPriceStock(product.maSP)?.hasPromotion ? 'text-red-600' : 'text-gray-900']">
+                                                {{ formatPrice(getPriceStock(product.maSP)?.finalPrice || getPriceStock(product.maSP)?.minPrice) }}
+                                            </p>
+                                        </div>
+
+                                        <!-- Add Button -->
+                                        <div class="flex-shrink-0">
+                                            <button
+                                                @click="openQuickView(product.maSP)"
+                                                :disabled="getPriceStock(product.maSP)?.outOfStock"
+                                                class="flex items-center gap-1.5 bg-gray-900 hover:bg-blue-900 text-white px-3.5 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                                title="Thêm vào giỏ"
+                                            >
+                                                <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -284,7 +362,25 @@ export default {
       ],
       // Quick View
       quickViewOpen: false,
-      quickViewProductId: null
+      quickViewProductId: null,
+      
+      // Brands
+      brands: [],
+      showAllBrands: false,
+      
+      // Price Filters
+      selectedPriceLevel: null,
+      customMinPrice: null,
+      customMaxPrice: null,
+      
+      // Sort Dropdown
+      sortDropdownOpen: false,
+      sortOptions: [
+        { value: 'moi', label: 'Mới nhất' },
+        { value: 'gia-tang', label: 'Giá: Thấp → Cao' },
+        { value: 'gia-giam', label: 'Giá: Cao → Thấp' },
+        { value: 'ten', label: 'Tên A → Z' }
+      ]
     }
   },
   computed: {
@@ -298,9 +394,26 @@ export default {
       }
       for (let i = start; i <= end; i++) pages.push(i)
       return pages
+    },
+    selectedSortLabel() {
+      const option = this.sortOptions.find(o => o.value === this.filters.sort)
+      return option ? option.label : 'Sắp xếp'
     }
   },
   methods: {
+    toggleSortDropdown() {
+      this.sortDropdownOpen = !this.sortDropdownOpen
+    },
+    selectSortOption(option) {
+      this.filters.sort = option.value
+      this.sortDropdownOpen = false
+      this.fetchProducts()
+    },
+    handleGlobalClick(e) {
+      if (this.sortDropdownOpen && !e.target.closest('.custom-dropdown')) {
+        this.sortDropdownOpen = false
+      }
+    },
     async fetchProducts() {
       this.loading = true
       this.error = null
@@ -320,6 +433,9 @@ export default {
           this.totalElements = response.data.totalElements || 0
           this.totalPages = response.data.totalPages || 0
           this.currentPage = response.data.currentPage || 0
+          if (response.data.brands) {
+             this.brands = response.data.brands
+          }
         } else {
           this.error = response.data.message || 'Tải sản phẩm thất bại'
         }
@@ -376,21 +492,126 @@ export default {
         maxPrice: null,
         sort: 'moi'
       }
+      this.selectedPriceLevel = null
+      this.customMinPrice = null
+      this.customMaxPrice = null
+      this.currentPage = 0
+      this.fetchProducts()
+    },
+
+    toggleBrand(brandId) {
+      if (this.filters.thuongHieu === brandId) {
+        this.filters.thuongHieu = null;
+      } else {
+        this.filters.thuongHieu = brandId;
+      }
+      this.currentPage = 0;
+      this.fetchProducts();
+    },
+
+    setPriceLevel(level) {
+      this.selectedPriceLevel = level;
+      if (level === 'all') {
+        this.filters.minPrice = null;
+        this.filters.maxPrice = null;
+      } else if (level === '<2m') {
+        this.filters.minPrice = null;
+        this.filters.maxPrice = 2000000;
+      } else if (level === '2-4m') {
+        this.filters.minPrice = 2000000;
+        this.filters.maxPrice = 4000000;
+      } else if (level === '4-7m') {
+        this.filters.minPrice = 4000000;
+        this.filters.maxPrice = 7000000;
+      } else if (level === '7-13m') {
+        this.filters.minPrice = 7000000;
+        this.filters.maxPrice = 13000000;
+      } else if (level === '13-20m') {
+        this.filters.minPrice = 13000000;
+        this.filters.maxPrice = 20000000;
+      } else if (level === '>20m') {
+        this.filters.minPrice = 20000000;
+        this.filters.maxPrice = null;
+      }
+      this.customMinPrice = null;
+      this.customMaxPrice = null;
+      this.currentPage = 0;
+      this.fetchProducts();
+    },
+
+    applyCustomPrice() {
+      this.selectedPriceLevel = 'custom';
+      this.filters.minPrice = this.customMinPrice ? parseInt(this.customMinPrice.toString().replace(/\D/g, '')) : null;
+      this.filters.maxPrice = this.customMaxPrice ? parseInt(this.customMaxPrice.toString().replace(/\D/g, '')) : null;
+      this.currentPage = 0;
+      this.fetchProducts();
+    },
+
+    formatInputPrice(type) {
+      if (type === 'min' && this.customMinPrice) {
+          let val = parseInt(this.customMinPrice.toString().replace(/\D/g, '')) || 0;
+          this.customMinPrice = new Intl.NumberFormat('vi-VN').format(val) + 'đ';
+      } else if (type === 'max' && this.customMaxPrice) {
+          let val = parseInt(this.customMaxPrice.toString().replace(/\D/g, '')) || 0;
+          this.customMaxPrice = new Intl.NumberFormat('vi-VN').format(val) + 'đ';
+      }
+    },
+
+    parseQueryParams() {
+      const path = this.$route.path
+      const query = this.$route.query
+      
+      this.filters.gioiTinh = null
+      if (path.includes('/nam')) {
+        this.filters.gioiTinh = 0
+        this.pageTitle = "Bộ sưu tập Nam"
+      } else if (path.includes('/nu')) {
+        this.filters.gioiTinh = 1
+        this.pageTitle = "Bộ sưu tập Nữ"
+      } else {
+        this.pageTitle = "Tất cả sản phẩm"
+      }
+
+      if (query.loai) {
+        this.filters.loai = parseInt(query.loai)
+      } else {
+        this.filters.loai = null
+      }
+      
+      if (query.search) {
+        this.filters.search = query.search
+        this.pageTitle = `Kết quả tìm kiếm cho "${query.search}"`
+      } else {
+        this.filters.search = null
+      }
+
+      if (query.thuongHieu) {
+        this.filters.thuongHieu = parseInt(query.thuongHieu)
+      } else {
+        this.filters.thuongHieu = null
+      }
+
       this.currentPage = 0
       this.fetchProducts()
     }
   },
 
   mounted() {
-    const path = this.$route.path
-    if (path.includes('/nam')) {
-      this.filters.gioiTinh = 0
-      this.pageTitle = "Bộ sưu tập Nam"
-    } else if (path.includes('/nu')) {
-      this.filters.gioiTinh = 1
-      this.pageTitle = "Bộ sưu tập Nữ"
+    document.addEventListener('click', this.handleGlobalClick)
+    this.parseQueryParams()
+  },
+
+  watch: {
+    '$route.query': {
+      handler() {
+        this.parseQueryParams()
+      },
+      deep: true
     }
-    this.fetchProducts()
+  },
+
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleGlobalClick)
   }
 }
 </script>
@@ -502,34 +723,7 @@ export default {
   background: #fff;
 }
 
-/* Add to Cart Button */
-.add-cart-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: 10px;
-  border: 1.5px solid #E5E7EB;
-  background: #fff;
-  color: #111827;
-  font-size: 12.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  letter-spacing: 0.3px;
-}
-.add-cart-btn:hover:not(:disabled) {
-  background: #111827;
-  color: #fff;
-  border-color: #111827;
-}
-.add-cart-btn:disabled {
-  color: #9CA3AF;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
+/* Nút Thêm thay thế */
 
 /* Pagination */
 .pagination-arrow {

@@ -5,27 +5,27 @@
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex h-10 items-center justify-end text-xs text-text-primary-light/80 dark:text-text-primary-dark/80">
                 <div class="flex items-center space-x-4">
-                    <a class="flex items-center gap-1.5 hover:text-primary dark:hover:text-white" href="mailto:luxury@fashion.vn">
+                    <a class="flex items-center gap-1.5 hover:text-blue-900 active:text-blue-950 transition-colors" href="mailto:luxury@fashion.vn">
                         <span class="material-symbols-outlined text-base">mail</span>
                         <span>luxury@fashion.vn</span>
                     </a>
                     <span class="text-secondary">|</span>
-                    <a class="flex items-center gap-1.5 hover:text-primary dark:hover:text-white" href="tel:0799191940">
+                    <a class="flex items-center gap-1.5 hover:text-blue-900 active:text-blue-950 transition-colors" href="tel:0799191940">
                         <span class="material-symbols-outlined text-base">call</span>
                         <span>Hotline: 079 9191940</span>
                     </a>
-                    <span class="hidden sm:inline text-secondary">|</span>
-                    <a class="hidden sm:flex items-center gap-1.5 hover:text-primary dark:hover:text-white" href="#">
+                    <span class="text-secondary">|</span>
+                    <a class="flex items-center gap-1.5 hover:text-blue-900 active:text-blue-950 transition-colors" href="#">
                         <span class="material-symbols-outlined text-base">handshake</span>
                         <span>Trở thành đối tác</span>
                     </a>
-                    <span class="hidden md:inline text-secondary">|</span>
-                    <a v-if="isAuthenticated" class="hidden md:flex items-center gap-1.5 hover:text-primary dark:hover:text-white" href="/profile">
+                    <span class="text-secondary">|</span>
+                    <a v-if="isAuthenticated" class="flex items-center gap-1.5 hover:text-blue-900 active:text-blue-950 transition-colors" href="/profile">
                         <span class="material-symbols-outlined text-base">local_shipping</span>
                         <span>Theo dõi đơn hàng</span>
                     </a>
-                    <span v-if="!isAuthenticated" class="hidden lg:inline text-secondary">|</span>
-                    <a v-if="!isAuthenticated" class="hidden lg:flex items-center gap-1.5 hover:text-primary dark:hover:text-white" href="/login">
+                    <span v-if="!isAuthenticated" class="text-secondary">|</span>
+                    <a v-if="!isAuthenticated" class="flex items-center gap-1.5 hover:text-blue-900 active:text-blue-950 transition-colors" href="/login">
                         <span class="material-symbols-outlined text-base">person</span>
                         <span>Đăng Ký / Đăng Nhập</span>
                     </a>
@@ -49,11 +49,11 @@
 
                 <!-- Navigation -->
                 <nav class="hidden lg:flex items-center gap-8 ml-8">
-                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/">Trang chủ</a>
+                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-blue-900 active:text-blue-950 focus:outline-none" href="/">Trang chủ</a>
                     
                     <!-- Dropdown Sản phẩm -->
                     <div class="relative group h-full flex items-center">
-                        <a class="flex items-center gap-1 text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/sanpham">
+                        <a class="flex items-center gap-1 text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-blue-900 active:text-blue-950 focus:outline-none" href="/sanpham">
                             <span>Sản phẩm</span>
                             <span class="material-symbols-outlined text-lg transition-transform group-hover:rotate-180">expand_more</span>
                         </a>
@@ -98,9 +98,9 @@
                         </div>
                     </div>
 
-                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/nam">Nam</a>
-                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/nu">Nữ</a>
-                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none" href="/kienthuc">Blog</a>
+                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-blue-900 active:text-blue-950 focus:outline-none" href="/nam">Nam</a>
+                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-blue-900 active:text-blue-950 focus:outline-none" href="/nu">Nữ</a>
+                    <a class="text-sm font-bold text-text-primary-light dark:text-text-primary-dark px-2 py-1 rounded-md transition-all hover:text-blue-900 active:text-blue-950 focus:outline-none" href="/kienthuc">Blog</a>
                 </nav>
 
                 <!-- Right Section -->

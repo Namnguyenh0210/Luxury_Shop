@@ -3,6 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import axios from 'axios'
 
+// Import global styles (font + margin)
+import './assets/css/global.css'
+
 // Import original CSS files as global styles
 import './assets/css/Home.css'
 import './assets/css/Product.css'
@@ -51,9 +54,20 @@ const routes = [
 
   // User Profile
   { path: '/profile', component: () => import('./views/Profile.vue') },
+  { path: '/profile/orders/:id', component: () => import('./views/OrderDetailUser.vue') },
 
   // About/Introduction
   { path: '/gioithieu', component: () => import('./views/Home.vue') },
+
+  // AI Chat Redirect - To avoid 404 and trigger widget
+  { 
+    path: '/chat', 
+    redirect: '/', 
+    beforeEnter: (to, from, next) => {
+      next('/');
+      setTimeout(() => window.dispatchEvent(new Event('open-chat')), 500);
+    } 
+  },
 
   // Error pages
   { path: '/403', component: () => import('./views/error/403.vue') }, // Moved to error/
