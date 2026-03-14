@@ -7,11 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -147,14 +144,52 @@ public class DonHangService {
 
         Integer currentStatus = dh.getTrangThaiDH();
 
-        if(status < currentStatus){
+        // Cho phép 6 (Lỗi) -> 4 (Hoàn tất)
+        if (currentStatus == 6 && status == 4) {
+            // Hợp lệ
+        } else if (status < currentStatus) {
             throw new RuntimeException("Không thể quay lại trạng thái cũ");
         }
 
         dh.setTrangThaiDH(status);
+        dh.setNgayCapNhat(LocalDateTime.now());
+        
+        if (status == 4) {
+            dh.setTrangThaiThanhToan(1);
+            dh.setNgayThanhToan(LocalDateTime.now());
+        }
 
         donHangRepository.save(dh);
 
+    }
+
+    /**
+     * KHÁCH BÁO CHƯA NHẬN ĐƯỢC HÀNG
+     */
+    @Transactional
+    public void reportOrderNotReceived(Long id, String lyDo, String moTa) {
+        DonHang dh = donHangRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+        
+        if (dh.getTrangThaiDH() != 3) {
+            throw new RuntimeException("Chỉ có thể báo lỗi khi đơn hàng đang ở trạng thái Đã giao");
+        }
+
+        dh.setKhachBaoChuaNhan(true);
+        dh.setLyDoChuaNhan(lyDo);
+        dh.setMoTaChuaNhan(moTa);
+        dh.setNgayCapNhat(LocalDateTime.now());
+        donHangRepository.save(dh);
+
+        // Ghi log
+        LichSuDonHang history = new LichSuDonHang();
+        history.setDonHang(dh);
+        history.setTrangThaiCu(3);
+        history.setTrangThaiMoi(3);
+        history.setNguoiCapNhat("KHACHHANG");
+        history.setGhiChu("Khách báo chưa nhận được hàng: " + lyDo);
+        history.setThoiGian(LocalDateTime.now());
+        lichSuDonHangRepository.save(history);
     }
 
     /**
@@ -182,17 +217,17 @@ public class DonHangService {
             throw new RuntimeException("Không thể quay lại trạng thái trước đó!");
         }
 
-        // Không cho phép cập nhật nếu đã hủy
-        if (trangThaiCu == 4) {
-            throw new RuntimeException("Đơn hàng đã hủy, không thể cập nhật!");
+        // Không cho phép cập nhật nếu đã kết thúc (4, 5)
+        if (trangThaiCu == 4 || trangThaiCu == 5) {
+            throw new RuntimeException("Đơn hàng đã kết thúc, không thể cập nhật!");
         }
 
         // Cập nhật trạng thái
         donHang.setTrangThaiDH(trangThaiMoi);
         donHang.setNgayCapNhat(LocalDateTime.now());
 
-        // Nếu đã giao hàng thì đánh dấu đã thanh toán
-        if (trangThaiMoi == 3) {
+        // Nếu đã giao hàng (Hoàn tất) thì đánh dấu đã thanh toán
+        if (trangThaiMoi == 4) {
             donHang.setTrangThaiThanhToan(1);
             donHang.setNgayThanhToan(LocalDateTime.now());
         }
@@ -253,7 +288,7 @@ public class DonHangService {
             throw new RuntimeException("Chỉ có thể hủy đơn hàng đang chờ xác nhận!");
         }
 
-        donHang.setTrangThaiDH(4); // Đã hủy
+        donHang.setTrangThaiDH(5); // Đã hủy
         donHang.setNgayCapNhat(LocalDateTime.now());
 
         // Hoàn lại tồn kho
@@ -269,7 +304,7 @@ public class DonHangService {
         LichSuDonHang lichSu = new LichSuDonHang(
             donHang,
             trangThaiCu,
-            4,
+            5,
             taiKhoan.getHoTen(),
             "Khách hàng hủy đơn hàng"
         );
@@ -396,9 +431,38 @@ public class DonHangService {
             case "chờ xác nhận" -> 0;
             case "đã xác nhận" -> 1;
             case "đang giao" -> 2;
-            case "hoàn tất", "đã giao" -> 3;
-            case "đã hủy", "hủy" -> 4;
+            case "đã giao" -> 3;
+            case "hoàn tất" -> 4;
+            case "đã hủy", "hủy" -> 5;
             default -> null;
         };
+    }
+
+    /**
+     * Tự động hoàn tất đơn hàng sau 3 ngày nếu khách không xác nhận.
+     * Chạy vào lúc 1:00 AM mỗi ngày.
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    @Transactional
+    public void autoConfirmOrders() {
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+        // Trạng thái 3: Đã giao
+        List<DonHang> ordersToComplete = donHangRepository.findByTrangThaiDHAndNgayCapNhatBefore(3, threeDaysAgo);
+
+        for (DonHang donHang : ordersToComplete) {
+            donHang.setTrangThaiDH(4); // Hoàn tất
+            donHang.setNgayCapNhat(LocalDateTime.now());
+            donHangRepository.save(donHang);
+
+            // Ghi log lịch sử
+            LichSuDonHang history = new LichSuDonHang();
+            history.setDonHang(donHang);
+            history.setTrangThaiCu(3); // Đã giao
+            history.setTrangThaiMoi(4); // Hoàn tất
+            history.setNguoiCapNhat("SYSTEM");
+            history.setGhiChu("Hệ thống tự động hoàn tất (Quá 3 ngày)");
+            history.setThoiGian(LocalDateTime.now());
+            lichSuDonHangRepository.save(history);
+        }
     }
 }

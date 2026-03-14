@@ -136,7 +136,8 @@ CREATE TABLE TaiKhoan (
     LastLogin DATETIME,
     TrangThai BIT NOT NULL DEFAULT 1,
     NgayTao DATETIME DEFAULT GETDATE(),
-    NgayCapNhat DATETIME DEFAULT GETDATE()
+    NgayCapNhat DATETIME DEFAULT GETDATE(),
+    Provider VARCHAR(20) DEFAULT 'LOCAL'
 );
 
 -- Bảng: Role (Phân Quyền)
@@ -159,6 +160,7 @@ CREATE TABLE SoDiaChi (
     HoTenNguoiNhan NVARCHAR(100) NOT NULL,
     SoDienThoai VARCHAR(20) NOT NULL,
     DiaChiChiTiet NVARCHAR(500) NOT NULL,
+    GhiChu NVARCHAR(255),
     LaMacDinh BIT DEFAULT 0
 );
 
@@ -249,7 +251,10 @@ CREATE TABLE DonHang (
     TrangThaiDH INT NOT NULL DEFAULT 0, -- 0: Chờ, 1: Xác nhận, 2: Giao, 3: Hoàn tất, 4: Hủy
     TrangThaiThanhToan INT NOT NULL DEFAULT 0,
     NgayThanhToan DATETIME NULL,
-    NgayCapNhat DATETIME DEFAULT GETDATE()
+    NgayCapNhat DATETIME DEFAULT GETDATE(),
+    KhachBaoChuaNhan BIT DEFAULT 0,
+    LyDoChuaNhan NVARCHAR(255),
+    MoTaChuaNhan NVARCHAR(1000)
 );
 
 -- Bảng: DonHangCT (Chi tiết đơn hàng)
@@ -281,7 +286,11 @@ CREATE TABLE DanhGia (
     MaTK BIGINT NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE CASCADE,
     NoiDung NVARCHAR(500),
     Diem INT NOT NULL CHECK (Diem >= 1 AND Diem <= 5),
-    NgayDanhGia DATETIME DEFAULT GETDATE()
+    NgayDanhGia DATETIME DEFAULT GETDATE(),
+    TrangThai INT DEFAULT 1,
+    PhanHoi NVARCHAR(1000),
+    NgayPhanHoi DATETIME,
+    ReportCount INT DEFAULT 0
 );
 
 -- Bảng: LoaiBaiViet
@@ -319,6 +328,9 @@ CREATE TABLE BinhLuan
     TrangThai      BIT      DEFAULT 1,
     SoLuongLike    INT      DEFAULT 0,
     SoLuongPhanHoi INT      DEFAULT 0,
+    PhanHoiAdmin   NVARCHAR(1000),
+    NgayPhanHoiAdmin DATETIME,
+    ReportCount    INT      DEFAULT 0,
     CONSTRAINT CK_BinhLuan CHECK (MaSP IS NOT NULL OR MaBV IS NOT NULL)
 );
 
@@ -731,9 +743,11 @@ GO
 -- 4.3.1. Địa chỉ của khách
 SET IDENTITY_INSERT dbo.SoDiaChi ON;
 INSERT INTO SoDiaChi
-(MaDiaChi, MaTK, HoTenNguoiNhan, SoDienThoai, DiaChiChiTiet, LaMacDinh)
+(MaDiaChi, MaTK, HoTenNguoiNhan, SoDienThoai, DiaChiChiTiet, GhiChu, LaMacDinh)
 VALUES
-    (1, 3, N'Lê Văn Khách', '0900000003', N'789 Đường Khách Hàng, P.1, Q.Tân Bình, TP.HCM', 1);
+    (1, 3, N'Lê Văn Khách', '0900000003', N'789 Đường Khách Hàng, P.1, Q.Tân Bình, TP.HCM', N'Nhà riêng', 1),
+    (2, 3, N'Trần Thị Vợ Khách', '0900000004', N'456 Đường Hậu Giang, Q6, TP.HCM', N'Cổng sau, lầu 2', 0),
+    (3, 1, N'Admin Luxury', '0900000001', N'123 Đường Admin, Q1, TP.HCM', N'Văn phòng công ty', 1);
 SET IDENTITY_INSERT dbo.SoDiaChi OFF;
 GO
 
@@ -1308,6 +1322,16 @@ BEGIN
 END
 GO
 
+-- ===== CẬP NHẬT CỘT BÁO CHƯA NHẬN HÀNG =====
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('DonHang') AND name = 'KhachBaoChuaNhan')
+BEGIN
+    ALTER TABLE DonHang ADD KhachBaoChuaNhan BIT DEFAULT 0;
+    ALTER TABLE DonHang ADD LyDoChuaNhan NVARCHAR(255);
+    ALTER TABLE DonHang ADD MoTaChuaNhan NVARCHAR(1000);
+    PRINT N'✅ Đã thêm các cột báo cáo chưa nhận hàng vào bảng DonHang';
+END
+GO
+
 -- ===== KIỂM TRA KẾT QUẢ =====
 PRINT N'';
 PRINT N'===== DANH SÁCH PHƯƠNG THỨC THANH TOÁN =====';
@@ -1636,3 +1660,22 @@ GO
 
 PRINT N'✅ HOÀN TẤT KHỞI TẠO BẢNG AI CHATBOT!';
 GO
+-- Bảng sản phẩm yêu thích
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SanPhamYeuThich')
+BEGIN
+    CREATE TABLE SanPhamYeuThich (
+        MaSPYT    BIGINT IDENTITY(1,1) PRIMARY KEY,
+        MaTK      BIGINT NOT NULL,
+        MaSP      BIGINT NOT NULL,
+        NgayThem  DATETIME DEFAULT GETDATE(),
+        CONSTRAINT FK_SPYT_TK FOREIGN KEY (MaTK) REFERENCES TaiKhoan(MaTK),
+        CONSTRAINT FK_SPYT_SP FOREIGN KEY (MaSP) REFERENCES SanPham(MaSP)
+    );
+    PRINT N'✅ Đã tạo bảng SanPhamYeuThich';
+END
+ELSE
+BEGIN
+    PRINT N'⚠️ Bảng SanPhamYeuThich đã tồn tại';
+END
+GO
+

@@ -10,8 +10,8 @@
 
         <div v-if="order" class="flex items-center gap-3">
           <span class="text-sm text-gray-400">Trạng thái hiện tại:</span>
-          <span class="px-4 py-1.5 rounded-full text-xs font-bold shadow-sm" :class="statusClass(order.trangThaiDH)">
-            {{ statusText(order.trangThaiDH) }}
+          <span class="px-4 py-1.5 rounded-full text-xs font-bold shadow-sm" :class="statusClass(order.trangThaiDH).class">
+            {{ statusClass(order.trangThaiDH).text }}
           </span>
         </div>
       </div>
@@ -76,46 +76,60 @@
           <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-wrap gap-3">
             <h4 class="w-full mb-2 text-sm font-bold text-gray-400 uppercase tracking-widest">Cập nhật trạng thái</h4>
 
-            <template v-if="order.trangThaiDH < 3 && order.trangThaiDH !== 4">
+              <div v-if="order.khachBaoChuaNhan" class="mb-4 w-full p-4 border-2 border-red-500 rounded-xl bg-red-50 animate-pulse">
+                <h3 class="text-red-600 font-bold text-lg mb-2 flex items-center gap-2">
+                  <span class="material-symbols-outlined">report_problem</span>
+                  Khách hàng báo chưa nhận được hàng!
+                </h3>
+                <p class="text-sm text-gray-700"><strong>Lý do:</strong> {{ order.lyDoChuaNhan }}</p>
+                <p class="text-sm text-gray-700"><strong>Mô tả:</strong> {{ order.moTaChuaNhan || 'Không có mô tả thêm' }}</p>
+                
+                <div class="mt-4 flex gap-3">
+                  <button 
+                    @click="cancelReportedOrder"
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 transition shadow">
+                    Xác nhận hủy đơn & Hoàn tiền
+                  </button>
+                </div>
+              </div>
 
-              <!-- 0: Chờ xác nhận → Xác nhận + Hủy -->
-              <template v-if="order.trangThaiDH === 0">
-                <button @click="updateStatus(1)"
-                  class="flex-1 min-w-[150px] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-                  <span class="material-symbols-outlined">check_circle</span> Xác nhận đơn
-                </button>
-                <button @click="updateStatus(4)"
-                  class="flex-1 min-w-[150px] border-2 border-red-200 text-red-600 hover:bg-red-50 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                  <span class="material-symbols-outlined">cancel</span> Hủy đơn hàng
-                </button>
-              </template>
+              <div v-if="order.trangThaiDH === 5" class="mb-4 w-full p-4 bg-gray-100 border rounded-xl">
+                <p class="text-red-600 font-bold">Đơn hàng đã hủy</p>
+                <p v-if="order.lyDoHuy" class="text-sm mt-1"><strong>Lý do hủy:</strong> {{ order.lyDoHuy }}</p>
+              </div>
 
-              <!-- 1: Đã xác nhận → chỉ Giao hàng, KHÔNG hủy được -->
-              <template v-if="order.trangThaiDH === 1">
-                <button @click="updateStatus(2)"
-                  class="flex-1 min-w-[150px] bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-                  <span class="material-symbols-outlined">local_shipping</span> Bắt đầu giao hàng
-                </button>
-                <p class="w-full text-xs text-orange-500 font-medium text-center">
-                  ⚠️ Đơn đã xác nhận — Không thể hủy. Liên hệ trực tiếp với khách nếu cần.
-                </p>
-              </template>
+            <div v-if="order.trangThaiDH < 4 && !order.khachBaoChuaNhan" class="flex flex-wrap gap-4 w-full">
+              <button
+                  v-if="order.trangThaiDH === 0"
+                  @click="updateStatus(1)"
+                  class="flex-1 min-w-[150px] bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
+                Xác nhận đơn hàng
+              </button>
 
-              <!-- 2: Đang giao → chỉ Hoàn tất, KHÔNG hủy được -->
-              <template v-if="order.trangThaiDH === 2">
-                <button @click="updateStatus(3)"
-                  class="flex-1 min-w-[150px] bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-                  <span class="material-symbols-outlined">verified</span> Xác nhận hoàn tất
-                </button>
-                <p class="w-full text-xs text-orange-500 font-medium text-center">
-                  ⚠️ Đang vận chuyển — Không thể hủy.
-                </p>
-              </template>
+              <button
+                  v-if="order.trangThaiDH === 1"
+                  @click="updateStatus(2)"
+                  class="flex-1 min-w-[150px] bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700 transition shadow-md">
+                Bắt đầu giao hàng
+              </button>
 
-            </template>
+              <button
+                  v-if="order.trangThaiDH === 2"
+                  @click="updateStatus(3)"
+                  class="flex-1 min-w-[150px] bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-md">
+                Xác nhận đã giao
+              </button>
 
-            <div v-if="order.trangThaiDH >= 3 || order.trangThaiDH === 4" class="w-full text-center py-2 text-gray-400 italic text-sm">
-              {{ order.trangThaiDH === 3 ? '✅ Đơn hàng đã hoàn tất.' : '❌ Đơn hàng đã bị hủy.' }}
+              <button
+                  v-if="order.trangThaiDH === 3"
+                  @click="updateStatus(4)"
+                  class="flex-1 min-w-[150px] bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-md">
+                Hoàn tất đơn hàng
+              </button>
+            </div>
+
+            <div v-else-if="order.trangThaiDH >= 4 && !order.khachBaoChuaNhan" class="w-full text-center py-2 text-gray-400 italic text-sm">
+              {{ order.trangThaiDH === 4 ? '✅ Đơn hàng đã hoàn tất.' : (order.trangThaiDH === 5 ? '❌ Đơn hàng đã bị hủy.' : 'Trạng thái xử lý đặc biệt.') }}
             </div>
           </div>
         </div>
@@ -192,7 +206,8 @@ export default {
   data() {
     return {
       order: null,
-      loading: true
+      loading: true,
+      orderId: null
     }
   },
 
@@ -207,9 +222,9 @@ export default {
     async fetchOrderDetail() {
       this.loading = true
       try {
-        const id = this.$route.params.id
+        this.orderId = this.$route.params.id
         // Gọi API Staff cho chi tiết đơn hàng
-        const res = await axios.get(`/staff/orders/${id}`, { withCredentials: true })
+        const res = await axios.get(`/staff/orders/${this.orderId}`, { withCredentials: true })
         // API staff trả về { donHang, chiTiet }
         if (res.data.donHang) {
           this.order = res.data.donHang
@@ -226,32 +241,72 @@ export default {
     },
 
     async updateStatus(newStatus) {
-      if (!confirm('Bạn có chắc chắn muốn chuyển trạng thái đơn hàng này?')) return
+      if (!confirm(`Xác nhận chuyển sang trạng thái: ${this.statusClass(newStatus).text}?`)) return
       try {
-        await axios.put(`/staff/orders/${this.order.maDH}/status`, null, {
-          params: { trangThaiMoi: newStatus },
-          withCredentials: true
-        })
-        await this.fetchOrderDetail()
-      } catch (e) {
-        alert('Lỗi: ' + (e.response?.data?.message || e.response?.data || 'Không thể cập nhật trạng thái'))
+        const res = await axios.put(
+            `http://localhost:8080/api/staff/orders/${this.orderId}/status`,
+            null,
+            {
+              params: { 
+                trangThaiMoi: newStatus 
+              },
+              withCredentials: true
+            }
+        )
+        if (res.data.success) {
+          this.fetchOrderDetail()
+        } else {
+          alert(res.data.message || "Không thể cập nhật trạng thái")
+        }
+      } catch (err) {
+        console.error("Update error", err)
+        alert('Lỗi: ' + (err.response?.data?.message || 'Lỗi hệ thống'))
+      }
+    },
+    
+    async cancelReportedOrder() {
+      const reason = prompt("Nhập lý do hủy đơn (Vd: Khách báo chưa nhận hàng, đã hoàn tiền):", "Khách báo chưa nhận được hàng: " + this.order.lyDoChuaNhan)
+      if (reason === null) return
+      
+      try {
+        const res = await axios.put(
+          `http://localhost:8080/api/staff/orders/${this.orderId}/status`,
+          null,
+          {
+            params: { 
+              trangThaiMoi: 5,
+              reason: reason
+            },
+            withCredentials: true
+          }
+        )
+        if (res.data.success) {
+          alert("Đơn hàng đã được hủy thành công!")
+          this.fetchOrderDetail()
+        } else {
+          alert(res.data.message || "Không thể hủy đơn hàng")
+        }
+      } catch (err) {
+        console.error("Cancel reported order error", err)
+        alert('Lỗi: ' + (err.response?.data?.message || 'Lỗi hệ thống'))
       }
     },
 
     fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v || 0) + ' đ' },
 
     statusText(s) {
-      return { 0: 'Chờ xác nhận', 1: 'Đã xác nhận', 2: 'Đang giao', 3: 'Hoàn tất', 4: 'Đã hủy' }[s] ?? 'Không xác định'
+      return { 0: 'Chờ xác nhận', 1: 'Đã xác nhận', 2: 'Đang giao', 3: 'Đã giao', 4: 'Hoàn tất', 5: 'Đã hủy' }[s] ?? 'Không xác định'
     },
 
     statusClass(s) {
       return {
-        0: 'bg-yellow-100 text-yellow-700',
-        1: 'bg-blue-100  text-blue-700',
-        2: 'bg-purple-100 text-purple-700',
-        3: 'bg-green-100 text-green-700',
-        4: 'bg-red-100   text-red-700'
-      }[s] ?? 'bg-gray-100 text-gray-600'
+        0: { text: 'Chờ xác nhận', class: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+        1: { text: 'Đã xác nhận', class: 'bg-blue-100 text-blue-700 border-blue-200' },
+        2: { text: 'Đang giao', class: 'bg-orange-100 text-orange-800 border-orange-200' },
+        3: { text: 'Đã giao', class: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+        4: { text: 'Hoàn tất', class: 'bg-green-100 text-green-800 border-green-200' },
+        5: { text: 'Đã hủy', class: 'bg-red-100 text-red-800 border-red-200' }
+      }[s] ?? { text: 'Không xác định', class: 'bg-gray-100 text-gray-600 border-gray-200' }
     }
   },
 

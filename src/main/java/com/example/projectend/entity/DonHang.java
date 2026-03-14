@@ -61,7 +61,7 @@ public class DonHang {
     private String maGiaoDich;
 
     @Column(name = "TrangThaiDH", nullable = false)
-    private Integer trangThaiDH = 0; // 0: Chờ xác nhận, 1: Đã xác nhận, 2: Đang giao, 3: Đã giao, 4: Đã hủy
+    private Integer trangThaiDH = 0; // 0: Chờ xác nhận, 1: Đã xác nhận, 2: Đang giao, 3: Đã giao, 4: Hoàn tất, 5: Đã hủy
 
     @Column(name = "TrangThaiThanhToan", nullable = false)
     private Integer trangThaiThanhToan = 0; // 0: Chờ thanh toán, 1: Đã thanh toán
@@ -71,6 +71,15 @@ public class DonHang {
 
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
+
+    @Column(name = "KhachBaoChuaNhan")
+    private Boolean khachBaoChuaNhan = false;
+
+    @Column(name = "LyDoChuaNhan", length = 255)
+    private String lyDoChuaNhan;
+
+    @Column(name = "MoTaChuaNhan", length = 1000)
+    private String moTaChuaNhan;
 
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("donHang")
@@ -221,14 +230,39 @@ public class DonHang {
             case 0: return "Chờ xác nhận";
             case 1: return "Đã xác nhận";
             case 2: return "Đang giao";
-            case 3: return "Hoàn tất";
-            case 4: return "Đã hủy";
+            case 3: return "Đã giao";
+            case 4: return "Hoàn tất";
+            case 5: return "Đã hủy";
             default: return "Không xác định";
         }
     }
 
     public String getTrangThaiDonHang() {
         return getTrangThaiDHText();
+    }
+
+    public Boolean getKhachBaoChuaNhan() {
+        return khachBaoChuaNhan;
+    }
+
+    public void setKhachBaoChuaNhan(Boolean khachBaoChuaNhan) {
+        this.khachBaoChuaNhan = khachBaoChuaNhan;
+    }
+
+    public String getLyDoChuaNhan() {
+        return lyDoChuaNhan;
+    }
+
+    public void setLyDoChuaNhan(String lyDoChuaNhan) {
+        this.lyDoChuaNhan = lyDoChuaNhan;
+    }
+
+    public String getMoTaChuaNhan() {
+        return moTaChuaNhan;
+    }
+
+    public void setMoTaChuaNhan(String moTaChuaNhan) {
+        this.moTaChuaNhan = moTaChuaNhan;
     }
 
     public String getTrangThaiThanhToanText() {

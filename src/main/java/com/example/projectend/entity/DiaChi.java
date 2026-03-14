@@ -8,7 +8,7 @@ import jakarta.persistence.*;
  * ENTITY SO DIA CHI - LUXURY FASHION
  * Bảng: SoDiaChi (theo SQL)
  */
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 @Entity
 @Table(name = "SoDiaChi")
 public class DiaChi {
@@ -32,17 +32,21 @@ public class DiaChi {
     @Column(name = "DiaChiChiTiet", nullable = false, length = 500)
     private String diaChiChiTiet;
 
+    @Column(name = "GhiChu", length = 255)
+    private String ghiChu;
+
     @Column(name = "LaMacDinh")
     private Boolean laMacDinh = false;
 
     public DiaChi() {
     }
 
-    public DiaChi(TaiKhoan taiKhoan, String hoTenNguoiNhan, String soDienThoai, String diaChiChiTiet) {
+    public DiaChi(TaiKhoan taiKhoan, String hoTenNguoiNhan, String soDienThoai, String diaChiChiTiet, String ghiChu) {
         this.taiKhoan = taiKhoan;
         this.hoTenNguoiNhan = hoTenNguoiNhan;
         this.soDienThoai = soDienThoai;
         this.diaChiChiTiet = diaChiChiTiet;
+        this.ghiChu = ghiChu;
     }
 
     // Getters and Setters
@@ -92,5 +96,13 @@ public class DiaChi {
 
     public void setLaMacDinh(Boolean laMacDinh) {
         this.laMacDinh = laMacDinh;
+    }
+
+    public String getGhiChu() {
+        return ghiChu;
+    }
+
+    public void setGhiChu(String ghiChu) {
+        this.ghiChu = ghiChu;
     }
 }

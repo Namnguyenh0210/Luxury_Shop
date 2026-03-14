@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +57,8 @@ public class AdminDonHangController {
     @PutMapping("/{id}/status")
     public Map<String, Object> updateStatus(
             @PathVariable Long id,
-            @RequestParam Integer status) {
+            @RequestParam Integer status,
+            @RequestParam(required = false) String reason) {
 
         Map<String, Object> res = new HashMap<>();
 
@@ -66,32 +68,40 @@ public class AdminDonHangController {
         Integer trangThaiHienTai = donHang.getTrangThaiDH();
 
         // Đơn đã kết thúc → không thay đổi
-        if (trangThaiHienTai == 3 || trangThaiHienTai == 4) {
-            res.put("success", false);
+        if (trangThaiHienTai == 4 || trangThaiHienTai == 5) {
+            res.put("success", "false");
             res.put("message", "Đơn hàng đã kết thúc, không thể thay đổi!");
             return res;
         }
 
-        // Chỉ hủy (4) khi đang chờ xác nhận (0)
-        if (status == 4 && trangThaiHienTai >= 1) {
+        // Chỉ hủy (5) khi đang chờ xác nhận (0) HOẶC khi khách báo chưa nhận hàng
+        boolean canCancel = (status == 5 && (trangThaiHienTai == 0 || donHang.getKhachBaoChuaNhan()));
+
+        if (status == 5 && !canCancel) {
             res.put("success", false);
             res.put("message", "Không thể hủy đơn đã xác nhận! Liên hệ khách hàng trực tiếp.");
             return res;
         }
 
-        // Bắt buộc tuần tự: 0→1→2→3
-        if (status != 4 && status != trangThaiHienTai + 1) {
+        // Bắt buộc tuần tự: 0→1→2→3→4
+        boolean isSequence = (status == trangThaiHienTai + 1);
+
+        if (status != 5 && !isSequence) {
             res.put("success", false);
             res.put("message", "Chỉ được chuyển sang trạng thái kế tiếp!");
             return res;
         }
 
         donHang.setTrangThaiDH(status);
-        donHang.setNgayCapNhat(java.time.LocalDateTime.now());
+        donHang.setNgayCapNhat(LocalDateTime.now());
+        
+        if (reason != null && !reason.isBlank()) {
+            donHang.setLyDoHuy(reason);
+        }
 
-        if (status == 3) {
+        if (status == 4) {
             donHang.setTrangThaiThanhToan(1);
-            donHang.setNgayThanhToan(java.time.LocalDateTime.now());
+            donHang.setNgayThanhToan(LocalDateTime.now());
         }
 
         donHangRepository.save(donHang);

@@ -36,24 +36,27 @@ public class DonHangController {
 
     @GetMapping("/my")
     public ResponseEntity<?> getMyOrders(Principal principal) {
+        try {
+            if (principal == null) {
+                return ResponseEntity.status(401).body("Not logged in");
+            }
 
-        if (principal == null) {
-            return ResponseEntity.status(401).body("Not logged in");
+            TaiKhoan tk = taiKhoanService.findByEmail(principal.getName());
+
+            if (tk == null) {
+                return ResponseEntity.status(404).body("User not found");
+            }
+
+            List<DonHang> orders = donHangService.getDonHangByKhachHang(tk);
+
+            if (orders == null) {
+                orders = new ArrayList<>();
+            }
+
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Orders server error: " + e.getMessage());
         }
-
-        TaiKhoan tk = taiKhoanService.findByEmail(principal.getName());
-
-        if (tk == null) {
-            return ResponseEntity.status(404).body("User not found");
-        }
-
-        List<DonHang> orders = donHangService.getDonHangByKhachHang(tk);
-
-        if (orders == null) {
-            orders = new ArrayList<>();
-        }
-
-        return ResponseEntity.ok(orders);
     }
 
     @PutMapping("/update-status/{id}")
@@ -66,13 +69,22 @@ public class DonHangController {
         return ResponseEntity.ok("Updated");
     }
 
+    @PutMapping("/{id}/report-undelivered")
+    public ResponseEntity<?> reportUndelivered(
+            @PathVariable Long id,
+            @RequestParam String reason,
+            @RequestParam(required = false) String description) {
+        donHangService.reportOrderNotReceived(id, reason, description);
+        return ResponseEntity.ok("Đã gửi báo cáo cho Admin");
+    }
+
     @PutMapping("/complete/{id}")
     public ResponseEntity<?> completeOrder(@PathVariable Long id) {
 
         DonHang donHang = donHangRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
 
-        donHang.setTrangThaiDH(3); // 3 = Hoàn tất
+        donHang.setTrangThaiDH(4); // 4 = Hoàn tất
         donHang.setNgayCapNhat(LocalDateTime.now());
 
         donHangRepository.save(donHang);

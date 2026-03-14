@@ -30,17 +30,17 @@
                 </ul>
             </div>
             <div class="col-span-2 md:col-span-1">
-                <h3 class="text-sm font-semibold uppercase tracking-wider">Subscribe to our newsletter</h3>
-                <p class="mt-4 text-sm text-text-primary-light/70 dark:text-text-primary-dark/70">Receive exclusive updates, new arrivals, and insider-only discounts.</p>
+                <h3 class="text-sm font-semibold uppercase tracking-wider">Đăng ký nhận bản tin</h3>
+                <p class="mt-4 text-sm text-text-primary-light/70 dark:text-text-primary-dark/70">Nhận thông tin cập nhật độc quyền, sản phẩm mới và ưu đãi nội bộ.</p>
                 <form class="mt-4 flex w-full">
-                    <label class="sr-only" for="email-address">Email address</label>
-                    <input autocomplete="email" class="min-w-0 flex-auto appearance-none rounded-l-md border border-secondary bg-transparent px-3.5 py-2 text-text-primary-light dark:text-text-primary-dark shadow-sm focus:border-accent focus:ring-accent sm:text-sm" id="email-address" name="email-address" placeholder="Enter your email" required="" type="email">
-                    <button class="flex-none rounded-r-md bg-accent px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" type="submit">Subscribe</button>
+                    <label class="sr-only" for="email-address">Địa chỉ Email</label>
+                    <input autocomplete="email" class="min-w-0 flex-auto appearance-none rounded-l-md border border-secondary bg-transparent px-3.5 py-2 text-text-primary-light dark:text-text-primary-dark shadow-sm focus:border-accent focus:ring-accent sm:text-sm" id="email-address" name="email-address" placeholder="Nhập email của bạn" required="" type="email">
+                    <button class="flex-none rounded-r-md bg-accent px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" type="submit">Đăng ký</button>
                 </form>
             </div>
         </div>
         <div class="mt-6 border-t border-secondary/50 pt-4 flex flex-col items-center justify-between sm:flex-row">
-            <p class="text-sm text-text-primary-light/60 dark:text-text-primary-dark/60">© 2025 LUXE FASHION. All rights reserved.</p>
+            <p class="text-sm text-text-primary-light/60 dark:text-text-primary-dark/60">© 2025 LUXURY SHOP. Bảo lưu mọi quyền.</p>
             <div class="mt-2 flex space-x-4 sm:mt-0">
                 <a class="text-text-primary-light/60 dark:text-text-primary-dark/60 hover:text-primary dark:hover:text-white" href="#">
                     <span class="sr-only">Instagram</span>
