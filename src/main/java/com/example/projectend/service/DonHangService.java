@@ -392,25 +392,30 @@ public class DonHangService {
     }
 
     /**
-     * SEARCH ADMIN (keyword = email khách; trangThai = mã hoặc tên tiếng Việt)
-     * Nếu trangThai là tên sẽ convert sang mã.
+     * SEARCH ADMIN (keyword = name/email; trangThai = mã hoặc tên; timeRange = day/week/month/year)
      */
-    public Page<DonHang> searchAdmin(String keyword, String trangThai, Pageable pageable) {
+    public Page<DonHang> searchAdmin(String keyword, String trangThai, String timeRange, Pageable pageable) {
         Integer statusCode = null;
         if (trangThai != null && !trangThai.isBlank()) {
             statusCode = convertStatusToCodeFlexible(trangThai.trim());
         }
-        boolean hasKeyword = keyword != null && !keyword.isBlank();
-        if (statusCode != null && hasKeyword) {
-            String cleanKeyword = Objects.requireNonNull(keyword).trim();
-            return donHangRepository.findByTrangThaiDHAndTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(statusCode, cleanKeyword, pageable);
-        } else if (statusCode != null) {
-            return donHangRepository.findByTrangThaiDHOrderByNgayDatDesc(statusCode, pageable);
-        } else if (hasKeyword) {
-            String cleanKeyword = Objects.requireNonNull(keyword).trim();
-            return donHangRepository.findByTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(cleanKeyword, pageable);
+
+        LocalDateTime startDate = null;
+        LocalDateTime endDate = LocalDateTime.now();
+
+        if (timeRange != null && !timeRange.isBlank()) {
+            startDate = switch (timeRange.toLowerCase()) {
+                case "day" -> LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+                case "week" -> LocalDateTime.now().minusWeeks(1);
+                case "month" -> LocalDateTime.now().minusMonths(1);
+                case "year" -> LocalDateTime.now().minusYears(1);
+                default -> null;
+            };
         }
-        return donHangRepository.findAllByOrderByNgayDatDesc(pageable);
+
+        String cleanKeyword = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+
+        return donHangRepository.searchAdvanced(cleanKeyword, statusCode, startDate, endDate, pageable);
     }
 
     /**

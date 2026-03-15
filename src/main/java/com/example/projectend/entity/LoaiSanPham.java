@@ -25,6 +25,13 @@ public class LoaiSanPham {
     @Column(name = "TrangThai", nullable = false)
     private Integer trangThai = 1;
 
+    @Transient
+    private Long countNam = 0L;
+    @Transient
+    private Long countNu = 0L;
+    @Transient
+    private Long countUnisex = 0L;
+
     // Constructors
     public LoaiSanPham() {
     }
@@ -66,6 +73,30 @@ public class LoaiSanPham {
 
     public void setTrangThai(Integer trangThai) {
         this.trangThai = trangThai;
+    }
+
+    public Long getCountNam() {
+        return countNam;
+    }
+
+    public void setCountNam(Long countNam) {
+        this.countNam = countNam;
+    }
+
+    public Long getCountNu() {
+        return countNu;
+    }
+
+    public void setCountNu(Long countNu) {
+        this.countNu = countNu;
+    }
+
+    public Long getCountUnisex() {
+        return countUnisex;
+    }
+
+    public void setCountUnisex(Long countUnisex) {
+        this.countUnisex = countUnisex;
     }
 
     @Override

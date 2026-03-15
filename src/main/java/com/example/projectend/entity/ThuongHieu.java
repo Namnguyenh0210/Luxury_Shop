@@ -22,6 +22,16 @@ public class ThuongHieu {
     @Column(name = "MoTa", length = 255)
     private String moTa;
 
+    @Column(name = "TrangThai", nullable = false)
+    private Integer trangThai = 1;
+
+    @Transient
+    private Long countNam = 0L;
+    @Transient
+    private Long countNu = 0L;
+    @Transient
+    private Long countUnisex = 0L;
+
     // Constructors
     public ThuongHieu() {
     }
@@ -29,6 +39,7 @@ public class ThuongHieu {
     public ThuongHieu(String tenTH, String moTa) {
         this.tenTH = tenTH;
         this.moTa = moTa;
+        this.trangThai = 1;
     }
 
     // Getters and Setters
@@ -54,6 +65,38 @@ public class ThuongHieu {
 
     public void setMoTa(String moTa) {
         this.moTa = moTa;
+    }
+
+    public Integer getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Integer trangThai) {
+        this.trangThai = trangThai;
+    }
+
+    public Long getCountNam() {
+        return countNam;
+    }
+
+    public void setCountNam(Long countNam) {
+        this.countNam = countNam;
+    }
+
+    public Long getCountNu() {
+        return countNu;
+    }
+
+    public void setCountNu(Long countNu) {
+        this.countNu = countNu;
+    }
+
+    public Long getCountUnisex() {
+        return countUnisex;
+    }
+
+    public void setCountUnisex(Long countUnisex) {
+        this.countUnisex = countUnisex;
     }
 
     @Override

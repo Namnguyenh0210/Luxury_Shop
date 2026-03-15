@@ -41,12 +41,13 @@ public class StaffDonHangController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String timeRange) {
 
         Pageable pageable = PageRequest.of(page, size);
         String statusStr = (status != null) ? status.toString() : null;
 
-        return donHangService.searchAdmin(keyword, statusStr, pageable);
+        return donHangService.searchAdmin(keyword, statusStr, timeRange, pageable);
     }
 
     // =============================

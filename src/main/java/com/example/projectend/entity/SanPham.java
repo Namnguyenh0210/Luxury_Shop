@@ -49,6 +49,9 @@ public class SanPham {
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
 
+    @Transient
+    private Integer totalStock = 0;
+
     @OneToMany(mappedBy = "sanPham", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("sanPham") // THÊM DÒNG NÀY ĐỂ CHẠY ĐƯỢC JSON
     private java.util.List<SanPhamChiTiet> variants = new java.util.ArrayList<>();
@@ -142,6 +145,14 @@ public class SanPham {
 
     public void setNgayCapNhat(LocalDateTime ngayCapNhat) {
         this.ngayCapNhat = ngayCapNhat;
+    }
+
+    public Integer getTotalStock() {
+        return totalStock;
+    }
+
+    public void setTotalStock(Integer totalStock) {
+        this.totalStock = totalStock;
     }
 
     public java.util.List<SanPhamChiTiet> getVariants() {

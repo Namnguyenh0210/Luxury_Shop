@@ -39,25 +39,13 @@ public class LoaiSanPhamService {
 
     @Transactional
     public void deleteById(Long id) {
-        // 1. Tìm hoặc tạo danh mục "Chưa phân loại"
-        LoaiSanPham uncategorized = repo.findByTenLoai("Chưa phân loại")
-                .orElseGet(() -> {
-                    LoaiSanPham lsp = new LoaiSanPham();
-                    lsp.setTenLoai("Chưa phân loại");
-                    lsp.setMoTa("Sản phẩm chưa được phân vào danh mục nào");
-                    lsp.setTrangThai(1);
-                    return repo.save(lsp);
-                });
-
-        // Nếu ID cần xóa trùng với ID "Chưa phân loại" thì không thể xóa (hoặc xử lý khác)
-        if (uncategorized.getMaLoai().equals(id)) {
-            throw new RuntimeException("Không thể xóa danh mục mặc định");
+        // Kiểm tra xem danh mục có sản phẩm nào không
+        long count = sanPhamRepository.countByLoaiSanPham_MaLoai(id);
+        if (count > 0) {
+            throw new RuntimeException("Chỉ được xóa danh mục khi tổng số lượng sản phẩm bằng 0. Danh mục này đang có " + count + " sản phẩm.");
         }
 
-        // 2. Cập nhật tất cả sản phẩm của danh mục cũ sang danh mục mới
-        sanPhamRepository.updateCategory(id, uncategorized);
-
-        // 3. Xóa danh mục
+        // Xóa danh mục
         repo.deleteById(id);
     }
 }

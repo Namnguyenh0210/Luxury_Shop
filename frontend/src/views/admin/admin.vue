@@ -13,7 +13,7 @@
           <div
             v-for="stat in stats"
             :key="stat.label"
-            class="flex flex-col gap-2 rounded-2xl p-6 border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow"
+            class="flex flex-col gap-2 rounded-2xl p-6 border border-[#C8A97E] bg-white shadow-sm hover:shadow-md transition-shadow"
           >
             <div class="flex items-center justify-between">
               <p class="text-gray-500 text-sm font-medium">{{ stat.label }}</p>
@@ -33,7 +33,7 @@
             <div
               v-for="module in modules"
               :key="module.to"
-              class="flex flex-col gap-4 rounded-2xl p-6 border border-gray-200 bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
+              class="flex flex-col gap-4 rounded-2xl p-6 border border-[#C8A97E] bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group"
               @click="$router.push(module.to)"
             >
               <div class="flex items-center gap-4">
@@ -98,7 +98,7 @@ export default {
     try {
       const res = await axios.get('/admin/reports', { withCredentials: true })
       this.totalRevenue   = res.data.totalRevenue   || 0
-      this.newOrdersCount = res.data.newOrdersCount || 0
+      this.newOrdersCount = res.data.newOrders || 0
       this.uniqueVisitors = res.data.uniqueVisitors || 0
       this.totalCustomers = res.data.totalCustomers || 0
     } catch (e) {

@@ -62,4 +62,9 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Long>, JpaSpec
     @Transactional
     @Query("UPDATE SanPham s SET s.loaiSanPham = :newCategory WHERE s.loaiSanPham.maLoai = :oldCategoryId")
     void updateCategory(@Param("oldCategoryId") Long oldCategoryId, @Param("newCategory") LoaiSanPham newCategory);
+
+    long countByLoaiSanPham_MaLoaiAndGioiTinh(Long maLoai, Integer gioiTinh);
+    long countByThuongHieu_MaTHAndGioiTinh(Long maTH, Integer gioiTinh);
+    long countByLoaiSanPham_MaLoai(Long maLoai);
+    long countByThuongHieu_MaTH(Long maTH);
 }

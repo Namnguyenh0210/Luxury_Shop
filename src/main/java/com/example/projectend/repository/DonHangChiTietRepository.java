@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.time.LocalDateTime;
+import org.springframework.data.repository.query.Param;
 
 /**
  * REPOSITORY DON HANG CHI TIET - LUXURY FASHION
@@ -23,4 +25,7 @@ public interface DonHangChiTietRepository extends JpaRepository<DonHangChiTiet, 
 
     @Query("SELECT COALESCE(SUM(d.soLuong), 0) FROM DonHangChiTiet d")
     Long countTotalSold();
+
+    @Query("SELECT COALESCE(SUM(d.soLuong), 0) FROM DonHangChiTiet d WHERE d.donHang.ngayDat >= :startDate AND d.donHang.ngayDat <= :endDate")
+    Long countTotalSoldBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

@@ -6,7 +6,7 @@
         Trở về danh sách
       </button>
 
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden text-sm">
         <div class="p-6 border-b border-gray-100 bg-gray-50/50">
           <h2 class="text-lg font-bold text-gray-800">Tạo sản phẩm mới</h2>
         </div>
@@ -16,13 +16,13 @@
             <div class="space-y-2 md:col-span-2">
               <label class="text-sm font-semibold text-gray-700">Tên sản phẩm</label>
               <input v-model="form.tenSP" type="text" required placeholder="Nhập tên sản phẩm..."
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-yellow-400 outline-none transition-all" />
+                class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
             </div>
 
             <div class="space-y-2">
               <label class="text-sm font-semibold text-gray-700">Danh mục</label>
               <select v-model="form.loaiSanPham.maLoai" required
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-yellow-400 outline-none transition-all bg-white">
+                class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
                 <option value="" disabled>Chọn danh mục</option>
                 <option v-for="c in categories" :key="c.maLoai" :value="c.maLoai">{{ c.tenLoai }}</option>
               </select>
@@ -31,7 +31,7 @@
             <div class="space-y-2">
               <label class="text-sm font-semibold text-gray-700">Thương hiệu</label>
               <select v-model="form.thuongHieu.maTH" required
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-yellow-400 outline-none transition-all bg-white">
+                class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
                 <option value="" disabled>Chọn thương hiệu</option>
                 <option v-for="b in brands" :key="b.maTH" :value="b.maTH">{{ b.tenTH }}</option>
               </select>
@@ -39,7 +39,7 @@
 
             <div class="space-y-2">
               <label class="text-sm font-semibold text-gray-700">Giới tính</label>
-              <select v-model="form.gioiTinh" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-yellow-400 outline-none transition-all bg-white">
+              <select v-model="form.gioiTinh" class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
                 <option :value="0">Nam</option>
                 <option :value="1">Nữ</option>
                 <option :value="2">Unisex</option>
@@ -61,13 +61,13 @@
             <div class="space-y-2 md:col-span-2">
               <label class="text-sm font-semibold text-gray-700">URL Ảnh chính</label>
               <input v-model="form.anhChinh" type="text" placeholder="https://..."
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-yellow-400 outline-none transition-all" />
+                class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
             </div>
 
             <div class="space-y-2 md:col-span-2">
               <label class="text-sm font-semibold text-gray-700">Mô tả chi tiết</label>
               <textarea v-model="form.moTa" rows="5" placeholder="Nhập mô tả sản phẩm..."
-                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-yellow-400 outline-none transition-all resize-none"></textarea>
+                class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all resize-none"></textarea>
             </div>
           </div>
 
