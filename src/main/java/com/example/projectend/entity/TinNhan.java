@@ -6,12 +6,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * ENTITY MESSAGE - LƯU TRỮ TIN NHẮN TRONG CUỘC HỘI THOẠI
- * Bảng: Messages
+ * ENTITY TIN NHẮN - LƯU TRỮ TIN NHẮN TRONG CUỘC HỘI THOẠI
+ * Bảng: TinNhan
  */
 @Entity
-@Table(name = "Messages")
-public class Message {
+@Table(name = "TinNhan")
+public class TinNhan {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,8 +20,8 @@ public class Message {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaCuocTroChuyen", nullable = false)
-    @JsonIgnoreProperties("messages")
-    private Conversation conversation;
+    @JsonIgnoreProperties("tinNhans")
+    private CuocTroChuyen cuocTroChuyen;
 
     @Column(name = "LoaiNguoiGui", nullable = false, length = 10)
     private String loaiNguoiGui; // 'USER', 'AI', 'STAFF'
@@ -32,12 +32,15 @@ public class Message {
     @Column(name = "NgayGui")
     private LocalDateTime ngayGui = LocalDateTime.now();
 
+    @Column(name = "DaDoc")
+    private Boolean daDoc = false; // false: Chưa đọc, true: Đã đọc
+
     // Constructors
-    public Message() {
+    public TinNhan() {
     }
 
-    public Message(Conversation conversation, String loaiNguoiGui, String noiDung) {
-        this.conversation = conversation;
+    public TinNhan(CuocTroChuyen cuocTroChuyen, String loaiNguoiGui, String noiDung) {
+        this.cuocTroChuyen = cuocTroChuyen;
         this.loaiNguoiGui = loaiNguoiGui;
         this.noiDung = noiDung;
     }
@@ -51,12 +54,12 @@ public class Message {
         this.maTinNhan = maTinNhan;
     }
 
-    public Conversation getConversation() {
-        return conversation;
+    public CuocTroChuyen getCuocTroChuyen() {
+        return cuocTroChuyen;
     }
 
-    public void setConversation(Conversation conversation) {
-        this.conversation = conversation;
+    public void setCuocTroChuyen(CuocTroChuyen cuocTroChuyen) {
+        this.cuocTroChuyen = cuocTroChuyen;
     }
 
     public String getLoaiNguoiGui() {
@@ -81,5 +84,13 @@ public class Message {
 
     public void setNgayGui(LocalDateTime ngayGui) {
         this.ngayGui = ngayGui;
+    }
+
+    public Boolean getDaDoc() {
+        return daDoc;
+    }
+
+    public void setDaDoc(Boolean daDoc) {
+        this.daDoc = daDoc;
     }
 }

@@ -45,6 +45,8 @@ public class PayOSController {
     private TaiKhoanService taiKhoanService;
     @Autowired
     private GioHangService gioHangService;
+    @Autowired
+    private com.example.projectend.repository.ThanhToanRepository thanhToanRepository;
 
     /**
      * ✅ TẠO LINK THANH TOÁN
@@ -314,9 +316,17 @@ public class PayOSController {
             donHang.setTrangThaiThanhToan(isPaid ? 1 : 0); // 1 = Đã thanh toán
 
             if (isPaid) {
-                donHang.setNgayThanhToan(LocalDateTime.now());
-                // KHÔNG tự chuyển trạng thái đơn hàng sang "Đã xác nhận" để giữ nguyên "Chờ xác
-                // nhận" như yêu cầu
+                // donHang.setNgayThanhToan(LocalDateTime.now()); - Đã xóa trong entity
+                
+                // Tạo bản ghi thanh toán chi tiết
+                com.example.projectend.entity.ThanhToan tt = new com.example.projectend.entity.ThanhToan();
+                tt.setDonHang(donHang);
+                tt.setSoTien(donHang.getTongTien().add(donHang.getPhiShip()));
+                tt.setTrangThai("COMPLETED");
+                tt.setGateway("PayOS");
+                tt.setTransactionID(donHang.getMaGiaoDich());
+                tt.setNgayTao(LocalDateTime.now());
+                thanhToanRepository.save(tt);
             }
 
             donHang.setNgayCapNhat(LocalDateTime.now());

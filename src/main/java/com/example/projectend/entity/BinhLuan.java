@@ -36,8 +36,8 @@ public class BinhLuan {
     @Column(name = "TrangThai")
     private Boolean trangThai = true;
 
-    @Column(name = "SoLuongLike")
-    private Integer soLuongLike = 0;
+    @Column(name = "SoLuotThich")
+    private Integer soLuotThich = 0;
 
     @Column(name = "SoLuongPhanHoi")
     private Integer soLuongPhanHoi = 0;
@@ -103,12 +103,12 @@ public class BinhLuan {
         this.trangThai = trangThai;
     }
 
-    public Integer getSoLuongLike() {
-        return soLuongLike;
+    public Integer getSoLuotThich() {
+        return soLuotThich;
     }
 
-    public void setSoLuongLike(Integer soLuongLike) {
-        this.soLuongLike = soLuongLike;
+    public void setSoLuotThich(Integer soLuotThich) {
+        this.soLuotThich = soLuotThich;
     }
 
     public Integer getSoLuongPhanHoi() {
@@ -126,12 +126,12 @@ public class BinhLuan {
     @Column(name = "NgayPhanHoiAdmin")
     private LocalDateTime ngayPhanHoiAdmin;
 
-    @Column(name = "ReportCount")
-    private Integer reportCount = 0;
+    @Column(name = "SoLuotBaoCao")
+    private Integer soLuotBaoCao = 0;
 
     public void incrementReport() {
-        if (this.reportCount == null) this.reportCount = 0;
-        this.reportCount++;
+        if (this.soLuotBaoCao == null) this.soLuotBaoCao = 0;
+        this.soLuotBaoCao++;
     }
 
     public String getPhanHoiAdmin() {
@@ -150,11 +150,11 @@ public class BinhLuan {
         this.ngayPhanHoiAdmin = ngayPhanHoiAdmin;
     }
 
-    public Integer getReportCount() {
-        return reportCount;
+    public Integer getSoLuotBaoCao() {
+        return soLuotBaoCao;
     }
 
-    public void setReportCount(Integer reportCount) {
-        this.reportCount = reportCount;
+    public void setSoLuotBaoCao(Integer soLuotBaoCao) {
+        this.soLuotBaoCao = soLuotBaoCao;
     }
 }

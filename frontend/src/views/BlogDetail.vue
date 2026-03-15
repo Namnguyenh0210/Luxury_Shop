@@ -419,7 +419,7 @@ export default {
   font-size: 20px;
   font-weight: 800;
   color: #111827;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Times New Roman', Times, serif;
   margin: 0;
   display: flex;
   align-items: center;

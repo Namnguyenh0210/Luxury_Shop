@@ -126,7 +126,7 @@ public class BlogApiController {
                 blDTO.put("maBL", bl.getMaBL());
                 blDTO.put("noiDung", bl.getNoiDung());
                 blDTO.put("ngayBinhLuan", bl.getNgayBinhLuan());
-                blDTO.put("soLuongLike", bl.getSoLuongLike());
+                blDTO.put("soLuongLike", bl.getSoLuotThich());
                 blDTO.put("tenNguoiDung", bl.getTaiKhoan() != null ? bl.getTaiKhoan().getHoTen() : "Khách");
                 blDTO.put("avatar", bl.getTaiKhoan() != null ? bl.getTaiKhoan().getAvatar() : null);
                 blDTO.put("phanHoiAdmin", bl.getPhanHoiAdmin());
@@ -191,7 +191,7 @@ public class BlogApiController {
             binhLuan.setNoiDung(noiDung.trim());
             binhLuan.setNgayBinhLuan(LocalDateTime.now());
             binhLuan.setTrangThai(false); // Pending approval
-            binhLuan.setSoLuongLike(0);
+            binhLuan.setSoLuotThich(0);
 
             BinhLuan saved = binhLuanRepository.save(binhLuan);
 
@@ -221,14 +221,15 @@ public class BlogApiController {
     public ResponseEntity<Map<String, Object>> likeBinhLuan(@PathVariable Long maBL) {
         Map<String, Object> response = new HashMap<>();
         try {
+            if (maBL == null) throw new IllegalArgumentException("maBL is null");
             BinhLuan bl = binhLuanRepository.findById(maBL)
                     .orElseThrow(() -> new RuntimeException("Bình luận không tồn tại"));
 
-            bl.setSoLuongLike((bl.getSoLuongLike() == null ? 0 : bl.getSoLuongLike()) + 1);
+            bl.setSoLuotThich((bl.getSoLuotThich() == null ? 0 : bl.getSoLuotThich()) + 1);
             binhLuanRepository.save(bl);
 
             response.put("thanhCong", true);
-            response.put("soLuongLike", bl.getSoLuongLike());
+            response.put("soLuongLike", bl.getSoLuotThich());
         } catch (Exception e) {
             response.put("thanhCong", false);
             response.put("thongBao", "Lỗi: " + e.getMessage());
@@ -243,6 +244,7 @@ public class BlogApiController {
     public ResponseEntity<Map<String, Object>> reportBinhLuan(@PathVariable Long maBL) {
         Map<String, Object> response = new HashMap<>();
         try {
+            if (maBL == null) throw new IllegalArgumentException("maBL is null");
             BinhLuan bl = binhLuanRepository.findById(maBL)
                     .orElseThrow(() -> new RuntimeException("Bình luận không tồn tại"));
 

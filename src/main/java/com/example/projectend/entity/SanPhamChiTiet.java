@@ -47,6 +47,12 @@ public class SanPhamChiTiet {
     @Column(name = "AnhBienThe", length = 255)
     private String anhBienThe;
 
+    @Column(name = "SKU", length = 100, unique = true)
+    private String sku;
+
+    @Column(name = "TrangThai", nullable = false)
+    private Boolean trangThai = true;
+
     // Constructors
     public SanPhamChiTiet() {
     }
@@ -131,14 +137,32 @@ public class SanPhamChiTiet {
         this.anhBienThe = anhBienThe;
     }
 
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public Boolean getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Boolean trangThai) {
+        this.trangThai = trangThai;
+    }
+
     @Override
     public String toString() {
         return "SanPhamChiTiet{" +
                 "maBienThe=" + maBienThe +
+                ", sku='" + sku + '\'' +
                 ", sizeSP=" + (sizeSP != null ? sizeSP.getTenSize() : "N/A") +
                 ", mauSacSP=" + (mauSacSP != null ? mauSacSP.getTenMau() : "N/A") +
                 ", giaBan=" + giaBan +
                 ", soLuongTon=" + soLuongTon +
+                ", trangThai=" + trangThai +
                 '}';
     }
 }

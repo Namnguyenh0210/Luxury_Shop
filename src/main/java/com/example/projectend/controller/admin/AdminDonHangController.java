@@ -62,52 +62,26 @@ public class AdminDonHangController {
 
         Map<String, Object> res = new HashMap<>();
 
-        DonHang donHang = donHangRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+        try {
+            String nguoiCapNhat = "ADMIN";
+            String ghiChu = (status == 5) ? "Hủy đơn: " + reason : "Cập nhật qua Admin";
+            
+            boolean updated = donHangService.capNhatTrangThai(id, status, nguoiCapNhat, ghiChu);
+            
+            if (updated && reason != null && !reason.isBlank()) {
+                DonHang dh = donHangRepository.findById(id).orElse(null);
+                if (dh != null) {
+                    dh.setLyDoHuy(reason);
+                    donHangRepository.save(dh);
+                }
+            }
 
-        Integer trangThaiHienTai = donHang.getTrangThaiDH();
-
-        // Đơn đã kết thúc → không thay đổi
-        if (trangThaiHienTai == 4 || trangThaiHienTai == 5) {
-            res.put("success", "false");
-            res.put("message", "Đơn hàng đã kết thúc, không thể thay đổi!");
-            return res;
-        }
-
-        // Chỉ hủy (5) khi đang chờ xác nhận (0) HOẶC khi khách báo chưa nhận hàng
-        boolean canCancel = (status == 5 && (trangThaiHienTai == 0 || donHang.getKhachBaoChuaNhan()));
-
-        if (status == 5 && !canCancel) {
+            res.put("success", updated);
+            res.put("message", updated ? "Cập nhật trạng thái thành công!" : "Không thể cập nhật trạng thái!");
+        } catch (Exception e) {
             res.put("success", false);
-            res.put("message", "Không thể hủy đơn đã xác nhận! Liên hệ khách hàng trực tiếp.");
-            return res;
+            res.put("message", "Lỗi: " + e.getMessage());
         }
-
-        // Bắt buộc tuần tự: 0→1→2→3→4
-        boolean isSequence = (status == trangThaiHienTai + 1);
-
-        if (status != 5 && !isSequence) {
-            res.put("success", false);
-            res.put("message", "Chỉ được chuyển sang trạng thái kế tiếp!");
-            return res;
-        }
-
-        donHang.setTrangThaiDH(status);
-        donHang.setNgayCapNhat(LocalDateTime.now());
-        
-        if (reason != null && !reason.isBlank()) {
-            donHang.setLyDoHuy(reason);
-        }
-
-        if (status == 4) {
-            donHang.setTrangThaiThanhToan(1);
-            donHang.setNgayThanhToan(LocalDateTime.now());
-        }
-
-        donHangRepository.save(donHang);
-
-        res.put("success", true);
-        res.put("message", "Cập nhật trạng thái thành công!");
         return res;
     }
 }

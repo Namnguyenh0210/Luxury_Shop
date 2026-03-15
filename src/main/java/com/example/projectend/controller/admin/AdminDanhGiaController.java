@@ -46,7 +46,7 @@ public class AdminDanhGiaController {
                 dto.put("trangThai", dg.getTrangThai());
                 dto.put("phanHoi", dg.getPhanHoi());
                 dto.put("ngayPhanHoi", dg.getNgayPhanHoi() != null ? dg.getNgayPhanHoi().format(FMT) : null);
-                dto.put("reportCount", dg.getReportCount());
+                dto.put("reportCount", dg.getSoLuotBaoCao());
 
                 if(dg.getTaiKhoan() != null) {
                     dto.put("tenNguoiDung", dg.getTaiKhoan().getHoTen());

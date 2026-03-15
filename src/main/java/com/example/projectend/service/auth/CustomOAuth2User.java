@@ -8,7 +8,7 @@ import java.util.*;
 
 /**
  * CUSTOM OAUTH2 USER
- * Wrapper cho OAuth2User để thêm roles từ database
+ * Wrapper cho OAuth2User để thêm vaiTros từ database
  */
 public class CustomOAuth2User implements OAuth2User {
 

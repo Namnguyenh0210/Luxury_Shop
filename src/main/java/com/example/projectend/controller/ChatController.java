@@ -1,16 +1,14 @@
 package com.example.projectend.controller;
 
-import com.example.projectend.entity.Conversation;
-import com.example.projectend.entity.Message;
+import com.example.projectend.entity.CuocTroChuyen;
+import com.example.projectend.entity.TinNhan;
 import com.example.projectend.entity.TaiKhoan;
-import com.example.projectend.repository.ConversationRepository;
+import com.example.projectend.repository.CuocTroChuyenRepository;
 import com.example.projectend.service.ChatService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,41 +22,40 @@ public class ChatController {
     private ChatService chatService;
 
     @Autowired
-    private ConversationRepository conversationRepository;
+    private CuocTroChuyenRepository cuocTroChuyenRepository;
 
     private TaiKhoan getCurrentUser(HttpSession session) {
         return (TaiKhoan) session.getAttribute("user");
     }
 
     /**
-     * Lấy Conversation hiện tại của session (hoặc tạo mới nếu chưa có)
+     * Lấy CuocTroChuyen hiện tại của session (hoặc tạo mới nếu chưa có)
      */
     @GetMapping("/my-conversation")
     public ResponseEntity<?> getMyConversation(HttpSession session) {
         TaiKhoan user = getCurrentUser(session);
+        CuocTroChuyen conv;
 
-        // Cần lưu ID hội thoại vào session cho người dùng ẩn danh (chưa đăng nhập)
-        Long conversationId = (Long) session.getAttribute("current_conversation_id");
-        Conversation conv;
-
-        if (conversationId != null) {
-            conv = conversationRepository.findById(conversationId)
-                    .orElseGet(() -> createAndSaveSessionConv(session, user));
+        if (user != null) {
+            // Nếu đã đăng nhập, luôn ưu tiên lấy hội thoại từ DB cho user đó
+            conv = chatService.getOrCreateConversation(user);
+            session.setAttribute("current_conversation_id", conv.getMaCuocTroChuyen());
         } else {
-            conv = createAndSaveSessionConv(session, user);
-        }
-
-        // Nếu đã đăng nhập, liên kết hội thoại với user nếu nó đang là NULL
-        if (user != null && conv.getTaiKhoan() == null) {
-            conv.setTaiKhoan(user);
-            conversationRepository.save(conv);
+            // Nếu là khách, sử dụng session để định danh
+            Long conversationId = (Long) session.getAttribute("current_conversation_id");
+            if (conversationId != null) {
+                conv = cuocTroChuyenRepository.findById(conversationId)
+                        .orElseGet(() -> createAndSaveSessionConv(session, null));
+            } else {
+                conv = createAndSaveSessionConv(session, null);
+            }
         }
 
         return ResponseEntity.ok(conv);
     }
 
-    private Conversation createAndSaveSessionConv(HttpSession session, TaiKhoan user) {
-        Conversation conv = chatService.getOrCreateConversation(user);
+    private CuocTroChuyen createAndSaveSessionConv(HttpSession session, TaiKhoan user) {
+        CuocTroChuyen conv = chatService.getOrCreateConversation(user);
         session.setAttribute("current_conversation_id", conv.getMaCuocTroChuyen());
         return conv;
     }
@@ -68,7 +65,7 @@ public class ChatController {
      */
     @GetMapping("/history/{conversationId}")
     public ResponseEntity<?> getHistory(@PathVariable Long conversationId) {
-        List<Message> messages = chatService.getMessages(conversationId);
+        List<TinNhan> messages = chatService.getMessages(conversationId);
         return ResponseEntity.ok(messages);
     }
 
@@ -83,21 +80,29 @@ public class ChatController {
         }
 
         TaiKhoan user = getCurrentUser(session);
-        Long conversationId = (Long) session.getAttribute("current_conversation_id");
+        Long sessionConvId = (Long) session.getAttribute("current_conversation_id");
 
-        Conversation conv;
-        if (conversationId != null) {
-            conv = conversationRepository.findById(conversationId)
-                    .orElseGet(() -> createAndSaveSessionConv(session, user));
+        CuocTroChuyen conv;
+        if (user != null) {
+            // Nếu đã đăng nhập, ưu tiên lấy hội thoại của User
+            conv = chatService.getOrCreateConversation(user);
+        } else if (sessionConvId != null) {
+            // Nếu chưa đăng nhập, lấy từ session
+            conv = cuocTroChuyenRepository.findById(sessionConvId)
+                    .orElseGet(() -> createAndSaveSessionConv(session, null));
         } else {
-            conv = createAndSaveSessionConv(session, user);
+            // Tạo mới hoàn toàn
+            conv = createAndSaveSessionConv(session, null);
         }
 
-        Message aiResponse = chatService.processUserMessage(conv, msgContent);
+        // Cập nhật lại session ID đề phòng trường hợp vừa login
+        session.setAttribute("current_conversation_id", conv.getMaCuocTroChuyen());
+
+        TinNhan aiResponse = chatService.processUserMessage(conv, msgContent);
 
         Map<String, Object> response = new HashMap<>();
         response.put("conversationId", conv.getMaCuocTroChuyen());
-        response.put("reply", aiResponse); // Có thể null nếu trạng thái là HUMAN
+        response.put("reply", aiResponse); 
         response.put("status", conv.getTrangThai());
 
         return ResponseEntity.ok(response);
@@ -127,7 +132,7 @@ public class ChatController {
             return ResponseEntity.status(403).body("Không có quyền truy cập");
         }
 
-        List<Conversation> convs = chatService.getAllConversations();
+        List<CuocTroChuyen> convs = chatService.getAllConversations();
         return ResponseEntity.ok(convs);
     }
 
@@ -141,17 +146,31 @@ public class ChatController {
         Long conversationId = Long.parseLong(payload.get("conversationId"));
         String content = payload.get("content");
 
-        Message reply = chatService.staffReply(conversationId, content);
+        TinNhan reply = chatService.staffReply(conversationId, content);
         return ResponseEntity.ok(reply);
     }
 
+    @PostMapping("/admin/status")
+    public ResponseEntity<?> updateStatus(@RequestBody Map<String, String> payload, HttpSession session) {
+        TaiKhoan nv = getCurrentUser(session);
+        if (nv == null || !hasRoles(nv, "ADMIN", "NHANVIEN")) {
+            return ResponseEntity.status(403).body("Không có quyền truy cập");
+        }
+
+        Long conversationId = Long.parseLong(payload.get("conversationId"));
+        String status = payload.get("status");
+
+        chatService.updateStatus(conversationId, status);
+        return ResponseEntity.ok("Cập nhật trạng thái thành công");
+    }
+
     private boolean hasRoles(TaiKhoan user, String... rolesAllowed) {
-        if (user == null || user.getRoles() == null)
+        if (user == null || user.getVaiTros() == null)
             return false;
-        return user.getRoles().stream()
+        return user.getVaiTros().stream()
                 .anyMatch(r -> {
                     for (String allowed : rolesAllowed) {
-                        if (r.getTenRole().equals("ROLE_" + allowed))
+                        if (r.getTenVaiTro().equals("ROLE_" + allowed) || r.getTenVaiTro().equals(allowed))
                             return true;
                     }
                     return false;

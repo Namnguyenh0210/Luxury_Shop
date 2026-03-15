@@ -31,11 +31,11 @@
             <div>
                 <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-5 border-l-2 border-gray-900 pl-2">Hướng dẫn mua hàng</h3>
                 <ul class="space-y-3">
-                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline underline-offset-4" href="/">Trang chủ</a></li>
-                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline underline-offset-4" href="/sanpham">Tất cả sản phẩm</a></li>
-                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline underline-offset-4" href="/kienthuc">Báo chí</a></li>
-                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline cursor-pointer underline-offset-4" @click.prevent="openChatBox">Hỏi đáp cùng AI</a></li>
-                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline cursor-pointer underline-offset-4" @click.prevent="openChatBox">Liên hệ</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 nav-link transition-colors font-medium  " href="/">Trang chủ</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 nav-link transition-colors font-medium  " href="/sanpham">Tất cả sản phẩm</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 nav-link transition-colors font-medium  " href="/kienthuc">Báo chí</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 nav-link transition-colors font-medium  cursor-pointer " @click.prevent="openChatBox">Hỏi đáp cùng AI</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 nav-link transition-colors font-medium  cursor-pointer " @click.prevent="openChatBox">Liên hệ</a></li>
                 </ul>
             </div>
 
@@ -43,9 +43,9 @@
             <div>
                 <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-5 border-l-2 border-gray-900 pl-2">Chăm sóc khách hàng</h3>
                 <ul class="space-y-3">
-                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline underline-offset-4" href="/">Trang chủ</a></li>
-                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline cursor-pointer underline-offset-4" @click.prevent="openChatBox">Hỏi đáp cùng AI</a></li>
-                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 hover:text-blue-900 transition-colors font-medium hover:underline cursor-pointer underline-offset-4" @click.prevent="openChatBox">Liên hệ</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 nav-link transition-colors font-medium  " href="/">Trang chủ</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 nav-link transition-colors font-medium  cursor-pointer " @click.prevent="openChatBox">Hỏi đáp cùng AI</a></li>
+                    <li><a class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 nav-link transition-colors font-medium  cursor-pointer " @click.prevent="openChatBox">Liên hệ</a></li>
                 </ul>
             </div>
 

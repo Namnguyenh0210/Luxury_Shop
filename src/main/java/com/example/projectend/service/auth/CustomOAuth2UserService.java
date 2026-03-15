@@ -75,10 +75,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // Xử lý user trong database
         TaiKhoan taiKhoan = processOAuthUser(email, name, picture, provider.toUpperCase());
 
-        // Build authorities từ roles trong database
+        // Build authorities từ vaiTros trong database
         List<GrantedAuthority> authorities = new ArrayList<>();
-        for (VaiTro role : taiKhoan.getRoles()) {
-            String roleName = "ROLE_" + role.getTenRole();
+        for (VaiTro role : taiKhoan.getVaiTros()) {
+            String roleName = "ROLE_" + role.getTenVaiTro();
             authorities.add(new SimpleGrantedAuthority(roleName));
             System.out.println("✅ Added authority: " + roleName);
         }
@@ -86,7 +86,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         System.out.println("\n╔════════════════════════════════════════════════════════════╗");
         System.out.println("║          ✅ GOOGLE OAUTH2 LOGIN SUCCESS                    ║");
         System.out.println("║   User: " + taiKhoan.getHoTen() + " (ID: " + taiKhoan.getMaTK() + ")");
-        System.out.println("║   Provider: " + taiKhoan.getProvider());
+        System.out.println("║   Provider: " + taiKhoan.getNguonTao());
         System.out.println("║   Roles: " + authorities.size());
         System.out.println("╚════════════════════════════════════════════════════════════╝\n");
 
@@ -109,36 +109,36 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             taiKhoan.setHoTen(name != null ? name : "Google User");
             taiKhoan.setMatKhau(null);  // ⚠️ Không có password cho Google OAuth2
             taiKhoan.setAvatar(picture);
-            taiKhoan.setProvider(provider);  // ✨ Set provider = GOOGLE
+            taiKhoan.setNguonTao(provider);  // ✨ Set provider = GOOGLE
             taiKhoan.setTrangThai(true);
             taiKhoan.setNgayTao(LocalDateTime.now());
             taiKhoan.setNgayCapNhat(LocalDateTime.now());
-            taiKhoan.setLastLogin(LocalDateTime.now());
+            taiKhoan.setDangNhapCuoi(LocalDateTime.now());
 
             // Gán role KHACHHANG mặc định
-            VaiTro roleKhachHang = vaiTroRepository.findByTenRole("KHACHHANG")
+            VaiTro roleKhachHang = vaiTroRepository.findByTenVaiTro("KHACHHANG")
                     .orElseGet(() -> {
                         System.out.println("⚠️ Role KHACHHANG không tồn tại, tạo mới...");
                         VaiTro newRole = new VaiTro();
-                        newRole.setTenRole("KHACHHANG");
+                        newRole.setTenVaiTro("KHACHHANG");
                         return vaiTroRepository.save(newRole);
                     });
 
-            Set<VaiTro> roles = new HashSet<>();
-            roles.add(roleKhachHang);
-            taiKhoan.setRoles(roles);
+            Set<VaiTro> vaiTros = new HashSet<>();
+            vaiTros.add(roleKhachHang);
+            taiKhoan.setVaiTros(vaiTros);
 
             taiKhoanRepository.save(taiKhoan);
             System.out.println("✅ Tạo tài khoản thành công!");
             System.out.println("   - ID: " + taiKhoan.getMaTK());
             System.out.println("   - Email: " + taiKhoan.getEmail());
-            System.out.println("   - Provider: " + taiKhoan.getProvider());
+            System.out.println("   - Provider: " + taiKhoan.getNguonTao());
             System.out.println("   - Role: KHACHHANG");
 
         } else {
             // ============ CẬP NHẬT TÀI KHOẢN ĐÃ TỒN TẠI ============
             System.out.println("\n♻️ Cập nhật tài khoản đã tồn tại: " + email);
-            System.out.println("   - Provider cũ: " + taiKhoan.getProvider());
+            System.out.println("   - Provider cũ: " + taiKhoan.getNguonTao());
             System.out.println("   - Avatar cũ: " + taiKhoan.getAvatar());
 
             // Cập nhật avatar nếu có thay đổi
@@ -154,13 +154,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             }
 
             // Cập nhật provider sang GOOGLE (nếu trước đó là LOCAL)
-            if (!"GOOGLE".equals(taiKhoan.getProvider())) {
-                taiKhoan.setProvider(provider);
+            if (!"GOOGLE".equals(taiKhoan.getNguonTao())) {
+                taiKhoan.setNguonTao(provider);
                 System.out.println("   ✅ Cập nhật provider: " + provider);
             }
 
             // Cập nhật lastLogin và ngày cập nhật
-            taiKhoan.setLastLogin(LocalDateTime.now());
+            taiKhoan.setDangNhapCuoi(LocalDateTime.now());
             taiKhoan.setNgayCapNhat(LocalDateTime.now());
 
             taiKhoanRepository.save(taiKhoan);

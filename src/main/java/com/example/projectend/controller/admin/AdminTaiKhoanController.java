@@ -27,7 +27,7 @@ public class AdminTaiKhoanController {
         return ResponseEntity.ok(Map.of("customers", taiKhoanService.findAll()));
     }
 
-    @GetMapping("/roles-list")
+    @GetMapping("/vaiTros-list")
     public ResponseEntity<?> getRolesList() {
         return ResponseEntity.ok(vaiTroRepository.findAll());
     }
@@ -38,23 +38,23 @@ public class AdminTaiKhoanController {
             if (account.getMaTK() == null) {
                 account.setNgayTao(LocalDateTime.now());
                 account.setTrangThai(true);
-                account.setProvider("LOCAL");
+                account.setNguonTao("LOCAL");
                 String pass = (account.getMatKhauMoi() != null && !account.getMatKhauMoi().isEmpty()) 
                               ? account.getMatKhauMoi() : "123456";
                 account.setMatKhau(passwordEncoder.encode(pass));
                 
-                if (account.getRoles() == null || account.getRoles().isEmpty()) {
+                if (account.getVaiTros() == null || account.getVaiTros().isEmpty()) {
                     vaiTroRepository.findAll().stream()
-                        .filter(r -> r.getTenRole().contains("USER")).findFirst()
+                        .filter(r -> r.getTenVaiTro().contains("USER")).findFirst()
                         .ifPresent(r -> { 
-                            account.setRoles(new HashSet<>()); 
-                            account.addRole(r); 
+                            account.setVaiTros(new HashSet<>()); 
+                            account.addVaiTro(r); 
                         });
                 }
             } else {
                 TaiKhoan old = taiKhoanService.findById(account.getMaTK()).orElseThrow();
                 account.setNgayTao(old.getNgayTao());
-                account.setProvider(old.getProvider());
+                account.setNguonTao(old.getNguonTao());
                 if (account.getMatKhauMoi() != null && !account.getMatKhauMoi().isEmpty()) {
                     account.setMatKhau(passwordEncoder.encode(account.getMatKhauMoi()));
                 } else {

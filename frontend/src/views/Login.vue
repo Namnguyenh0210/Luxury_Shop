@@ -225,7 +225,7 @@ export default {
 
 <style scoped>
 .font-serif {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Times New Roman', Times, serif;
 }
 .breakout-full {
     margin-left: -2cm;

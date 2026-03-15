@@ -22,7 +22,7 @@ public class AdminInventoryController {
     @Autowired
     private PhieuNhapRepository phieuNhapRepository;
     @Autowired
-    private NhapKhoRepository nhapKhoRepository;
+    private NhapKhoChiTietRepository nhapKhoChiTietRepository;
     @Autowired
     private NhaCungCapRepository nhaCungCapRepository;
     @Autowired
@@ -42,7 +42,7 @@ public class AdminInventoryController {
             "phieuNhaps", phieuNhaps,
             "suppliers", nhaCungCapRepository.findAll(),
             "products", sanPhamRepository.findByTrangThaiSP(1),
-            "totalItems", nhapKhoRepository.count(),
+            "totalItems", nhapKhoChiTietRepository.count(),
             "supplierCount", nhaCungCapRepository.count(),
             "activeProducts", sanPhamRepository.countByTrangThaiSP(1)
         );

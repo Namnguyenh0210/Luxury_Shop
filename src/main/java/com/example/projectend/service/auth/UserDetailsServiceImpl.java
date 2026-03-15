@@ -50,7 +50,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         System.out.println("   - ID: " + taiKhoan.getMaTK());
         System.out.println("   - Tên: " + taiKhoan.getHoTen());
         System.out.println("   - Email: " + taiKhoan.getEmail());
-        System.out.println("   - Provider: " + taiKhoan.getProvider());
+        System.out.println("   - Provider: " + taiKhoan.getNguonTao());
         System.out.println("   - Trạng thái: " + (taiKhoan.getTrangThai() ? "Active" : "Inactive"));
 
         // Kiểm tra tài khoản có bị vô hiệu hóa không
@@ -60,7 +60,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         // ⚠️ QUAN TRỌNG: Kiểm tra nếu là tài khoản Google OAuth2
-        if ("GOOGLE".equals(taiKhoan.getProvider()) && taiKhoan.getMatKhau() == null) {
+        if ("GOOGLE".equals(taiKhoan.getNguonTao()) && taiKhoan.getMatKhau() == null) {
             System.out.println("⚠️ Tài khoản Google OAuth2 không thể đăng nhập bằng form!");
             System.out.println("   → Vui lòng sử dụng nút 'Đăng nhập bằng Google'");
             throw new UsernameNotFoundException(
@@ -68,13 +68,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             );
         }
 
-        // Map roles từ database
+        // Map vaiTros từ database
         List<GrantedAuthority> authorities = new ArrayList<>();
-        Set<VaiTro> roles = taiKhoan.getRoles();
+        Set<VaiTro> vaiTros = taiKhoan.getVaiTros();
 
         System.out.println("🔑 Roles:");
-        for (VaiTro role : roles) {
-            String roleName = "ROLE_" + role.getTenRole();
+        for (VaiTro role : vaiTros) {
+            String roleName = "ROLE_" + role.getTenVaiTro();
             authorities.add(new SimpleGrantedAuthority(roleName));
             System.out.println("   - " + roleName);
         }
@@ -87,7 +87,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // Cập nhật lastLogin
         try {
-            taiKhoan.setLastLogin(LocalDateTime.now());
+            taiKhoan.setDangNhapCuoi(LocalDateTime.now());
             taiKhoanRepository.save(taiKhoan);
             System.out.println("✅ Cập nhật lastLogin thành công");
         } catch (Exception e) {

@@ -1,12 +1,11 @@
 package com.example.projectend.service;
 
-import com.example.projectend.entity.Conversation;
+import com.example.projectend.entity.CuocTroChuyen;
 import com.example.projectend.entity.DonHang;
-import com.example.projectend.entity.Message;
+import com.example.projectend.entity.TinNhan;
 import com.example.projectend.entity.TaiKhoan;
-import com.example.projectend.repository.ConversationRepository;
-import com.example.projectend.repository.DonHangRepository;
-import com.example.projectend.repository.MessageRepository;
+import com.example.projectend.repository.CuocTroChuyenRepository;
+import com.example.projectend.repository.TinNhanRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -23,10 +23,10 @@ public class ChatService {
     private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     @Autowired
-    private ConversationRepository conversationRepository;
+    private CuocTroChuyenRepository cuocTroChuyenRepository;
 
     @Autowired
-    private MessageRepository messageRepository;
+    private TinNhanRepository tinNhanRepository;
 
     @Autowired
     private GroqService groqService;
@@ -41,61 +41,62 @@ public class ChatService {
      * Lấy cuộc hội thoại hiện tại hoặc tạo mới nếu chưa có/đã đóng
      */
     @Transactional
-    public Conversation getOrCreateConversation(TaiKhoan user) {
+    public CuocTroChuyen getOrCreateConversation(TaiKhoan user) {
         if (user != null) {
-            Optional<Conversation> existConvObj = conversationRepository
+            Optional<CuocTroChuyen> existConvObj = cuocTroChuyenRepository
                     .findFirstByTaiKhoanOrderByNgayCapNhatDesc(user);
             if (existConvObj.isPresent()) {
-                Conversation existConv = existConvObj.get();
+                CuocTroChuyen existConv = existConvObj.get();
                 if (!"CLOSED".equals(existConv.getTrangThai())) {
                     return existConv; // Trả về cuộc trò chuyện đang mở
                 }
             }
         }
         // Tạo cuộc trò chuyện mới
-        Conversation newConv = new Conversation();
+        CuocTroChuyen newConv = new CuocTroChuyen();
         newConv.setTaiKhoan(user);
         newConv.setTrangThai("AI");
         newConv.setNgayTao(LocalDateTime.now());
         newConv.setNgayCapNhat(LocalDateTime.now());
-        return conversationRepository.save(newConv);
+        return cuocTroChuyenRepository.save(newConv);
     }
 
     /**
      * Lấy tất cả messages của một cuộc hội thoại
      */
-    public List<Message> getMessages(Long conversationId) {
-        Conversation conv = conversationRepository.findById(conversationId)
+    public List<TinNhan> getMessages(Long conversationId) {
+        Objects.requireNonNull(conversationId, "conversationId must not be null");
+        CuocTroChuyen conv = cuocTroChuyenRepository.findById(conversationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hội thoại"));
-        return messageRepository.findByConversationOrderByNgayGuiAsc(conv);
+        return tinNhanRepository.findByCuocTroChuyenOrderByNgayGuiAsc(conv);
     }
 
     /**
      * Gửi tin nhắn từ người dùng, gọi Gemini nếu đang là trạng thái 'AI'
      */
     @Transactional
-    public Message processUserMessage(Conversation conversation, String messageContent) {
+    public TinNhan processUserMessage(CuocTroChuyen cuocTroChuyen, String messageContent) {
         // Lưu tin nhắn của USER
-        Message userMessage = new Message(conversation, "USER", messageContent);
-        messageRepository.save(userMessage);
+        TinNhan userMessage = new TinNhan(cuocTroChuyen, "USER", messageContent);
+        tinNhanRepository.save(userMessage);
 
-        conversation.setNgayCapNhat(LocalDateTime.now());
-        conversationRepository.save(conversation);
+        cuocTroChuyen.setNgayCapNhat(LocalDateTime.now());
+        cuocTroChuyenRepository.save(cuocTroChuyen);
 
         // Nếu trạng thái đang là AI -> phân tích và gọi Gemini
-        if ("AI".equals(conversation.getTrangThai())) {
-            String context = buildContextForAI(conversation.getTaiKhoan(), messageContent);
+        if ("AI".equals(cuocTroChuyen.getTrangThai())) {
+            String context = buildContextForAI(cuocTroChuyen.getTaiKhoan(), messageContent);
 
             // Gọi AI
             String aiReplyStr = groqService.generateResponse(messageContent, context);
 
             // Lưu tin nhắn của AI
-            Message aiMessage = new Message(conversation, "AI", aiReplyStr);
-            messageRepository.save(aiMessage);
+            TinNhan aiMessage = new TinNhan(cuocTroChuyen, "AI", aiReplyStr);
+            tinNhanRepository.save(aiMessage);
             return aiMessage;
         }
 
-        // Đang chat với HUMAN (staff) -> Không gọi AI, chờ staff reply
+        // Đang chat với HUMAN hoặc PENDING (đang chờ nhân viên) -> Không gọi AI, chờ staff reply
         return null;
     }
 
@@ -159,33 +160,69 @@ public class ChatService {
      */
     @Transactional
     public void switchToHuman(Long conversationId) {
-        Conversation conv = conversationRepository.findById(conversationId)
+        Objects.requireNonNull(conversationId, "conversationId must not be null");
+        CuocTroChuyen conv = cuocTroChuyenRepository.findById(conversationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hội thoại"));
-        conv.setTrangThai("HUMAN");
+        
+        // Tránh ghi đè nếu đã là HUMAN
+        if ("HUMAN".equals(conv.getTrangThai())) return;
+
+        conv.setTrangThai("PENDING"); // Đổi sang PENDING (Chờ nhân viên tiếp nhận)
         conv.setNgayCapNhat(LocalDateTime.now());
-        conversationRepository.save(conv);
+        cuocTroChuyenRepository.save(conv);
+
+        // Thêm tin nhắn xác nhận từ hệ thống/AI
+        TinNhan confirmMsg = new TinNhan(conv, "AI", "⏳ Chúng tôi đang kết nối bạn với nhân viên trong vài phút. Bạn có thể để lại câu hỏi trước tại đây...");
+        tinNhanRepository.save(confirmMsg);
+    }
+
+    /**
+     * Cập nhật trạng thái cuộc hội thoại (CLOSED, AI, HUMAN)
+     */
+    @Transactional
+    public void updateStatus(Long conversationId, String status) {
+        Objects.requireNonNull(conversationId, "conversationId must not be null");
+        CuocTroChuyen conv = cuocTroChuyenRepository.findById(conversationId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hội thoại"));
+        conv.setTrangThai(status);
+        conv.setNgayCapNhat(LocalDateTime.now());
+        cuocTroChuyenRepository.save(conv);
     }
 
     /**
      * Nhân viên gửi tin nhắn
      */
     @Transactional
-    public Message staffReply(Long conversationId, String content) {
-        Conversation conv = conversationRepository.findById(conversationId)
+    public TinNhan staffReply(Long conversationId, String content) {
+        Objects.requireNonNull(conversationId, "conversationId must not be null");
+        CuocTroChuyen conv = cuocTroChuyenRepository.findById(conversationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hội thoại"));
 
-        Message msg = new Message(conv, "STAFF", content);
+        // Khi nhân viên trả lời, nếu đang là PENDING thì chuyển hẳn sang HUMAN
+        if ("PENDING".equals(conv.getTrangThai())) {
+            conv.setTrangThai("HUMAN");
+        }
+
+        TinNhan msg = new TinNhan(conv, "STAFF", content);
         conv.setNgayCapNhat(LocalDateTime.now());
 
-        messageRepository.save(msg);
-        conversationRepository.save(conv);
+        tinNhanRepository.save(msg);
+        cuocTroChuyenRepository.save(conv);
         return msg;
     }
 
     /**
      * Admin/Staff lấy tất cả các cuộc hội thoại
      */
-    public List<Conversation> getAllConversations() {
-        return conversationRepository.findAllByOrderByNgayCapNhatDesc();
+    public List<CuocTroChuyen> getAllConversations() {
+        List<CuocTroChuyen> list = cuocTroChuyenRepository.findAllByOrderByNgayCapNhatDesc();
+        for (CuocTroChuyen c : list) {
+            // Lấy tin nhắn cuối cùng để hiển thị ở sidebar admin
+            TinNhan last = tinNhanRepository.findFirstByCuocTroChuyenOrderByNgayGuiDesc(c);
+            if (last != null) {
+                c.setLastMessage(last.getNoiDung());
+            }
+        }
+        return list;
     }
 }

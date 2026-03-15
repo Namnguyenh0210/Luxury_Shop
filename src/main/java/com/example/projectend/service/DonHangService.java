@@ -3,6 +3,8 @@ package com.example.projectend.service;
 import com.example.projectend.entity.*;
 import com.example.projectend.repository.*;
 import jakarta.transaction.Transactional;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +41,9 @@ public class DonHangService {
     @Autowired
     private LichSuDonHangRepository lichSuDonHangRepository;
 
+    @Autowired
+    private ThanhToanRepository thanhToanRepository;
+
     /**
      * TẠO ĐƠN HÀNG MỚI - HOÀN CHỈNH
      */
@@ -51,6 +55,9 @@ public class DonHangService {
         if (gioHangItems == null || gioHangItems.isEmpty()) {
             throw new RuntimeException("Giỏ hàng trống!");
         }
+
+        if (diaChiId == null) throw new IllegalArgumentException("diaChiId is null");
+        if (phuongThucTTId == null) throw new IllegalArgumentException("phuongThucTTId is null");
 
         // 2. Lấy địa chỉ giao hàng
         DiaChi diaChi = diaChiRepository.findById(diaChiId)
@@ -156,7 +163,15 @@ public class DonHangService {
         
         if (status == 4) {
             dh.setTrangThaiThanhToan(1);
-            dh.setNgayThanhToan(LocalDateTime.now());
+            
+            // Tạo bản ghi thanh toán nếu chưa có
+            ThanhToan tt = new ThanhToan();
+            tt.setDonHang(dh);
+            tt.setSoTien(dh.getTongTien().add(dh.getPhiShip()));
+            tt.setTrangThai("COMPLETED");
+            tt.setGateway(dh.getHinhThucThanhToan() != null ? dh.getHinhThucThanhToan().getTenHinhThuc() : "COD");
+            tt.setNgayTao(LocalDateTime.now());
+            thanhToanRepository.save(tt);
         }
 
         donHangRepository.save(dh);
@@ -229,7 +244,15 @@ public class DonHangService {
         // Nếu đã giao hàng (Hoàn tất) thì đánh dấu đã thanh toán
         if (trangThaiMoi == 4) {
             donHang.setTrangThaiThanhToan(1);
-            donHang.setNgayThanhToan(LocalDateTime.now());
+            
+            // Tạo bản ghi thanh toán
+            ThanhToan tt = new ThanhToan();
+            tt.setDonHang(donHang);
+            tt.setSoTien(donHang.getTongTien().add(donHang.getPhiShip()));
+            tt.setTrangThai("COMPLETED");
+            tt.setGateway(donHang.getHinhThucThanhToan() != null ? donHang.getHinhThucThanhToan().getTenHinhThuc() : "COD");
+            tt.setNgayTao(LocalDateTime.now());
+            thanhToanRepository.save(tt);
         }
 
         donHangRepository.save(donHang);
@@ -379,11 +402,13 @@ public class DonHangService {
         }
         boolean hasKeyword = keyword != null && !keyword.isBlank();
         if (statusCode != null && hasKeyword) {
-            return donHangRepository.findByTrangThaiDHAndTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(statusCode, keyword.trim(), pageable);
+            String cleanKeyword = Objects.requireNonNull(keyword).trim();
+            return donHangRepository.findByTrangThaiDHAndTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(statusCode, cleanKeyword, pageable);
         } else if (statusCode != null) {
             return donHangRepository.findByTrangThaiDHOrderByNgayDatDesc(statusCode, pageable);
         } else if (hasKeyword) {
-            return donHangRepository.findByTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(keyword.trim(), pageable);
+            String cleanKeyword = Objects.requireNonNull(keyword).trim();
+            return donHangRepository.findByTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(cleanKeyword, pageable);
         }
         return donHangRepository.findAllByOrderByNgayDatDesc(pageable);
     }

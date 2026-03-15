@@ -106,12 +106,12 @@ public class DanhGia {
     @Column(name = "NgayPhanHoi")
     private LocalDateTime ngayPhanHoi;
 
-    @Column(name = "ReportCount")
-    private Integer reportCount = 0;
+    @Column(name = "SoLuotBaoCao")
+    private Integer soLuotBaoCao = 0;
 
     public void incrementReport() {
-        if (this.reportCount == null) this.reportCount = 0;
-        this.reportCount++;
+        if (this.soLuotBaoCao == null) this.soLuotBaoCao = 0;
+        this.soLuotBaoCao++;
     }
 
     public Integer getTrangThai() {
@@ -138,11 +138,11 @@ public class DanhGia {
         this.ngayPhanHoi = ngayPhanHoi;
     }
 
-    public Integer getReportCount() {
-        return reportCount;
+    public Integer getSoLuotBaoCao() {
+        return soLuotBaoCao;
     }
 
-    public void setReportCount(Integer reportCount) {
-        this.reportCount = reportCount;
+    public void setSoLuotBaoCao(Integer soLuotBaoCao) {
+        this.soLuotBaoCao = soLuotBaoCao;
     }
 }
