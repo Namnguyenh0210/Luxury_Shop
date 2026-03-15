@@ -5,6 +5,7 @@ import axios from 'axios'
 
 // Import global styles (font + margin)
 import './assets/css/global.css'
+import './utils/modal.js'
 
 // Import original CSS files as global styles
 import './assets/css/Home.css'

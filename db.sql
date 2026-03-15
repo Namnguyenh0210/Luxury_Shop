@@ -168,7 +168,8 @@ CREATE TABLE SoDiaChi (
 CREATE TABLE ThuongHieu (
     MaTH BIGINT IDENTITY(1,1) PRIMARY KEY,
     TenTH NVARCHAR(100) NOT NULL,
-    MoTa NVARCHAR(255)
+    MoTa NVARCHAR(255),
+    TrangThai INT NOT NULL DEFAULT 1
 );
 
 -- Bảng: LoaiSanPham
@@ -523,11 +524,11 @@ GO
 
 SET IDENTITY_INSERT dbo.ThuongHieu ON;
 INSERT INTO ThuongHieu
-(MaTH, TenTH, MoTa)
+(MaTH, TenTH, MoTa, TrangThai)
 VALUES
-    (1, N'Gucci', N'Thương hiệu thời trang cao cấp của Ý'),
-    (2, N'Chanel', N'Thương hiệu thời trang cao cấp của Pháp'),
-    (3, N'MLB', N'Thương hiệu thời trang thể thao Hàn Quốc');
+    (1, N'Gucci', N'Thương hiệu thời trang cao cấp của Ý', 1),
+    (2, N'Chanel', N'Thương hiệu thời trang cao cấp của Pháp', 1),
+    (3, N'MLB', N'Thương hiệu thời trang thể thao Hàn Quốc', 1);
 SET IDENTITY_INSERT dbo.ThuongHieu OFF;
 GO
 

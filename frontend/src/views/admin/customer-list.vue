@@ -4,15 +4,30 @@
 
       <!-- ACTION BAR -->
       <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="relative">
-          <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <span class="material-symbols-outlined text-[18px]">search</span>
-          </span>
-          <input
-            v-model="keyword"
-            placeholder="Tìm kiếm tài khoản..."
-            class="border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 w-64"
-          />
+        <div class="flex items-center gap-3">
+          <div class="relative w-72">
+            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+              <span class="material-symbols-outlined text-[20px]">search</span>
+            </span>
+            <input
+              v-model="keyword"
+              placeholder="Tìm kiếm tài khoản..."
+              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
+            />
+          </div>
+          <!-- Lọc theo vai trò -->
+          <div class="flex items-center bg-gray-100 p-1 rounded-2xl shadow-inner">
+            <button @click="filterRole = ''"
+              class="px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap"
+              :class="filterRole === '' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+              Tất cả
+            </button>
+            <button v-for="role in allRoles" :key="role.id" @click="filterRole = role.tenRole"
+              class="px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap"
+              :class="filterRole === role.tenRole ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+              {{ role.tenRole }}
+            </button>
+          </div>
         </div>
         <button @click="openModal()"
           class="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-colors">
@@ -22,7 +37,7 @@
       </div>
 
       <!-- TABLE -->
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -106,25 +121,25 @@
 	      <div class="space-y-1.5">
 	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Họ Tên</label>
 	        <input v-model="form.hoTen" placeholder="Nguyễn Văn A"
-	          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
+	          class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all"/>
 	      </div>
 
 	      <div class="space-y-1.5">
 	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email</label>
 	        <input v-model="form.email" placeholder="email@example.com" type="email"
-	          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
+	          class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all"/>
 	      </div>
 
 	      <div class="space-y-1.5">
 	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Số Điện Thoại</label>
 	        <input v-model="form.soDienThoai" placeholder="0912 345 678"
-	          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
+	          class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all"/>
 	      </div>
 
 	      <div class="space-y-1.5">
 	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mật Khẩu Mới</label>
 	        <input v-model="form.matKhauMoi" placeholder="Để trống nếu không đổi" type="password"
-	          class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
+	          class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all"/>
 	      </div>
 
 	      <div class="space-y-2">
@@ -175,22 +190,31 @@ export default {
   data() {
     return {
       customers: [],
-      allRoles: [], // Danh sách tất cả các Role từ Database
+      allRoles: [],
       keyword: '',
+      filterRole: '',
       showModal: false,
       form: {
-        roles: [] // Khởi tạo mảng roles rỗng
+        roles: []
       }
     }
   },
   computed: {
     filteredCustomers() {
-      if (!this.keyword) return this.customers
-      const kw = this.keyword.toLowerCase()
-      return this.customers.filter(u =>
-        (u.hoTen || '').toLowerCase().includes(kw) ||
-        (u.email  || '').toLowerCase().includes(kw)
-      )
+      let list = this.customers
+      if (this.keyword) {
+        const kw = this.keyword.toLowerCase()
+        list = list.filter(u =>
+          (u.hoTen || '').toLowerCase().includes(kw) ||
+          (u.email  || '').toLowerCase().includes(kw)
+        )
+      }
+      if (this.filterRole) {
+        list = list.filter(u =>
+          u.roles && u.roles.some(r => r.tenRole === this.filterRole)
+        )
+      }
+      return list
     }
   },
   async mounted() {
@@ -230,12 +254,13 @@ export default {
         this.closeModal()
         this.loadData() 
       } catch (e) { 
-        alert("Lỗi lưu dữ liệu! Kiểm tra console để biết thêm chi tiết.")
+        window.$alert("Lỗi lưu dữ liệu! Kiểm tra console để biết thêm chi tiết.", "Lỗi")
         console.error(e)
       }
     },
     async deleteUser(id) {
-      if (!confirm('Xóa tài khoản này?')) return
+      const ok = await window.$confirm('Xóa tài khoản này?')
+      if (!ok) return
       try {
         await api.post(`/admin/customers/delete/${id}`)
         this.loadData()

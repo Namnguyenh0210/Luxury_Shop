@@ -17,9 +17,18 @@ public class AdminThuongHieuController {
     @Autowired
     private ThuongHieuService thuongHieuService;
 
+    @Autowired
+    private com.example.projectend.repository.SanPhamRepository sanPhamRepository;
+
     @GetMapping
     public List<ThuongHieu> getAllBrands() {
-        return thuongHieuService.findAll();
+        List<ThuongHieu> brands = thuongHieuService.findAll();
+        for (ThuongHieu b : brands) {
+            b.setCountNam(sanPhamRepository.countByThuongHieu_MaTHAndGioiTinh(b.getMaTH(), 0));
+            b.setCountNu(sanPhamRepository.countByThuongHieu_MaTHAndGioiTinh(b.getMaTH(), 1));
+            b.setCountUnisex(sanPhamRepository.countByThuongHieu_MaTHAndGioiTinh(b.getMaTH(), 2));
+        }
+        return brands;
     }
 
     @GetMapping("/{id}")

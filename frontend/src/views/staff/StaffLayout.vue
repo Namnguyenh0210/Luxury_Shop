@@ -1,74 +1,75 @@
 <template>
-  <div class="relative flex min-h-screen w-full flex-col bg-gray-50 staff-breakout">
+  <div class="relative flex min-h-screen w-full flex-col bg-gray-50">
     <div class="flex h-full w-full grow">
 
       <!-- ====== SIDEBAR ====== -->
-      <aside class="flex h-screen w-64 flex-col justify-between border-r border-gray-200 bg-white p-4 sticky top-0 z-20 shadow-sm">
-        <div class="flex flex-col gap-8">
+      <aside class="flex h-screen w-64 flex-col border-r border-gray-200 bg-white sticky top-0 z-20 shadow-sm">
+        <!-- Scrollable Top Area -->
+        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          <div class="flex flex-col gap-8">
 
-          <!-- Logo -->
-          <div class="flex items-center gap-3 px-3 py-2">
-            <div class="flex items-center justify-center size-9 rounded-lg bg-blue-600 text-white">
-              <span class="material-symbols-outlined text-xl">badge</span>
-            </div>
-            <div>
-              <p class="text-sm font-extrabold text-gray-900 tracking-wide">LUXURY</p>
-              <p class="text-[10px] text-blue-600 uppercase tracking-widest font-semibold">Staff Panel</p>
-            </div>
-          </div>
-
-          <!-- User Info -->
-          <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-gray-50 border border-gray-100">
-            <div class="size-9 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold text-base uppercase flex-shrink-0">
-              {{ userInitial }}
-            </div>
-            <div class="flex flex-col overflow-hidden">
-              <p class="text-sm font-semibold text-gray-800 truncate">{{ staffUser.name || 'Nhân Viên' }}</p>
-              <p class="text-xs text-blue-500 truncate font-medium">{{ staffUser.role || 'ROLE_NHANVIEN' }}</p>
-            </div>
-          </div>
-
-          <!-- Nav — chỉ có các chức năng được phép -->
-          <nav class="flex flex-col gap-1">
-            <router-link
-              v-for="item in navItems"
-              :key="item.to"
-              :to="item.to"
-              class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-blue-50 hover:text-blue-800 group"
-              active-class="bg-blue-50 text-blue-800 font-semibold shadow-sm"
-            >
-              <span class="material-symbols-outlined text-[20px]">{{ item.icon }}</span>
-              {{ item.label }}
-            </router-link>
-
-            <!-- Divider + Locked Features -->
-            <div class="mt-3 pt-3 border-t border-gray-100">
-              <p class="px-3 pb-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Không có quyền</p>
-              <div
-                v-for="item in lockedItems"
-                :key="item.label"
-                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-300 cursor-not-allowed select-none"
-                :title="'Chức năng này chỉ dành cho Admin'"
-              >
-                <span class="material-symbols-outlined text-[20px]">{{ item.icon }}</span>
-                <span>{{ item.label }}</span>
-                <span class="ml-auto material-symbols-outlined text-[14px] text-gray-300">lock</span>
+            <!-- Logo -->
+            <div class="flex items-center gap-3 px-3 py-2">
+              <div class="flex items-center justify-center size-9 rounded-lg bg-blue-600 text-white">
+                <span class="material-symbols-outlined text-xl">badge</span>
+              </div>
+              <div>
+                <p class="text-sm font-extrabold text-gray-900 tracking-wide">LUXURY</p>
+                <p class="text-[10px] text-blue-600 uppercase tracking-widest font-semibold">Staff Panel</p>
               </div>
             </div>
-          </nav>
+
+            <!-- User Info -->
+            <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-gray-50 border border-gray-100">
+              <div class="size-9 rounded-full bg-blue-700 text-white flex items-center justify-center font-bold text-base uppercase flex-shrink-0">
+                {{ userInitial }}
+              </div>
+              <div class="flex flex-col overflow-hidden">
+                <p class="text-sm font-semibold text-gray-800 truncate">{{ staffUser.name || 'Nhân Viên' }}</p>
+                <p class="text-xs text-blue-500 truncate font-medium">{{ staffUser.role || 'ROLE_NHANVIEN' }}</p>
+              </div>
+            </div>
+
+            <!-- Nav -->
+            <nav class="flex flex-col gap-1">
+              <router-link
+                v-for="item in navItems"
+                :key="item.to"
+                :to="item.to"
+                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-blue-50 hover:text-blue-800 group"
+                active-class="bg-blue-50 text-blue-800 font-semibold shadow-sm"
+              >
+                <span class="material-symbols-outlined text-[20px]">{{ item.icon }}</span>
+                {{ item.label }}
+              </router-link>
+
+              <!-- Locked Features -->
+              <div class="mt-3 pt-3 border-t border-gray-100">
+                <p class="px-3 pb-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Không có quyền</p>
+                <div
+                  v-for="item in lockedItems"
+                  :key="item.label"
+                  class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-300 cursor-not-allowed select-none"
+                  :title="'Chức năng này chỉ dành cho Admin'"
+                >
+                  <span class="material-symbols-outlined text-[20px]">{{ item.icon }}</span>
+                  <span>{{ item.label }}</span>
+                  <span class="ml-auto material-symbols-outlined text-[14px] text-gray-300">lock</span>
+                </div>
+              </div>
+            </nav>
+          </div>
         </div>
 
-        <!-- Logout -->
-        <div class="px-1 pb-2">
-          <div class="border-t border-gray-100 pt-3">
-            <button
-              @click="logout"
-              class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-200"
-            >
-              <span class="material-symbols-outlined text-[20px]">logout</span>
-              Đăng xuất
-            </button>
-          </div>
+        <!-- Logout (Fixed Bottom) -->
+        <div class="p-4 border-t border-gray-100 bg-white">
+          <button
+            @click="logout"
+            class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-200"
+          >
+            <span class="material-symbols-outlined text-[20px]">logout</span>
+            Đăng xuất
+          </button>
         </div>
       </aside>
 
@@ -159,28 +160,19 @@ export default {
   }
 }
 </script>
-
 <style scoped>
-.staff-breakout {
-  margin-left: -2cm;
-  margin-right: -2cm;
-  width: calc(100% + 4cm);
-  max-width: none;
+/* Custom Scrollbar for Sidebar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
 }
-
-@media (max-width: 1024px) {
-  .staff-breakout {
-    margin-left: -1.5cm;
-    margin-right: -1.5cm;
-    width: calc(100% + 3cm);
-  }
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
-
-@media (max-width: 640px) {
-  .staff-breakout {
-    margin-left: -0.75cm;
-    margin-right: -0.75cm;
-    width: calc(100% + 1.5cm);
-  }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
 }
 </style>
