@@ -3,7 +3,7 @@
     <AppHeader />
 
     <main class="flex-grow">
-      <div class="flex flex-1 max-w-7xl mx-auto w-full">
+      <div class="flex flex-1 w-full px-4 md:px-[3.7cm]">
         <!-- Sidebar -->
         <aside class="w-64 flex-shrink-0 bg-white border-r border-gray-200 p-6 hidden md:block sticky top-0 h-screen overflow-y-auto">
           <div class="flex flex-col gap-6">
@@ -84,7 +84,7 @@
 
         <!-- Main Content -->
         <div class="flex-1 p-6 md:p-10 bg-gray-50">
-          <div class="max-w-4xl">
+          <div class="w-full">
             <!-- Loading State -->
             <div v-if="loading" class="flex flex-col items-center justify-center py-20">
               <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-600 mb-4"></div>
