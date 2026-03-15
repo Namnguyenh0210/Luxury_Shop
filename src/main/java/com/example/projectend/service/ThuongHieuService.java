@@ -22,5 +22,17 @@ public class ThuongHieuService {
     public List<ThuongHieu> findAll() {
         return thuongHieuRepository.findAll();
     }
+
+    public java.util.Optional<ThuongHieu> findById(Long id) {
+        return thuongHieuRepository.findById(id);
+    }
+
+    public ThuongHieu save(ThuongHieu brand) {
+        return thuongHieuRepository.save(brand);
+    }
+
+    public void deleteById(Long id) {
+        thuongHieuRepository.deleteById(id);
+    }
 }
 

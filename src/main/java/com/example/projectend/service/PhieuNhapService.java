@@ -98,7 +98,7 @@ public class PhieuNhapService {
         for (NewItem item : newItems) {
             // TÌM HOẶC TẠO SẢN PHẨM CHA (SanPham)
             // Logic mới: Tìm theo TenSP. Nếu có thì dùng lại, không thì tạo mới.
-            LoaiSanPham lsp = item.categoryId() != null ? loaiSanPhamRepository.findById(item.categoryId().intValue()).orElse(null) : null;
+            LoaiSanPham lsp = item.categoryId() != null ? loaiSanPhamRepository.findById(item.categoryId()).orElse(null) : null;
             ThuongHieu th = item.brandId() != null ? thuongHieuRepository.findById(item.brandId()).orElse(null) : null;
 
             SanPham sp = sanPhamRepository.findByTenSP(item.tenSP())

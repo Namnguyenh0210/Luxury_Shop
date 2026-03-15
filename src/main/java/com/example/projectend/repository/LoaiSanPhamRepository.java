@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
  * Repository cho entity LoaiSanPham
  */
 @Repository
-public interface LoaiSanPhamRepository extends JpaRepository<LoaiSanPham, Integer> {
+public interface LoaiSanPhamRepository extends JpaRepository<LoaiSanPham, Long> {
 
     // ========================================
     // TODO: NGƯỜI 3 - Frontend & Customer Website
@@ -20,7 +20,7 @@ public interface LoaiSanPhamRepository extends JpaRepository<LoaiSanPham, Intege
     // List<LoaiSanPham> findAllByOrderByTenLoaiAsc();
 
     // TODO: NGƯỜI 3 - Thêm method tìm danh mục theo tên (nếu cần search)
-    // Optional<LoaiSanPham> findByTenLoai(String tenLoai);
+    java.util.Optional<LoaiSanPham> findByTenLoai(String tenLoai);
 
     // TODO: NGƯỜI 3 - Thêm method đếm số sản phẩm trong mỗi danh mục
     // @Query("SELECT lsp, COUNT(sp) FROM LoaiSanPham lsp LEFT JOIN SanPham sp ON sp.loaiSanPham = lsp GROUP BY lsp")

@@ -3,13 +3,15 @@ package com.example.projectend.repository;
 import com.example.projectend.entity.LoaiSanPham;
 import com.example.projectend.entity.SanPham;
 import com.example.projectend.entity.ThuongHieu;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -55,4 +57,9 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Long>, JpaSpec
     Optional<SanPham> findByTenSPAndLoaiSanPhamAndThuongHieu(String tenSP, LoaiSanPham loaiSanPham, ThuongHieu thuongHieu);
 
     Optional<SanPham> findByTenSP(String tenSP);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE SanPham s SET s.loaiSanPham = :newCategory WHERE s.loaiSanPham.maLoai = :oldCategoryId")
+    void updateCategory(@Param("oldCategoryId") Long oldCategoryId, @Param("newCategory") LoaiSanPham newCategory);
 }

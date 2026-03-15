@@ -24,14 +24,14 @@ public class AdminSanPhamController {
     // =============================
     @GetMapping
     public List<SanPham> getAllProducts(@RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Integer status) {
     	// BỔ SUNG DÒNG NÀY: Khởi tạo pageable để lấy dữ liệu trang đầu tiên
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
         
         // Gọi hàm có sẵn trong Service của bạn
-        return sanPhamService.findWithFilters(keyword, categoryId, null, brandId, null, null, null, pageable).getContent();
+        return sanPhamService.findWithFilters(keyword, categoryId, null, brandId, null, null, status, null, pageable).getContent();
     }
 
     // =============================

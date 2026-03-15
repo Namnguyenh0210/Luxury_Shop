@@ -29,6 +29,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
+  overflow-x: hidden; /* Ngăn chặn nút kéo ngang khi sử dụng breakout */
 }
 
 /* --- Wrapper toàn app: padding 2cm hai bên --- */
@@ -93,6 +94,16 @@ footer,
     margin-right: -0.75cm;
     width: calc(100% + 1.5cm);
   }
+}
+
+/* Ngăn chặn double-breakout cho Admin và Staff Layout */
+.admin-breakout header,
+.admin-breakout footer,
+.staff-breakout header,
+.staff-breakout footer {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
 }
 
 /* --- Tailwind font overrides --- */

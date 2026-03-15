@@ -22,6 +22,9 @@ public class LoaiSanPham {
     @Column(name = "MoTa", length = 255)
     private String moTa;
 
+    @Column(name = "TrangThai", nullable = false)
+    private Integer trangThai = 1;
+
     // Constructors
     public LoaiSanPham() {
     }
@@ -29,6 +32,7 @@ public class LoaiSanPham {
     public LoaiSanPham(String tenLoai, String moTa) {
         this.tenLoai = tenLoai;
         this.moTa = moTa;
+        this.trangThai = 1;
     }
 
     // Getters and Setters
@@ -56,11 +60,20 @@ public class LoaiSanPham {
         this.moTa = moTa;
     }
 
+    public Integer getTrangThai() {
+        return trangThai;
+    }
+
+    public void setTrangThai(Integer trangThai) {
+        this.trangThai = trangThai;
+    }
+
     @Override
     public String toString() {
         return "LoaiSanPham{" +
                 "maLoai=" + maLoai +
                 ", tenLoai='" + tenLoai + '\'' +
+                ", trangThai=" + trangThai +
                 '}';
     }
 }
