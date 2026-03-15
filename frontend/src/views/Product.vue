@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <div class="py-10 flex-1 w-full">
+        <div class="py-10 flex-1 w-full px-4 md:px-[3.7cm]">
             <div class="mx-auto w-full">
 
                 <!-- Loading State -->

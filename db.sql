@@ -801,11 +801,7 @@ VALUES
 SET IDENTITY_INSERT dbo.GioHang OFF;
 GO
 
-INSERT INTO GioHangChiTiet
-    (MaGioHang, MaBienThe, SoLuong)
-VALUES
-    (1, 1, 2); -- Khách có 2 cái Áo Polo Gucci Cotton S Đen (MaBienThe=1) trong giỏ
-GO
+-- 4.3.3. (Trống - Đã xóa hàng mẫu trong giỏ)
 
 -- 4.3.4. Khách chat với CSKH
 -- 4.3.4. Khách chat với CSKH (Dùng hệ thống mới CuocTroChuyen/TinNhan)

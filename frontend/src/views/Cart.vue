@@ -2,21 +2,21 @@
 <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
     <AppHeader />
     
-    <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <h1 class="text-3xl font-bold mb-8">Shopping Cart</h1>
+    <main class="flex-grow w-full px-4 md:px-[3.7cm] py-10">
+        <h1 class="text-3xl font-bold mb-8">Giỏ hàng</h1>
 
         <!-- Loading State -->
         <div v-if="loading" class="text-center py-16">
             <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-accent mx-auto"></div>
-            <p class="mt-4 text-gray-600">Loading cart...</p>
+            <p class="mt-4 text-gray-600">Đang tải giỏ hàng...</p>
         </div>
 
         <!-- Empty Cart -->
         <div v-else-if="items.length === 0" class="text-center py-16 border border-gray-200 rounded-lg">
             <span class="material-symbols-outlined text-6xl text-gray-400 mb-4">shopping_cart</span>
-            <p class="text-xl text-gray-600 mb-6">Your cart is empty</p>
+            <p class="text-xl text-gray-600 mb-6">Giỏ hàng của bạn đang trống</p>
             <a href="/sanpham" class="inline-block px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90">
-                Continue Shopping
+                Tiếp tục mua sắm
             </a>
         </div>
 
@@ -41,7 +41,7 @@
                         </a>
                         <p class="text-sm text-gray-600 mt-1">
                             <span v-if="item.sanPhamChiTiet.sizeSP">Size: {{ item.sanPhamChiTiet.sizeSP.tenSize }}</span>
-                            <span v-if="item.sanPhamChiTiet.mauSacSP" class="ml-2">Color: {{ item.sanPhamChiTiet.mauSacSP.tenMau }}</span>
+                            <span v-if="item.sanPhamChiTiet.mauSacSP" class="ml-2">Màu sắc: {{ item.sanPhamChiTiet.mauSacSP.tenMau }}</span>
                         </p>
                         <p class="text-lg font-bold text-accent mt-2">{{ formatPrice(item.sanPhamChiTiet.giaBan) }}</p>
 
@@ -66,9 +66,10 @@
                             </div>
                             <button 
                                 @click="removeItem(item)" 
-                                class="text-red-600 text-sm hover:underline ml-auto"
+                                class="text-red-500 hover:text-red-700 transition-colors ml-auto"
+                                title="Xóa khỏi giỏ hàng"
                             >
-                                Remove
+                                <span class="material-symbols-outlined">delete</span>
                             </button>
                         </div>
                     </div>
@@ -78,18 +79,18 @@
             <!-- Cart Summary -->
             <div class="lg:col-span-1">
                 <div class="border border-gray-200 rounded-lg p-6 sticky top-24">
-                    <h2 class="text-xl font-bold mb-4">Order Summary</h2>
+                    <h2 class="text-xl font-bold mb-4">Tóm tắt đơn hàng</h2>
                     <div class="space-y-3 border-t border-gray-200 pt-4">
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-gray-600">Tạm tính</span>
                             <span class="font-medium">{{ formatPrice(subtotal) }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Shipping</span>
-                            <span class="font-medium">Free</span>
+                            <span class="text-gray-600">Phí vận chuyển</span>
+                            <span class="font-medium">Miễn phí</span>
                         </div>
                         <div class="flex justify-between text-lg font-bold border-t border-gray-200 pt-3">
-                            <span>Total</span>
+                            <span>Tổng cộng</span>
                             <span class="text-accent">{{ formatPrice(total) }}</span>
                         </div>
                     </div>
@@ -97,10 +98,10 @@
                         href="/checkout"
                         class="w-full block text-center bg-black text-white font-bold py-3 rounded-lg mt-6 hover:bg-gray-800"
                     >
-                        Proceed to Checkout
+                        Tiến hành thanh toán
                     </a>
                     <a href="/sanpham" class="w-full block text-center text-gray-600 mt-4 hover:underline">
-                        Continue Shopping
+                        Tiếp tục mua sắm
                     </a>
                 </div>
             </div>

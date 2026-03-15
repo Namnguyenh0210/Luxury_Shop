@@ -2,7 +2,7 @@
 <header>
     <!-- Top Bar -->
     <div class="bg-[papayawhip]">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full px-4 md:px-[3.7cm]">
             <div class="flex h-10 items-center justify-end text-xs text-text-primary-light/80 dark:text-text-primary-dark/80">
                 <div class="flex items-center space-x-4">
                     <a class="nav-link flex items-center gap-1.5 transition-colors" href="mailto:luxury@fashion.vn">
@@ -36,7 +36,7 @@
 
     <!-- Main Header -->
     <div class="border-y border-secondary/50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full px-4 md:px-[3.7cm]">
             <div class="flex h-32 items-center justify-between gap-4">
                 <!-- Logo -->
                 <div class="h-full flex-shrink-0">

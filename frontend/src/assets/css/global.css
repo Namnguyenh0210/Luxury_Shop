@@ -29,81 +29,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* Ngăn chặn nút kéo ngang khi sử dụng breakout */
+  overflow-x: hidden;
 }
 
-/* --- Wrapper toàn app: padding 2cm hai bên --- */
+/* #app as full-width container */
 #app {
-  padding-left: 2cm;
-  padding-right: 2cm;
-}
-
-/* Tablet */
-@media (max-width: 1024px) {
-  #app {
-    padding-left: 1.5cm;
-    padding-right: 1.5cm;
-  }
-}
-
-/* Mobile */
-@media (max-width: 640px) {
-  #app {
-    padding-left: 0.75cm;
-    padding-right: 0.75cm;
-  }
-}
-
-/* -----------------------------------------------
-   Breakout: Header, Footer, Chat widget, Modals,
-   và bất kỳ element nào cần full-width
-   ----------------------------------------------- */
-#app > div > header,
-header,
-footer,
-.chat-widget-wrapper,
-[class*="fixed"],
-.fixed {
-  margin-left: -2cm;
-  margin-right: -2cm;
-  width: calc(100% + 4cm);
-  max-width: none;
-}
-
-@media (max-width: 1024px) {
-  #app > div > header,
-  header,
-  footer,
-  .chat-widget-wrapper,
-  [class*="fixed"],
-  .fixed {
-    margin-left: -1.5cm;
-    margin-right: -1.5cm;
-    width: calc(100% + 3cm);
-  }
-}
-
-@media (max-width: 640px) {
-  #app > div > header,
-  header,
-  footer,
-  .chat-widget-wrapper,
-  [class*="fixed"],
-  .fixed {
-    margin-left: -0.75cm;
-    margin-right: -0.75cm;
-    width: calc(100% + 1.5cm);
-  }
-}
-
-/* Ngăn chặn double-breakout cho Admin và Staff Layout */
-.admin-breakout header,
-.admin-breakout footer,
-.staff-breakout header,
-.staff-breakout footer {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  width: 100% !important;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* --- Tailwind font overrides --- */

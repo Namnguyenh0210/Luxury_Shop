@@ -4,7 +4,7 @@
     <AppHeader />
     
     <main class="flex-grow">
-        <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="w-full px-4 md:px-[3.7cm] py-4">
             <div class="flex min-h-[60vh] flex-col items-center justify-center gap-6 rounded-lg bg-cover bg-center bg-no-repeat p-4 text-center md:gap-8" data-alt="A high-fashion model posing in a minimalist, modern setting, wearing an elegant outfit from the new collection." style="background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuA2RLsd-sCd1DS_TgR8LSOXwcPO_XfMapD3C5LhyLuf2p6bLLleNeiMm37yA5eAKO-GmDxoQclsNVZJxX_fRpxphaAoN8adFL6BnGC6nCdNHsNoZzXbnchw6JsZg6hvOSv1bNwRA1XKdm4JFROKCw3zojoJ7nr9xGQfcyRBMEqZ4ueW8fCGty1jzBEkobgbZXZ66LBrKIpVTjp85aUppDbXObeUM1zj_iI7dfgW3Ap4EJ9QVQ-F7hxAuVH8hEzE2yAYOUYJNcDdoNo&quot;);">
                 <div class="flex flex-col gap-4">
                     <h1 class="font-serif text-4xl font-bold text-white md:text-6xl">Autumn/Winter '24: A New Era</h1>
@@ -12,11 +12,11 @@
                         of modern tailoring and timeless elegance.</h2>
                 </div>
                 <a class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-md h-12 px-6 bg-transparent text-white border border-white text-base font-bold tracking-wide transition-colors hover:bg-primary hover:border-primary" href="/sanpham">
-                    <span class="truncate">Shop The Collection</span>
+                    <span class="truncate">Mua ngay bộ sưu tập</span>
                 </a>
             </div>
         </div>
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="w-full px-4 md:px-[3.7cm] py-16">
             <h2 class="text-center font-serif text-3xl font-bold tracking-tight md:text-4xl">Curated Collections</h2>
             <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <div class="group relative overflow-hidden rounded-lg">
@@ -42,7 +42,7 @@
                 </div>
             </div>
         </div>
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="w-full px-4 md:px-[3.7cm] py-16">
             <h2 class="text-center font-serif text-3xl font-bold tracking-tight md:text-4xl">New Arrivals</h2>
             <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-6">
                 <div class="group relative">
@@ -110,7 +110,7 @@
             </div>
         </div>
         <div class="bg-background-light dark:bg-background-dark py-16">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="w-full px-4 md:px-[3.7cm]">
                 <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
                     <div class="relative h-96 overflow-hidden rounded-lg lg:h-[32rem]">
                         <img class="h-full w-full object-cover" data-alt="An artistic, black and white shot of a designer sketching in a studio." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXiuB0kQSHby6ccYOmju4ElSbioXSvBbWzop5Nikd3QRA0q-L1pPSFupZo2Yuj8BiG9Y-JEp82UEzpmKC8DGb1C16c8ojcksklRm0OAEsj1UgVusuRyQFtYYsfyWP9ozIEfI3TUhwkfY5Twyo1VNcT4XZpw8GVHVoaVRyBIUzwlVToC2P62iIVFc8R9ZLiabJFzQQqeVNt7auKaGA80baXKiDugJADmVBROykiw5KmidXMFWg4zhHMm7asCiw0bMKDQToMzXJMEP8">
@@ -123,7 +123,7 @@
                             of design.
                         </p>
                         <a class="mt-8 inline-block rounded-md border border-accent bg-transparent px-8 py-3 text-base font-medium text-accent transition hover:bg-accent hover:text-white" href="/gioithieu">
-                            Read More
+                            Xem chi tiết
                         </a>
                     </div>
                 </div>
