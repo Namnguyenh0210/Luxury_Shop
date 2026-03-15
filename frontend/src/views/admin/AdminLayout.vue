@@ -6,9 +6,8 @@
       <aside class="flex h-screen w-64 flex-col justify-between border-r border-gray-200 bg-white p-4 sticky top-0 z-20 shadow-sm">
         <div class="flex flex-col gap-8">
 
-          <!-- Logo -->
           <div class="flex items-center gap-3 px-3 py-2">
-            <div class="flex items-center justify-center size-9 rounded-lg bg-yellow-600 text-white">
+            <div class="flex items-center justify-center size-9 rounded-lg bg-yellow-600 text-white shadow-sm">
               <span class="material-symbols-outlined text-xl">diamond</span>
             </div>
             <div>
@@ -17,7 +16,6 @@
             </div>
           </div>
 
-          <!-- User Info -->
           <div class="flex items-center gap-3 px-3 py-2 rounded-xl bg-gray-50 border border-gray-100">
             <div class="size-9 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-base uppercase flex-shrink-0">
               {{ userInitial }}
@@ -28,18 +26,26 @@
             </div>
           </div>
 
-          <!-- Nav -->
           <nav class="flex flex-col gap-1">
-            <router-link
-              v-for="item in navItems"
-              :key="item.to"
-              :to="item.to"
-              class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-yellow-50 hover:text-yellow-800 group"
-              active-class="bg-yellow-50 text-yellow-800 font-semibold shadow-sm"
-            >
-              <span class="material-symbols-outlined text-[20px] group-[.router-link-active]:text-yellow-700">{{ item.icon }}</span>
-              {{ item.label }}
-            </router-link>
+            <template v-for="item in navItems" :key="item.label">
+              <button
+                v-if="item.isAction"
+                @click="item.action"
+                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-yellow-50 hover:text-yellow-800 group w-full text-left"
+              >
+                <span class="material-symbols-outlined text-[20px]">{{ item.icon }}</span>
+                {{ item.label }}
+              </button>
+              <router-link
+                v-else
+                :to="item.to"
+                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-yellow-50 hover:text-yellow-800 group"
+                active-class="bg-yellow-50 text-yellow-800 font-semibold shadow-sm"
+              >
+                <span class="material-symbols-outlined text-[20px] group-[.router-link-active]:text-yellow-700">{{ item.icon }}</span>
+                {{ item.label }}
+              </router-link>
+            </template>
           </nav>
         </div>
 
@@ -60,7 +66,6 @@
       <!-- ====== MAIN AREA ====== -->
       <main class="flex flex-1 flex-col min-w-0">
 
-        <!-- Header -->
         <!-- Header -->
         <header class="sticky top-0 z-10 flex h-[84px] items-center justify-between whitespace-nowrap border-b border-gray-200 bg-white/90 backdrop-blur-sm shadow-sm px-8">
           <div class="flex items-center gap-3">
@@ -89,6 +94,7 @@
 
       </main>
     </div>
+
   </div>
 </template>
 
@@ -97,6 +103,7 @@ import axios from 'axios'
 
 export default {
   name: 'AdminLayout',
+  components: { },
 
   props: {
     pageTitle: {

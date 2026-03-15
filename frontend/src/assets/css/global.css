@@ -1,6 +1,6 @@
 /* =============================================
    LUXURY SHOP — GLOBAL STYLES
-   Font: Playfair Display (toàn bộ nội dung)
+   Font: Times New Roman (toàn bộ nội dung)
    Margin: 2cm hai bên
    ============================================= */
 
@@ -8,7 +8,7 @@
 *,
 *::before,
 *::after {
-  font-family: 'Playfair Display', 'Manrope', Georgia, serif;
+  font-family: 'Times New Roman', Times, serif;
   box-sizing: border-box;
 }
 
@@ -24,7 +24,7 @@
 
 /* --- Base body --- */
 body {
-  font-family: 'Playfair Display', 'Manrope', Georgia, serif;
+  font-family: 'Times New Roman', Times, serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -108,11 +108,38 @@ footer,
 
 /* --- Tailwind font overrides --- */
 .font-sans {
-  font-family: 'Playfair Display', 'Manrope', serif !important;
+  font-family: 'Times New Roman', Times, serif !important;
 }
 .font-serif {
-  font-family: 'Playfair Display', Georgia, serif !important;
+  font-family: 'Times New Roman', Times, serif !important;
 }
 .font-mono {
   font-family: 'Courier New', Courier, monospace !important;
 }
+
+/* --- Luxury Nav Link Style --- */
+.nav-link {
+    position: relative;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -4px;
+    width: 0;
+    height: 2px;
+    background: #C8A97E;
+    transition: 0.3s;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.nav-link:hover {
+    color: #C8A97E !important;
+}
+

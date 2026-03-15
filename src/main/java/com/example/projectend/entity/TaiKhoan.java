@@ -47,8 +47,8 @@ public class TaiKhoan {
     @Column(name = "Avatar", length = 255)
     private String avatar;
 
-    @Column(name = "LastLogin")
-    private LocalDateTime lastLogin;
+    @Column(name = "DangNhapCuoi")
+    private LocalDateTime dangNhapCuoi;
 
     @Column(name = "TrangThai", nullable = false)
     @JsonProperty("trangThai")
@@ -60,17 +60,17 @@ public class TaiKhoan {
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
 
-    // ✨ MỚI: Thêm field Provider (LOCAL hoặc GOOGLE)
-    @Column(name = "Provider", length = 20)
-    private String provider = "LOCAL";  // Mặc định là LOCAL
+    // ✨ MỚI: Thêm field NguonTao (LOCAL hoặc GOOGLE)
+    @Column(name = "NguonTao", length = 20)
+    private String nguonTao = "LOCAL";  // Mặc định là LOCAL
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "TaiKhoan_Role",
+        name = "TaiKhoan_VaiTro",
         joinColumns = @JoinColumn(name = "MaTK"),
-        inverseJoinColumns = @JoinColumn(name = "MaRole")
+        inverseJoinColumns = @JoinColumn(name = "MaVaiTro")
     )
-    private Set<VaiTro> roles = new HashSet<>();
+    private Set<VaiTro> vaiTros = new HashSet<>();
 
     // Constructors
     public TaiKhoan() {
@@ -146,12 +146,12 @@ public class TaiKhoan {
         this.avatar = avatar;
     }
 
-    public LocalDateTime getLastLogin() {
-        return lastLogin;
+    public LocalDateTime getDangNhapCuoi() {
+        return dangNhapCuoi;
     }
 
-    public void setLastLogin(LocalDateTime lastLogin) {
-        this.lastLogin = lastLogin;
+    public void setDangNhapCuoi(LocalDateTime dangNhapCuoi) {
+        this.dangNhapCuoi = dangNhapCuoi;
     }
 
     public Boolean getTrangThai() {
@@ -178,30 +178,30 @@ public class TaiKhoan {
         this.ngayCapNhat = ngayCapNhat;
     }
 
-    // ✨ MỚI: Getter/Setter cho Provider
-    public String getProvider() {
-        return provider;
+    // ✨ MỚI: Getter/Setter cho NguonTao
+    public String getNguonTao() {
+        return nguonTao;
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public void setNguonTao(String nguonTao) {
+        this.nguonTao = nguonTao;
     }
 
-    public Set<VaiTro> getRoles() {
-        return roles;
+    public Set<VaiTro> getVaiTros() {
+        return vaiTros;
     }
 
-    public void setRoles(Set<VaiTro> roles) {
-        this.roles = roles;
+    public void setVaiTros(Set<VaiTro> vaiTros) {
+        this.vaiTros = vaiTros;
     }
 
     // Helper methods
-    public void addRole(VaiTro role) {
-        this.roles.add(role);
+    public void addVaiTro(VaiTro vaiTro) {
+        this.vaiTros.add(vaiTro);
     }
 
-    public void removeRole(VaiTro role) {
-        this.roles.remove(role);
+    public void removeVaiTro(VaiTro vaiTro) {
+        this.vaiTros.remove(vaiTro);
     }
 
     @Override
@@ -210,7 +210,7 @@ public class TaiKhoan {
                 "maTK=" + maTK +
                 ", hoTen='" + hoTen + '\'' +
                 ", email='" + email + '\'' +
-                ", provider='" + provider + '\'' +
+                ", nguonTao='" + nguonTao + '\'' +
                 ", trangThai=" + trangThai +
                 '}';
     }

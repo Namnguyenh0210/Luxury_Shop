@@ -66,9 +66,6 @@ public class DonHang {
     @Column(name = "TrangThaiThanhToan", nullable = false)
     private Integer trangThaiThanhToan = 0; // 0: Chờ thanh toán, 1: Đã thanh toán
 
-    @Column(name = "NgayThanhToan")
-    private LocalDateTime ngayThanhToan;
-
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
 
@@ -84,6 +81,10 @@ public class DonHang {
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("donHang")
     private List<DonHangChiTiet> chiTietList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("donHang")
+    private List<ThanhToan> chiTietThanhToan = new ArrayList<>();
 
     // Constructors
     public DonHang() {
@@ -200,14 +201,6 @@ public class DonHang {
         this.trangThaiThanhToan = trangThaiThanhToan;
     }
 
-    public LocalDateTime getNgayThanhToan() {
-        return ngayThanhToan;
-    }
-
-    public void setNgayThanhToan(LocalDateTime ngayThanhToan) {
-        this.ngayThanhToan = ngayThanhToan;
-    }
-
     public LocalDateTime getNgayCapNhat() {
         return ngayCapNhat;
     }
@@ -222,6 +215,14 @@ public class DonHang {
 
     public void setChiTietList(List<DonHangChiTiet> chiTietList) {
         this.chiTietList = chiTietList;
+    }
+
+    public List<ThanhToan> getChiTietThanhToan() {
+        return chiTietThanhToan;
+    }
+
+    public void setChiTietThanhToan(List<ThanhToan> chiTietThanhToan) {
+        this.chiTietThanhToan = chiTietThanhToan;
     }
 
     // Helper method

@@ -350,7 +350,7 @@ export default {
   font-size: 22px;
   font-weight: 800;
   color: #111827;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Times New Roman', Times, serif;
   margin: 0;
 }
 
@@ -396,7 +396,7 @@ export default {
   font-weight: 900;
   color: #111827;
   line-height: 1;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Times New Roman', Times, serif;
 }
 .avg-stars { display: flex; gap: 3px; margin: 8px 0; }
 .avg-count { font-size: 12px; color: #6B7280; }

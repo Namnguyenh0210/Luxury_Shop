@@ -35,18 +35,12 @@ Hủy theo thứ tự ngược lại của các ràng buộc khóa ngoại để
 
 IF OBJECT_ID('dbo.TinNhan', 'U') IS NOT NULL
 DROP TABLE dbo.TinNhan;
-IF
-OBJECT_ID('dbo.PhongChat', 'U') IS NOT NULL
-DROP TABLE dbo.PhongChat;
-IF
-OBJECT_ID('dbo.NhapKhoChiTiet', 'U') IS NOT NULL
-DROP TABLE dbo.NhapKhoChiTiet;
-IF
-OBJECT_ID('dbo.PhieuNhap', 'U') IS NOT NULL
-DROP TABLE dbo.PhieuNhap;
-IF
-OBJECT_ID('dbo.NhaCungCap', 'U') IS NOT NULL
-DROP TABLE dbo.NhaCungCap;
+IF OBJECT_ID('dbo.CuocTroChuyen', 'U') IS NOT NULL
+DROP TABLE dbo.CuocTroChuyen;
+IF OBJECT_ID('dbo.ThanhToan', 'U') IS NOT NULL
+DROP TABLE dbo.ThanhToan;
+IF OBJECT_ID('dbo.SanPhamYeuThich', 'U') IS NOT NULL
+DROP TABLE dbo.SanPhamYeuThich;
 IF
 OBJECT_ID('dbo.GioHangChiTiet', 'U') IS NOT NULL
 DROP TABLE dbo.GioHangChiTiet;
@@ -100,18 +94,22 @@ OBJECT_ID('dbo.ThuongHieu', 'U') IS NOT NULL
 DROP TABLE dbo.ThuongHieu;
 IF OBJECT_ID('dbo.SoDiaChi', 'U') IS NOT NULL
 DROP TABLE dbo.SoDiaChi;
-IF OBJECT_ID('dbo.TaiKhoan_Role', 'U') IS NOT NULL
-DROP TABLE dbo.TaiKhoan_Role;
-IF OBJECT_ID('dbo.Role', 'U') IS NOT NULL
-DROP TABLE dbo.Role;
+IF OBJECT_ID('dbo.TaiKhoan_VaiTro', 'U') IS NOT NULL
+DROP TABLE dbo.TaiKhoan_VaiTro;
+IF OBJECT_ID('dbo.VaiTro', 'U') IS NOT NULL
+DROP TABLE dbo.VaiTro;
 IF OBJECT_ID('dbo.TaiKhoan', 'U') IS NOT NULL
 DROP TABLE dbo.TaiKhoan;
 IF OBJECT_ID('dbo.TrangThaiDonHang', 'U') IS NOT NULL
 DROP TABLE dbo.TrangThaiDonHang;
 IF OBJECT_ID('dbo.ThongKe', 'U') IS NOT NULL
 DROP TABLE dbo.ThongKe;
-IF OBJECT_ID('dbo.NhapKho', 'U') IS NOT NULL
-DROP TABLE dbo.NhapKho;
+IF OBJECT_ID('dbo.NhapKhoChiTiet', 'U') IS NOT NULL
+DROP TABLE dbo.NhapKhoChiTiet;
+IF OBJECT_ID('dbo.PhieuNhap', 'U') IS NOT NULL
+DROP TABLE dbo.PhieuNhap;
+IF OBJECT_ID('dbo.NhaCungCap', 'U') IS NOT NULL
+DROP TABLE dbo.NhaCungCap;
 GO
 
 PRINT N'PHẦN 1: HỦY BẢNG CŨ THÀNH CÔNG!';
@@ -133,24 +131,26 @@ CREATE TABLE TaiKhoan (
     SoDienThoai VARCHAR(20),
     DiaChi NVARCHAR(255),
     Avatar NVARCHAR(255),
-    LastLogin DATETIME,
+    DangNhapCuoi DATETIME,
     TrangThai BIT NOT NULL DEFAULT 1,
     NgayTao DATETIME DEFAULT GETDATE(),
     NgayCapNhat DATETIME DEFAULT GETDATE(),
-    Provider VARCHAR(20) DEFAULT 'LOCAL'
+    NguonTao VARCHAR(20) DEFAULT 'LOCAL'
+);
+CREATE INDEX idx_taikhoan_email ON TaiKhoan(Email);
+
+
+-- Bảng: VaiTro (Phân Quyền)
+CREATE TABLE VaiTro (
+    MaVaiTro BIGINT IDENTITY(1,1) PRIMARY KEY,
+    TenVaiTro VARCHAR(50) UNIQUE NOT NULL
 );
 
--- Bảng: Role (Phân Quyền)
-CREATE TABLE Role (
-    MaRole BIGINT IDENTITY(1,1) PRIMARY KEY,
-    TenRole VARCHAR(50) UNIQUE NOT NULL
-);
-
--- Bảng: TaiKhoan_Role (Nối Tài Khoản - Quyền)
-CREATE TABLE TaiKhoan_Role (
+-- Bảng: TaiKhoan_VaiTro (Nối Tài Khoản - Quyền)
+CREATE TABLE TaiKhoan_VaiTro (
     MaTK BIGINT NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK),
-    MaRole BIGINT NOT NULL FOREIGN KEY REFERENCES Role(MaRole),
-    PRIMARY KEY (MaTK, MaRole)
+    MaVaiTro BIGINT NOT NULL FOREIGN KEY REFERENCES VaiTro(MaVaiTro),
+    PRIMARY KEY (MaTK, MaVaiTro)
 );
 
 -- Bảng: SoDiaChi
@@ -204,10 +204,14 @@ CREATE TABLE SanPham (
     NgayTao DATETIME DEFAULT GETDATE(),
     NgayCapNhat DATETIME DEFAULT GETDATE()
 );
+CREATE INDEX idx_product_category ON SanPham(MaLoai);
+CREATE INDEX idx_product_brand ON SanPham(MaTH);
+
 
 -- Bảng: SanPhamChiTiet (Biến thể SKU)
 CREATE TABLE SanPhamChiTiet (
     MaBienThe BIGINT IDENTITY(1,1) PRIMARY KEY,
+    SKU VARCHAR(100), -- UNIQUE filtered index sẽ cho phép nhiều NULL
     MaSP BIGINT NOT NULL FOREIGN KEY REFERENCES SanPham(MaSP) ON DELETE CASCADE,
     MaSize BIGINT FOREIGN KEY REFERENCES SizeSP(MaSize) ON DELETE SET NULL,
     MaMau BIGINT FOREIGN KEY REFERENCES MauSacSP(MaMau) ON DELETE SET NULL,
@@ -216,8 +220,15 @@ CREATE TABLE SanPhamChiTiet (
     SoLuongTon INT DEFAULT 0,
     SoLuongDaBan INT DEFAULT 0,
     AnhBienThe NVARCHAR(255),
+    TrangThai BIT NOT NULL DEFAULT 1, -- 1: Đang bán, 0: Ngừng bán/Ẩn
     CONSTRAINT UK_SanPham_Variant UNIQUE (MaSP, MaSize, MaMau)
 );
+
+-- Index lọc cho SKU để cho phép nhiều NULL nhưng vẫn UNIQUE nếu có giá trị
+CREATE UNIQUE INDEX UIX_SanPhamChiTiet_SKU ON SanPhamChiTiet(SKU) WHERE SKU IS NOT NULL;
+CREATE INDEX idx_variant_product ON SanPhamChiTiet(MaSP);
+CREATE INDEX idx_variant_stock ON SanPhamChiTiet(SoLuongTon);
+
 
 -- Bảng: HinhAnhSP
 CREATE TABLE HinhAnhSP
@@ -227,6 +238,16 @@ CREATE TABLE HinhAnhSP
     DuongDan NVARCHAR(255)
 );
 
+
+-- Bảng: TrangThaiDonHang (Định nghĩa trước DonHang để làm FK)
+IF OBJECT_ID('dbo.TrangThaiDonHang', 'U') IS NOT NULL
+DROP TABLE dbo.TrangThaiDonHang;
+
+CREATE TABLE TrangThaiDonHang
+(
+    MaTTDH INT PRIMARY KEY, -- Khớp trực tiếp mã trạng thái 0,1,2,3,4
+    TenTTDH NVARCHAR(50) NOT NULL UNIQUE
+);
 
 -- Bảng: HinhThucThanhToan
 CREATE TABLE HinhThucThanhToan (
@@ -248,23 +269,38 @@ CREATE TABLE DonHang (
     MaHinhThucTT BIGINT FOREIGN KEY REFERENCES HinhThucThanhToan(MaHinhThucTT) ON DELETE SET NULL,
     GhiChu NVARCHAR(500),
     LyDoHuy NVARCHAR(255),
-    MaGiaoDich VARCHAR(100),
-    TrangThaiDH INT NOT NULL DEFAULT 0, -- 0: Chờ, 1: Xác nhận, 2: Giao, 3: Hoàn tất, 4: Hủy
+    MaGiaoDich VARCHAR(100), -- Giữ lại làm Cache cho nhanh nếu cần, hoặc có thể xóa hoàn toàn
+    TrangThaiDH INT NOT NULL DEFAULT 0 FOREIGN KEY REFERENCES TrangThaiDonHang(MaTTDH),
     TrangThaiThanhToan INT NOT NULL DEFAULT 0,
-    NgayThanhToan DATETIME NULL,
     NgayCapNhat DATETIME DEFAULT GETDATE(),
+    NgayThanhToan DATETIME NULL,
     KhachBaoChuaNhan BIT DEFAULT 0,
     LyDoChuaNhan NVARCHAR(255),
     MoTaChuaNhan NVARCHAR(1000)
 );
+CREATE INDEX idx_order_user ON DonHang(MaTK);
+CREATE INDEX idx_order_status ON DonHang(TrangThaiDH);
+
+
 
 -- Bảng: DonHangCT (Chi tiết đơn hàng)
 CREATE TABLE DonHangCT (
     MaCT BIGINT IDENTITY(1,1) PRIMARY KEY,
     MaDH BIGINT NOT NULL FOREIGN KEY REFERENCES DonHang(MaDH) ON DELETE CASCADE,
-    MaBienThe BIGINT FOREIGN KEY REFERENCES SanPhamChiTiet(MaBienThe) ON DELETE SET NULL,
+    MaBienThe BIGINT FOREIGN KEY REFERENCES SanPhamChiTiet(MaBienThe) ON DELETE NO ACTION, -- Đổi từ SET NULL sang NO ACTION để bảo toàn dữ liệu
     SoLuong INT,
     DonGia DECIMAL(18, 2)
+);
+
+-- Bảng: ThanhToan (Giao dịch thanh toán)
+CREATE TABLE ThanhToan (
+    MaThanhToan   BIGINT IDENTITY(1,1) PRIMARY KEY,
+    MaDH          BIGINT NOT NULL FOREIGN KEY REFERENCES DonHang(MaDH) ON DELETE CASCADE,
+    SoTien        DECIMAL(18, 2) NOT NULL,
+    TrangThai     NVARCHAR(20) DEFAULT 'PENDING', -- PENDING, COMPLETED, FAILED, REFUNDED
+    Gateway       NVARCHAR(50), -- VNPay, Momo, ZaloPay, COD
+    TransactionID VARCHAR(100), -- Mã giao dịch từ đối tác
+    NgayTao       DATETIME DEFAULT GETDATE()
 );
 
 -- Bảng: LichSuDonHang (Audit Trail - Rất "xịn")
@@ -291,7 +327,7 @@ CREATE TABLE DanhGia (
     TrangThai INT DEFAULT 1,
     PhanHoi NVARCHAR(1000),
     NgayPhanHoi DATETIME,
-    ReportCount INT DEFAULT 0
+    SoLuotBaoCao INT DEFAULT 0
 );
 
 -- Bảng: LoaiBaiViet
@@ -327,19 +363,26 @@ CREATE TABLE BinhLuan
     NgayBinhLuan   DATETIME DEFAULT GETDATE(),
     AnDanh         BIT      DEFAULT 0,
     TrangThai      BIT      DEFAULT 1,
-    SoLuongLike    INT      DEFAULT 0,
+    SoLuotThich    INT      DEFAULT 0,
     SoLuongPhanHoi INT      DEFAULT 0,
     PhanHoiAdmin   NVARCHAR(1000),
     NgayPhanHoiAdmin DATETIME,
-    ReportCount    INT      DEFAULT 0,
-    CONSTRAINT CK_BinhLuan CHECK (MaSP IS NOT NULL OR MaBV IS NOT NULL)
+    SoLuotBaoCao    INT      DEFAULT 0,
+    MaBLCha         BIGINT   NULL FOREIGN KEY REFERENCES BinhLuan(MaBL),
+    CONSTRAINT CK_BinhLuan CHECK (
+        (MaSP IS NOT NULL AND MaBV IS NULL)
+        OR
+        (MaSP IS NULL AND MaBV IS NOT NULL)
+    )
 );
 
 -- Bảng: GioHang
 CREATE TABLE GioHang (
     MaGioHang BIGINT IDENTITY(1,1) PRIMARY KEY,
-    MaTK BIGINT UNIQUE NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE CASCADE
+    MaTK BIGINT UNIQUE NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE CASCADE,
+    NgayCapNhat DATETIME DEFAULT GETDATE()
 );
+
 -- Bảng: GioHangChiTiet
 CREATE TABLE GioHangChiTiet
 (
@@ -383,58 +426,55 @@ CREATE TABLE NhapKhoChiTiet
     ThanhTien DECIMAL(18, 2)
 );
 
--- Bảng: PhongChat
-CREATE TABLE PhongChat
-(
-    MaPhong BIGINT IDENTITY(1,1) PRIMARY KEY,
-    MaTK BIGINT UNIQUE NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE CASCADE,
-    MaNV BIGINT FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE NO ACTION,
-    TrangThai INT DEFAULT 0,
-    NgayTao DATETIME DEFAULT GETDATE()
+
+-- Bảng: CuocTroChuyen (Cuộc hội thoại)
+CREATE TABLE CuocTroChuyen (
+    MaCuocTroChuyen BIGINT IDENTITY(1,1) PRIMARY KEY,
+    MaTK            BIGINT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK),
+    MaNhanVien      BIGINT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK), -- Nhân viên đang xử lý
+    TrangThai       NVARCHAR(10) DEFAULT 'AI' NOT NULL, -- AI, PENDING, HUMAN, CLOSED
+    NgayTao         DATETIME DEFAULT GETDATE(),
+    NgayCapNhat     DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_chat_user ON CuocTroChuyen(MaTK);
+CREATE INDEX idx_chat_staff ON CuocTroChuyen(MaNhanVien);
+
+
+-- Bảng: TinNhan (Tin nhắn)
+CREATE TABLE TinNhan (
+    MaTinNhan       BIGINT IDENTITY(1,1) PRIMARY KEY,
+    MaCuocTroChuyen BIGINT NOT NULL FOREIGN KEY REFERENCES CuocTroChuyen(MaCuocTroChuyen) ON DELETE CASCADE,
+    LoaiNguoiGui    NVARCHAR(10) NOT NULL, -- USER, AI, STAFF
+    NoiDung         NVARCHAR(MAX) NOT NULL,
+    DaDoc           BIT DEFAULT 0, -- 0: Chưa đọc, 1: Đã đọc
+    NgayGui         DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_chat_message ON TinNhan(MaCuocTroChuyen, NgayGui);
+
+
+-- Bảng: SanPhamYeuThich
+CREATE TABLE SanPhamYeuThich (
+    MaSPYT    BIGINT IDENTITY(1,1) PRIMARY KEY,
+    MaTK      BIGINT NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK) ON DELETE CASCADE,
+    MaSP      BIGINT NOT NULL FOREIGN KEY REFERENCES SanPham(MaSP) ON DELETE CASCADE,
+    NgayThem  DATETIME DEFAULT GETDATE(),
+    CONSTRAINT UK_SPYT UNIQUE (MaTK, MaSP)
 );
 
--- Bảng: TinNhan
-CREATE TABLE TinNhan
-(
-    MaTinNhan BIGINT IDENTITY(1,1) PRIMARY KEY,
-    MaPhong BIGINT NOT NULL FOREIGN KEY REFERENCES PhongChat(MaPhong) ON DELETE CASCADE,
-    MaNguoiGui BIGINT NOT NULL FOREIGN KEY REFERENCES TaiKhoan(MaTK),
-    LoaiNguoiGui INT DEFAULT 0,
-    -- 0=Khách, 1=Nhân viên, 2=Bot
-    LoaiTinNhan INT DEFAULT 0,
-    -- 0=Text, 1=Image
-    NoiDung NVARCHAR(MAX),
-    ThoiGianGui DATETIME DEFAULT GETDATE(),
-    DaDoc BIT DEFAULT 0
-);
+-- (Bảng TrangThaiDonHang đã được dời lên trên)
 
--- Bảng: TrangThaiDonHang (Bổ sung theo Entity TrangThaiDonHang.java)
-CREATE TABLE TrangThaiDonHang
-(
-    MaTTDH INT IDENTITY(0,1) PRIMARY KEY, -- Bắt đầu từ 0 để khớp mã trạng thái trong DonHang
-    TenTTDH NVARCHAR(50) NOT NULL UNIQUE
-);
-
--- Bảng: ThongKe (Bổ sung theo Entity ThongKe.java)
+-- Bảng: ThongKe
 CREATE TABLE ThongKe
 (
-    MaThongKe INT IDENTITY(1,1) PRIMARY KEY,
+    MaThongKe BIGINT IDENTITY(1,1) PRIMARY KEY,
     NgayBaoCao DATE NOT NULL UNIQUE,
     TongDoanhThu DECIMAL(18,2) NOT NULL,
     TongDonHang INT NOT NULL,
     TongSanPhamBanRa INT NOT NULL
 );
 
--- Bảng: NhapKho (Bổ sung theo Entity NhapKho.java)
-CREATE TABLE NhapKho
-(
-    MaNK INT IDENTITY(1,1) PRIMARY KEY,
-    MaSP BIGINT NOT NULL FOREIGN KEY REFERENCES SanPham(MaSP) ON DELETE CASCADE,
-    SoLuong INT NOT NULL,
-    NgayNhap DATETIME DEFAULT GETDATE()
-);
 GO
-PRINT N'PHẦN 2 (BỔ SUNG): TẠO BẢNG TRẠNG THÁI, THỐNG KÊ, NHẬP KHO THÀNH CÔNG!';
+PRINT N'PHẦN 2: TẠO CẤU TRÚC BẢNG FINAL THÀNH CÔNG!';
 GO
 
 /*
@@ -448,14 +488,14 @@ GO
 
 -- 1. Chèn các bảng Danh Mục (Không phụ thuộc)
 
-SET IDENTITY_INSERT dbo.Role ON;
-INSERT INTO Role
-(MaRole, TenRole)
+SET IDENTITY_INSERT dbo.VaiTro ON;
+INSERT INTO VaiTro
+(MaVaiTro, TenVaiTro)
 VALUES
     (1, 'ADMIN'),
     (2, 'NHANVIEN'),
     (3, 'KHACHHANG');
-SET IDENTITY_INSERT dbo.Role OFF;
+SET IDENTITY_INSERT dbo.VaiTro OFF;
 GO
 
 SET IDENTITY_INSERT dbo.TaiKhoan ON;
@@ -471,8 +511,8 @@ VALUES
 SET IDENTITY_INSERT dbo.TaiKhoan OFF;
 GO
 
-INSERT INTO TaiKhoan_Role
-    (MaTK, MaRole)
+INSERT INTO TaiKhoan_VaiTro
+    (MaTK, MaVaiTro)
 VALUES
     (1, 1),
     -- Admin Luxury là ADMIN
@@ -768,19 +808,21 @@ VALUES
 GO
 
 -- 4.3.4. Khách chat với CSKH
-SET IDENTITY_INSERT dbo.PhongChat ON;
-INSERT INTO PhongChat
-(MaPhong, MaTK, MaNV, TrangThai)
-VALUES
-    (1, 3, 2, 1);
--- Phòng chat của Khách (3), đang được NV (2) hỗ trợ
-SET IDENTITY_INSERT dbo.PhongChat OFF;
+-- 4.3.4. Khách chat với CSKH (Dùng hệ thống mới CuocTroChuyen/TinNhan)
+INSERT INTO CuocTroChuyen (MaTK, TrangThai) VALUES (3, 'HUMAN'); -- MaCuocTroChuyen = 1
+INSERT INTO TinNhan (MaCuocTroChuyen, LoaiNguoiGui, NoiDung)
+VALUES (1, 'USER', N'Chào shop, tôi cần tư vấn về sản phẩm cao cấp');
 GO
 
-INSERT INTO TinNhan
-    (MaPhong, MaNguoiGui, LoaiNguoiGui, LoaiTinNhan, NoiDung)
-VALUES
-    (1, 3, 0, 0, N'Chào shop, tôi cần tư vấn về áo Polo'); -- 0=Khách, 0=Text
+-- Seed data cho TrangThaiDonHang để khớp với chi tiết trong Java (0-5)
+-- Phải chèn trước DonHang để thỏa mãn FK TrangThaiDH
+INSERT INTO TrangThaiDonHang (MaTTDH, TenTTDH) VALUES
+    (0, N'Chờ xác nhận'),
+    (1, N'Đã xác nhận'),
+    (2, N'Đang giao'),
+    (3, N'Đã giao'),
+    (4, N'Hoàn tất'),
+    (5, N'Đã hủy');
 GO
 
 -- 4.3.5. Đơn hàng cũ (ĐÃ GIAO) của khách
@@ -826,16 +868,7 @@ VALUES
 SET IDENTITY_INSERT dbo.DanhGia OFF;
 GO
 
--- Seed data cho TrangThaiDonHang để tránh null và phục vụ hiển thị
-SET IDENTITY_INSERT dbo.TrangThaiDonHang ON;
-INSERT INTO TrangThaiDonHang (MaTTDH, TenTTDH) VALUES
-                                                   (0, N'Chờ xác nhận'),
-                                                   (1, N'Đã xác nhận'),
-                                                   (2, N'Đang giao'),
-                                                   (3, N'Hoàn tất'),
-                                                   (4, N'Đã hủy');
-SET IDENTITY_INSERT dbo.TrangThaiDonHang OFF;
-GO
+-- (Seed data TrangThaiDonHang đã được dời lên trên)
 
 -- Seed data mẫu cho ThongKe (ngày hiện tại)
 SET IDENTITY_INSERT dbo.ThongKe ON;
@@ -844,11 +877,6 @@ VALUES (1, CAST(GETDATE() AS DATE), 35030000.00, 1, 1);
 SET IDENTITY_INSERT dbo.ThongKe OFF;
 GO
 
--- Seed data mẫu cho NhapKho (song song với PhieuNhap/NhapKhoChiTiet để đơn giản hóa Mapping Entity)
-SET IDENTITY_INSERT dbo.NhapKho ON;
-INSERT INTO NhapKho (MaNK, MaSP, SoLuong, NgayNhap)
-VALUES (1, 1, 10, GETDATE()-1);
-SET IDENTITY_INSERT dbo.NhapKho OFF;
 GO
 
 PRINT N'PHẦN 3: CHÈN DỮ LIỆU MẪU THÀNH CÔNG!';
@@ -926,10 +954,10 @@ PRINT N'========================================';
 PRINT N'1. BẢNG TÀI KHOẢN VÀ PHÂN QUYỀN';
 PRINT N'========================================';
 
--- Bảng Role
-SELECT '=== ROLE ===' AS [Table];
+-- Bảng VaiTro
+SELECT '=== VAI TRO ===' AS [Table];
 SELECT *
-FROM Role;
+FROM VaiTro;
 GO
 
 -- Bảng TaiKhoan
@@ -938,10 +966,10 @@ SELECT *
 FROM TaiKhoan;
 GO
 
--- Bảng TaiKhoan_Role
-SELECT '=== TAI KHOAN - ROLE ===' AS [Table];
+-- Bảng TaiKhoan_VaiTro
+SELECT '=== TAI KHOAN - VAI TRO ===' AS [Table];
 SELECT *
-FROM TaiKhoan_Role;
+FROM TaiKhoan_VaiTro;
 GO
 
 -- Bảng SoDiaChi
@@ -1104,10 +1132,10 @@ PRINT N'========================================';
 PRINT N'9. BẢNG CHAT';
 PRINT N'========================================';
 
--- Bảng PhongChat
-SELECT '=== PHONG CHAT ===' AS [Table];
+-- Bảng CuocTroChuyen
+SELECT '=== CUOC TRO CHUYEN ===' AS [Table];
 SELECT *
-FROM PhongChat;
+FROM CuocTroChuyen;
 GO
 
 -- Bảng TinNhan
@@ -1173,8 +1201,6 @@ GO
 PRINT N'========================================';
 PRINT N'BẢNG NHẬP KHO (BỔ SUNG)';
 PRINT N'========================================';
-SELECT '=== NHAP KHO ===' AS [Table];
-SELECT * FROM NhapKho;
 GO
 
 
@@ -1548,135 +1574,38 @@ PRINT N'✅ Đã thêm biến thể: Size L, Màu Trắng, Giá 3.000 VNĐ';
 -- Màu Đen
 IF NOT EXISTS (SELECT 1 FROM MauSacSP WHERE TenMau = N'Đen')
 BEGIN
-INSERT INTO MauSacSP (TenMau, MaHex) VALUES (N'Đen', N'#000000');
+    INSERT INTO MauSacSP (TenMau, MaHex) VALUES (N'Đen', N'#000000');
 END
-SELECT @MaMau = MaMau FROM MauSacSP WHERE TenMau = N'Đen';
-
--- Size M Màu Đen
-SELECT @MaSize = MaSize FROM SizeSP WHERE TenSize = N'M';
-INSERT INTO SanPhamChiTiet (MaSP, MaSize, MaMau, GiaBan, GiaNhap, SoLuongTon, SoLuongDaBan)
-VALUES (@MaSP, @MaSize, @MaMau, 3000.00, 2000.00, 999, 0);
-
-PRINT N'✅ Đã thêm biến thể: Size M, Màu Đen, Giá 3.000 VNĐ';
-
--- ===== KIỂM TRA KẾT QUẢ =====
-PRINT N'';
-PRINT N'===== THÔNG TIN SẢN PHẨM VỪA TẠO =====';
 GO
 
-SELECT
-    sp.MaSP,
-    sp.TenSP as [Tên sản phẩm],
-    lsp.TenLoai as [Loại],
-    th.TenTH as [Thương hiệu],
-    COUNT(spct.MaBienThe) as [Số biến thể],
-    MIN(spct.GiaBan) as [Giá thấp nhất],
-    MAX(spct.GiaBan) as [Giá cao nhất],
-    SUM(spct.SoLuongTon) as [Tổng tồn kho]
-FROM SanPham sp
-    LEFT JOIN LoaiSanPham lsp ON sp.MaLoai = lsp.MaLoai
-    LEFT JOIN ThuongHieu th ON sp.MaTH = th.MaTH
-    LEFT JOIN SanPhamChiTiet spct ON sp.MaSP = spct.MaSP
-WHERE sp.TenSP = N'Áo Test PayOS 3K'
-GROUP BY sp.MaSP, sp.TenSP, lsp.TenLoai, th.TenTH;
+PRINT N'✅ HOÀN TẤT TOÀN BỘ KỊCH BẢN THIẾT LẬP DB!';
 GO
 
-PRINT N'';
-PRINT N'===== CHI TIẾT CÁC BIẾN THỂ =====';
-GO
 
-SELECT
-    spct.MaBienThe as [Mã biến thể],
-    sp.TenSP as [Sản phẩm],
-    sz.TenSize as [Size],
-    mau.TenMau as [Màu],
-    spct.GiaBan as [Giá bán],
-    spct.SoLuongTon as [Tồn kho]
-FROM SanPhamChiTiet spct
-    INNER JOIN SanPham sp ON spct.MaSP = sp.MaSP
-    LEFT JOIN SizeSP sz ON spct.MaSize = sz.MaSize
-    LEFT JOIN MauSacSP mau ON spct.MaMau = mau.MaMau
-WHERE sp.TenSP = N'Áo Test PayOS 3K'
-ORDER BY sz.TenSize, mau.TenMau;
-GO
-
-PRINT N'';
-PRINT N'✅ HOÀN TẤT! Sản phẩm đã sẵn sàng để test PayOS.';
-PRINT N'';
-PRINT N'📝 HƯỚNG DẪN TEST:';
-PRINT N'1. Truy cập: http://localhost:8080';
-PRINT N'2. Tìm kiếm "Áo Test PayOS 3K"';
-PRINT N'3. Thêm vào giỏ hàng';
-PRINT N'4. Checkout → Chọn PayOS → Đặt hàng';
-PRINT N'5. Quét QR code để thanh toán 3.000 VNĐ';
-PRINT N'';
-GO
-
+-- ✅ PHẦN 4: TRIGGERS AUTO-UPDATE NgayCapNhat
 -- =====================================================
--- SCRIPT THÊM BẢNG AI CHATBOT
--- =====================================================
-
-PRINT N'========================================';
-PRINT N'AI CHATBOT: TẠO BẢNG CONVERSATIONS & MESSAGES';
-PRINT N'========================================';
 GO
 
--- Bảng lưu cuộc hội thoại
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Conversations')
-BEGIN
-    CREATE TABLE Conversations (
-        MaCuocTroChuyen INT IDENTITY(1,1) PRIMARY KEY,
-        MaTK            BIGINT NULL,
-        TrangThai       NVARCHAR(10) DEFAULT 'AI' NOT NULL,
-        NgayTao         DATETIME DEFAULT GETDATE(),
-        NgayCapNhat     DATETIME DEFAULT GETDATE(),
-        FOREIGN KEY (MaTK) REFERENCES TaiKhoan(MaTK)
-    );
-    PRINT N'✅ Đã tạo bảng Conversations';
-END
-ELSE
-BEGIN
-    PRINT N'⚠️ Bảng Conversations đã tồn tại';
-END
+CREATE TRIGGER trg_UpdateTaiKhoan_NgayCapNhat ON TaiKhoan AFTER UPDATE AS
+BEGIN UPDATE TaiKhoan SET NgayCapNhat = GETDATE() FROM TaiKhoan INNER JOIN inserted ON TaiKhoan.MaTK = inserted.MaTK END;
 GO
 
--- Bảng lưu từng tin nhắn
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Messages')
-BEGIN
-    CREATE TABLE Messages (
-        MaTinNhan       INT IDENTITY(1,1) PRIMARY KEY,
-        MaCuocTroChuyen INT NOT NULL,
-        LoaiNguoiGui    NVARCHAR(10) NOT NULL,
-        NoiDung         NVARCHAR(MAX) NOT NULL,
-        NgayGui         DATETIME DEFAULT GETDATE(),
-        FOREIGN KEY (MaCuocTroChuyen) REFERENCES Conversations(MaCuocTroChuyen)
-    );
-    PRINT N'✅ Đã tạo bảng Messages';
-END
-ELSE
-BEGIN
-    PRINT N'⚠️ Bảng Messages đã tồn tại';
-END
+CREATE TRIGGER trg_UpdateSanPham_NgayCapNhat ON SanPham AFTER UPDATE AS
+BEGIN UPDATE SanPham SET NgayCapNhat = GETDATE() FROM SanPham INNER JOIN inserted ON SanPham.MaSP = inserted.MaSP END;
 GO
 
-PRINT N'✅ HOÀN TẤT KHỞI TẠO BẢNG AI CHATBOT!';
-GO
--- Bảng sản phẩm yêu thích
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SanPhamYeuThich')
-BEGIN
-    CREATE TABLE SanPhamYeuThich (
-        MaSPYT    BIGINT IDENTITY(1,1) PRIMARY KEY,
-        MaTK      BIGINT NOT NULL,
-        MaSP      BIGINT NOT NULL,
-        NgayThem  DATETIME DEFAULT GETDATE(),
-        CONSTRAINT FK_SPYT_TK FOREIGN KEY (MaTK) REFERENCES TaiKhoan(MaTK),
-        CONSTRAINT FK_SPYT_SP FOREIGN KEY (MaSP) REFERENCES SanPham(MaSP)
-    );
-    PRINT N'✅ Đã tạo bảng SanPhamYeuThich';
-END
-ELSE
-BEGIN
-    PRINT N'⚠️ Bảng SanPhamYeuThich đã tồn tại';
-END
+CREATE TRIGGER trg_UpdateDonHang_NgayCapNhat ON DonHang AFTER UPDATE AS
+BEGIN UPDATE DonHang SET NgayCapNhat = GETDATE() FROM DonHang INNER JOIN inserted ON DonHang.MaDH = inserted.MaDH END;
 GO
 
+CREATE TRIGGER trg_UpdateCuocTroChuyen_NgayCapNhat ON CuocTroChuyen AFTER UPDATE AS
+BEGIN UPDATE CuocTroChuyen SET NgayCapNhat = GETDATE() FROM CuocTroChuyen INNER JOIN inserted ON CuocTroChuyen.MaCuocTroChuyen = inserted.MaCuocTroChuyen END;
+GO
+
+CREATE TRIGGER trg_UpdateGioHang_NgayCapNhat ON GioHang AFTER UPDATE AS
+BEGIN UPDATE GioHang SET NgayCapNhat = GETDATE() FROM GioHang INNER JOIN inserted ON GioHang.MaGioHang = inserted.MaGioHang END;
+GO
+
+
+-- ✅ HOÀN TẤT TOÀN BỘ KỊCH BẢN!
+GO

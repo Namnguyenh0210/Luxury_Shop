@@ -89,10 +89,10 @@ public class ApiController {
             String email = auth.getName();
             TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(email);
 
-            Set<VaiTro> roles = taiKhoan.getRoles();
+            Set<VaiTro> vaiTros = taiKhoan.getVaiTros();
             java.util.List<String> roleNames = new java.util.ArrayList<>();
-            for (VaiTro role : roles) {
-                roleNames.add(role.getTenRole());
+            for (VaiTro role : vaiTros) {
+                roleNames.add(role.getTenVaiTro());
             }
 
             response.put("authenticated", true);
@@ -100,9 +100,9 @@ public class ApiController {
             response.put("hoTen", taiKhoan.getHoTen());
             response.put("soDienThoai", taiKhoan.getSoDienThoai());
             response.put("avatar", taiKhoan.getAvatar());
-            response.put("provider", taiKhoan.getProvider() != null ? taiKhoan.getProvider() : "LOCAL");
-            response.put("roles", roleNames);
-            response.put("isGoogleUser", "GOOGLE".equals(taiKhoan.getProvider()));
+            response.put("provider", taiKhoan.getNguonTao() != null ? taiKhoan.getNguonTao() : "LOCAL");
+            response.put("vaiTros", roleNames);
+            response.put("isGoogleUser", "GOOGLE".equals(taiKhoan.getNguonTao()));
             response.put("trangThai", taiKhoan.getTrangThai());
             response.put("ngayTao", taiKhoan.getNgayTao());
 
@@ -446,10 +446,10 @@ public class ApiController {
 
             // Get user info
             TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(username);
-            Set<VaiTro> roles = taiKhoan.getRoles();
+            Set<VaiTro> vaiTros = taiKhoan.getVaiTros();
             java.util.List<String> roleNames = new java.util.ArrayList<>();
-            for (VaiTro role : roles) {
-                roleNames.add(role.getTenRole());
+            for (VaiTro role : vaiTros) {
+                roleNames.add(role.getTenVaiTro());
             }
 
             // Determine redirect URL based on role
@@ -465,7 +465,7 @@ public class ApiController {
             response.put("user", Map.of(
                     "email", taiKhoan.getEmail(),
                     "hoTen", taiKhoan.getHoTen(),
-                    "roles", roleNames));
+                    "vaiTros", roleNames));
             response.put("redirectUrl", redirectUrl);
 
             return ResponseEntity.ok(response);

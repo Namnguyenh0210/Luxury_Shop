@@ -87,55 +87,32 @@ public class StaffDonHangController {
 
         Integer trangThaiHienTai = donHang.getTrangThaiDH();
 
-        // Đơn đã kết thúc (Hoàn tất=4 hoặc Đã hủy=5) → không thay đổi được
-        if (trangThaiHienTai == 4 || trangThaiHienTai == 5) {
-            throw new RuntimeException("Đơn hàng đã kết thúc, không thể thay đổi trạng thái!");
+        try {
+            String nguoiCapNhat = currentUser.getHoTen();
+            String ghiChu = (trangThaiMoi == 5) ? "Hủy đơn: " + reason : "Cập nhật qua Staff";
+            
+            // Gán nhân viên khi xác nhận lần đầu (status 0 → 1)
+            if (trangThaiHienTai == 0 && trangThaiMoi == 1 && donHang.getNhanVien() == null) {
+                donHang.setNhanVien(currentUser);
+                donHangRepository.save(donHang);
+            }
+
+            boolean updated = donHangService.capNhatTrangThai(id, trangThaiMoi, nguoiCapNhat, ghiChu);
+            
+            if (updated && reason != null && !reason.isBlank()) {
+                DonHang dh = donHangRepository.findById(id).orElse(null);
+                if (dh != null) {
+                    dh.setLyDoHuy(reason);
+                    donHangRepository.save(dh);
+                }
+            }
+
+            res.put("success", updated);
+            res.put("message", updated ? "Cập nhật thành công!" : "Không thể cập nhật!");
+        } catch (Exception e) {
+            res.put("success", false);
+            res.put("message", "Lỗi: " + e.getMessage());
         }
-
-        // Chỉ được hủy (status=5) khi đang ở "Chờ xác nhận" (status=0) HOẶC khi khách báo chưa nhận hàng
-        boolean canCancel = (trangThaiMoi == 5 && (trangThaiHienTai == 0 || donHang.getKhachBaoChuaNhan()));
-
-        if (trangThaiMoi == 5 && !canCancel) {
-            throw new RuntimeException("Không thể hủy đơn đã xác nhận! Liên hệ khách hàng trực tiếp.");
-        }
-
-        // Bắt buộc đi tuần tự: 0→1→2→3→4
-        boolean isSequence = (trangThaiMoi == trangThaiHienTai + 1);
-
-        if (trangThaiMoi != 5 && !isSequence) {
-            throw new RuntimeException("Chỉ được chuyển sang trạng thái kế tiếp!");
-        }
-
-        // Gán nhân viên khi xác nhận lần đầu (status 0 → 1)
-        if (trangThaiHienTai == 0 && trangThaiMoi == 1 && donHang.getNhanVien() == null) {
-            donHang.setNhanVien(currentUser);
-        }
-
-        // Kiểm tra nhân viên phụ trách (ADMIN bỏ qua kiểm tra này)
-        boolean isAdmin = auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        if (!isAdmin && donHang.getNhanVien() != null &&
-                !donHang.getNhanVien().getMaTK().equals(currentUser.getMaTK())) {
-            throw new RuntimeException("Đơn hàng đã có nhân viên khác phụ trách!");
-        }
-
-        donHang.setTrangThaiDH(trangThaiMoi);
-        donHang.setNgayCapNhat(LocalDateTime.now());
-        
-        if (reason != null && !reason.isBlank()) {
-            donHang.setLyDoHuy(reason);
-        }
-
-        // Hoàn tất → tự động đánh dấu đã thanh toán
-        if (trangThaiMoi == 4) {
-            donHang.setTrangThaiThanhToan(1);
-            donHang.setNgayThanhToan(LocalDateTime.now());
-        }
-
-        donHangRepository.save(donHang);
-
-        res.put("message", "Cập nhật thành công!");
-        res.put("success", true);
         return res;
     }
 

@@ -7,15 +7,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.example.projectend.entity.Message;
-
 /**
- * ENTITY CONVERSATION - LƯU TRỮ CUỘC HỘI THOẠI CHATBOT
- * Bảng: Conversations
+ * ENTITY CUỘC TRÒ CHUYỆN - LƯU TRỮ CUỘC HỘI THOẠI CHATBOT
+ * Bảng: CuocTroChuyen
  */
 @Entity
-@Table(name = "Conversations")
-public class Conversation {
+@Table(name = "CuocTroChuyen")
+public class CuocTroChuyen {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,8 +22,13 @@ public class Conversation {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaTK")
-    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "matKhau", "roles" })
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "matKhau", "vaiTros" })
     private TaiKhoan taiKhoan;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaNhanVien")
+    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler", "matKhau", "vaiTros" })
+    private TaiKhoan nhanVien;
 
     @Column(name = "TrangThai", nullable = false, length = 10)
     private String trangThai = "AI"; // 'AI', 'HUMAN', 'CLOSED'
@@ -36,15 +39,18 @@ public class Conversation {
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnoreProperties("conversation")
-    private List<Message> messages = new ArrayList<>();
+    @OneToMany(mappedBy = "cuocTroChuyen", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("cuocTroChuyen")
+    private List<TinNhan> tinNhans = new ArrayList<>();
+
+    @Transient
+    private String lastMessage;
 
     // Constructors
-    public Conversation() {
+    public CuocTroChuyen() {
     }
 
-    public Conversation(TaiKhoan taiKhoan) {
+    public CuocTroChuyen(TaiKhoan taiKhoan) {
         this.taiKhoan = taiKhoan;
     }
 
@@ -63,6 +69,14 @@ public class Conversation {
 
     public void setTaiKhoan(TaiKhoan taiKhoan) {
         this.taiKhoan = taiKhoan;
+    }
+
+    public TaiKhoan getNhanVien() {
+        return nhanVien;
+    }
+
+    public void setNhanVien(TaiKhoan nhanVien) {
+        this.nhanVien = nhanVien;
     }
 
     public String getTrangThai() {
@@ -89,11 +103,19 @@ public class Conversation {
         this.ngayCapNhat = ngayCapNhat;
     }
 
-    public List<Message> getMessages() {
-        return messages;
+    public List<TinNhan> getTinNhans() {
+        return tinNhans;
     }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
+    public void setTinNhans(List<TinNhan> tinNhans) {
+        this.tinNhans = tinNhans;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
     }
 }

@@ -127,7 +127,7 @@ public class TaiKhoanService {
 
         if (tkOpt.isPresent() && roleOpt.isPresent()) {
             TaiKhoan tk = tkOpt.get();
-            tk.addRole(roleOpt.get());
+            tk.addVaiTro(roleOpt.get());
             save(tk);
             return true;
         }

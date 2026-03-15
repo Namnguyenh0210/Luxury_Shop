@@ -13,5 +13,5 @@ import java.util.Optional;
 public interface VaiTroRepository extends JpaRepository<VaiTro, Long> {
 
     // Tìm role theo tên (ADMIN, NHANVIEN, KHACHHANG)
-    Optional<VaiTro> findByTenRole(String tenRole);
+    Optional<VaiTro> findByTenVaiTro(String tenVaiTro);
 }

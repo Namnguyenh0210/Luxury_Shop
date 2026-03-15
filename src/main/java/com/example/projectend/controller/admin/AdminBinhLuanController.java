@@ -45,7 +45,7 @@ public class AdminBinhLuanController {
                 dto.put("trangThai", bl.getTrangThai());
                 dto.put("phanHoiAdmin", bl.getPhanHoiAdmin());
                 dto.put("ngayPhanHoiAdmin", bl.getNgayPhanHoiAdmin() != null ? bl.getNgayPhanHoiAdmin().format(FMT) : null);
-                dto.put("reportCount", bl.getReportCount());
+                dto.put("reportCount", bl.getSoLuotBaoCao());
 
                 if(bl.getTaiKhoan() != null) {
                     dto.put("tenNguoiDung", bl.getTaiKhoan().getHoTen());

@@ -534,7 +534,7 @@ export default {
   font-weight: 800;
   color: #111827;
   margin: 0 0 12px;
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Times New Roman', Times, serif;
   line-height: 1.3;
 }
 

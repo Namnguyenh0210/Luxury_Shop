@@ -160,10 +160,10 @@ export default {
 @import '@/assets/css/Home.css';
 
 body {
-    font-family: 'Playfair Display', 'Manrope', Georgia, serif;
+    font-family: 'Times New Roman', Times, serif;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
+    font-family: 'Times New Roman', Times, serif;
 }
 .material-symbols-outlined {
     font-variation-settings:

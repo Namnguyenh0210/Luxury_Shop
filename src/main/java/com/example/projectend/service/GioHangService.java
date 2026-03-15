@@ -34,9 +34,6 @@ public class GioHangService {
     private SanPhamChiTietRepository sanPhamChiTietRepository;
 
     @Autowired
-    private SanPhamRepository sanPhamRepository;
-
-    @Autowired
     private TaiKhoanRepository taiKhoanRepository;
 
     @PersistenceContext
@@ -226,10 +223,6 @@ public class GioHangService {
         try {
             TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
-
-            // Tìm sản phẩm
-            SanPham sanPham = sanPhamRepository.findById(productId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
             // Tìm biến thể còn hàng đầu tiên
             List<SanPhamChiTiet> variants = sanPhamChiTietRepository.findBySanPham_MaSP(productId);

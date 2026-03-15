@@ -109,7 +109,7 @@ public class AuthController extends BaseController {
 
         try {
             // Lấy vai trò khách hàng (KHACHHANG trong database - khớp với db.sql)
-            VaiTro vaiTroUser = vaiTroRepository.findByTenRole("KHACHHANG")
+            VaiTro vaiTroUser = vaiTroRepository.findByTenVaiTro("KHACHHANG")
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò KHACHHANG"));
 
             // Tạo tài khoản mới
@@ -119,7 +119,7 @@ public class AuthController extends BaseController {
             taiKhoanMoi.setMatKhau(matKhau); // Plain text password (NoOpPasswordEncoder)
             taiKhoanMoi.setSoDienThoai(soDienThoai);
             // Thêm vai trò vào Set (Many-to-Many)
-            taiKhoanMoi.addRole(vaiTroUser);
+            taiKhoanMoi.addVaiTro(vaiTroUser);
             taiKhoanMoi.setTrangThai(true);
             taiKhoanMoi.setNgayTao(LocalDateTime.now());
 
