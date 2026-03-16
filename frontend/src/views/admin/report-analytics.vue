@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout page-title="Báo Cáo & Thống Kê">
+  
     <div class="p-8 space-y-8">
 
       <!-- STAT CARDS -->
@@ -85,18 +85,15 @@
 
       </div>
     </div>
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 import { Chart } from 'chart.js/auto'
 
 export default {
   name: 'ReportAnalytics',
-  components: { AdminLayout },
-
   data() {
     return {
       // Totals
@@ -369,4 +366,4 @@ export default {
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
-</style>
+</style>

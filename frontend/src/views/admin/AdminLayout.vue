@@ -9,7 +9,7 @@
           <div class="flex flex-col gap-8">
 
             <div class="flex items-center gap-3 px-3 py-2">
-              <div class="flex items-center justify-center size-9 rounded-lg bg-yellow-600 text-white shadow-sm">
+              <div class="flex items-center justify-center size-9 rounded-lg bg-[#C8A97E] text-white shadow-sm shadow-[#C8A97E]/20">
                 <span class="material-symbols-outlined text-xl">diamond</span>
               </div>
               <div>
@@ -49,10 +49,10 @@
                 <router-link
                   v-else
                   :to="item.to"
-                  class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-yellow-50 hover:text-yellow-800 group"
-                  active-class="bg-yellow-50 text-yellow-800 font-semibold shadow-sm"
+                  class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 text-gray-600 hover:bg-[#C8A97E]/10 hover:text-[#C8A97E] group"
+                  active-class="bg-[#C8A97E]/10 text-[#C8A97E] font-semibold shadow-sm"
                 >
-                  <span class="material-symbols-outlined text-[20px] group-[.router-link-active]:text-yellow-700">{{ item.icon }}</span>
+                  <span class="material-symbols-outlined text-[20px] group-[.router-link-active]:text-[#C8A97E]">{{ item.icon }}</span>
                   {{ item.label }}
                 </router-link>
               </template>
@@ -85,9 +85,9 @@
           <div class="flex items-center gap-2">
             <button class="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100 text-gray-500 transition-colors relative">
               <span class="material-symbols-outlined text-[20px]">notifications</span>
-              <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-yellow-500"></span>
+              <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#C8A97E] shadow-sm"></span>
             </button>
-            <div class="size-9 rounded-full bg-slate-200 overflow-hidden border-2 border-yellow-400 cursor-pointer">
+            <div class="size-9 rounded-full bg-slate-200 overflow-hidden border-2 border-[#C8A97E] cursor-pointer shadow-sm">
               <img
                 :src="`https://ui-avatars.com/api/?name=${encodeURIComponent(adminUser.name || 'Admin')}&background=78350f&color=fff`"
                 :alt="adminUser.name || 'Admin'"
@@ -97,8 +97,12 @@
         </header>
 
         <!-- Page Content -->
-        <div class="flex-1 overflow-auto">
-          <slot />
+        <div class="flex-1 bg-gray-50/30 overflow-x-hidden min-h-0 relative">
+          <router-view v-slot="{ Component }">
+            <transition name="page-fade">
+              <component :is="Component" :key="$route.fullPath" />
+            </transition>
+          </router-view>
         </div>
 
       </main>
@@ -107,27 +111,20 @@
   </div>
 </template>
 
+
 <script>
-import axios from 'axios'
+import { authState, fetchCurrentUser } from '@/utils/auth'
 
 export default {
   name: 'AdminLayout',
   components: { },
 
-  props: {
-    pageTitle: {
-      type: String,
-      default: 'Admin'
-    }
-  },
-
   data() {
     return {
-      adminUser: { name: '', role: '' },
-      navItems: [
+      allNavItems: [
         { isHeader: true, label: 'Tổng Quan' },
         { to: '/admin/dashboard', icon: 'dashboard',    label: 'Bảng Điều Khiển'  },
-        { to: '/admin/reports',   icon: 'bar_chart',    label: 'Báo Cáo Thống Kê'  },
+        { to: '/admin/reports',   icon: 'bar_chart',    label: 'Báo Cáo Thống Kê', roles: ['ADMIN']  },
 
         { isHeader: true, label: 'Kinh Doanh' },
         { to: '/admin/products',  icon: 'diamond',      label: 'Sản Phẩm'  },
@@ -136,7 +133,7 @@ export default {
         { to: '/admin/reviews',   icon: 'star_rate',    label: 'Đánh Giá' },
 
         { isHeader: true, label: 'Người Dùng' },
-        { to: '/admin/customers', icon: 'person',       label: 'Danh Sách Tài Khoản' },
+        { to: '/admin/customers', icon: 'person',       label: 'Danh Sách Tài Khoản', roles: ['ADMIN'] },
         { to: '/admin/chat',      icon: 'chat',         label: 'Hỗ Trợ Trực Tuyến' },
 
         { isHeader: true, label: 'Nội Dung' },
@@ -147,17 +144,27 @@ export default {
   },
 
   computed: {
+    pageTitle() {
+      return this.$route.meta?.title || 'Quản lý'
+    },
+    adminUser() {
+      return authState.user || { name: 'Admin', role: '...', roles: [] }
+    },
     userInitial() {
       return this.adminUser.name ? this.adminUser.name.charAt(0).toUpperCase() : 'A'
+    },
+    navItems() {
+      return this.allNavItems.filter(item => {
+        if (!item.roles) return true
+        return item.roles.some(role => this.adminUser.roles.includes(role))
+      })
     }
   },
 
   async created() {
-    try {
-      const res = await axios.get('/admin/reports', { withCredentials: true })
-      this.adminUser = res.data.user || { name: 'Admin', role: 'ROLE_ADMIN' }
-    } catch {
-      this.adminUser = { name: 'Admin', role: 'ROLE_ADMIN' }
+    await fetchCurrentUser()
+    if (!authState.user && authState.fetched) {
+      window.location.href = '/login'
     }
   },
 
@@ -183,4 +190,21 @@ export default {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #d1d5db;
 }
+
+/* Page Transition */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition: all 0.3s ease;
+}
+
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
 </style>
+

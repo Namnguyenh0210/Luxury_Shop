@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout page-title="Quản Lý Đánh Giá Tương Tác">
+  
     <div class="p-8 space-y-6">
 
       <!-- THỐNG KÊ NHANH -->
@@ -215,17 +215,15 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 
 export default {
   name: 'ReviewsAdmin',
-  components: { AdminLayout },
   data() {
     return {
       reviews: [],

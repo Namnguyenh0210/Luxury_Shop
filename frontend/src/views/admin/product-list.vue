@@ -1,12 +1,11 @@
 <template>
-  <AdminLayout page-title="Quản Lý Sản Phẩm & Danh Mục">
-    <div class="w-full mx-auto p-8 space-y-6">
+  <div class="w-full mx-auto p-8 space-y-6">
       
       <!-- NAVIGATION TABS -->
       <div class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
         <button 
           @click="activeTab = 'products'"
-          :class="activeTab === 'products' ? 'bg-white shadow-sm text-yellow-700' : 'text-gray-500 hover:text-gray-700'"
+          :class="activeTab === 'products' ? 'bg-white shadow-sm text-[#C8A97E]' : 'text-gray-500 hover:text-gray-700'"
           class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
         >
           <span class="material-symbols-outlined text-[20px]">inventory_2</span>
@@ -14,7 +13,7 @@
         </button>
         <button 
           @click="activeTab = 'categories'"
-          :class="activeTab === 'categories' ? 'bg-white shadow-sm text-yellow-700' : 'text-gray-500 hover:text-gray-700'"
+          :class="activeTab === 'categories' ? 'bg-white shadow-sm text-[#C8A97E]' : 'text-gray-500 hover:text-gray-700'"
           class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
         >
           <span class="material-symbols-outlined text-[20px]">category</span>
@@ -22,7 +21,7 @@
         </button>
         <button 
           @click="activeTab = 'brands'"
-          :class="activeTab === 'brands' ? 'bg-white shadow-sm text-yellow-700' : 'text-gray-500 hover:text-gray-700'"
+          :class="activeTab === 'brands' ? 'bg-white shadow-sm text-[#C8A97E]' : 'text-gray-500 hover:text-gray-700'"
           class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2"
         >
           <span class="material-symbols-outlined text-[20px]">diamond</span>
@@ -56,7 +55,7 @@
               </button>
               <div v-if="openDropdown === 'category'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div @click="filters.categoryId = ''; fetchProducts(); openDropdown = null" 
-                  class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
+                  class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-[#C8A97E]/10" 
                   :class="!filters.categoryId ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
                   Tất cả danh mục
                 </div>
@@ -152,7 +151,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-              <tr v-for="p in products" :key="p.id" class="hover:bg-yellow-50/50 transition-colors cursor-pointer" @click="openDetails(p.maSP)">
+              <tr v-for="p in products" :key="p.id" class="hover:bg-[#C8A97E]/5 transition-colors cursor-pointer" @click="openDetails(p.maSP)">
                 <td class="px-4 py-4 font-mono text-xs text-gray-500 text-center">#{{ p.maSP }}</td>
                 <td class="px-6 py-4 font-semibold text-gray-800 text-left truncate">{{ p.tenSP }}</td>
                 <td class="px-6 py-4 text-gray-600 text-center truncate">{{ p.loaiSanPham?.tenLoai }}</td>
@@ -203,7 +202,7 @@
       <div v-else-if="activeTab === 'categories'" class="space-y-6">
         <!-- ACTION BAR -->
         <div class="flex justify-end hidden">
-          <button @click="openCategoryModal()" class="flex items-center gap-2 px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-xl shadow-lg shadow-yellow-100 transition-all">
+          <button @click="openCategoryModal()" class="flex items-center gap-2 px-6 py-2.5 bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold rounded-xl shadow-lg shadow-[#C8A97E]/20 transition-all">
             <span class="material-symbols-outlined text-[20px]">add_circle</span>
             Thêm danh mục
           </button>
@@ -267,7 +266,7 @@
       <div v-else class="space-y-6">
         <!-- ACTION BAR -->
         <div class="flex justify-end hidden">
-          <button @click="openBrandModal()" class="flex items-center gap-2 px-6 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold rounded-xl shadow-lg shadow-yellow-100 transition-all">
+          <button @click="openBrandModal()" class="flex items-center gap-2 px-6 py-2.5 bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold rounded-xl shadow-lg shadow-[#C8A97E]/20 transition-all">
             <span class="material-symbols-outlined text-[20px]">add_circle</span>
             Thêm thương hiệu
           </button>
@@ -403,7 +402,7 @@
           </div>
           <div class="flex items-center justify-end gap-3 pt-4">
             <button type="button" @click="categoryModal.show = false" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-500 font-bold hover:bg-gray-50 transition-all">Hủy</button>
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold shadow-lg shadow-yellow-100 transition-all">
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold shadow-lg shadow-[#C8A97E]/20 transition-all">
               {{ categoryModal.form.maLoai ? 'Lưu thay đổi' : 'Tạo ngay' }}
             </button>
           </div>
@@ -444,7 +443,7 @@
           </div>
           <div class="flex items-center justify-end gap-3 pt-4">
             <button type="button" @click="brandModal.show = false" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-500 font-bold hover:bg-gray-50 transition-all">Hủy</button>
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold shadow-lg shadow-yellow-100 transition-all">
+            <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold shadow-lg shadow-[#C8A97E]/20 transition-all">
               {{ brandModal.form.maTH ? 'Lưu thay đổi' : 'Thêm mới' }}
             </button>
           </div>
@@ -452,16 +451,13 @@
       </div>
     </div>
 
-  </AdminLayout>
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 export default {
   name: 'ProductList',
-  components: { AdminLayout },
 
   data() {
     return {

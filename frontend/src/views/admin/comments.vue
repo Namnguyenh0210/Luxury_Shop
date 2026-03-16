@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout page-title="Quản Lý Bình Luận Bài Viết">
+  
     <div class="p-8 space-y-6">
 
       <!-- THỐNG KÊ NHANH & CHART -->
@@ -192,17 +192,15 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 
 export default {
   name: 'CommentsAdmin',
-  components: { AdminLayout },
   data() {
     return {
       comments: [],
@@ -249,14 +247,7 @@ export default {
       }
     },
 
-    async updateStatus(maBL, status) {
-      try {
-        await axios.post('http://localhost:8080/admin/binh-luan/status', { maBL, status });
-        this.fetchComments();
-      } catch (e) {
-        console.error('Lỗi khi cập nhật trạng thái:', e);
-      }
-    },
+
 
     getStatusLabel(val) {
       if (val === '') return ''

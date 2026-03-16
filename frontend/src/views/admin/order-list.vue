@@ -1,6 +1,5 @@
 <template>
-  <AdminLayout page-title="Quản Lý Đơn Hàng">
-    <div class="p-8 space-y-8">
+  <div class="p-8 space-y-8">
       
       <!-- PENDING ORDERS QUICK VIEW -->
       <div class="space-y-4">
@@ -166,16 +165,13 @@
         </button>
       </div>
     </div>
-  </AdminLayout>
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 export default {
   name: 'OrderList',
-  components: { AdminLayout },
 
   data() {
     return {
@@ -208,7 +204,7 @@ export default {
   methods: {
     async fetchOrders() {
       try {
-        const res = await axios.get('http://localhost:8080/admin/orders', {
+        const res = await axios.get('/admin/orders', {
           params: { 
             keyword: this.keyword, 
             status: this.status, 
@@ -228,7 +224,7 @@ export default {
 
     async fetchPendingOrders() {
       try {
-        const res = await axios.get('http://localhost:8080/admin/orders', {
+        const res = await axios.get('/admin/orders', {
           params: { status: 0, page: 0, size: 6 },
           withCredentials: true
         })
