@@ -22,10 +22,10 @@
               :class="filterRole === '' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
               Tất cả
             </button>
-            <button v-for="role in allRoles" :key="role.id" @click="filterRole = role.tenRole"
+            <button v-for="role in allRoles" :key="role.id" @click="filterRole = role.tenVaiTro"
               class="px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap"
-              :class="filterRole === role.tenRole ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-              {{ role.tenRole }}
+              :class="filterRole === role.tenVaiTro ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+              {{ role.tenVaiTro }}
             </button>
           </div>
         </div>
@@ -64,11 +64,11 @@
               <td class="px-6 py-4 text-gray-600">{{ u.email }}</td>
               <td class="px-6 py-4 text-gray-600">{{ u.soDienThoai || '---' }}</td>
               <td class="px-6 py-4">
-                <span v-for="r in u.roles" :key="r.id"
+                <span v-for="r in u.vaiTros" :key="r.id"
                   class="inline-block bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-medium mr-1">
-                  {{ r.tenRole }}
+                  {{ r.tenVaiTro }}
                 </span>
-                <span v-if="!u.roles || u.roles.length === 0" class="text-gray-400 text-xs italic">Chưa cấp</span>
+                <span v-if="!u.vaiTros || u.vaiTros.length === 0" class="text-gray-400 text-xs italic">Chưa cấp</span>
               </td>
               <td class="px-6 py-4">
                 <span class="inline-flex items-center gap-1.5 text-xs font-medium"
@@ -153,7 +153,7 @@
 	              v-model="form.roles" 
 	              class="size-4 rounded accent-yellow-600 border-gray-300"
 	            />
-	            <span class="text-sm font-medium text-gray-700">{{ role.tenRole }}</span>
+	            <span class="text-sm font-medium text-gray-700">{{ role.tenVaiTro }}</span>
 	          </label>
 	        </div>
 	        <p v-if="form.roles && form.roles.length === 0" class="text-[10px] text-red-400 italic">* Vui lòng chọn ít nhất 1 vai trò</p>
@@ -209,7 +209,7 @@ export default {
       }
       if (this.filterRole) {
         list = list.filter(u =>
-          u.roles && u.roles.some(r => r.tenRole === this.filterRole)
+          u.vaiTros && u.vaiTros.some(r => r.tenVaiTro === this.filterRole)
         )
       }
       return list
