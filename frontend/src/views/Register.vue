@@ -1,5 +1,5 @@
 <template>
-    <main class="flex min-h-screen items-center justify-center py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-[papayawhip] breakout-full">
+    <main class="flex min-h-screen items-center justify-center py-10 md:py-16 px-4 sm:px-6 lg:px-8 bg-[papayawhip]">
         <div class="w-full max-w-lg">
             <!-- Logo và tiêu đề -->
             <div class="text-center mb-8">
@@ -121,25 +121,5 @@ export default {
 <style scoped>
 .font-serif {
     font-family: 'Times New Roman', Times, serif;
-}
-.breakout-full {
-    margin-left: -2cm;
-    margin-right: -2cm;
-    width: calc(100% + 4cm);
-    max-width: none;
-}
-@media (max-width: 1024px) {
-    .breakout-full {
-        margin-left: -1.5cm;
-        margin-right: -1.5cm;
-        width: calc(100% + 3cm);
-    }
-}
-@media (max-width: 640px) {
-    .breakout-full {
-        margin-left: -0.75cm;
-        margin-right: -0.75cm;
-        width: calc(100% + 1.5cm);
-    }
 }
 </style>

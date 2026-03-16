@@ -322,14 +322,14 @@ export default {
         })
         
         if (response.data.success) {
-          alert(response.data.message)
+          window.$alert(response.data.message, 'Thành công')
           this.quantity = 1
         } else {
-          alert(response.data.message)
+          window.$alert(response.data.message, 'Thông báo')
         }
       } catch (err) {
         console.error('Error adding to cart:', err)
-        alert('Cannot add product to cart')
+        window.$alert('Không thể thêm sản phẩm vào giỏ hàng', 'Lỗi')
       }
     }
   },

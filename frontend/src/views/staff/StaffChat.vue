@@ -17,10 +17,4 @@ export default {
 }
 </script>
 
-<style scoped>
-/* Reset any layout constraints if needed */
-:deep(.staff-breakout) {
-   height: 100vh;
-   overflow: hidden;
-}
-</style>
+

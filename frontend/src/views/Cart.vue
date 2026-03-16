@@ -150,7 +150,7 @@ export default {
         }
       } catch (err) {
         console.error('Error fetching cart:', err)
-        alert('Failed to load cart')
+        window.$alert('Không thể tải giỏ hàng', 'Lỗi')
       } finally {
         this.loading = false
       }
@@ -167,16 +167,17 @@ export default {
         if (response.data.success) {
           item.soLuong = newQuantity
         } else {
-          alert(response.data.message)
+          window.$alert(response.data.message, 'Thông báo')
         }
       } catch (err) {
         console.error('Error updating quantity:', err)
-        alert('Failed to update quantity')
+        window.$alert('Không thể cập nhật số lượng', 'Lỗi')
       }
     },
     
     async removeItem(item) {
-      if (!confirm('Remove this item from cart?')) return
+      const ok = await window.$confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?')
+      if (!ok) return
       
       try {
         const response = await axios.post('/cart/remove', null, {
@@ -186,11 +187,11 @@ export default {
         if (response.data.success) {
           this.items = this.items.filter(i => i.maGHCT !== item.maGHCT)
         } else {
-          alert(response.data.message)
+          window.$alert(response.data.message, 'Lỗi')
         }
       } catch (err) {
         console.error('Error removing item:', err)
-        alert('Failed to remove item')
+        window.$alert('Không thể xóa sản phẩm', 'Lỗi')
       }
     },
     
