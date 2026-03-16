@@ -10,13 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomeController {
 
-    @GetMapping("/")
-    public String home() {
-        return "redirect:http://localhost:5173/";
-    }
-
-    @GetMapping("/home")
-    public String homePage() {
-        return "redirect:http://localhost:5173/";
+    @GetMapping({"/", "/home", "/admin/**", "/staff/**", "/profile/**", "/checkout/**", "/payment/**", "/sanpham/**", "/kienthuc/**", "/blog/**", "/dangky", "/register"})
+    public String home(jakarta.servlet.http.HttpServletRequest request) {
+        return "redirect:http://localhost:5173" + request.getRequestURI();
     }
 }

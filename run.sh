@@ -108,7 +108,7 @@ echo -e "\n${BLUE}🔧 Starting Backend (Spring Boot)...${NC}"
 echo -e "${YELLOW}   Logs: tail -f backend.log${NC}"
 
 # Run backend in background
-$MVN_CMD spring-boot:run > backend.log 2>&1 &
+$MVN_CMD clean spring-boot:run > backend.log 2>&1 &
 BACKEND_PID=$!
 echo -e "${GREEN}   ✓ Backend started (PID: $BACKEND_PID)${NC}"
 
