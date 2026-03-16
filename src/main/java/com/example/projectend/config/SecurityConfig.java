@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .hasAnyRole("ADMIN", "NHANVIEN")
 
                         .requestMatchers("/admin/**")
-                        .hasRole("ADMIN")
+                        .hasAnyRole("ADMIN", "NHANVIEN")
 
                         .requestMatchers(
                                 "/checkout/**",
@@ -79,10 +79,8 @@ public class SecurityConfig {
                                     .anyMatch(a -> a.getAuthority().equals("ROLE_NHANVIEN"));
 
                             String redirectPath;
-                            if (isAdmin) {
+                            if (isAdmin || isStaff) {
                                 redirectPath = "/admin/dashboard";
-                            } else if (isStaff) {
-                                redirectPath = "/staff/dashboard";
                             } else {
                                 redirectPath = "/";
                             }
@@ -111,10 +109,8 @@ public class SecurityConfig {
                                     .anyMatch(a -> a.getAuthority().equals("ROLE_NHANVIEN"));
 
                             String redirectPath;
-                            if (isAdmin) {
+                            if (isAdmin || isStaff) {
                                 redirectPath = "/admin/dashboard";
-                            } else if (isStaff) {
-                                redirectPath = "/staff/dashboard";
                             } else {
                                 redirectPath = "/";
                             }

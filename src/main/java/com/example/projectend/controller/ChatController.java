@@ -5,6 +5,7 @@ import com.example.projectend.entity.TinNhan;
 import com.example.projectend.entity.TaiKhoan;
 import com.example.projectend.repository.CuocTroChuyenRepository;
 import com.example.projectend.service.ChatService;
+import com.example.projectend.service.AuthService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +20,21 @@ import java.util.Map;
 public class ChatController {
 
     @Autowired
+    private AuthService authService;
+
+    @Autowired
     private ChatService chatService;
 
     @Autowired
     private CuocTroChuyenRepository cuocTroChuyenRepository;
 
     private TaiKhoan getCurrentUser(HttpSession session) {
+        // First try to get from AuthService (Spring Security Context)
+        TaiKhoan user = authService.getCurrentUser();
+        if (user != null)
+            return user;
+
+        // Fallback to session attribute (if any)
         return (TaiKhoan) session.getAttribute("user");
     }
 
@@ -44,8 +54,12 @@ public class ChatController {
             // Nếu là khách, sử dụng session để định danh
             Long conversationId = (Long) session.getAttribute("current_conversation_id");
             if (conversationId != null) {
-                conv = cuocTroChuyenRepository.findById(conversationId)
-                        .orElseGet(() -> createAndSaveSessionConv(session, null));
+                conv = cuocTroChuyenRepository.findById(conversationId).orElse(null);
+                
+                // Nếu không tìm thấy hoặc đã đóng, tạo mới
+                if (conv == null || "CLOSED".equals(conv.getTrangThai())) {
+                    conv = createAndSaveSessionConv(session, null);
+                }
             } else {
                 conv = createAndSaveSessionConv(session, null);
             }
@@ -102,15 +116,12 @@ public class ChatController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("conversationId", conv.getMaCuocTroChuyen());
-        response.put("reply", aiResponse); 
+        response.put("reply", aiResponse);
         response.put("status", conv.getTrangThai());
 
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Khách hàng yêu cầu chuyển sang nhân viên
-     */
     @PostMapping("/switch-human")
     public ResponseEntity<?> switchToHuman(@RequestBody Map<String, Long> payload) {
         Long conversationId = payload.get("conversationId");
@@ -121,14 +132,24 @@ public class ChatController {
         return ResponseEntity.badRequest().body("Thiếu conversationId");
     }
 
+    @PostMapping("/reset")
+    public ResponseEntity<?> resetChat(HttpSession session) {
+        Long conversationId = (Long) session.getAttribute("current_conversation_id");
+        if (conversationId != null) {
+            chatService.updateStatus(conversationId, "CLOSED");
+            session.removeAttribute("current_conversation_id");
+            return ResponseEntity.ok("Hội thoại đã được đặt lại");
+        }
+        return ResponseEntity.ok("Không có hội thoại cần đặt lại");
+    }
+
     // ===================================
     // API DÀNH CHO ADMIN / NHANVIEN
     // ===================================
 
     @GetMapping("/admin/all")
     public ResponseEntity<?> getAllConversations(HttpSession session) {
-        TaiKhoan nv = getCurrentUser(session);
-        if (nv == null || !hasRoles(nv, "ADMIN", "NHANVIEN")) {
+        if (!authService.isAdmin() && !authService.isStaff()) {
             return ResponseEntity.status(403).body("Không có quyền truy cập");
         }
 
@@ -138,22 +159,21 @@ public class ChatController {
 
     @PostMapping("/admin/reply")
     public ResponseEntity<?> adminReply(@RequestBody Map<String, String> payload, HttpSession session) {
-        TaiKhoan nv = getCurrentUser(session);
-        if (nv == null || !hasRoles(nv, "ADMIN", "NHANVIEN")) {
+        if (!authService.isAdmin() && !authService.isStaff()) {
             return ResponseEntity.status(403).body("Không có quyền truy cập");
         }
 
         Long conversationId = Long.parseLong(payload.get("conversationId"));
         String content = payload.get("content");
+        TaiKhoan staff = getCurrentUser(session);
 
-        TinNhan reply = chatService.staffReply(conversationId, content);
+        TinNhan reply = chatService.staffReply(conversationId, content, staff);
         return ResponseEntity.ok(reply);
     }
 
     @PostMapping("/admin/status")
     public ResponseEntity<?> updateStatus(@RequestBody Map<String, String> payload, HttpSession session) {
-        TaiKhoan nv = getCurrentUser(session);
-        if (nv == null || !hasRoles(nv, "ADMIN", "NHANVIEN")) {
+        if (!authService.isAdmin() && !authService.isStaff()) {
             return ResponseEntity.status(403).body("Không có quyền truy cập");
         }
 
@@ -162,6 +182,19 @@ public class ChatController {
 
         chatService.updateStatus(conversationId, status);
         return ResponseEntity.ok("Cập nhật trạng thái thành công");
+    }
+
+    @PostMapping("/admin/accept")
+    public ResponseEntity<?> acceptConversation(@RequestBody Map<String, Long> payload, HttpSession session) {
+        if (!authService.isAdmin() && !authService.isStaff()) {
+            return ResponseEntity.status(403).body("Không có quyền truy cập");
+        }
+
+        Long conversationId = payload.get("conversationId");
+        TaiKhoan staff = getCurrentUser(session);
+
+        chatService.updateStatusWithStaff(conversationId, "HUMAN", staff);
+        return ResponseEntity.ok("Đã tiếp nhận cuộc trò chuyện");
     }
 
     private boolean hasRoles(TaiKhoan user, String... rolesAllowed) {

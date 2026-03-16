@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout page-title="Chỉnh Sửa Sản Phẩm">
+  
     <div class="p-8 max-w-4xl mx-auto">
       <button @click="$router.back()" class="flex items-center text-gray-500 hover:text-yellow-600 mb-6 transition-colors">
         <span class="material-symbols-outlined mr-1">arrow_back</span>
@@ -86,16 +86,14 @@
         </form>
       </div>
     </div>
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 export default {
   name: 'EditProduct',
-  components: { AdminLayout },
   data() {
     return {
       loading: true,

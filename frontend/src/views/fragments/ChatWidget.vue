@@ -1,5 +1,5 @@
 <template>
-  <div class="luxury-chat-root">
+  <div v-if="isVisible" class="luxury-chat-root">
     <!-- Chat Window Container -->
     <transition name="chat-window">
       <div v-if="isOpen" class="chat-window-box">
@@ -12,8 +12,10 @@
             <div class="header-info">
               <span class="header-name">Luxury Shop Support</span>
               <div class="status-indicator">
-                <span class="status-dot" :class="{ 'is-staff': status === 'HUMAN' || status === 'PENDING' }"></span>
-                <span class="status-text">{{ status === 'HUMAN' || status === 'PENDING' ? 'Nhân viên đang trực' : 'AI Assistant Online' }}</span>
+                <span class="status-dot" :class="statusColorClass"></span>
+                <transition name="fade-status" mode="out-in">
+                  <span class="status-text" :key="status">{{ statusLabel }}</span>
+                </transition>
               </div>
             </div>
           </div>
@@ -46,7 +48,7 @@
             <div class="bubble-container">
               <!-- Sender label (Premium) -->
               <div v-if="msg.loaiNguoiGui !== 'USER'" class="sender-label">
-                {{ msg.loaiNguoiGui === 'AI' ? '🤖 AI Assistant đang trả lời' : '👩💼 Nhân viên đang hỗ trợ' }}
+                {{ msg.loaiNguoiGui === 'AI' ? '🤖 AI Assistant đang trả lời' : ('👨💼 Nhân viên ' + (assignedStaff || 'Luxury') + ' đang hỗ trợ') }}
               </div>
 
               <div class="message-bubble">
@@ -97,12 +99,15 @@
       </div>
     </transition>
 
-    <!-- Floating Toggle Button (As per user image in Step 118) -->
+    <!-- Floating Toggle Button -->
     <button 
       @click="toggleChat"
       class="luxury-toggle-btn-final"
       :class="{ 'hidden-btn': isOpen }"
     >
+      <!-- Status Badge -->
+      <div class="status-badge-dot" :class="statusColorClass"></div>
+
       <!-- 24/7 Badge -->
       <div class="badge-bubble">
          <span>24/7</span>
@@ -110,7 +115,9 @@
 
       <!-- Main Box -->
       <div class="btn-yellow-box">
-        <span class="btn-text">TRỢ LÝ AI</span>
+        <span class="btn-text" v-if="status === 'AI'">TRỢ LÝ AI</span>
+        <span class="btn-text" v-else-if="status === 'PENDING'">ĐANG CHỜ</span>
+        <span class="btn-text" v-else>HỖ TRỢ</span>
       </div>
     </button>
   </div>
@@ -141,7 +148,50 @@ export default {
       isTyping: false,
       conversationId: null,
       status: 'AI',
-      pollingInterval: null
+      pollingInterval: null,
+      assignedStaff: null
+    }
+  },
+  computed: {
+    isVisible() {
+      // 1. Không hiển thị cho Admin/Nhân viên nếu đã đăng nhập
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user.vaiTros?.some(v => v.tenVaiTro === 'ADMIN' || v.tenVaiTro === 'NHANVIEN')) {
+            return false;
+          }
+        } catch (e) {}
+      }
+
+      const path = this.$route.path;
+      // 2. Chỉ hiển thị ở: Home, Sản phẩm, Chi tiết sản phẩm, Liên hệ
+      return (
+        path === '/' || 
+        path === '/home' || 
+        path === '/gioithieu' ||
+        path.startsWith('/sanpham') || 
+        path.startsWith('/product') || 
+        path === '/nam' || 
+        path === '/nu' ||
+        path === '/lienhe'
+      );
+    },
+    statusLabel() {
+      if (this.status === 'AI') return '🤖 AI đang hỗ trợ';
+      if (this.status === 'PENDING') return '⏳ Đang chờ nhân viên hỗ trợ';
+      if (this.status === 'HUMAN') return '👨💼 Nhân viên: ' + (this.assignedStaff || 'Luxury Staff');
+      if (this.status === 'CLOSED') return '⏸ Đã kết thúc';
+      return 'Online';
+    },
+    statusColorClass() {
+      return {
+        'is-ai': this.status === 'AI',
+        'is-pending': this.status === 'PENDING',
+        'is-human': this.status === 'HUMAN',
+        'is-closed': this.status === 'CLOSED'
+      };
     }
   },
   methods: {
@@ -160,9 +210,9 @@ export default {
       // 2. Gọi API switch-human
       try {
         await axios.post('/chat/switch-human', { conversationId: this.conversationId });
-        this.status = 'PENDING'; // Chờ nhân viên
-        // Refresh ngay để lấy tin nhắn xác nhận từ backend
-        await this.fetchMessagesSilently();
+        this.status = 'PENDING';
+        // Luôn gọi initChat để đồng bộ toàn bộ lịch sử và trạng thái mới nhất
+        await this.initChat();
       } catch (e) {
         console.error("Switch human error:", e);
       }
@@ -178,6 +228,7 @@ export default {
         const res = await axios.get('/chat/my-conversation');
         this.conversationId = res.data.maCuocTroChuyen;
         this.status = res.data.trangThai;
+        this.assignedStaff = res.data.nhanVien?.hoTen;
         const hist = await axios.get(`/chat/history/${this.conversationId}`);
         if (hist.data && hist.data.length > 0) {
           this.messages = hist.data;
@@ -212,17 +263,24 @@ export default {
         this.isTyping = false;
       }
     },
-    resetConversation() {
+    async resetConversation() {
        if (confirm('Làm mới cuộc hội thoại này?')) {
-          this.messages = [
-            {
-              loaiNguoiGui: 'AI',
-              noiDung: 'Xin chào Anh/Chị! Em là trợ lý AI của Luxury Shop.',
-              ngayGui: new Date()
-            }
-          ];
-          this.conversationId = null;
-          this.initChat();
+          try {
+             await axios.post('/chat/reset');
+             this.messages = [
+               {
+                 loaiNguoiGui: 'AI',
+                 noiDung: 'Xin chào Anh/Chị! Em là trợ lý AI của Luxury Shop.',
+                 ngayGui: new Date()
+               }
+             ];
+             this.conversationId = null;
+             this.status = 'AI';
+             this.assignedStaff = null;
+             await this.initChat();
+          } catch (e) {
+             console.error("Reset chat error:", e);
+          }
        }
     },
     formatTime(d) {
@@ -251,16 +309,17 @@ export default {
       }
     },
     async fetchMessagesSilently() {
-      if (!this.conversationId || this.isSending) return;
       try {
         const res = await axios.get(`/chat/history/${this.conversationId}`);
-        if (res.data.length > this.messages.length) {
+        // Cập nhật nếu số lượng tin nhắn khác nhau hoặc có tin nhắn mới
+        if (res.data.length !== this.messages.length) {
           this.messages = res.data;
           this.scrollToBottom();
           
           // Sau khi có tin nhắn mới, cập nhật lại trạng thái hội thoại
           const convRes = await axios.get('/chat/my-conversation');
           this.status = convRes.data.trangThai;
+          this.assignedStaff = convRes.data.nhanVien?.hoTen;
         }
       } catch (e) {}
     }
@@ -577,6 +636,19 @@ export default {
 .custom-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
 
 /* New Styles for Premium Features */
+/* Smooth Status Transition */
+.fade-status-enter-active, .fade-status-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fade-status-enter-from {
+  opacity: 0;
+  transform: translateX(-5px);
+}
+.fade-status-leave-to {
+  opacity: 0;
+  transform: translateX(5px);
+}
+
 .header-info {
   display: flex;
   flex-direction: column;
@@ -589,31 +661,71 @@ export default {
   margin-top: 2px;
 }
 
-.status-dot {
-  width: 7px;
-  height: 7px;
+.status-dot.is-ai {
   background: #4cd137;
-  border-radius: 50%;
-  box-shadow: 0 0 5px #4cd137;
+  box-shadow: 0 0 8px rgba(76, 209, 55, 0.8);
+  animation: pulse-green 2s infinite;
 }
 
-.status-dot.is-staff {
-  background: #4cd137;
-  box-shadow: 0 0 5px #4cd137;
-  animation: pulse-green 2s infinite;
+.status-dot.is-pending {
+  background: #ff9f43;
+  box-shadow: 0 0 8px rgba(255, 159, 67, 0.8);
+  animation: pulse-orange 2s infinite;
+}
+
+.status-dot.is-human {
+  background: #00d2ff;
+  box-shadow: 0 0 8px rgba(0, 210, 255, 0.8);
+  animation: pulse-blue 2s infinite;
+}
+
+.status-dot.is-closed {
+  background: #95a5a6;
+  box-shadow: none;
 }
 
 @keyframes pulse-green {
   0% { box-shadow: 0 0 0 0 rgba(76, 209, 55, 0.7); }
-  70% { box-shadow: 0 0 0 5px rgba(76, 209, 55, 0); }
+  70% { box-shadow: 0 0 0 8px rgba(76, 209, 55, 0); }
   100% { box-shadow: 0 0 0 0 rgba(76, 209, 55, 0); }
+}
+
+@keyframes pulse-orange {
+  0% { box-shadow: 0 0 0 0 rgba(255, 159, 67, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(255, 159, 67, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 159, 67, 0); }
+}
+
+@keyframes pulse-blue {
+  0% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(0, 210, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
 }
 
 .status-text {
   font-size: 10px;
   color: rgba(255,255,255,0.7);
-  font-weight: 500;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
+
+/* Floating button status badge */
+.status-badge-dot {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 30;
+}
+
+.status-badge-dot.is-ai { background: #4cd137; }
+.status-badge-dot.is-pending { background: #ff9f43; }
+.status-badge-dot.is-human { background: #00d2ff; }
+.status-badge-dot.is-closed { background: #95a5a6; }
 
 .support-btn {
   background: #ffcc00;

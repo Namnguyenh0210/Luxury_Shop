@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout page-title="Quản Lý Tài Khoản">
+  
     <div class="p-8 space-y-6">
 
       <!-- ACTION BAR -->
@@ -172,21 +172,19 @@
 	    </div>
 	  </div>
 	</div>
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080', 
+  baseURL: '/api',
   withCredentials: true
 });
 
 export default {
   name: 'CustomerList',
-  components: { AdminLayout },
   data() {
     return {
       customers: [],
@@ -230,7 +228,7 @@ export default {
     },
     async fetchRoles() {
       try {
-        const res = await api.get('/admin/customers/roles-list')
+        const res = await api.get('/admin/customers/vaiTros-list')
         this.allRoles = res.data
       } catch (e) { console.error("Lỗi load vai trò:", e) }
     },

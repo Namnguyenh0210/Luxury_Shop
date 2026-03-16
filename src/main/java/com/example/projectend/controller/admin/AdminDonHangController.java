@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin/orders")
+@RequestMapping("/api/admin/orders")
 @PreAuthorize("hasRole('ADMIN') or hasRole('NHANVIEN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminDonHangController {

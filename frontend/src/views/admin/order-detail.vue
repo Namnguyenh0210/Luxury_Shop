@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout :page-title="'Chi Tiết Đơn Hàng #' + (order?.maDH || '')">
+  
     <div class="p-8 space-y-6">
       
       <div class="flex justify-between items-center">
@@ -215,16 +215,14 @@
 
       </div>
     </div>
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 export default {
   name: 'OrderDetail',
-  components: { AdminLayout },
   data() {
     return {
       order: null,
@@ -244,7 +242,7 @@ export default {
       this.loading = true
       try {
         const id = this.$route.params.id
-        const res = await axios.get(`http://localhost:8080/admin/orders/${id}`, { withCredentials: true })
+        const res = await axios.get(`/admin/orders/${id}`, { withCredentials: true })
         this.order = res.data
       } catch (e) {
         console.error("Lỗi khi tải chi tiết đơn hàng:", e)
@@ -257,7 +255,7 @@ export default {
       if (!ok) return
       try {
         const res = await axios.put(
-            `http://localhost:8080/admin/orders/${this.order.maDH}/status`,
+            `/admin/orders/${this.order.maDH}/status`,
             null,
             { params: { status: newStatus }, withCredentials: true }
         )
@@ -278,7 +276,7 @@ export default {
       
       try {
         await axios.put(
-            `http://localhost:8080/admin/orders/${this.order.maDH}/status`,
+            `/admin/orders/${this.order.maDH}/status`,
             null,
             { params: { status: 5, reason: reason }, withCredentials: true }
         )
@@ -294,7 +292,7 @@ export default {
       if (!this.cancelReason.trim()) return;
       try {
         const res = await axios.put(
-            `http://localhost:8080/admin/orders/${this.order.maDH}/status`,
+            `/admin/orders/${this.order.maDH}/status`,
             null,
             { params: { status: 5, reason: this.cancelReason }, withCredentials: true }
         )

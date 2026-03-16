@@ -1,6 +1,5 @@
 <template>
-  <AdminLayout page-title="Quản Lý Kho & NCC">
-    <div class="p-8 space-y-6">
+  <div class="p-8 space-y-6">
 
       <!-- TABS -->
       <div class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
@@ -539,16 +538,14 @@
       </div>
     </div>
 
-  </AdminLayout>
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 export default {
   name: 'InventoryPage',
-  components: { AdminLayout },
+
 
   data() {
     return {
@@ -621,7 +618,7 @@ export default {
 
   async mounted() {
     try {
-      const res = await axios.get('http://localhost:8080/admin/inventory', { withCredentials: true })
+      const res = await axios.get('/admin/inventory', { withCredentials: true })
       this.suppliers       = res.data.suppliers     || []
       this.products        = res.data.products      || []
       this.filteredProducts= this.products
@@ -768,13 +765,13 @@ export default {
       }
       try {
         if (this.nccForm.maNCC) {
-          await axios.put(`http://localhost:8080/admin/inventory/supplier/${this.nccForm.maNCC}`, this.nccForm, { withCredentials: true })
+          await axios.put(`/admin/inventory/supplier/${this.nccForm.maNCC}`, this.nccForm, { withCredentials: true })
           await this.showAppDialog({ title: 'Thành công', message: 'Cập nhật nhà cung cấp thành công!' })
         } else {
-          await axios.post('http://localhost:8080/admin/inventory/supplier', this.nccForm, { withCredentials: true })
+          await axios.post('/admin/inventory/supplier', this.nccForm, { withCredentials: true })
           await this.showAppDialog({ title: 'Thành công', message: 'Thêm nhà cung cấp thành công!' })
         }
-        const res = await axios.get('http://localhost:8080/admin/inventory', { withCredentials: true })
+        const res = await axios.get('/admin/inventory', { withCredentials: true })
         this.suppliers = res.data.suppliers || []
         this.supplierCount = res.data.supplierCount || this.suppliers.length
         this.closeNccModal()
@@ -787,9 +784,9 @@ export default {
       const confirmed = await this.showAppDialog({ type: 'confirm', title: 'Xác nhận xóa', message: `Bạn có chắc chắn muốn xóa nhà cung cấp "${ncc.tenNCC}"?` })
       if (!confirmed) return
       try {
-        await axios.delete(`http://localhost:8080/admin/inventory/supplier/${ncc.maNCC}`, { withCredentials: true })
+        await axios.delete(`/admin/inventory/supplier/${ncc.maNCC}`, { withCredentials: true })
         await this.showAppDialog({ title: 'Thành công', message: 'Xóa nhà cung cấp thành công!' })
-        const res = await axios.get('http://localhost:8080/admin/inventory', { withCredentials: true })
+        const res = await axios.get('/admin/inventory', { withCredentials: true })
         this.suppliers = res.data.suppliers || []
         this.supplierCount = res.data.supplierCount || this.suppliers.length
       } catch (e) {
@@ -833,7 +830,7 @@ export default {
       this.variantOptions = []
       if (!this.newItem.productId) return
       try {
-        const res = await axios.get(`http://localhost:8080/admin/inventory/variants/${this.newItem.productId}`, { withCredentials: true })
+        const res = await axios.get(`/admin/inventory/variants/${this.newItem.productId}`, { withCredentials: true })
         this.variantOptions = res.data
       } catch (e) { console.error(e) }
     },
@@ -898,9 +895,9 @@ export default {
         await this.showAppDialog({ isError: true, message: 'Vui lòng điền đầy đủ thông tin.' }); return
       }
       try {
-        await axios.post('http://localhost:8080/admin/inventory/import', this.form, { withCredentials: true })
+        await axios.post('/admin/inventory/import', this.form, { withCredentials: true })
         await this.showAppDialog({ title: 'Thành công', message: 'Tạo phiếu thành công!' })
-        const res = await axios.get('http://localhost:8080/admin/inventory', { withCredentials: true })
+        const res = await axios.get('/admin/inventory', { withCredentials: true })
         this.danhSachPhieu = res.data.phieuNhaps || []
         this.lowStock      = res.data.lowStock   || []
         this.totalItems    = res.data.totalItems || 0
