@@ -186,16 +186,10 @@
                                         <span>Địa chỉ nhận hàng</span>
                                     </a>
 
-                                    <!-- Admin Dashboard (Only for Admin) -->
-                                    <a v-if="isAdmin" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border-t border-gray-200 dark:border-gray-700" href="/admin/dashboard">
+                                    <!-- Admin/Staff Dashboard -->
+                                    <a v-if="isAdmin || isStaff" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border-t border-gray-200 dark:border-gray-700" href="/admin/dashboard">
                                         <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
                                         <span>Quản trị hệ thống</span>
-                                    </a>
-
-                                    <!-- Staff Dashboard (Only for Staff) -->
-                                    <a v-if="isStaff" class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border-t border-gray-200 dark:border-gray-700" href="/staff/dashboard">
-                                        <span class="material-symbols-outlined text-xl">badge</span>
-                                        <span>Quản lý nhân viên</span>
                                     </a>
 
                                     <!-- Logout -->

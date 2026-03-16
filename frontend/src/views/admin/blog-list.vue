@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout page-title="Quản Lý Bài Viết">
+  
     <div class="p-8 space-y-6">
 
       <!-- ACTION BAR -->
@@ -181,17 +181,14 @@
       </div>
     </div>
 
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 export default {
   name: 'BlogList',
-  components: { AdminLayout },
-
   data() {
     return {
       danhSach: [],
