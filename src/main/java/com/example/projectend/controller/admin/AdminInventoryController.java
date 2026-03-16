@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @RestController
-@RequestMapping("/admin/inventory")
+@RequestMapping("/api/admin/inventory")
 @PreAuthorize("hasRole('ADMIN') or hasRole('NHANVIEN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminInventoryController {
