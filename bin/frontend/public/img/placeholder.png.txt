@@ -1,0 +1,5 @@
+This file should be a real placeholder image.
+To add product images:
+1. Place your product images in this folder
+2. Name them according to the database (e.g., ao-polo-gucci-1.jpg)
+3. Update the database with correct image paths
