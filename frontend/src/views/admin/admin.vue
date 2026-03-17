@@ -12,6 +12,7 @@
         <div
           v-for="stat in stats"
           :key="stat.label"
+		  @click="$router.push(stat.route)"
           class="flex flex-col gap-2 rounded-2xl p-6 border border-[#C8A97E] bg-white shadow-sm hover:shadow-md transition-shadow"
         >
           <div class="flex items-center justify-between">
@@ -87,10 +88,10 @@ export default {
     stats() {
       const isAdmin = this.currentUser.roles.includes('ADMIN')
       const list = [
-        { label: 'Tổng Doanh Thu',   icon: 'payments',     iconBg: '#fef9c3', value: this.fmtCurrency(this.totalRevenue),    trend: '+100% vs tháng trước', trendColor: 'text-green-600', role: 'ADMIN' },
-        { label: 'Đơn Chờ Xử Lý',   icon: 'pending_actions', iconBg: '#dbeafe', value: this.newOrdersCount,                  trend: 'Cần duyệt ngay',       trendColor: 'text-blue-600' },
-        { label: 'Lượt Truy Cập',    icon: 'bar_chart',    iconBg: '#dcfce7', value: this.fmtNumber(this.uniqueVisitors),    trend: '+5.4% tháng này',      trendColor: 'text-green-600', role: 'ADMIN' },
-        { label: 'Tổng Khách Hàng',  icon: 'group',        iconBg: '#fce7f3', value: this.totalCustomers,                     trend: '+12 người mới',        trendColor: 'text-green-600', role: 'ADMIN' },
+        { label: 'Tổng Doanh Thu',   icon: 'payments',     iconBg: '#fef9c3', value: this.fmtCurrency(this.totalRevenue),    trend: '+100% vs tháng trước', trendColor: 'text-green-600', role: 'ADMIN', route: '/admin/reports' },
+        { label: 'Đơn Chờ Xử Lý',   icon: 'pending_actions', iconBg: '#dbeafe', value: this.newOrdersCount,                  trend: 'Cần duyệt ngay',       trendColor: 'text-blue-600', route: '/admin/orders'  },
+        { label: 'Lượt Truy Cập',    icon: 'bar_chart',    iconBg: '#dcfce7', value: this.fmtNumber(this.uniqueVisitors),    trend: '+5.4% tháng này',      trendColor: 'text-green-600', role: 'ADMIN', route: '/admin/reports' },
+        { label: 'Tổng Khách Hàng',  icon: 'group',        iconBg: '#fce7f3', value: this.totalCustomers,                     trend: '+12 người mới',        trendColor: 'text-green-600', role: 'ADMIN', route: '/admin/customers' },
       ]
       return list.filter(item => !item.role || (item.role === 'ADMIN' && isAdmin))
     },

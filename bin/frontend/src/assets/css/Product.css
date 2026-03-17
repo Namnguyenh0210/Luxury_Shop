@@ -1,0 +1,320 @@
+/* Product Page Specific Styles */
+
+/* Range Input Styling */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: rgba(207, 207, 207, 0.3);
+    border-radius: 9999px;
+    outline: none;
+    transition: background 0.3s ease;
+}
+
+input[type="range"]:hover {
+    background: rgba(207, 207, 207, 0.5);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #111111;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid #FAFAFA;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(0.95);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #111111;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid #FAFAFA;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+}
+
+input[type="range"]::-moz-range-thumb:active {
+    transform: scale(0.95);
+}
+
+/* Dark mode range slider */
+.dark input[type="range"] {
+    background: rgba(75, 85, 99, 0.5);
+}
+
+.dark input[type="range"]::-webkit-slider-thumb {
+    background: #D5BFA3;
+    border-color: #1d1a15;
+}
+
+.dark input[type="range"]::-moz-range-thumb {
+    background: #D5BFA3;
+    border-color: #1d1a15;
+}
+
+/* Custom Checkbox and Radio Styling */
+input[type="checkbox"],
+input[type="radio"] {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:hover,
+input[type="radio"]:hover {
+    transform: scale(1.05);
+}
+
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+    background-color: #111111;
+    border-color: #111111;
+}
+
+.dark input[type="checkbox"]:checked,
+.dark input[type="radio"]:checked {
+    background-color: #D5BFA3;
+    border-color: #D5BFA3;
+}
+
+/* Select Dropdown Styling */
+select {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+select:hover {
+    border-color: #111111;
+}
+
+.dark select:hover {
+    border-color: #D5BFA3;
+}
+
+select:focus {
+    outline: none;
+    ring-width: 2px;
+    ring-color: #D5BFA3;
+}
+
+/* Size Button Styling */
+.size-button {
+    transition: all 0.2s ease;
+}
+
+.size-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.size-button:active {
+    transform: translateY(0);
+}
+
+/* Product Card Hover Effects */
+.product-card {
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.dark .product-card:hover {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Product Image Hover Effect */
+.product-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-card:hover .product-image::after {
+    opacity: 1;
+}
+
+/* Button Styling */
+button {
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Add to Cart Button */
+.add-to-cart-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.add-to-cart-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+}
+
+.add-to-cart-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Pagination Button Styling */
+.pagination-btn {
+    transition: all 0.2s ease;
+}
+
+.pagination-btn:hover {
+    transform: scale(1.05);
+}
+
+.pagination-btn:active {
+    transform: scale(0.95);
+}
+
+/* Scrollbar Hiding */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Sticky Sidebar */
+.sticky-sidebar {
+    position: sticky;
+    top: 7rem;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+    .product-title {
+        font-size: 1.25rem;
+        line-height: 1.75rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        line-height: 2.5rem;
+    }
+}
+
+/* Loading Animation for Images */
+[data-alt] {
+    position: relative;
+    background-color: #CFCFCF;
+}
+
+.dark [data-alt] {
+    background-color: #2d2a25;
+}
+
+/* Filter Section Animation */
+.filter-section {
+    transition: all 0.3s ease;
+}
+
+.filter-section:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark .filter-section:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Material Icons Alignment */
+.material-symbols-outlined {
+    vertical-align: middle;
+    user-select: none;
+}
+
+/* Smooth Transitions for Dark Mode */
+* {
+    transition-property: background-color, border-color, color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+button, a, input, select {
+    transition-property: all;
+}
+
+/* Focus Styles for Accessibility */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid #D5BFA3;
+    outline-offset: 2px;
+}
+
+/* Grid Layout Optimization */
+.product-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .product-grid {
+        gap: 2rem;
+    }
+}
+
+/* Hero Section Overlay */
+.hero-overlay {
+    backdrop-filter: blur(2px);
+    transition: backdrop-filter 0.3s ease;
+}
+
+.hero-overlay:hover {
+    backdrop-filter: blur(4px);
+}
+
