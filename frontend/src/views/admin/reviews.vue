@@ -1,11 +1,11 @@
 <template>
-  <AdminLayout page-title="Quản Lý Đánh Giá Tương Tác">
+  
     <div class="p-8 space-y-6">
 
       <!-- THỐNG KÊ NHANH -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Chart Cột -->
-        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-[#C8A97E] shadow-sm">
           <h3 class="font-bold text-gray-800 flex items-center gap-2 mb-4">
             <span class="material-symbols-outlined text-blue-500">bar_chart</span> Phân Tích Đánh Giá Sản Phẩm (Top)
           </h3>
@@ -15,7 +15,7 @@
         </div>
 
         <div class="flex flex-col gap-6">
-          <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex-1">
+          <div class="bg-white p-6 rounded-2xl border border-[#C8A97E] shadow-sm flex-1">
             <h3 class="font-bold text-gray-800 flex items-center gap-2 mb-4">
               <span class="material-symbols-outlined text-green-500">trending_up</span> Top Đánh Giá Cao
             </h3>
@@ -30,7 +30,7 @@
             <div v-else class="text-sm text-gray-400">Chưa có dữ liệu</div>
           </div>
 
-          <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex-1">
+          <div class="bg-white p-6 rounded-2xl border border-[#C8A97E] shadow-sm flex-1">
             <h3 class="font-bold text-gray-800 flex items-center gap-2 mb-4">
               <span class="material-symbols-outlined text-red-500">trending_down</span> Cần Lưu Ý (Thấp)
             </h3>
@@ -48,33 +48,48 @@
       </div>
 
       <!-- BỘ LỌC -->
-      <div class="flex flex-wrap items-center gap-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-        <div class="relative">
+      <div class="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-[#C8A97E] shadow-sm">
+        <div class="relative w-72">
           <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <span class="material-symbols-outlined text-[18px]">search</span>
+            <span class="material-symbols-outlined text-[20px]">search</span>
           </span>
           <input
             v-model="filterKeyword"
             @keyup.enter="fetchReviews"
             placeholder="Tìm theo sản phẩm, user..."
-            class="border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500 w-64"
+            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
           />
         </div>
 
-        <select v-model="filterStatus" @change="fetchReviews" class="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-yellow-500">
-          <option value="">-- Tất cả trạng thái --</option>
-          <option :value="0">⏳ Chờ duyệt (Pending)</option>
-          <option :value="1">✅ Đã hiển thị (Approved)</option>
-          <option :value="2">🚫 Đã ẩn (Hidden)</option>
-        </select>
+        <!-- Custom Status Dropdown -->
+        <div class="relative min-w-[200px]">
+          <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
+            class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-2.5 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
+            <span class="truncate font-medium text-gray-700">{{ getStatusLabel(filterStatus) || 'Tất cả trạng thái' }}</span>
+            <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+          </button>
+          <div v-if="openDropdown === 'status'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div @click="filterStatus = ''; fetchReviews(); openDropdown = null" 
+              class="px-5 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
+              :class="filterStatus === '' ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
+              Tất cả trạng thái
+            </div>
+            <div @click="filterStatus = 0; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 0 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">⏳ Chờ duyệt</div>
+            <div @click="filterStatus = 1; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 1 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Đã hiển thị</div>
+            <div @click="filterStatus = 2; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 2 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">🚫 Đã ẩn</div>
+          </div>
+        </div>
 
-        <button @click="fetchReviews" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium transition-colors">
-          Lọc
+        <!-- Nút Làm mới -->
+        <button @click="resetFilters" 
+          class="flex items-center justify-center size-10 rounded-2xl border border-[#C8A97E]/30 bg-white text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all shadow-sm group"
+          title="Làm mới bộ lọc">
+          <span class="material-symbols-outlined text-[22px] group-hover:rotate-180 transition-transform duration-500">refresh</span>
         </button>
       </div>
 
       <!-- BẢNG DANH SÁCH -->
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -200,17 +215,15 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 
 export default {
   name: 'ReviewsAdmin',
-  components: { AdminLayout },
   data() {
     return {
       reviews: [],
@@ -224,13 +237,17 @@ export default {
       hienModalReply: false,
       selectedReview: null,
       noiDungReply: '',
-      
-      chartInstance: null
+      chartInstance: null,
+      openDropdown: null
     }
   },
-  async mounted() {
-    await this.fetchStats()
-    await this.fetchReviews()
+  mounted() {
+    window.addEventListener('click', this.closeDropdowns)
+    this.fetchStats()
+    this.fetchReviews()
+  },
+  beforeUnmount() {
+    window.removeEventListener('click', this.closeDropdowns)
   },
   methods: {
     async fetchReviews() {
@@ -249,6 +266,25 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+
+
+    getStatusLabel(val) {
+      if (val === '') return ''
+      if (val === 0) return '⏳ Chờ duyệt'
+      if (val === 1) return '✅ Đã hiển thị'
+      if (val === 2) return '🚫 Đã ẩn'
+      return ''
+    },
+
+    resetFilters() {
+      this.filterKeyword = ''
+      this.filterStatus = ''
+      this.fetchReviews()
+    },
+
+    closeDropdowns() {
+      this.openDropdown = null
     },
     async fetchStats() {
       try {
@@ -319,25 +355,27 @@ export default {
       })
     },
     async updateStatus(id, newStatus) {
-      if(!confirm(`Xác nhận ${newStatus === 1 ? 'DUYỆT (Hiển thị)' : 'ẨN'} đánh giá này?`)) return
+      const ok = await window.$confirm(`Xác nhận ${newStatus === 1 ? 'DUYỆT (Hiển thị)' : 'ẨN'} đánh giá này?`)
+      if(!ok) return
       try {
         const res = await axios.put(`/admin/danh-gia/${id}/status`, { trangThai: newStatus }, { withCredentials: true })
         if(res.data.thanhCong) {
-          alert('Cập nhật thành công')
+          window.$alert('Cập nhật thành công', 'Thành công')
           this.fetchReviews()
-        } else alert('Lỗi: ' + res.data.thongBao)
-      } catch (e) { alert('Lỗi kết nối') }
+        } else window.$alert('Lỗi: ' + res.data.thongBao, 'Lỗi')
+      } catch (e) { window.$alert('Lỗi kết nối', 'Lỗi') }
     },
     async xoaDanhGia(id) {
-      if(!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn đánh giá này?')) return
+      const ok = await window.$confirm('Bạn có chắc chắn muốn xóa vĩnh viễn đánh giá này?')
+      if(!ok) return
       try {
         const res = await axios.delete(`/admin/danh-gia/${id}`, { withCredentials: true })
         if(res.data.thanhCong) {
-          alert('Đã xóa thành công')
+          window.$alert('Đã xóa thành công', 'Thành công')
           this.fetchReviews()
           this.fetchStats()
-        } else alert('Lỗi: ' + res.data.thongBao)
-      } catch (e) { alert('Lỗi kết nối') }
+        } else window.$alert('Lỗi: ' + res.data.thongBao, 'Lỗi')
+      } catch (e) { window.$alert('Lỗi kết nối', 'Lỗi') }
     },
     moModalPhanHoi(rv) {
       this.selectedReview = rv
@@ -354,11 +392,11 @@ export default {
         const res = await axios.post(`/admin/danh-gia/${this.selectedReview.maDG}/reply`, 
           { phanHoi: this.noiDungReply }, { withCredentials: true })
         if(res.data.thanhCong) {
-          alert('Đã phản hồi!')
+          window.$alert('Đã phản hồi!', 'Thành công')
           this.dongModalPhanHoi()
           this.fetchReviews()
-        } else alert('Lỗi: ' + res.data.thongBao)
-      } catch (e) { alert('Lỗi kết nối') }
+        } else window.$alert('Lỗi: ' + res.data.thongBao, 'Lỗi')
+      } catch (e) { window.$alert('Lỗi kết nối', 'Lỗi') }
     }
   }
 }

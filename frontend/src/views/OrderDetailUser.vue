@@ -170,11 +170,33 @@
             <h3 class="w-full text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Hành động đơn hàng</h3>
 
             <!-- Hủy đơn -->
-            <button v-if="order.trangThaiDH === 0" @click="cancelOrder"
+            <button v-if="order.trangThaiDH === 0 && !showCancelForm" @click="showCancelForm = true"
                     class="flex items-center gap-2 px-5 py-3 bg-red-50 text-red-600 border border-red-100 rounded-xl font-black text-[10px] uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all active:scale-95">
               <span class="material-symbols-outlined text-sm">cancel</span>
               Hủy đơn hàng
             </button>
+
+            <!-- Cancel Reason Form -->
+            <div v-if="showCancelForm" class="w-full mt-4 p-6 bg-red-50/50 border border-red-100 rounded-3xl space-y-4 shadow-inner">
+              <p class="text-[10px] font-black text-red-700 uppercase tracking-widest">Vui lòng cung cấp lý do hủy đơn:</p>
+              <textarea 
+                v-model="cancelReason"
+                rows="3"
+                placeholder="Lý do hủy (Vd: Tôi muốn đổi sản phẩm khác, bận việc đột xuất...)"
+                class="w-full border border-red-200 rounded-2xl px-5 py-4 text-sm focus:ring-2 focus:ring-red-400 outline-none transition-all resize-none bg-white shadow-sm"
+              ></textarea>
+              <div class="flex gap-4">
+                <button @click="cancelOrder" 
+                  :disabled="!cancelReason.trim()"
+                  class="flex-1 py-3 bg-red-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-200 disabled:opacity-50">
+                  Xác nhận hủy đơn
+                </button>
+                <button @click="showCancelForm = false; cancelReason = ''" 
+                  class="flex-1 py-3 bg-white text-gray-400 border border-gray-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-50 transition-all">
+                  Đóng
+                </button>
+              </div>
+            </div>
 
             <!-- Đã nhận hàng -->
             <button v-if="!order.khachBaoChuaNhan && order.trangThaiDH === 3" @click="confirmReceived"
@@ -361,6 +383,8 @@ export default {
       showReportModal: false,
       reportReason: '',
       reportDesc: '',
+      showCancelForm: false,
+      cancelReason: '',
       reportReasons: ['Chưa thấy giao', 'Giao nhầm địa chỉ', 'Khác'],
       steps: ['Chờ xác\nnhận', 'Đã xác\nnhận', 'Đang\ngiao', 'Đã\ngiao', 'Hoàn\nthành']
     }
@@ -388,16 +412,20 @@ export default {
     },
 
     async cancelOrder() {
-      if (!confirm('Bạn có chắc muốn hủy đơn hàng này không?')) return
+      if (!this.cancelReason.trim()) return;
+      const ok = await window.$confirm('Bạn có chắc muốn hủy đơn hàng này không?')
+      if (!ok) return
       try {
         await axios.put(`/orders/update-status/${this.order.maDH}`, null, {
-          params: { status: 5 },
+          params: { status: 5, reason: this.cancelReason },
           withCredentials: true
         })
+        this.showCancelForm = false;
+        this.cancelReason = '';
         await this.fetchOrder()
       } catch (e) {
         console.error(e)
-        alert('Không thể hủy đơn hàng. Vui lòng thử lại.')
+        window.$alert('Không thể hủy đơn hàng: ' + (e.response?.data?.message || 'Vui lòng thử lại.'), 'Lỗi')
       }
     },
 

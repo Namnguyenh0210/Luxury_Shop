@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.repository.query.Param;
 
 /**
  * REPOSITORY ĐƠN HÀNG - FIXED
@@ -43,11 +44,33 @@ public interface DonHangRepository extends JpaRepository<DonHang, Long> {
 
     // ================= BỔ SUNG CHO TÌM KIẾM ADMIN =================
     Page<DonHang> findByTrangThaiDHOrderByNgayDatDesc(Integer trangThai, Pageable pageable);
-    Page<DonHang> findByTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(String email, Pageable pageable);
-    Page<DonHang> findByTrangThaiDHAndTaiKhoan_EmailContainingIgnoreCaseOrderByNgayDatDesc(Integer trangThai, String email, Pageable pageable);
+    
+    @Query("SELECT d FROM DonHang d JOIN d.taiKhoan e " +
+           "WHERE (LOWER(e.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "ORDER BY d.ngayDat DESC")
+    Page<DonHang> findByKeyword(String keyword, Pageable pageable);
+
+    @Query("SELECT d FROM DonHang d JOIN d.taiKhoan e " +
+           "WHERE d.trangThaiDH = :trangThai " +
+           "AND (LOWER(e.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "ORDER BY d.ngayDat DESC")
+    Page<DonHang> findByTrangThaiAndKeyword(Integer trangThai, String keyword, Pageable pageable);
+
+    @Query("SELECT d FROM DonHang d JOIN d.taiKhoan e " +
+           "WHERE (:trangThai IS NULL OR d.trangThaiDH = :trangThai) " +
+           "AND (:keyword IS NULL OR (LOWER(e.hoTen) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(e.email) LIKE LOWER(CONCAT('%', :keyword, '%')))) " +
+           "AND (:startDate IS NULL OR d.ngayDat >= :startDate) " +
+           "AND (:endDate IS NULL OR d.ngayDat <= :endDate) " +
+           "ORDER BY d.ngayDat DESC")
+    Page<DonHang> searchAdvanced(String keyword, Integer trangThai, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     // Tính tổng doanh thu (Chỉ tính các đơn Hoàn tất = 4)
     @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH = 4")
     BigDecimal sumTotalRevenue();
+
+    @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH = 4 AND d.ngayDat >= :startDate AND d.ngayDat <= :endDate")
+    BigDecimal sumTotalRevenueBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    Long countByTrangThaiDHAndNgayDatBetween(Integer trangThai, LocalDateTime startDate, LocalDateTime endDate);
 
     // Tìm đơn hàng để auto-complete
     List<DonHang> findByTrangThaiDHAndNgayCapNhatBefore(Integer trangThai, LocalDateTime ngayCapNhat);

@@ -11,6 +11,9 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/api/admin/reports")
@@ -38,6 +41,21 @@ public class AdminThongKeController {
         long soldProducts = donHangChiTietRepository.countTotalSold();
         long totalCustomers = taiKhoanRepository.count();
 
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+
+        BigDecimal todayRevenue = donHangRepository.sumTotalRevenueBetween(startOfDay, endOfDay);
+        if (todayRevenue == null) todayRevenue = BigDecimal.ZERO;
+
+        Long todayOrders = donHangRepository.countByTrangThaiDHAndNgayDatBetween(0, startOfDay, endOfDay);
+        if (todayOrders == null) todayOrders = 0L;
+
+        Long todaySoldProducts = donHangChiTietRepository.countTotalSoldBetween(startOfDay, endOfDay);
+        if (todaySoldProducts == null) todaySoldProducts = 0L;
+
+        Long todayNewCustomers = taiKhoanRepository.countByNgayTaoBetween(startOfDay, endOfDay);
+        if (todayNewCustomers == null) todayNewCustomers = 0L;
+
         // TODO: Sau này query thật theo ngày/tháng
         List<Integer> chartData = List.of(15, 25, 18, 30, 22, 40, 55);
         List<String> chartLabels = List.of("T2", "T3", "T4", "T5", "T6", "T7", "CN");
@@ -47,6 +65,12 @@ public class AdminThongKeController {
         response.put("newOrders", newOrders);
         response.put("soldProducts", soldProducts);
         response.put("totalCustomers", totalCustomers);
+        
+        response.put("todayRevenue", todayRevenue);
+        response.put("todayOrders", todayOrders);
+        response.put("todaySoldProducts", todaySoldProducts);
+        response.put("todayNewCustomers", todayNewCustomers);
+
         response.put("chartData", chartData);
         response.put("chartLabels", chartLabels);
 

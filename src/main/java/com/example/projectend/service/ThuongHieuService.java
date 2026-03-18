@@ -16,6 +16,9 @@ public class ThuongHieuService {
     @Autowired
     private ThuongHieuRepository thuongHieuRepository;
 
+    @Autowired
+    private com.example.projectend.repository.SanPhamRepository sanPhamRepository;
+
     /**
      * Lấy tất cả thương hiệu
      */
@@ -32,6 +35,10 @@ public class ThuongHieuService {
     }
 
     public void deleteById(Long id) {
+        long count = sanPhamRepository.countByThuongHieu_MaTH(id);
+        if (count > 0) {
+            throw new RuntimeException("Chỉ được xóa thương hiệu khi tổng số lượng sản phẩm bằng 0. Thương hiệu này đang có " + count + " sản phẩm.");
+        }
         thuongHieuRepository.deleteById(id);
     }
 }

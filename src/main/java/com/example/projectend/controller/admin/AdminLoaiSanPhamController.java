@@ -10,16 +10,25 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/categories")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'NHANVIEN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminLoaiSanPhamController {
 
     @Autowired
     private LoaiSanPhamService loaiSanPhamService;
 
+    @Autowired
+    private com.example.projectend.repository.SanPhamRepository sanPhamRepository;
+
     @GetMapping
     public List<LoaiSanPham> getAllCategories() {
-        return loaiSanPhamService.findAll();
+        List<LoaiSanPham> categories = loaiSanPhamService.findAll();
+        for (LoaiSanPham c : categories) {
+            c.setCountNam(sanPhamRepository.countByLoaiSanPham_MaLoaiAndGioiTinh(c.getMaLoai(), 0));
+            c.setCountNu(sanPhamRepository.countByLoaiSanPham_MaLoaiAndGioiTinh(c.getMaLoai(), 1));
+            c.setCountUnisex(sanPhamRepository.countByLoaiSanPham_MaLoaiAndGioiTinh(c.getMaLoai(), 2));
+        }
+        return categories;
     }
 
     @GetMapping("/{id}")

@@ -57,7 +57,10 @@ export default defineConfig({
         bypass(req) {
           if (req.method === 'GET') return req.url
         }
-      }
+      },
+      
+      // ❌ REMOVED /admin proxy because it conflicts with Vue Router navigation (/admin/dashboard, etc.)
+      // Admin API calls already go through /api/admin/... via axios.defaults.baseURL = '/api'
 
       // ❌ KHÔNG proxy /checkout — Vue Router xử lý
       // Data fetch qua /api/checkout (đã có trong /api proxy trên)

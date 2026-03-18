@@ -1149,7 +1149,7 @@ export default {
 
     async saveAddress() {
       if (!this.newAddress.ten || !this.newAddress.phone || !this.newAddress.diaChi) {
-        alert("Vui lòng điền đầy đủ các thông tin bắt buộc!");
+        window.$alert("Vui lòng điền đầy đủ các thông tin bắt buộc!", "Thông báo");
         return;
       }
 
@@ -1164,10 +1164,10 @@ export default {
         this.newAddress = { ten: '', phone: '', diaChi: '', ghiChu: '' }
         this.showAddAddress = false // Đóng popup khi thêm thành công
         this.fetchAddresses()
-        alert("Đã thêm địa chỉ mới!");
+        window.$alert("Đã thêm địa chỉ mới!", "Thành công");
       } catch (err) {
         console.error("Save address error", err)
-        alert("Lỗi khi thêm địa chỉ!");
+        window.$alert("Lỗi khi thêm địa chỉ!", "Lỗi");
       }
     },
 
@@ -1179,23 +1179,21 @@ export default {
         this.fetchAddresses()
       } catch (err) {
         console.error("Set default address error", err)
-        alert("Lỗi khi đặt địa chỉ mặc định!");
+        window.$alert("Lỗi khi đặt địa chỉ mặc định!", "Lỗi");
       }
     },
 
     async deleteAddress(id) {
-      if (!confirm("Bạn có chắc chắn muốn xóa địa chỉ này?")) return;
+      const ok = await window.$confirm("Bạn có chắc chắn muốn xóa địa chỉ này?")
+      if (!ok) return;
       try {
         const formData = new FormData()
         formData.append("id", id)
-        // Dùng endpoint delete có sẵn trong ProfileController (nếu chạy qua Proxy)
-        // Hoặc check xem ApiController có hỗ trợ delete không. 
-        // ProfileController.java has @PostMapping("/profile/address/delete")
         await axios.post("/profile/address/delete", formData)
         this.fetchAddresses()
       } catch (err) {
         console.error("Delete address error", err)
-        alert("Lỗi khi xóa địa chỉ!");
+        window.$alert("Lỗi khi xóa địa chỉ!", "Lỗi");
       }
     },
 
@@ -1214,7 +1212,8 @@ export default {
     },
 
     async cancelOrder(orderId) {
-      if (!confirm('Bạn có chắc chắn muốn huỷ đơn hàng này?')) return;
+      const ok = await window.$confirm('Bạn có chắc chắn muốn huỷ đơn hàng này?')
+      if (!ok) return;
       try {
         await axios.put(
             `http://localhost:8080/api/orders/update-status/${orderId}`,
@@ -1293,12 +1292,12 @@ export default {
             withCredentials: true
           }
         )
-        alert('Đã gửi báo cáo cho Admin!')
+        window.$alert('Đã gửi báo cáo cho Admin!', 'Thành công')
         this.closeReportModal()
         this.fetchOrders()
       } catch (err) {
         console.error('Submit report error', err)
-        alert('Lỗi: ' + (err.response?.data?.message || 'Không thể gửi báo cáo'))
+        window.$alert('Lỗi: ' + (err.response?.data?.message || 'Không thể gửi báo cáo'), 'Lỗi')
       }
     },
   },

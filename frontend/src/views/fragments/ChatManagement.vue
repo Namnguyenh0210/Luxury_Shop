@@ -18,22 +18,32 @@
       <div class="p-3 bg-white">
         <div class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit overflow-x-auto no-scrollbar">
           <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-            class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300"
+            class="px-5 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-300"
             :class="activeTab === tab.id ? 
-              'bg-white shadow-sm text-yellow-700' : 
-              'text-gray-500 hover:text-gray-700'">
+              'bg-white shadow-sm text-[#C8A97E]' : 
+              'text-gray-400 hover:text-gray-600'">
             {{ tab.label }}
           </button>
         </div>
       </div>
 
       <!-- Conversations Loop -->
-      <div class="flex-1 overflow-y-auto custom-scroll p-3 space-y-2">
-        <div v-for="conv in filteredConversations" :key="conv.maCuocTroChuyen" @click="selectConversation(conv)"
-          class="group flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all duration-300 relative border border-transparent"
-          :class="selectedConv?.maCuocTroChuyen === conv.maCuocTroChuyen ? 
-            'bg-white border-gray-100 shadow-md scale-[1.02] z-10' : 
-            'hover:bg-white hover:border-gray-50 hover:shadow-sm'">
+      <div class="flex-1 overflow-y-auto custom-scroll px-3 space-y-2 py-4 bg-gray-50/30">
+          <div v-if="filteredConversations.length === 0 && !isFetching" class="py-12 text-center">
+             <span class="material-symbols-outlined text-4xl text-gray-200 mb-2">inbox</span>
+             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Không có hội thoại</p>
+          </div>
+          
+          <div v-if="isFetching" class="py-12 text-center space-y-3">
+             <div class="size-6 border-2 border-[#C8A97E]/20 border-t-[#C8A97E] rounded-full animate-spin mx-auto"></div>
+             <p class="text-[9px] font-black text-[#C8A97E] uppercase tracking-widest">Đang kết nối...</p>
+          </div>
+
+          <div v-for="conv in filteredConversations" :key="conv.maCuocTroChuyen" @click="selectConversation(conv)"
+            class="group flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer transition-all duration-500 relative border border-transparent"
+            :class="selectedConv?.maCuocTroChuyen === conv.maCuocTroChuyen ? 
+              'bg-white border-[#C8A97E]/30 shadow-xl scale-[1.02] z-10 ring-1 ring-[#C8A97E]/10' : 
+              'hover:bg-white hover:border-gray-100 hover:shadow-md hover:scale-[1.01]'">
           
           <div class="relative flex-shrink-0">
             <div class="size-11 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-bold text-sm shadow-sm overflow-hidden border-2 border-white">
@@ -43,24 +53,22 @@
             <div class="absolute -bottom-1 -right-1 size-3.5 rounded-full border-2 border-white" 
               :class="conv.trangThai === 'HUMAN' ? 'bg-orange-500' : (conv.trangThai === 'PENDING' ? 'bg-red-500 animate-pulse' : (conv.trangThai === 'CLOSED' ? 'bg-gray-400' : 'bg-blue-500'))"></div>
           </div>
-
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-start mb-0.5">
-              <h4 class="text-sm font-bold text-gray-800 truncate">{{ conv.taiKhoan?.hoTen || 'Khách Vô Danh' }}</h4>
-              <span class="text-[10px] text-gray-400 font-medium tabular-nums">{{ formatTimeShort(conv.ngayCapNhat) }}</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-start mb-0.5">
+                <h4 class="text-sm font-bold text-gray-800 truncate">
+                  {{ conv.taiKhoan?.hoTen || conv.taiKhoan?.email || 'Khách hàng #' + conv.maCuocTroChuyen }}
+                </h4>
+                <span class="text-[10px] text-gray-400 font-medium tabular-nums">{{ formatTimeShort(conv.ngayCapNhat) }}</span>
+              </div>
+              <p class="text-xs text-gray-500 truncate" :class="{'text-gray-900 font-bold': (conv.trangThai === 'HUMAN' || conv.trangThai === 'PENDING') && selectedConv?.maCuocTroChuyen !== conv.maCuocTroChuyen}">
+                {{ conv.lastMessage || (conv.taiKhoan ? 'Bắt đầu trò chuyện...' : 'Phiên khách #' + conv.maCuocTroChuyen) }}
+              </p>
             </div>
-            <p class="text-xs text-gray-500 truncate" :class="{'text-gray-900 font-bold': (conv.trangThai === 'HUMAN' || conv.trangThai === 'PENDING') && selectedConv?.maCuocTroChuyen !== conv.maCuocTroChuyen}">
-              {{ conv.lastMessage || 'Bắt đầu trò chuyện...' }}
-            </p>
-          </div>
 
           <div v-if="conv.trangThai === 'HUMAN' || conv.trangThai === 'PENDING'" class="absolute right-3 top-1/2 -translate-y-1/2 size-2 rounded-full bg-orange-500 shadow-sm animate-pulse"></div>
         </div>
 
-        <div v-if="filteredConversations.length === 0" class="flex flex-col items-center justify-center py-20 text-gray-300">
-          <span class="material-symbols-outlined text-4xl mb-3 opacity-20">forum</span>
-          <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Không có hội thoại</p>
-        </div>
+        
       </div>
       
       <!-- Last Sync Info -->
@@ -79,33 +87,54 @@
     <div class="flex-1 flex flex-col bg-white relative">
       <template v-if="selectedConv">
         <!-- Chat Header -->
-        <div class="h-20 px-6 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-20">
-          <div class="flex items-center gap-4">
-            <div class="size-10 rounded-xl bg-gray-900 text-yellow-400 flex items-center justify-center font-bold text-sm shadow-lg">
-               <img v-if="selectedConv.taiKhoan?.avatar" :src="selectedConv.taiKhoan.avatar" class="size-full object-cover" />
+        <!-- Chat Header: Premium Glassmorphism -->
+        <div class="h-20 px-8 border-b border-gray-100 flex items-center justify-between bg-white/90 backdrop-blur-xl sticky top-0 z-20 shadow-[0_1px_10px_rgba(0,0,0,0.02)]">
+          <div class="flex items-center gap-5">
+            <div class="size-11 rounded-2xl bg-slate-900 text-[#C8A97E] flex items-center justify-center font-black text-sm shadow-2xl border-2 border-white ring-1 ring-[#C8A97E]/20 overflow-hidden group">
+               <img v-if="selectedConv.taiKhoan?.avatar" :src="selectedConv.taiKhoan.avatar" class="size-full object-cover group-hover:scale-110 transition-transform duration-500" />
                <span v-else>{{ getInitials(selectedConv.taiKhoan?.hoTen) }}</span>
             </div>
-            <div>
-              <h3 class="text-base font-bold text-gray-900 tracking-tight">{{ selectedConv.taiKhoan?.hoTen || 'Khách Vô Danh' }}</h3>
-              <div class="flex items-center gap-2 mt-0.5">
-                <div class="flex items-center gap-1">
-                  <span class="size-2 rounded-full" :class="selectedConv.trangThai === 'HUMAN' || selectedConv.trangThai === 'PENDING' ? 'bg-orange-500' : 'bg-blue-500'"></span>
-                  <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{{ selectedConv.trangThai === 'HUMAN' ? 'Nhân viên trực' : (selectedConv.trangThai === 'PENDING' ? 'Đang chờ...' : 'AI Online') }}</span>
+            <div class="flex flex-col">
+              <div class="flex items-center gap-2">
+                <h3 class="text-[15px] font-black text-slate-800 tracking-tight leading-none">
+                  {{ selectedConv.taiKhoan?.hoTen || selectedConv.taiKhoan?.email || 'Khách vãng lai #' + selectedConv.maCuocTroChuyen }}
+                </h3>
+                <span v-if="selectedConv.taiKhoan" class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200">Customer</span>
+                <span v-else class="px-2 py-0.5 bg-orange-100 text-orange-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-orange-200">Guest Session</span>
+              </div>
+              <div class="flex items-center gap-2 mt-1.5">
+                <div v-if="selectedConv.trangThai === 'CLOSED'" class="px-2 py-0.5 rounded-full border bg-gray-50 border-gray-200 text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                  Đã kết thúc
                 </div>
-                <span class="text-gray-300 text-[10px]">•</span>
-                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest tabular-nums">{{ selectedConv.taiKhoan?.email || 'Guest' }}</span>
+                <div v-else class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border" 
+                  :class="selectedConv.trangThai === 'HUMAN' || selectedConv.trangThai === 'PENDING' ? 'bg-orange-50 border-orange-100' : 'bg-blue-50 border-blue-100'">
+                  <span class="size-1.5 rounded-full animate-pulse" :class="selectedConv.trangThai === 'HUMAN' || selectedConv.trangThai === 'PENDING' ? 'bg-orange-500' : 'bg-blue-500'"></span>
+                  <span class="text-[9px] font-black uppercase tracking-widest" :class="selectedConv.trangThai === 'HUMAN' || selectedConv.trangThai === 'PENDING' ? 'text-orange-600' : 'text-blue-600'">
+                    {{ selectedConv.trangThai === 'HUMAN' ? 'Nhân viên trực' : (selectedConv.trangThai === 'PENDING' ? 'Chờ hỗ trợ' : 'AI Assistant') }}
+                  </span>
+                </div>
+                <span class="text-gray-300 text-[10px] opacity-50">|</span>
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest tabular-nums">{{ selectedConv.taiKhoan?.email || 'Phiên #' + selectedConv.maCuocTroChuyen }}</span>
               </div>
             </div>
           </div>
-          
-          <div class="flex items-center gap-2">
-            <button @click="showRightPanel = !showRightPanel" class="p-2.5 hover:bg-gray-100 rounded-xl transition-all group" :class="{'bg-gold/10 text-gold': showRightPanel}">
-               <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">person_search</span>
+          <div class="flex items-center gap-3">
+            <button @click="showRightPanel = !showRightPanel" 
+               class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 group relative overflow-hidden" 
+               :class="showRightPanel ? 'bg-slate-900 text-[#C8A97E] shadow-lg' : 'bg-gray-50 text-slate-500 hover:bg-gray-100 border border-gray-100'">
+               <span class="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">analytics</span>
+               <span class="text-[10px] font-black uppercase tracking-widest">Hồ sơ khách</span>
             </button>
             <div class="w-px h-6 bg-gray-100 mx-1"></div>
-            <button v-if="selectedConv.trangThai !== 'CLOSED'" @click="closeConv" class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm shadow-red-100 border border-red-100/50">
+            <button v-if="selectedConv.trangThai === 'PENDING'" @click="acceptConv" 
+               class="flex items-center gap-2 px-5 py-2.5 bg-[#C8A97E] text-slate-900 hover:bg-slate-900 hover:text-[#C8A97E] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-lg border border-[#C8A97E] hover:shadow-[#C8A97E]/20 hover:-translate-y-0.5">
+               <span class="material-symbols-outlined text-[18px]">handshake</span>
+               Tiếp nhận ngay
+            </button>
+            <button v-if="selectedConv.trangThai !== 'CLOSED'" @click="closeConv" 
+               class="flex items-center gap-2 px-5 py-2.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-sm border border-red-100/50 hover:shadow-red-200 hover:-translate-y-0.5">
                <span class="material-symbols-outlined text-[18px]">done_all</span>
-               Đóng đơn
+               Kết thúc
             </button>
           </div>
         </div>
@@ -117,33 +146,30 @@
             
             <div v-if="isNewGroup(idx)" class="flex items-center gap-2 mb-3 px-1" :class="msg.loaiNguoiGui === 'USER' ? 'flex-row' : 'flex-row-reverse'">
               <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                {{ msg.loaiNguoiGui === 'USER' ? (selectedConv.taiKhoan?.hoTen || 'Khách hàng') : (msg.loaiNguoiGui === 'AI' ? '🤖 AI Trợ lý' : '👩💼 Nhân viên tư vấn') }}
+                {{ msg.loaiNguoiGui === 'USER' ? (selectedConv.taiKhoan?.hoTen || selectedConv.taiKhoan?.email || 'Khách vãng lai #' + selectedConv.maCuocTroChuyen) : (msg.loaiNguoiGui === 'AI' ? '🤖 AI Trợ lý' : '👩💼 Nhân viên tư vấn') }}
               </span>
               <div class="h-px w-6 bg-gray-100"></div>
             </div>
 
-            <div class="max-w-[70%] group relative">
-              <div class="px-5 py-3.5 rounded-3xl text-[13px] font-medium leading-relaxed shadow-sm transition-all duration-300"
+            <div class="max-w-[75%] group relative">
+              <div class="px-6 py-4 rounded-3xl text-[13px] font-medium leading-relaxed shadow-sm transition-all duration-300 transform"
                 :class="msg.loaiNguoiGui === 'USER' ? 
-                  'bg-white text-gray-800 rounded-tl-none border border-gray-100' : 
+                  'bg-white text-gray-800 rounded-tl-none border border-gray-100 hover:shadow-md' : 
                   (msg.loaiNguoiGui === 'AI' ? 
-                    'bg-slate-100 text-slate-800 rounded-tr-none border border-slate-200' : 
-                    (role === 'ADMIN' ? 'bg-slate-900 text-white rounded-tr-none shadow-xl shadow-slate-200 border border-slate-800' : 'bg-blue-600 text-white rounded-tr-none shadow-xl shadow-blue-100'))">
+                    'bg-slate-50 text-slate-800 rounded-tr-none border border-slate-200 italic' : 
+                    'bg-slate-900 text-[#C8A97E] rounded-tr-none shadow-2xl shadow-slate-200 border border-slate-800 hover:shadow-[#C8A97E]/10')">
                   {{ msg.noiDung }}
               </div>
-              
-              <div class="absolute top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 transition-opacity duration-300 flex items-center gap-1"
-                :class="msg.loaiNguoiGui === 'USER' ? 'left-full ml-3' : 'right-full mr-3'">
-                <span class="text-[9px] font-bold text-gray-400 bg-white px-2 py-1 rounded-full shadow-sm border border-gray-100 tabular-nums">
-                  {{ formatTimeVeryShort(msg.ngayGui) }}
-                </span>
+              <div class="flex items-center gap-2 mt-2" :class="msg.loaiNguoiGui === 'USER' ? 'justify-start' : 'justify-end'">
+                <span class="text-[9px] font-bold text-gray-300 tabular-nums uppercase">{{ formatDate(msg.ngayGui) }}</span>
+                <span v-if="msg.loaiNguoiGui !== 'USER'" class="material-symbols-outlined text-[12px] text-[#C8A97E]">done_all</span>
               </div>
             </div>
           </div>
           
           <!-- Loading State inside messages -->
           <div v-if="loadingHistory" class="flex flex-col items-center justify-center py-10 gap-3">
-             <div class="size-6 border-2 border-yellow-200 border-t-yellow-500 rounded-full animate-spin"></div>
+             <div class="size-6 border-2 border-[#C8A97E]/20 border-t-[#C8A97E] rounded-full animate-spin"></div>
              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Đang tải lịch sử...</p>
           </div>
         </div>
@@ -151,12 +177,12 @@
         <!-- Input Area -->
         <div v-if="selectedConv.trangThai !== 'CLOSED'" class="p-6 bg-white border-t border-gray-100 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.05)] z-20">
           <div class="flex flex-wrap gap-2 mb-4">
-             <button v-for="q in quickReplies" :key="q" @click="replyText = q" class="px-3.5 py-1.5 bg-gray-50 hover:bg-gold hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 border border-gray-100 transition-all active:scale-95 shadow-sm">
+             <button v-for="q in quickReplies" :key="q" @click="replyText = q" class="px-3.5 py-1.5 bg-gray-50 hover:bg-[#C8A97E] hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 border border-gray-100 transition-all active:scale-95 shadow-sm">
                 {{ q }}
              </button>
-             <button @click="autoComplete" class="ml-auto flex items-center gap-1 px-3 py-1.5 bg-slate-900 text-gold rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg active:scale-95">
+             <button @click="autoComplete" class="ml-auto flex items-center gap-1 px-3 py-1.5 bg-slate-900 text-[#C8A97E] rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg active:scale-95 border border-[#C8A97E]/30">
                 <span class="material-symbols-outlined text-[14px]">auto_awesome</span>
-                Gợi ý AI
+                AI Gợi ý
              </button>
           </div>
           
@@ -170,7 +196,7 @@
              ></textarea>
              
              <button type="submit" :disabled="!replyText.trim() || replying" 
-                class="size-12 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-xl bg-yellow-400 text-yellow-900 shadow-yellow-100 hover:shadow-yellow-200 hover:-translate-y-1 active:scale-90 disabled:opacity-30">
+                class="size-12 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-xl bg-[#C8A97E] text-white shadow-[#C8A97E]/20 hover:shadow-[#C8A97E]/40 hover:-translate-y-1 active:scale-90 disabled:opacity-30">
                 <span v-if="!replying" class="material-symbols-outlined text-2xl">arrow_upward</span>
                 <div v-else class="size-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
              </button>
@@ -189,30 +215,39 @@
       <!-- EMPTY STATE -->
       <div v-else class="flex-1 flex flex-col items-center justify-center bg-gray-50/10 p-12 text-center">
         <div class="relative mb-8">
-           <div class="size-32 rounded-[48px] bg-white shadow-2xl flex items-center justify-center text-slate-100">
+           <div class="size-32 rounded-[48px] bg-white shadow-2xl flex items-center justify-center text-slate-100 border border-[#C8A97E]/10">
               <span class="material-symbols-outlined text-7xl">chat_bubble</span>
            </div>
-           <div class="absolute -bottom-2 -right-2 size-10 rounded-2xl bg-yellow-400 text-yellow-900 shadow-xl flex items-center justify-center animate-bounce">
+           <div class="absolute -bottom-2 -right-2 size-10 rounded-2xl bg-[#C8A97E] text-white shadow-xl flex items-center justify-center animate-bounce border-2 border-white">
               <span class="material-symbols-outlined">support_agent</span>
            </div>
         </div>
-        <h2 class="text-2xl font-black text-slate-800 uppercase tracking-tight mb-2">Trung tâm điều hành Chat</h2>
+         <h2 class="text-2xl font-serif font-bold text-slate-800 uppercase tracking-tight mb-2">Trung tâm điều hành Chat</h2>
         <p class="text-sm font-medium text-gray-400 max-w-sm mb-8 leading-relaxed">Chọn một cuộc hội thoại từ danh sách bên trái để bắt đầu hỗ trợ khách hàng theo tiêu chuẩn Luxury.</p>
         
-        <div class="grid grid-cols-2 gap-4 w-full max-w-md">
-           <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 text-left group hover:border-yellow-400/30 transition-all cursor-default">
-              <div class="size-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center mb-3 group-hover:bg-orange-600 group-hover:text-white transition-all">
-                 <span class="material-symbols-outlined text-[20px]">priority_high</span>
+        <div class="grid grid-cols-2 gap-6 w-full max-w-xl">
+           <div class="bg-white p-6 rounded-[32px] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-gray-100 text-left group hover:border-[#C8A97E]/30 transition-all duration-500 cursor-default relative overflow-hidden">
+              <div class="absolute top-0 right-0 size-24 bg-orange-50/30 rounded-full translate-x-12 -translate-y-12"></div>
+              <div class="size-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-4 group-hover:bg-orange-600 group-hover:text-white transition-all transform group-hover:rotate-12">
+                 <span class="material-symbols-outlined text-[22px]">priority_high</span>
               </div>
-              <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">Cần hỗ trợ</p>
-              <p class="text-sm font-bold text-gray-800 tabular-nums">{{ stats.pending + stats.human }} khách đang chờ</p>
+              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Cần hỗ trợ</p>
+              <div class="flex items-baseline gap-2">
+                 <p class="text-2xl font-serif font-bold text-slate-800 tabular-nums">{{ stats.pending + stats.human }}</p>
+                 <p class="text-xs font-bold text-gray-400">Khách chờ</p>
+              </div>
            </div>
-           <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 text-left group hover:border-yellow-400/30 transition-all cursor-default">
-              <div class="size-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                 <span class="material-symbols-outlined text-[20px]">robot_2</span>
+           
+           <div class="bg-white p-6 rounded-[32px] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-gray-100 text-left group hover:border-[#C8A97E]/30 transition-all duration-500 cursor-default relative overflow-hidden">
+              <div class="absolute top-0 right-0 size-24 bg-blue-50/30 rounded-full translate-x-12 -translate-y-12"></div>
+              <div class="size-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all transform group-hover:-rotate-12">
+                 <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
               </div>
-              <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">AI đang trực</p>
-              <p class="text-sm font-bold text-gray-800 tabular-nums">{{ stats.ai }} khách đang chat</p>
+              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">AI Đang trực</p>
+              <div class="flex items-baseline gap-2">
+                 <p class="text-2xl font-serif font-bold text-slate-800 tabular-nums">{{ stats.ai }}</p>
+                 <p class="text-xs font-bold text-gray-400">Đang chat</p>
+              </div>
            </div>
         </div>
       </div>
@@ -230,12 +265,12 @@
         </div>
 
         <div class="p-8 flex flex-col items-center text-center">
-           <div class="size-24 rounded-[36px] bg-slate-800 text-gold flex items-center justify-center text-3xl font-black shadow-2xl mb-6 relative group overflow-hidden border-4 border-white">
+           <div class="size-24 rounded-[36px] bg-slate-800 text-[#C8A97E] flex items-center justify-center text-3xl font-black shadow-2xl mb-6 relative group overflow-hidden border-4 border-white ring-2 ring-[#C8A97E]/20">
               <img v-if="selectedConv.taiKhoan.avatar" :src="selectedConv.taiKhoan.avatar" class="size-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <span v-else>{{ getInitials(selectedConv.taiKhoan.hoTen) }}</span>
            </div>
            <h3 class="text-lg font-black text-gray-800 mb-1 leading-tight">{{ selectedConv.taiKhoan.hoTen }}</h3>
-           <span class="px-3 py-1 bg-gold/10 text-gold rounded-full text-[10px] font-black uppercase tracking-widest border border-gold/10">Silver Member</span>
+            <span class="px-3 py-1 bg-[#C8A97E]/10 text-[#C8A97E] rounded-full text-[10px] font-black uppercase tracking-widest border border-[#C8A97E]/20">Luxury VIP Member</span>
         </div>
 
         <div class="px-6 space-y-6 pb-12">
@@ -301,29 +336,33 @@ export default {
       loadingHistory: false,
       isFetching: false,
       searchKeyword: '',
-      activeTab: 'HUMAN',
+      activeTab: 'PENDING',
       replyText: '',
       replying: false,
       showRightPanel: true,
       pollingInterval: null,
       tabs: [
-        { id: 'HUMAN', label: 'Cần hỗ trợ' },
+        { id: 'PENDING', label: 'Cần hỗ trợ' },
+        { id: 'HUMAN', label: 'Đang xử lý' },
         { id: 'AI', label: 'AI đang trực' },
-        { id: 'ALL', label: 'Tất cả' },
-        { id: 'CLOSED', label: 'Lịch sử' }
+        { id: 'ALL', label: 'Tất cả' }
       ],
       quickReplies: ['Xin chào!', 'Dạ vâng ạ', 'Sản phẩm này còn hàng', 'Vui lòng chờ giây lát', 'Cảm ơn bạn!']
     }
   },
   computed: {
     filteredConversations() {
-      let filtered = this.conversations;
+      let filtered = [...this.conversations];
       if (this.activeTab !== 'ALL') {
+        // Tab cụ thể không hiện cuộc hội thoại đã CLOSED
+        filtered = filtered.filter(c => c.trangThai !== 'CLOSED');
+
         if (this.activeTab === 'HUMAN') {
-          // Tab "Cần hỗ trợ" hiện cả PENDING và HUMAN
-          filtered = filtered.filter(c => c.trangThai === 'HUMAN' || c.trangThai === 'PENDING');
+           filtered = filtered.filter(c => c.trangThai === 'HUMAN');
+        } else if (this.activeTab === 'PENDING') {
+           filtered = filtered.filter(c => c.trangThai === 'PENDING');
         } else {
-          filtered = filtered.filter(c => c.trangThai === this.activeTab);
+           filtered = filtered.filter(c => c.trangThai === this.activeTab);
         }
       }
       if (this.searchKeyword) {
@@ -396,10 +435,23 @@ export default {
         this.replying = false;
       }
     },
+    async acceptConv() {
+       if (!this.selectedConv) return;
+       try {
+          await axios.post('/chat/admin/accept', 
+             { conversationId: this.selectedConv.maCuocTroChuyen },
+             { withCredentials: true }
+          );
+          this.selectedConv.trangThai = 'HUMAN';
+          this.fetchConversations(true);
+       } catch (e) {
+          alert('Lỗi khi tiếp nhận cuộc trò chuyện');
+       }
+    },
     async closeConv() {
        if (!confirm('Bạn có chắc chắn muốn kết thúc cuộc hỗ trợ này?')) return;
        try {
-          const res = await axios.post('/chat/admin/status', 
+          await axios.post('/chat/admin/status', 
              { conversationId: this.selectedConv.maCuocTroChuyen, status: 'CLOSED' },
              { withCredentials: true }
           );
@@ -484,11 +536,11 @@ export default {
 </script>
 
 <style scoped>
-.gold { color: #854d0e; }
-.bg-gold { background-color: #facc15; }
-.border-gold { border-color: #facc15; }
-.focus\:ring-gold:focus { --tw-ring-color: #ca8a04; }
-.ring-gold { --tw-ring-color: #ca8a04; }
+.gold { color: #C8A97E; }
+.bg-gold { background-color: #C8A97E; }
+.border-gold { border-color: #C8A97E; }
+.focus\:ring-gold:focus { --tw-ring-color: rgba(200, 169, 126, 0.4); }
+.ring-gold { --tw-ring-color: rgba(200, 169, 126, 0.4); }
 
 .custom-scroll::-webkit-scrollbar {
   width: 5px;

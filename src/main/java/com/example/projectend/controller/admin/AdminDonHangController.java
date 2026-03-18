@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin/orders")
+@RequestMapping("/api/admin/orders")
 @PreAuthorize("hasRole('ADMIN') or hasRole('NHANVIEN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminDonHangController {
@@ -34,12 +34,13 @@ public class AdminDonHangController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String timeRange) {
 
         Pageable pageable = PageRequest.of(page, size);
         String statusStr = (status != null) ? status.toString() : null;
 
-        return donHangService.searchAdmin(keyword, statusStr, pageable);
+        return donHangService.searchAdmin(keyword, statusStr, timeRange, pageable);
     }
 
     // ==========================================

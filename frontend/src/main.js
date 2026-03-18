@@ -5,6 +5,7 @@ import axios from 'axios'
 
 // Import global styles (font + margin)
 import './assets/css/global.css'
+import './utils/modal.js'
 
 // Import original CSS files as global styles
 import './assets/css/Home.css'
@@ -72,24 +73,40 @@ const routes = [
   // Error pages
   { path: '/403', component: () => import('./views/error/403.vue') }, // Moved to error/
   { path: '/:pathMatch(.*)*', component: () => import('./views/error/404.vue') },
-  { path: '/admin/dashboard', component: () => import('./views/admin/admin.vue') },
-  { path: '/admin/products', component: () => import('./views/admin/product-list.vue') },
-  { path: '/admin/products/add', component: () => import('./views/admin/AddProduct.vue') },
-  { path: '/admin/products/edit/:id', component: () => import('./views/admin/EditProduct.vue') },
-  { path: '/admin/inventory', component: () => import('./views/admin/inventory.vue') },
-  { path: '/admin/orders', component: () => import('./views/admin/order-list.vue') },
-  { path: '/admin/orders/:id', component: () => import('./views/admin/order-detail.vue') },
-  { path: '/admin/customers', component: () => import('./views/admin/customer-list.vue') },
-  { path: '/admin/blogs', component: () => import('./views/admin/blog-list.vue') },
-  { path: '/admin/reviews', component: () => import('./views/admin/reviews.vue') },
-  { path: '/admin/comments', component: () => import('./views/admin/comments.vue') },
-  { path: '/admin/reports', component: () => import('./views/admin/report-analytics.vue') },
-  { path: '/admin/chat', component: () => import('./views/admin/admin-chat.vue') },
-  { path: '/staff/dashboard', component: () => import('./views/staff/StaffDashboard.vue') },
-  { path: '/staff/blogs', component: () => import('./views/staff/StaffBaiViet.vue') },
-  { path: '/staff/orders', component: () => import('./views/staff/StaffOrders.vue') },
-  { path: '/staff/orders/:id', component: () => import('./views/staff/StaffOrderDetail.vue') },
-  { path: '/staff/chat', component: () => import('./views/staff/StaffChat.vue') },
+  // Admin - Nested Routes with Persistent Layout
+  {
+    path: '/admin',
+    component: () => import('./views/admin/AdminLayout.vue'),
+    redirect: '/admin/dashboard',
+    children: [
+      { path: 'dashboard', component: () => import('./views/admin/admin.vue'), meta: { title: 'Tổng Quan' } },
+      { path: 'products', component: () => import('./views/admin/product-list.vue'), meta: { title: 'Sản Phẩm' } },
+      { path: 'products/add', component: () => import('./views/admin/AddProduct.vue'), meta: { title: 'Thêm Sản Phẩm' } },
+      { path: 'products/edit/:id', component: () => import('./views/admin/EditProduct.vue'), meta: { title: 'Sửa Sản Phẩm' } },
+      { path: 'inventory', component: () => import('./views/admin/inventory.vue'), meta: { title: 'Kho & Nhập Hàng' } },
+      { path: 'orders', component: () => import('./views/admin/order-list.vue'), meta: { title: 'Đơn Hàng' } },
+      { path: 'orders/:id', component: () => import('./views/admin/order-detail.vue'), meta: { title: 'Chi Tiết Đơn Hàng' } },
+      { path: 'customers', component: () => import('./views/admin/customer-list.vue'), meta: { title: 'Người Dùng' } },
+      { path: 'blogs', component: () => import('./views/admin/blog-list.vue'), meta: { title: 'Bài Viết Blog' } },
+      { path: 'reviews', component: () => import('./views/admin/reviews.vue'), meta: { title: 'Đánh Giá' } },
+      { path: 'comments', component: () => import('./views/admin/comments.vue'), meta: { title: 'Phản Hồi' } },
+      { path: 'reports', component: () => import('./views/admin/report-analytics.vue'), meta: { title: 'Thống Kê' } },
+      { path: 'chat', component: () => import('./views/admin/admin-chat.vue'), meta: { title: 'Chat Trực Tuyến' } },
+    ]
+  },
+  // Staff fallback to admin layout too
+  {
+    path: '/staff',
+    component: () => import('./views/admin/AdminLayout.vue'),
+    redirect: '/staff/dashboard',
+    children: [
+      { path: 'dashboard', component: () => import('./views/admin/admin.vue'), meta: { title: 'Tổng Quan' } },
+      { path: 'blogs', component: () => import('./views/admin/blog-list.vue'), meta: { title: 'Bài Viết Blog' } },
+      { path: 'orders', component: () => import('./views/admin/order-list.vue'), meta: { title: 'Đơn Hàng' } },
+      { path: 'orders/:id', component: () => import('./views/admin/order-detail.vue'), meta: { title: 'Chi Tiết Đơn Hàng' } },
+      { path: 'chat', component: () => import('./views/admin/admin-chat.vue'), meta: { title: 'Chat Trực Tuyến' } },
+    ]
+  },
 ]
 
 const router = createRouter({

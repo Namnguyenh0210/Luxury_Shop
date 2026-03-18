@@ -1,17 +1,17 @@
 <template>
-  <AdminLayout page-title="Quản Lý Bài Viết">
+  
     <div class="p-8 space-y-6">
 
       <!-- ACTION BAR -->
       <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="relative">
+        <div class="relative w-72">
           <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <span class="material-symbols-outlined text-[18px]">search</span>
+            <span class="material-symbols-outlined text-[20px]">search</span>
           </span>
           <input
             v-model="tuKhoa"
             placeholder="Tìm bài viết..."
-            class="border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400 w-64"
+            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
           />
         </div>
         <button @click="moModal()"
@@ -22,7 +22,7 @@
       </div>
 
       <!-- BẢNG DANH SÁCH -->
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
@@ -181,17 +181,14 @@
       </div>
     </div>
 
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 export default {
   name: 'BlogList',
-  components: { AdminLayout },
-
   data() {
     return {
       danhSach: [],
@@ -267,7 +264,7 @@ export default {
 
     async luuBaiViet() {
       if (!this.form.tieuDe?.trim() || !this.form.noiDung?.trim()) {
-        alert('Vui lòng nhập đầy đủ tiêu đề và nội dung!')
+        window.$alert('Vui lòng nhập đầy đủ tiêu đề và nội dung!', 'Thông báo')
         return
       }
 
@@ -289,30 +286,31 @@ export default {
         }
 
         if (res.data.thanhCong) {
-          alert(res.data.thongBao || 'Thành công!')
+          window.$alert(res.data.thongBao || 'Thành công!', 'Thành công')
           this.dongModal()
           await this.taiDuLieu()
         } else {
-          alert('Lỗi: ' + (res.data.thongBao || 'Có lỗi xảy ra'))
+          window.$alert('Lỗi: ' + (res.data.thongBao || 'Có lỗi xảy ra'), 'Lỗi')
         }
       } catch (e) {
-        alert('Lỗi kết nối: ' + e.message)
+        window.$alert('Lỗi kết nối: ' + e.message, 'Lỗi')
       } finally {
         this.dangLuu = false
       }
     },
 
     async xoaBaiViet(id) {
-      if (!confirm('Bạn có chắc muốn xóa bài viết này?')) return
+      const ok = await window.$confirm('Bạn có chắc muốn xóa bài viết này?')
+      if (!ok) return
       try {
         const res = await axios.delete(`/admin/blogs/${id}`, { withCredentials: true })
         if (res.data.thanhCong) {
           this.danhSach = this.danhSach.filter(b => b.maBV !== id)
         } else {
-          alert('Lỗi: ' + res.data.thongBao)
+          window.$alert('Lỗi: ' + res.data.thongBao, 'Lỗi')
         }
       } catch (e) {
-        alert('Lỗi khi xóa: ' + e.message)
+        window.$alert('Lỗi khi xóa: ' + e.message, 'Lỗi')
       }
     },
 
@@ -335,10 +333,10 @@ export default {
           this.form.maLoaiBV = res.data.loaiBaiViet.maLoaiBV
           this.dongModalLoai()
         } else {
-          alert('Lỗi: ' + res.data.thongBao)
+          window.$alert('Lỗi: ' + res.data.thongBao, 'Lỗi')
         }
       } catch (e) {
-        alert('Lỗi kết nối: ' + e.message)
+        window.$alert('Lỗi kết nối: ' + e.message, 'Lỗi')
       } finally {
         this.dangLuuLoai = false
       }

@@ -96,7 +96,8 @@ public class ChatService {
             return aiMessage;
         }
 
-        // Đang chat với HUMAN hoặc PENDING (đang chờ nhân viên) -> Không gọi AI, chờ staff reply
+        // Đang chat với HUMAN hoặc PENDING (đang chờ nhân viên) -> Không gọi AI, chờ
+        // staff reply
         return null;
     }
 
@@ -163,16 +164,18 @@ public class ChatService {
         Objects.requireNonNull(conversationId, "conversationId must not be null");
         CuocTroChuyen conv = cuocTroChuyenRepository.findById(conversationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hội thoại"));
-        
+
         // Tránh ghi đè nếu đã là HUMAN
-        if ("HUMAN".equals(conv.getTrangThai())) return;
+        if ("HUMAN".equals(conv.getTrangThai()))
+            return;
 
         conv.setTrangThai("PENDING"); // Đổi sang PENDING (Chờ nhân viên tiếp nhận)
         conv.setNgayCapNhat(LocalDateTime.now());
         cuocTroChuyenRepository.save(conv);
 
         // Thêm tin nhắn xác nhận từ hệ thống/AI
-        TinNhan confirmMsg = new TinNhan(conv, "AI", "⏳ Chúng tôi đang kết nối bạn với nhân viên trong vài phút. Bạn có thể để lại câu hỏi trước tại đây...");
+        TinNhan confirmMsg = new TinNhan(conv, "AI",
+                "⏳ Chúng tôi đang kết nối bạn với nhân viên trong vài phút. Bạn có thể để lại câu hỏi trước tại đây...");
         tinNhanRepository.save(confirmMsg);
     }
 
@@ -181,10 +184,18 @@ public class ChatService {
      */
     @Transactional
     public void updateStatus(Long conversationId, String status) {
+        updateStatusWithStaff(conversationId, status, null);
+    }
+
+    @Transactional
+    public void updateStatusWithStaff(Long conversationId, String status, TaiKhoan staff) {
         Objects.requireNonNull(conversationId, "conversationId must not be null");
         CuocTroChuyen conv = cuocTroChuyenRepository.findById(conversationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hội thoại"));
         conv.setTrangThai(status);
+        if (staff != null) {
+            conv.setNhanVien(staff);
+        }
         conv.setNgayCapNhat(LocalDateTime.now());
         cuocTroChuyenRepository.save(conv);
     }
@@ -193,7 +204,7 @@ public class ChatService {
      * Nhân viên gửi tin nhắn
      */
     @Transactional
-    public TinNhan staffReply(Long conversationId, String content) {
+    public TinNhan staffReply(Long conversationId, String content, TaiKhoan staff) {
         Objects.requireNonNull(conversationId, "conversationId must not be null");
         CuocTroChuyen conv = cuocTroChuyenRepository.findById(conversationId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hội thoại"));
@@ -201,6 +212,11 @@ public class ChatService {
         // Khi nhân viên trả lời, nếu đang là PENDING thì chuyển hẳn sang HUMAN
         if ("PENDING".equals(conv.getTrangThai())) {
             conv.setTrangThai("HUMAN");
+        }
+        
+        // Gán nhân viên nếu chưa có hoặc cập nhật người reply mới nhất
+        if (staff != null) {
+            conv.setNhanVien(staff);
         }
 
         TinNhan msg = new TinNhan(conv, "STAFF", content);
@@ -215,14 +231,25 @@ public class ChatService {
      * Admin/Staff lấy tất cả các cuộc hội thoại
      */
     public List<CuocTroChuyen> getAllConversations() {
-        List<CuocTroChuyen> list = cuocTroChuyenRepository.findAllByOrderByNgayCapNhatDesc();
-        for (CuocTroChuyen c : list) {
-            // Lấy tin nhắn cuối cùng để hiển thị ở sidebar admin
+        List<CuocTroChuyen> all = cuocTroChuyenRepository.findAllByOrderByNgayCapNhatDesc();
+        
+        return all.stream().filter(c -> {
+            // 1. Lọc bỏ các cuộc chat của Admin/Nhân viên (nếu có)
+            if (c.getTaiKhoan() != null) {
+                boolean isStaff = c.getTaiKhoan().getVaiTros().stream()
+                    .anyMatch(v -> v.getTenVaiTro().equals("ROLE_ADMIN") || v.getTenVaiTro().equals("ROLE_NHANVIEN"));
+                if (isStaff) return false;
+            }
+            
+            // 2. Lọc bỏ các phiên AI mà chưa có nội dung chat (phiên rác khi khách vừa load trang)
             TinNhan last = tinNhanRepository.findFirstByCuocTroChuyenOrderByNgayGuiDesc(c);
             if (last != null) {
                 c.setLastMessage(last.getNoiDung());
+                return true; 
             }
-        }
-        return list;
+            
+            // Nếu không có tin nhắn nhưng đã chuyển sang PENDING/HUMAN thì vẫn giữ lại
+            return !"AI".equals(c.getTrangThai());
+        }).toList();
     }
 }

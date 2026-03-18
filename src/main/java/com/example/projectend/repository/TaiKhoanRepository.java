@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 /**
  * REPOSITORY TAI KHOAN - LUXURY FASHION
@@ -30,4 +31,6 @@ public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Long> {
     // Tìm kiếm tài khoản theo tên hoặc email
     @Query("SELECT t FROM TaiKhoan t WHERE t.hoTen LIKE %:keyword% OR t.email LIKE %:keyword%")
     List<TaiKhoan> searchByKeyword(@Param("keyword") String keyword);
+
+    Long countByNgayTaoBetween(LocalDateTime startDate, LocalDateTime endDate);
 }

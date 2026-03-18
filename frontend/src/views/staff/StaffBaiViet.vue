@@ -268,7 +268,7 @@ export default {
 
     async luuBaiViet() {
       if (!this.form.tieuDe?.trim() || !this.form.noiDung?.trim()) {
-        alert('Vui lòng nhập đầy đủ tiêu đề và nội dung!')
+        window.$alert('Vui lòng nhập đầy đủ tiêu đề và nội dung!', 'Thông báo')
         return
       }
 
@@ -290,30 +290,31 @@ export default {
         }
 
         if (res.data.thanhCong) {
-          alert(res.data.thongBao || 'Thành công!')
+          window.$alert(res.data.thongBao || 'Thành công!', 'Thành công')
           this.dongModal()
           await this.taiDuLieu()
         } else {
-          alert('Lỗi: ' + (res.data.thongBao || 'Có lỗi xảy ra'))
+          window.$alert('Lỗi: ' + (res.data.thongBao || 'Có lỗi xảy ra'), 'Lỗi')
         }
       } catch (e) {
-        alert('Lỗi kết nối: ' + e.message)
+        window.$alert('Lỗi kết nối: ' + e.message, 'Lỗi')
       } finally {
         this.dangLuu = false
       }
     },
 
     async xoaBaiViet(id) {
-      if (!confirm('Bạn có chắc muốn xóa bài viết này?')) return
+      const ok = await window.$confirm('Bạn có chắc muốn xóa bài viết này?')
+      if (!ok) return
       try {
         const res = await axios.delete(`/admin/blogs/${id}`, { withCredentials: true })
         if (res.data.thanhCong) {
           this.danhSach = this.danhSach.filter(b => b.maBV !== id)
         } else {
-          alert('Lỗi: ' + res.data.thongBao)
+          window.$alert('Lỗi: ' + res.data.thongBao, 'Lỗi')
         }
       } catch (e) {
-        alert('Lỗi khi xóa: ' + e.message)
+        window.$alert('Lỗi khi xóa: ' + e.message, 'Lỗi')
       }
     },
 
@@ -336,10 +337,10 @@ export default {
           this.form.maLoaiBV = res.data.loaiBaiViet.maLoaiBV
           this.dongModalLoai()
         } else {
-          alert('Lỗi: ' + res.data.thongBao)
+          window.$alert('Lỗi: ' + res.data.thongBao, 'Lỗi')
         }
       } catch (e) {
-        alert('Lỗi kết nối: ' + e.message)
+        window.$alert('Lỗi kết nối: ' + e.message, 'Lỗi')
       } finally {
         this.dangLuuLoai = false
       }

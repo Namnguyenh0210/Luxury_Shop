@@ -98,32 +98,61 @@
                 <p v-if="order.lyDoHuy" class="text-sm mt-1"><strong>Lý do hủy:</strong> {{ order.lyDoHuy }}</p>
               </div>
 
-            <div v-if="order.trangThaiDH < 4 && !order.khachBaoChuaNhan" class="flex flex-wrap gap-4 w-full">
+            <div v-if="order.trangThaiDH < 4 && !order.khachBaoChuaNhan" class="flex flex-wrap gap-4 items-start w-full">
               <button
                   v-if="order.trangThaiDH === 0"
                   @click="updateStatus(1)"
-                  class="flex-1 min-w-[150px] bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md">
+                  class="flex-1 min-w-[150px] bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md h-fit">
                 Xác nhận đơn hàng
               </button>
 
               <button
+                  v-if="order.trangThaiDH === 0 && !showCancelForm"
+                  @click="showCancelForm = true"
+                  class="flex-1 min-w-[150px] bg-red-50 text-red-600 py-3 rounded-xl font-bold hover:bg-red-100 transition border border-red-200 h-fit">
+                Hủy đơn hàng
+              </button>
+
+              <!-- Cancel Reason Form -->
+              <div v-if="showCancelForm" class="w-full mt-2 p-5 bg-red-50/50 border border-red-100 rounded-2xl space-y-4">
+                <label class="text-sm font-bold text-red-700">Lý do hủy đơn hàng:</label>
+                <textarea 
+                  v-model="cancelReason"
+                  rows="3"
+                  placeholder="Nhập lý do hủy (Vd: Khách đổi ý, Hết hàng...)"
+                  class="w-full border border-red-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-400 outline-none transition-all resize-none shadow-sm"
+                ></textarea>
+                <div class="flex gap-3">
+                  <button @click="cancelOrder0" 
+                    :disabled="!cancelReason.trim()"
+                    class="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition shadow-md disabled:opacity-50">
+                    Xác nhận hủy
+                  </button>
+                  <button @click="showCancelForm = false; cancelReason = ''" 
+                    class="flex-1 py-3 bg-white text-gray-500 border border-gray-200 rounded-xl font-bold hover:bg-gray-50 transition shadow-sm">
+                    Đóng
+                  </button>
+                </div>
+              </div>
+
+              <button
                   v-if="order.trangThaiDH === 1"
                   @click="updateStatus(2)"
-                  class="flex-1 min-w-[150px] bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700 transition shadow-md">
+                  class="flex-1 min-w-[150px] bg-purple-600 text-white py-3 rounded-xl font-bold hover:bg-purple-700 transition shadow-md h-fit">
                 Bắt đầu giao hàng
               </button>
 
               <button
                   v-if="order.trangThaiDH === 2"
                   @click="updateStatus(3)"
-                  class="flex-1 min-w-[150px] bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-md">
+                  class="flex-1 min-w-[150px] bg-teal-600 text-white py-3 rounded-xl font-bold hover:bg-teal-700 transition shadow-md h-fit">
                 Xác nhận đã giao
               </button>
 
               <button
                   v-if="order.trangThaiDH === 3"
                   @click="updateStatus(4)"
-                  class="flex-1 min-w-[150px] bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-md">
+                  class="flex-1 min-w-[150px] bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-md h-fit">
                 Hoàn tất đơn hàng
               </button>
             </div>
@@ -207,7 +236,9 @@ export default {
     return {
       order: null,
       loading: true,
-      orderId: null
+      orderId: null,
+      showCancelForm: false,
+      cancelReason: ''
     }
   },
 
@@ -241,7 +272,8 @@ export default {
     },
 
     async updateStatus(newStatus) {
-      if (!confirm(`Xác nhận chuyển sang trạng thái: ${this.statusClass(newStatus).text}?`)) return
+      const ok = await window.$confirm(`Xác nhận chuyển sang trạng thái: ${this.statusClass(newStatus).text}?`)
+      if (!ok) return
       try {
         const res = await axios.put(
             `http://localhost:8080/api/staff/orders/${this.orderId}/status`,
@@ -256,11 +288,11 @@ export default {
         if (res.data.success) {
           this.fetchOrderDetail()
         } else {
-          alert(res.data.message || "Không thể cập nhật trạng thái")
+          window.$alert(res.data.message || "Không thể cập nhật trạng thái", "Lỗi")
         }
       } catch (err) {
         console.error("Update error", err)
-        alert('Lỗi: ' + (err.response?.data?.message || 'Lỗi hệ thống'))
+        window.$alert(err.response?.data?.message || 'Lỗi hệ thống', "Lỗi")
       }
     },
     
@@ -281,14 +313,42 @@ export default {
           }
         )
         if (res.data.success) {
-          alert("Đơn hàng đã được hủy thành công!")
+          window.$alert("Đơn hàng đã được hủy thành công!", "Thành công")
           this.fetchOrderDetail()
         } else {
-          alert(res.data.message || "Không thể hủy đơn hàng")
+          window.$alert(res.data.message || "Không thể hủy đơn hàng", "Lỗi")
         }
       } catch (err) {
         console.error("Cancel reported order error", err)
-        alert('Lỗi: ' + (err.response?.data?.message || 'Lỗi hệ thống'))
+        window.$alert(err.response?.data?.message || 'Lỗi hệ thống', "Lỗi")
+      }
+    },
+
+    async cancelOrder0() {
+      if (!this.cancelReason.trim()) return;
+      try {
+        const res = await axios.put(
+          `http://localhost:8080/api/staff/orders/${this.orderId}/status`,
+          null,
+          {
+            params: { 
+              trangThaiMoi: 5,
+              reason: this.cancelReason
+            },
+            withCredentials: true
+          }
+        )
+        if (res.data.success) {
+          window.$alert("Đơn hàng đã được hủy thành công!", "Thành công")
+          this.showCancelForm = false;
+          this.cancelReason = '';
+          this.fetchOrderDetail()
+        } else {
+          window.$alert(res.data.message || "Không thể hủy đơn hàng", "Lỗi")
+        }
+      } catch (err) {
+        console.error("Cancel error", err)
+        window.$alert(err.response?.data?.message || 'Lỗi hệ thống', "Lỗi")
       }
     },
 

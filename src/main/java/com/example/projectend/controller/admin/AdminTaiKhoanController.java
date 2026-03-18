@@ -7,6 +7,7 @@ import com.example.projectend.service.TaiKhoanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,8 @@ import java.util.HashSet;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/admin/customers")
+@RequestMapping("/api/admin/customers")
+@PreAuthorize("hasRole('ADMIN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminTaiKhoanController {
 

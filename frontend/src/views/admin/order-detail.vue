@@ -1,5 +1,5 @@
 <template>
-  <AdminLayout :page-title="'Chi Tiết Đơn Hàng #' + (order?.maDH || '')">
+  
     <div class="p-8 space-y-6">
       
       <div class="flex justify-between items-center">
@@ -24,7 +24,7 @@
       <div v-else-if="order" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <div class="lg:col-span-2 space-y-6">
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
               <h3 class="font-bold text-gray-800 flex items-center gap-2">
                 <span class="material-symbols-outlined text-yellow-600">shopping_basket</span>
@@ -71,7 +71,7 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-wrap gap-3">
+          <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm p-6 flex flex-wrap gap-3">
             <h4 class="w-full mb-2 text-sm font-bold text-gray-400 uppercase tracking-widest">Cập nhật trạng thái</h4>
 
             <!-- Chỉ hiện nút hành động phù hợp với trạng thái hiện tại -->
@@ -97,32 +97,61 @@
         <p v-if="order.lyDoHuy" class="text-sm"><strong>Lý do hủy:</strong> {{ order.lyDoHuy }}</p>
       </div>
 
-    <div v-if="order.trangThaiDH < 4 && !order.khachBaoChuaNhan" class="flex gap-4 mb-6">
+    <div v-if="order.trangThaiDH < 4 && !order.khachBaoChuaNhan" class="flex flex-wrap gap-4 items-start mb-6 w-full">
       <button
           v-if="order.trangThaiDH === 0"
           @click="updateStatus(1)"
-          class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition">
+          class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-sm h-fit">
         Xác nhận đơn hàng
       </button>
 
       <button
+          v-if="order.trangThaiDH === 0 && !showCancelForm"
+          @click="showCancelForm = true"
+          class="bg-red-50 text-red-600 px-6 py-2.5 rounded-xl font-bold hover:bg-red-100 transition border border-red-200 h-fit">
+        Hủy đơn hàng
+      </button>
+
+      <!-- Cancel Reason Form -->
+      <div v-if="showCancelForm" class="w-full mt-4 p-5 bg-red-50/50 border border-red-100 rounded-2xl space-y-4">
+        <label class="text-sm font-bold text-red-700">Lý do hủy đơn hàng:</label>
+        <textarea 
+          v-model="cancelReason"
+          rows="3"
+          placeholder="Nhập lý do hủy (Vd: Khách đổi ý, Hết hàng...)"
+          class="w-full border border-red-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-400 outline-none transition-all resize-none"
+        ></textarea>
+        <div class="flex gap-3">
+          <button @click="cancelOrder0" 
+            :disabled="!cancelReason.trim()"
+            class="px-6 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition shadow-sm disabled:opacity-50">
+            Xác nhận hủy
+          </button>
+          <button @click="showCancelForm = false; cancelReason = ''" 
+            class="px-6 py-2 bg-white text-gray-500 border border-gray-200 rounded-lg font-bold hover:bg-gray-50 transition">
+            Đóng
+          </button>
+        </div>
+      </div>
+
+      <button
           v-if="order.trangThaiDH === 1"
           @click="updateStatus(2)"
-          class="bg-purple-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-purple-700 transition">
+          class="bg-purple-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-purple-700 transition shadow-sm h-fit">
         Giao cho đơn vị vận chuyển
       </button>
 
       <button
           v-if="order.trangThaiDH === 2"
           @click="updateStatus(3)"
-          class="bg-teal-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-teal-700 transition">
+          class="bg-teal-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-teal-700 transition shadow-sm h-fit">
         Xác nhận đã giao
       </button>
 
       <button
           v-if="order.trangThaiDH === 3"
           @click="updateStatus(4)"
-          class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 transition">
+          class="bg-green-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-green-700 transition shadow-sm h-fit">
         Hoàn tất đơn hàng
       </button>
     </div>
@@ -133,7 +162,7 @@
         </div>
 
         <div class="space-y-6">
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm p-6">
             <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-3">
               <span class="material-symbols-outlined text-yellow-600">person</span>
               Khách hàng
@@ -154,7 +183,7 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm p-6">
             <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-3">
               <span class="material-symbols-outlined text-yellow-600">location_on</span>
               Địa chỉ giao hàng
@@ -164,7 +193,7 @@
             </p>
           </div>
 
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm p-6">
             <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-3">
               <span class="material-symbols-outlined text-yellow-600">payments</span>
               Thanh toán
@@ -186,20 +215,20 @@
 
       </div>
     </div>
-  </AdminLayout>
+  
 </template>
 
 <script>
-import AdminLayout from './AdminLayout.vue'
 import axios from 'axios'
 
 export default {
   name: 'OrderDetail',
-  components: { AdminLayout },
   data() {
     return {
       order: null,
-      loading: true
+      loading: true,
+      showCancelForm: false,
+      cancelReason: ''
     }
   },
   computed: {
@@ -213,7 +242,7 @@ export default {
       this.loading = true
       try {
         const id = this.$route.params.id
-        const res = await axios.get(`http://localhost:8080/admin/orders/${id}`, { withCredentials: true })
+        const res = await axios.get(`/admin/orders/${id}`, { withCredentials: true })
         this.order = res.data
       } catch (e) {
         console.error("Lỗi khi tải chi tiết đơn hàng:", e)
@@ -222,10 +251,11 @@ export default {
       }
     },
     async updateStatus(newStatus) {
-      if (!confirm(`Xác nhận chuyển sang trạng thái: ${this.statusClass(newStatus).text}?`)) return
+      const ok = await window.$confirm(`Xác nhận chuyển sang trạng thái: ${this.statusClass(newStatus).text}?`)
+      if (!ok) return
       try {
         const res = await axios.put(
-            `http://localhost:8080/admin/orders/${this.order.maDH}/status`,
+            `/admin/orders/${this.order.maDH}/status`,
             null,
             { params: { status: newStatus }, withCredentials: true }
         )
@@ -236,7 +266,7 @@ export default {
         }
       } catch (err) {
         console.error("Update error", err)
-        alert('Lỗi: ' + (err.response?.data?.message || err.response?.data || 'Không thể cập nhật trạng thái'))
+        window.$alert(err.response?.data?.message || err.response?.data || 'Không thể cập nhật trạng thái', 'Lỗi cập nhật')
       }
     },
     
@@ -245,24 +275,38 @@ export default {
       if (reason === null) return
       
       try {
-        // Sử dụng /status endpoint với status=5 (Hủy) và thêm lý do nếu backend hỗ trợ (as implicit or explicit param)
-        // Hiện tại AdminDonHangController chỉ nhận status. Cần cập nhật backend hoặc dùng endpoint khác.
-        // Tôi sẽ dùng updateStatus 5 và sau đó cập nhật lý do hủy.
-        
         await axios.put(
-            `http://localhost:8080/admin/orders/${this.order.maDH}/status`,
+            `/admin/orders/${this.order.maDH}/status`,
             null,
-            { params: { status: 5, reason: reason }, withCredentials: true } // Added reason param
+            { params: { status: 5, reason: reason }, withCredentials: true }
         )
-        
-        // Cập nhật lý do hủy trong field DonHang
-        // Giả sử có endpoint cập nhật lý do hoặc backend tự mapping
-        
-        alert("Đơn hàng đã được hủy và lưu lý do!")
+        window.$alert("Đơn hàng đã được hủy và lưu lý do!", "Thành công")
         this.fetchOrderDetail()
       } catch (err) {
         console.error("Cancel reported order error", err)
-        alert('Lỗi: ' + (err.response?.data?.message || err.response?.data || 'Không thể hủy đơn hàng'))
+        window.$alert(err.response?.data?.message || err.response?.data || 'Không thể hủy đơn hàng', 'Lỗi')
+      }
+    },
+
+    async cancelOrder0() {
+      if (!this.cancelReason.trim()) return;
+      try {
+        const res = await axios.put(
+            `/admin/orders/${this.order.maDH}/status`,
+            null,
+            { params: { status: 5, reason: this.cancelReason }, withCredentials: true }
+        )
+        if (res.data.success) {
+          window.$alert("Đơn hàng đã được hủy thành công!", "Thành công")
+          this.showCancelForm = false;
+          this.cancelReason = '';
+          this.fetchOrderDetail()
+        } else {
+          window.$alert(res.data.message, "Lỗi")
+        }
+      } catch (err) {
+        console.error("Cancel error", err)
+        window.$alert(err.response?.data?.message || 'Không thể hủy đơn hàng', "Lỗi")
       }
     },
     fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v || 0) + ' đ' },
