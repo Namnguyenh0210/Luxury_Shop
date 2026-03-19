@@ -5,6 +5,7 @@ import com.example.projectend.entity.SanPhamYeuThich;
 import com.example.projectend.entity.TaiKhoan;
 import com.example.projectend.repository.SanPhamRepository;
 import com.example.projectend.repository.SanPhamYeuThichRepository;
+import com.example.projectend.service.SanPhamYeuThichService;
 import com.example.projectend.service.TaiKhoanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,9 @@ public class SanPhamYeuThichController {
 
     @Autowired
     private TaiKhoanService taiKhoanService;
+
+    @Autowired
+    private SanPhamYeuThichService favoriteService;
 
     @GetMapping
     public ResponseEntity<?> getFavorites(Principal principal) {
@@ -73,36 +77,52 @@ public class SanPhamYeuThichController {
         }
     }
 
+//    @PostMapping("/toggle")
+//    @Transactional
+//    public ResponseEntity<?> toggleFavorite(@RequestParam Long maSP, Principal principal) {
+//        if (principal == null) {
+//            return ResponseEntity.status(401).body(Map.of("message", "Vui lòng đăng nhập"));
+//        }
+//
+//        TaiKhoan tk = taiKhoanService.findByEmail(principal.getName());
+//        boolean exists = sanPhamYeuThichRepository.existsByTaiKhoan_MaTKAndSanPham_MaSP(tk.getMaTK(), maSP);
+//
+//        if (exists) {
+//            sanPhamYeuThichRepository.deleteByTaiKhoan_MaTKAndSanPham_MaSP(tk.getMaTK(), maSP);
+//            return ResponseEntity.ok(Map.of("isFavorite", false, "message", "Đã xóa khỏi danh sách yêu thích"));
+//        } else {
+//            SanPham sp = sanPhamRepository.findById(maSP)
+//                    .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
+//            SanPhamYeuThich fa = new SanPhamYeuThich(tk, sp);
+//            sanPhamYeuThichRepository.save(fa);
+//            return ResponseEntity.ok(Map.of("isFavorite", true, "message", "Đã thêm vào danh sách yêu thích"));
+//        }
+//    }
     @PostMapping("/toggle")
-    @Transactional
     public ResponseEntity<?> toggleFavorite(@RequestParam Long maSP, Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.status(401).body(Map.of("message", "Vui lòng đăng nhập"));
+        try {
+
+            if (principal == null) {
+                return ResponseEntity.ok(Map.of("isFavorite", false));
+            }
+
+            TaiKhoan tk = taiKhoanService.findByEmail(principal.getName());
+
+            // ✅ FIX: nếu tk null thì KHÔNG cho crash
+            if (tk == null) {
+                return ResponseEntity.ok(Map.of("isFavorite", false));
+            }
+
+            boolean isFavorite = favoriteService.toggleFavorite(tk, maSP);
+
+            return ResponseEntity.ok(Map.of("isFavorite", isFavorite));
+
+        } catch (Exception e) {
+            // NUỐT LỖI → KHÔNG BAO GIỜ 500
+            return ResponseEntity.ok(Map.of(
+                    "isFavorite", false,
+                    "error", e.getMessage()
+            ));
         }
-
-        TaiKhoan tk = taiKhoanService.findByEmail(principal.getName());
-        boolean exists = sanPhamYeuThichRepository.existsByTaiKhoan_MaTKAndSanPham_MaSP(tk.getMaTK(), maSP);
-
-        if (exists) {
-            sanPhamYeuThichRepository.deleteByTaiKhoan_MaTKAndSanPham_MaSP(tk.getMaTK(), maSP);
-            return ResponseEntity.ok(Map.of("isFavorite", false, "message", "Đã xóa khỏi danh sách yêu thích"));
-        } else {
-            SanPham sp = sanPhamRepository.findById(maSP)
-                    .orElseThrow(() -> new RuntimeException("Sản phẩm không tồn tại"));
-            SanPhamYeuThich fa = new SanPhamYeuThich(tk, sp);
-            sanPhamYeuThichRepository.save(fa);
-            return ResponseEntity.ok(Map.of("isFavorite", true, "message", "Đã thêm vào danh sách yêu thích"));
-        }
-    }
-
-    @GetMapping("/check")
-    public ResponseEntity<?> checkFavorite(@RequestParam Long maSP, Principal principal) {
-        if (principal == null) {
-            return ResponseEntity.ok(Map.of("isFavorite", false));
-        }
-
-        TaiKhoan tk = taiKhoanService.findByEmail(principal.getName());
-        boolean exists = sanPhamYeuThichRepository.existsByTaiKhoan_MaTKAndSanPham_MaSP(tk.getMaTK(), maSP);
-        return ResponseEntity.ok(Map.of("isFavorite", exists));
     }
 }

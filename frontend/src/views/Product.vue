@@ -229,8 +229,39 @@
                                     </div>
 
                                     <!-- Wishlist button -->
-                                    <button class="wishlist-btn opacity-0 group-hover:opacity-100">
+                                    <!-- <button class="wishlist-btn opacity-0 group-hover:opacity-100">
                                         <span class="material-symbols-outlined text-lg">favorite_border</span>
+                                    </button> --> 
+                                    <!-- <button 
+                                      @click.stop="toggleWishlist(product.maSP)"
+                                      class="wishlist-btn opacity-0 group-hover:opacity-100"
+                                    >
+                                      <span 
+                                        class="material-symbols-outlined text-lg"
+                                        :class="{ 'text-red-600': isFavorite(product.maSP) }"
+                                      >
+                                        {{ isFavorite(product.maSP) ? 'favorite' : 'favorite_border' }}
+                                      </span>
+                                    </button> --> 
+                                    <button 
+                                      @click.stop="toggleWishlist(product.maSP)"
+                                      class="wishlist-btn opacity-0 group-hover:opacity-100"
+                                    >
+                                      <!-- ❤️ ĐÃ YÊU THÍCH -->
+                                      <span 
+                                        v-if="isFavorite(product.maSP)" 
+                                        class="material-symbols-outlined text-lg text-red-600"
+                                      >
+                                        favorite
+                                      </span>
+
+                                      <!-- 🤍 CHƯA YÊU THÍCH -->
+                                      <span 
+                                        v-else 
+                                        class="material-symbols-outlined text-lg"
+                                      >
+                                        favorite_border
+                                      </span> 
                                     </button>
                                 </div>
 
@@ -335,7 +366,8 @@ export default {
     ProductQuickViewModal
   },
   data() {
-    return {
+    return { 
+      favoriteMap: {},
       products: [],
       priceStockMap: {},
       loading: true,
@@ -371,7 +403,7 @@ export default {
       // Price Filters
       selectedPriceLevel: null,
       customMinPrice: null,
-      customMaxPrice: null,
+      customMaxPrice: null, 
       
       // Sort Dropdown
       sortDropdownOpen: false,
@@ -444,8 +476,68 @@ export default {
         this.error = 'Không thể tải sản phẩm. Vui lòng thử lại.'
       } finally {
         this.loading = false
+      } 
+    }, 
+
+    //WISHLIST
+    async fetchFavorites() {
+      try {
+        const res = await axios.get('/favorites', {
+          withCredentials: true
+        })
+
+        const map = {}
+        res.data.forEach(item => {
+          map[item.maSP] = true
+        })
+
+        this.favoriteMap = map
+
+        console.log("Favorites loaded:", map)
+
+      } catch (e) {
+        console.error("Load favorites failed", e)
       }
     },
+
+    async toggleWishlist(productId) {
+      try {
+        const res = await axios.post('/favorites/toggle', null, {
+          params: { maSP: productId },
+          withCredentials: true
+        })
+
+        const isFav = res.data.isFavorite
+
+        // ✅ CÁCH CHUẨN: tạo object mới → Vue re-render
+        this.favoriteMap = {
+          ...this.favoriteMap,
+          [productId]: isFav
+        }
+
+        console.log("Updated favoriteMap:", this.favoriteMap)
+
+      } catch (err) {
+        console.error("Wishlist error:", err.response?.data || err)
+      } 
+      this.$forceUpdate()
+    },
+    
+  //   async checkFavorite(productId) {
+  //   try {
+  //     const res = await axios.get('/api/favorites/check', {
+  //       params: { maSP: productId },
+  //       withCredentials: true
+  //     })
+  //     this.favoriteMap[productId] = res.data.isFavorite
+  //   } catch (e) {
+  //     this.favoriteMap[productId] = false
+  //   }
+  // },
+
+   isFavorite(productId) {
+      return this.favoriteMap[productId] === true
+    }, 
 
     getPriceStock(productId) {
       return this.priceStockMap[productId] || {}
@@ -599,6 +691,8 @@ export default {
   mounted() {
     document.addEventListener('click', this.handleGlobalClick)
     this.parseQueryParams()
+    this.fetchProducts()
+    this.fetchFavorites()
   },
 
   watch: {
@@ -667,7 +761,7 @@ export default {
   padding-bottom: 12px;
   justify-content: center;
   transition: background 0.3s ease;
-  z-index: 3;
+  z-index: 1;
 }
 .product-card:hover .quick-view-overlay {
   background: rgba(10, 10, 20, 0.2);
@@ -697,6 +791,9 @@ export default {
 .quick-view-btn:hover {
   background: #111827;
   color: #fff;
+} 
+.quick-view-overlay {
+  pointer-events: none;
 }
 
 /* Wishlist button */
@@ -721,6 +818,9 @@ export default {
 .wishlist-btn:hover {
   color: #DC2626;
   background: #fff;
+}
+.wishlist-btn {
+  z-index: 9999;
 }
 
 /* Nút Thêm thay thế */
