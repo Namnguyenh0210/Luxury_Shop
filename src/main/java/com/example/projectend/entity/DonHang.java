@@ -69,6 +69,9 @@ public class DonHang {
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat = LocalDateTime.now();
 
+    @Column(name = "NgayThanhToan")
+    private LocalDateTime ngayThanhToan;
+
     @Column(name = "KhachBaoChuaNhan")
     private Boolean khachBaoChuaNhan = false;
 
@@ -207,6 +210,14 @@ public class DonHang {
 
     public void setNgayCapNhat(LocalDateTime ngayCapNhat) {
         this.ngayCapNhat = ngayCapNhat;
+    }
+
+    public LocalDateTime getNgayThanhToan() {
+        return ngayThanhToan;
+    }
+
+    public void setNgayThanhToan(LocalDateTime ngayThanhToan) {
+        this.ngayThanhToan = ngayThanhToan;
     }
 
     public List<DonHangChiTiet> getChiTietList() {

@@ -39,6 +39,10 @@ public class AdminInventoryController {
     private MauSacSPRepository mauSacSPRepository;
     @Autowired
     private SanPhamChiTietRepository sanPhamChiTietRepository;
+    @Autowired
+    private YeuCauNhapKhoRepository yeuCauNhapKhoRepository;
+    @Autowired
+    private ThuongHieuRepository thuongHieuRepository;
 
     // Lấy toàn bộ dữ liệu cho trang Inventory
     @GetMapping
@@ -75,6 +79,10 @@ public class AdminInventoryController {
             }
         }
 
+        // Danh sách yêu cầu nhập kho (chờ duyệt cho Admin, hoặc lịch sử của staff)
+        List<YeuCauNhapKho> requests = yeuCauNhapKhoRepository.findAll();
+        requests.sort((a, b) -> b.getNgayYeuCau().compareTo(a.getNgayYeuCau()));
+
         Map<String, Object> result = new HashMap<>();
         result.put("phieuNhaps", phieuNhaps);
         result.put("suppliers", nhaCungCapRepository.findAll());
@@ -87,11 +95,14 @@ public class AdminInventoryController {
         result.put("supplierCount", nhaCungCapRepository.count());
         result.put("activeProducts", sanPhamRepository.countByTrangThaiSP(1));
         result.put("lowStock", lowStockList);
+        result.put("stockRequests", requests);
+        result.put("brands", thuongHieuRepository.findAll());
         return result;
     }
 
     // API xử lý Lưu Phiếu Nhập từ Vue gửi lên
     @PostMapping("/import")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> savePhieuNhap(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody Map<String, Object> payload) {
@@ -129,12 +140,23 @@ public class AdminInventoryController {
                     String color = item.get("color") != null ? item.get("color").toString() : "";
                     Integer gender = item.get("gender") != null ? Integer.parseInt(item.get("gender").toString()) : 2;
                     Long categoryId = item.get("categoryId") != null ? Long.parseLong(item.get("categoryId").toString()) : null;
+                    Long brandId = item.get("brandId") != null ? Long.parseLong(item.get("brandId").toString()) : null;
                     BigDecimal giaBan = item.get("giaBan") != null ? new BigDecimal(item.get("giaBan").toString()) : price;
-                    newItems.add(new PhieuNhapService.NewItem(tenSP, size, color, qty, price, giaBan, categoryId, null, gender));
+                    String moTa = item.get("moTa") != null ? item.get("moTa").toString() : "";
+                    newItems.add(new PhieuNhapService.NewItem(tenSP, size, color, qty, price, giaBan, categoryId, brandId, gender, moTa));
                 }
             }
 
             PhieuNhap saved = phieuNhapService.createPhieuNhap(nhanVien, nhaCungCap, existingItems, newItems, ghiChu);
+
+            // Nếu có mã yêu cầu liên quan, cập nhật trạng thái yêu cầu
+            if (payload.get("maYeuCau") != null) {
+                Long maYeuCau = Long.parseLong(payload.get("maYeuCau").toString());
+                yeuCauNhapKhoRepository.findById(maYeuCau).ifPresent(req -> {
+                    req.setTrangThai(1); // Đã duyệt/xử lý
+                    yeuCauNhapKhoRepository.save(req);
+                });
+            }
 
             return ResponseEntity.ok(Map.of(
                 "success", true,
@@ -145,6 +167,47 @@ public class AdminInventoryController {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body("Lỗi hệ thống: " + e.getMessage());
         }
+    }
+
+    // API Nhân viên gửi yêu cầu nhập kho
+    @PostMapping("/request")
+    public ResponseEntity<?> createRequest(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, Object> payload) {
+        try {
+            Long maBienThe = Long.parseLong(payload.get("maBienThe").toString());
+            Integer qty = Integer.parseInt(payload.get("qty").toString());
+            String ghiChu = (String) payload.get("ghiChu");
+
+            TaiKhoan nv = taiKhoanRepository.findByEmail(userDetails.getUsername()).get();
+            SanPhamChiTiet spct = sanPhamChiTietRepository.findById(maBienThe).get();
+
+            YeuCauNhapKho req = new YeuCauNhapKho();
+            req.setNhanVien(nv);
+            req.setSanPhamChiTiet(spct);
+            req.setSoLuongYeuCau(qty);
+            req.setGhiChu(ghiChu);
+            req.setTrangThai(0);
+            yeuCauNhapKhoRepository.save(req);
+
+            return ResponseEntity.ok(Map.of("success", true, "message", "Đã gửi yêu cầu nhập kho cho Admin"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/request/{id}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> rejectRequest(@PathVariable Long id) {
+        if (id == null) return ResponseEntity.badRequest().build();
+        Optional<YeuCauNhapKho> reqOpt = yeuCauNhapKhoRepository.findById(id);
+        if (reqOpt.isPresent()) {
+            YeuCauNhapKho req = reqOpt.get();
+            req.setTrangThai(2); // Từ chối
+            yeuCauNhapKhoRepository.save(req);
+            return ResponseEntity.ok(Map.of("success", true));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     // API lấy biến thể của 1 sản phẩm
