@@ -112,7 +112,10 @@ public class PhieuNhapService {
                         if (item.gender() != null) {
                             newSp.setGioiTinh(item.gender());
                         }
-                        // Ảnh chính và mô tả có thể được cập nhật sau
+                        if (item.moTa() != null && !item.moTa().isEmpty()) {
+                            newSp.setMoTa(item.moTa());
+                        }
+                        // Ảnh chính có thể được cập nhật sau
                         return sanPhamRepository.save(newSp);
                     });
 
@@ -174,5 +177,5 @@ public class PhieuNhapService {
 
     // Record types cho dữ liệu tạm
     public record ExistingItem(Long maBienThe, Integer soLuong, BigDecimal donGiaNhap) {}
-    public record NewItem(String tenSP, String size, String color, Integer soLuong, BigDecimal donGiaNhap, BigDecimal giaBan, Long categoryId, Long brandId, Integer gender) {}
+    public record NewItem(String tenSP, String size, String color, Integer soLuong, BigDecimal donGiaNhap, BigDecimal giaBan, Long categoryId, Long brandId, Integer gender, String moTa) {}
 }
