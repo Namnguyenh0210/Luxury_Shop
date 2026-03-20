@@ -28,8 +28,8 @@ public class AdminSanPhamController {
             @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Integer gioiTinh,
             @RequestParam(required = false) Integer status) {
-    	// BỔ SUNG DÒNG NÀY: Khởi tạo pageable để lấy dữ liệu trang đầu tiên
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000);
+    	// BỔ SUNG DÒNG NÀY: Khởi tạo pageable để lấy dữ liệu trang đầu tiên và sắp xếp mới nhất lên đầu
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "maSP"));
         
         // Gọi hàm có sẵn trong Service của bạn
         List<SanPham> products = sanPhamService.findWithFilters(keyword, categoryId, gioiTinh, brandId, null, null, status, null, pageable).getContent();

@@ -1,92 +1,188 @@
 <template>
-  
-    <div class="p-8 max-w-4xl mx-auto">
-      <button @click="$router.back()" class="flex items-center text-gray-500 hover:text-yellow-600 mb-6 transition-colors">
-        <span class="material-symbols-outlined mr-1">arrow_back</span>
-        Trở về danh sách
-      </button>
+  <div class="min-h-screen bg-[#FDFBF9] p-4 md:p-8 selection:bg-[#C8A97E] selection:text-white">
+    <div class="max-w-6xl mx-auto space-y-10 pb-20">
+      
+      <!-- HEADER -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 animate-in fade-in slide-in-from-top duration-700">
+        <div class="flex items-center gap-6">
+          <button @click="$router.push('/admin/products')" class="size-14 rounded-2xl bg-white border border-[#C8A97E]/30 text-gray-500 hover:text-[#C8A97E] hover:border-[#C8A97E] transition-all flex items-center justify-center shadow-sm group">
+            <span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform text-[28px]">arrow_back</span>
+          </button>
+          <div>
+            <h1 class="text-3xl font-black text-gray-900 tracking-tight italic">Sửa sản phẩm</h1>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="size-1.5 bg-[#C8A97E] rounded-full animate-pulse"></span>
+                <p class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest">Hệ thống quản trị LUXURY SHOP v2.0</p>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-4 text-sm font-bold uppercase tracking-widest">
+           <button @click="$router.push('/admin/products')" class="px-8 py-4 rounded-2xl text-[#C8A97E] hover:bg-[#C8A97E]/10 transition-all">
+              HỦY BỎ
+           </button>
+           <button @click="updateProduct" :disabled="saving || loading" class="px-10 py-4 rounded-2xl bg-gray-900 text-white hover:bg-black transition-all shadow-xl shadow-[#C8A97E]/20 disabled:opacity-50 flex items-center gap-3">
+              <span v-if="saving" class="material-symbols-outlined animate-spin text-lg">progress_activity</span>
+              <span v-else class="material-symbols-outlined text-[20px]">verified</span>
+              LƯU THAY ĐỔI
+           </button>
+        </div>
+      </div>
 
-      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden text-sm">
-        <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-          <h2 class="text-lg font-bold text-gray-800">Thông tin sản phẩm #{{ $route.params.id }}</h2>
+      <div v-if="loading" class="flex flex-col items-center justify-center py-40 gap-6">
+        <div class="relative size-20">
+            <div class="absolute inset-0 border-[3px] border-[#C8A97E]/10 rounded-full"></div>
+            <div class="absolute inset-0 border-[3px] border-[#C8A97E] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        <p class="text-xs font-bold text-[#C8A97E] animate-pulse tracking-[0.2em] italic uppercase">Đang đồng bộ hóa dữ liệu...</p>
+      </div>
+
+      <!-- MAIN CONTENT GRID -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-in fade-in zoom-in duration-700">
+        
+        <!-- FRAME 1: EDITABLE (LEFT - LARGE) -->
+        <div class="lg:col-span-8 bg-white rounded-[3rem] border border-[#C8A97E]/20 shadow-2xl shadow-stone-200/40 p-10 lg:p-12 relative overflow-hidden group">
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-10 pb-6 border-b border-gray-50">
+                    <h3 class="text-lg font-bold text-gray-800 uppercase tracking-widest flex items-center gap-4">
+                        <span class="size-10 bg-[#C8A97E] text-white rounded-xl shadow-lg flex items-center justify-center">
+                           <span class="material-symbols-outlined text-[20px]">edit_square</span>
+                        </span>
+                        Nội dung chỉnh sửa
+                    </h3>
+                    <div class="px-5 py-2 rounded-full bg-[#C8A97E]/5 border border-[#C8A97E]/10 text-xs font-bold text-[#C8A97E] italic uppercase tracking-wider">Luxury Mode</div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-10">
+                    <!-- LEFT COLUMN (FORM FIELDS) -->
+                    <div class="md:col-span-7 space-y-8">
+                        <!-- NAME FIELD -->
+                        <div class="group/input">
+                            <label class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest mb-3 block">Tên sản phẩm quốc tế</label>
+                            <input v-model="form.tenSP" placeholder="Luxury Fashion Piece..." 
+                                class="w-full bg-transparent border border-[#C8A97E]/30 rounded-[1.5rem] px-6 py-4 text-lg font-bold text-gray-900 outline-none focus:border-[#C8A97E] focus:ring-1 focus:ring-[#C8A97E] transition-all shadow-sm" />
+                        </div>
+
+                        <!-- PRICE FIELD -->
+                        <div class="group/input">
+                            <label class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest mb-3 block">Giá bán niêm yết (VNĐ)</label>
+                            <div class="relative flex items-center">
+                                <span class="absolute left-6 text-[#C8A97E] material-symbols-outlined text-[20px]">payments</span>
+                                <input v-model.number="form.giaBan" type="number" 
+                                    class="w-full bg-transparent border border-[#C8A97E]/30 rounded-[1.5rem] pl-14 pr-12 py-4 text-xl font-bold text-[#C8A97E] outline-none focus:border-[#C8A97E] focus:ring-1 focus:ring-[#C8A97E] transition-all shadow-sm tabular-nums" />
+                                <span class="absolute right-6 text-lg font-bold text-[#C8A97E]/50 italic">₫</span>
+                            </div>
+                        </div>
+
+                        <!-- STATUS TOGGLE -->
+                        <div class="space-y-4">
+                             <label class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest block">Trạng thái phát hành</label>
+                             <div class="flex items-center gap-4">
+                                <button @click="form.trangThaiSP = 1" type="button" 
+                                    :class="form.trangThaiSP == 1 ? 'bg-white border-[#C8A97E] text-green-600 shadow-md transform scale-[1.02]' : 'bg-gray-50 border-transparent text-gray-400 hover:bg-gray-100'"
+                                    class="flex-1 py-4 rounded-[1.2rem] border-2 text-xs font-bold uppercase transition-all tracking-widest flex items-center justify-center gap-2">
+                                    <span class="size-2 rounded-full bg-green-500" v-if="form.trangThaiSP == 1"></span>
+                                    Đang kinh doanh
+                                </button>
+                                <button @click="form.trangThaiSP = 0" type="button" 
+                                    :class="form.trangThaiSP == 0 ? 'bg-white border-[#C8A97E] text-red-500 shadow-md transform scale-[1.02]' : 'bg-gray-50 border-transparent text-gray-400 hover:bg-gray-100'"
+                                    class="flex-1 py-4 rounded-[1.2rem] border-2 text-xs font-bold uppercase transition-all tracking-widest flex items-center justify-center gap-2">
+                                    <span class="size-2 rounded-full bg-red-500" v-if="form.trangThaiSP == 0"></span>
+                                    Dừng kinh doanh
+                                </button>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN (MEDIA PREVIEW & URL) -->
+                    <div class="md:col-span-5 space-y-8">
+                        <div class="relative aspect-[4/5] rounded-[2.5rem] bg-gray-50 border border-[#C8A97E]/20 p-2 overflow-hidden shadow-inner group/img">
+                            <img v-if="form.anhChinh" :src="form.anhChinh" class="w-full h-full object-cover rounded-[2rem] transition-transform duration-1000 group-hover/img:scale-105" @error="onImgError" />
+                            <div v-else class="w-full h-full flex flex-col items-center justify-center text-gray-200 italic">
+                                <span class="material-symbols-outlined text-8xl mb-3 font-thin">insert_photo</span>
+                                <p class="text-xs font-bold uppercase tracking-widest leading-none">Chưa có ảnh</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest block text-center">Liên kết hình ảnh trực tiếp</label>
+                            <input v-model="form.anhChinh" placeholder="https://..." 
+                                class="w-full bg-transparent border border-[#C8A97E]/30 rounded-[1.2rem] px-5 py-3.5 text-sm font-bold text-gray-600 focus:border-[#C8A97E] transition-all outline-none" />
+                        </div>
+                    </div>
+
+                    <!-- DESCRIPTION (FOOTER AREA) -->
+                    <div class="md:col-span-12 space-y-4 pt-4 border-t border-gray-50">
+                        <label class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest block">Mô tả sản phẩm</label>
+                        <textarea v-model="form.moTa" rows="5" placeholder="Câu chuyện thương hiệu..."
+                            class="w-full bg-transparent border border-[#C8A97E]/30 rounded-[2rem] p-8 text-base leading-relaxed text-gray-700 italic focus:border-[#C8A97E] transition-all outline-none resize-none shadow-sm focus:ring-1 focus:ring-[#C8A97E]"></textarea>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <form @submit.prevent="updateProduct" class="p-8 space-y-6">
-          <div v-if="loading" class="flex flex-col items-center py-12 text-gray-400">
-            <span class="material-symbols-outlined animate-spin text-4xl mb-2">progress_activity</span>
-            <p>Đang tải dữ liệu...</p>
-          </div>
-
-          <template v-else>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="space-y-2 md:col-span-2">
-                <label class="text-sm font-semibold text-gray-700">Tên sản phẩm</label>
-                <input v-model="form.tenSP" type="text" required
-                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
-              </div>
-
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-gray-700">Danh mục</label>
-                <select v-model="form.loaiSanPham.maLoai" required
-                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
-                  <option value="" disabled>Chọn danh mục</option>
-                  <option v-for="c in categories" :key="c.maLoai" :value="c.maLoai">{{ c.tenLoai }}</option>
-                </select>
-              </div>
-
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-gray-700">Thương hiệu</label>
-                <select v-model="form.thuongHieu.maTH" required
-                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
-                  <option value="" disabled>Chọn thương hiệu</option>
-                  <option v-for="b in brands" :key="b.maTH" :value="b.maTH">{{ b.tenTH }}</option>
-                </select>
-              </div>
-
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-gray-700">Giới tính</label>
-                <select v-model="form.gioiTinh" class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
-                  <option :value="0">Nam</option>
-                  <option :value="1">Nữ</option>
-                  <option :value="2">Unisex</option>
-                </select>
-              </div>
-
-              <div class="space-y-2">
-                <label class="text-sm font-semibold text-gray-700">Trạng thái kinh doanh</label>
-                <div class="flex gap-4 p-1 bg-gray-100 rounded-xl w-fit">
-                  <button type="button" @click="form.trangThaiSP = 1"
-                    :class="form.trangThaiSP == 1 ? 'bg-white shadow-sm text-green-600' : 'text-gray-500'"
-                    class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all">Đang bán</button>
-                  <button type="button" @click="form.trangThaiSP = 0"
-                    :class="form.trangThaiSP == 0 ? 'bg-white shadow-sm text-red-600' : 'text-gray-500'"
-                    class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all">Ngừng bán</button>
+        <!-- FRAME 2: READ-ONLY INFO (RIGHT - SMALL) -->
+        <div class="lg:col-span-4 bg-[#FCF8F2] rounded-[3rem] border border-[#C8A97E]/20 p-10 lg:p-12 space-y-12 relative overflow-hidden group/read shadow-xl shadow-[#C8A97E]/5">
+             <div class="relative z-10">
+                <div class="flex items-center gap-4 mb-10">
+                   <div class="size-10 bg-white rounded-xl border border-[#C8A97E]/10 flex items-center justify-center text-[#C8A97E]">
+                      <span class="material-symbols-outlined text-[20px]">account_tree</span>
+                   </div>
+                   <h3 class="text-base font-bold text-gray-800 uppercase tracking-widest whitespace-nowrap">Thông tin chỉ đọc</h3>
                 </div>
-              </div>
 
-              <div class="space-y-2 md:col-span-2">
-                <label class="text-sm font-semibold text-gray-700">Mô tả chi tiết</label>
-                <textarea v-model="form.moTa" rows="5"
-                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all resize-none"></textarea>
-              </div>
-            </div>
+                <div class="space-y-6">
+                    <!-- ID DISPLAY -->
+                    <div class="bg-white rounded-[2rem] p-8 border border-[#C8A97E]/20 shadow-sm relative group/id">
+                        <p class="text-xs text-[#C8A97E] font-bold uppercase tracking-widest mb-2 opacity-80 italic">ID Sản Phẩm</p>
+                        <p class="font-bold text-3xl text-gray-900 leading-none tracking-tighter">#{{ form.maSP }}</p>
+                    </div>
 
-            <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
-              <button type="button" @click="$router.back()"
-                class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium transition-all">
-                Hủy bỏ
-              </button>
-              <button type="submit" :disabled="saving"
-                class="px-8 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold shadow-lg shadow-yellow-200 transition-all disabled:opacity-50 flex items-center">
-                <span v-if="saving" class="material-symbols-outlined animate-spin mr-2 text-sm">progress_activity</span>
-                Lưu thay đổi
-              </button>
-            </div>
-          </template>
-        </form>
+                    <!-- META CARDS -->
+                    <div class="grid grid-cols-1 gap-3">
+                        <div v-for="(item, idx) in [
+                          { label: 'Thương hiệu', val: originalProduct?.thuongHieu?.tenTH, icon: 'stars' },
+                          { label: 'Danh mục', val: originalProduct?.loaiSanPham?.tenLoai, icon: 'category' },
+                          { label: 'Giới tính', val: originalProduct?.gioiTinh === 0 ? 'Nam' : originalProduct?.gioiTinh === 1 ? 'Nữ' : 'Unisex', icon: 'wc' }
+                        ]" :key="idx" class="p-5 bg-white rounded-[1.5rem] border border-[#C8A97E]/10 shadow-sm flex items-center gap-5">
+                            <div class="size-10 bg-[#C8A97E]/10 rounded-xl flex items-center justify-center text-[#C8A97E]">
+                                <span class="material-symbols-outlined text-[20px]">{{ item.icon }}</span>
+                            </div>
+                            <div>
+                                <p class="text-xs text-[#C8A97E] font-bold uppercase tracking-widest italic opacity-80 mb-1">{{ item.label }}</p>
+                                <p class="font-bold text-base text-gray-800">{{ item.val || '---' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HISTORY BOX -->
+                    <div class="bg-gray-900 rounded-[2.5rem] p-8 text-white relative shadow-2xl mt-8 overflow-hidden">
+                         <span class="absolute right-[-10%] bottom-[-10%] text-white opacity-[0.03] font-black text-[120px] italic select-none pointer-events-none">LUXURY</span>
+                         <p class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest mb-6 flex items-center gap-2">
+                             <span class="size-2 bg-[#C8A97E] rounded-full"></span>
+                             Tiến trình thời gian
+                         </p>
+                         <div class="space-y-6">
+                            <div class="flex items-start gap-4">
+                                <div class="size-1.5 bg-[#C8A97E] rounded-full mt-2"></div>
+                                <div>
+                                    <p class="text-xs text-white/50 font-bold uppercase tracking-widest mb-1">Ngày tạo</p>
+                                    <p class="font-bold text-sm tracking-tight">{{ formatDate(originalProduct?.ngayTao) }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4">
+                                <div class="size-1.5 bg-white/20 rounded-full mt-2"></div>
+                                <div>
+                                    <p class="text-xs text-white/50 font-bold uppercase tracking-widest mb-1">Cập nhật cuối</p>
+                                    <p class="font-bold text-sm italic tracking-tight opacity-90">{{ formatDate(originalProduct?.ngayCapNhat) }}</p>
+                                </div>
+                            </div>
+                         </div>
+                    </div>
+                </div>
+             </div>
+        </div>
       </div>
     </div>
-  
+  </div>
 </template>
 
 <script>
@@ -98,55 +194,41 @@ export default {
     return {
       loading: true,
       saving: false,
-      categories: [],
-      brands: [],
+      originalProduct: null,
       form: {
         maSP: null,
         tenSP: '',
-        loaiSanPham: { maLoai: '' },
-        thuongHieu: { maTH: '' },
-        gioiTinh: 2,
+        anhChinh: '',
+        giaBan: 0,
         moTa: '',
-        trangThaiSP: 1,
-        anhChinh: ''
+        trangThaiSP: 1
       }
     }
   },
   methods: {
     async fetchData() {
       const productId = this.$route.params.id;
+      this.loading = true;
       try {
-        // Gọi song song thông tin sản phẩm và dữ liệu hỗ trợ (nếu có)
-        // Lưu ý: Backend cần cho phép ADMIN truy cập các endpoint này
-        const [prodRes, catRes, brandRes] = await Promise.allSettled([
-          axios.get(`/admin/products/${productId}`),
-          axios.get('/admin/categories'), // Cần bổ sung ở Backend
-          axios.get('/admin/brands')      // Cần bổ sung ở Backend
-        ]);
+        const res = await axios.get(`/admin/products/${productId}`);
+        const p = res.data;
+        if (!p) throw new Error("Thông tin sản phẩm không tồn tại");
 
-        if (prodRes.status === 'fulfilled') {
-          const p = prodRes.data;
-          this.form = {
-            maSP: p.maSP,
-            tenSP: p.tenSP,
-            loaiSanPham: { maLoai: p.loaiSanPham?.maLoai || '' },
-            thuongHieu: { maTH: p.thuongHieu?.maTH || '' },
-            gioiTinh: p.gioiTinh ?? 2,
-            moTa: p.moTa || '',
-            trangThaiSP: p.trangThaiSP ?? 1,
-            anhChinh: p.anhChinh || '',
-            ngayTao: p.ngayTao
-          };
-        } else {
-          throw new Error("Không thể tải thông tin sản phẩm");
-        }
+        this.originalProduct = p;
+        const basePrice = (p.variants && p.variants.length > 0) ? p.variants[0].giaBan : 0;
 
-        if (catRes.status === 'fulfilled') this.categories = catRes.data;
-        if (brandRes.status === 'fulfilled') this.brands = brandRes.data;
+        this.form = {
+          maSP: p.maSP,
+          tenSP: p.tenSP,
+          anhChinh: p.anhChinh || '',
+          giaBan: basePrice,
+          moTa: p.moTa || '',
+          trangThaiSP: p.trangThaiSP ?? 1
+        };
 
       } catch (e) {
         console.error("Lỗi FetchData:", e);
-        alert(e.message || 'Lỗi kết nối Server!');
+        if (window.$alert) window.$alert(e.message || 'Hệ thống gián đoạn!', 'Lỗi');
         this.$router.push('/admin/products');
       } finally {
         this.loading = false;
@@ -154,27 +236,54 @@ export default {
     },
 
     async updateProduct() {
+      if (!this.form.tenSP.trim()) return alert("Tên sản phẩm bắt buộc nhập");
+      if (this.form.giaBan < 0) return alert("Giá trị không hợp lệ");
+
       this.saving = true;
       try {
-        // Theo Controller của bạn: @PostMapping xử lý cả thêm mới và cập nhật
-        // Nếu maSP != null -> Backend setNgayCapNhat() và thực hiện save (Merge)
-        const response = await axios.post('/admin/products', this.form);
+        const payload = { 
+            ...this.originalProduct,
+            tenSP: this.form.tenSP,
+            anhChinh: this.form.anhChinh,
+            moTa: this.form.moTa,
+            trangThaiSP: this.form.trangThaiSP
+        };
+
+        if (payload.variants && payload.variants.length > 0) {
+            payload.variants = payload.variants.map(v => ({
+                ...v,
+                giaBan: this.form.giaBan,
+                trangThai: this.form.trangThaiSP == 1
+            }));
+        }
+
+        const response = await axios.post('/admin/products', payload);
         
         if (response.data) {
-          alert('Cập nhật thành công!');
+          if (window.$toast) window.$toast.success('Dữ liệu đã được lưu thành công!');
           this.$router.push('/admin/products');
         }
       } catch (e) {
         console.error("Lỗi Update:", e);
-        // Kiểm tra lỗi 403 (Chưa đăng nhập ADMIN)
-        if (e.response?.status === 403) {
-          alert("Bạn không có quyền thực hiện hành động này!");
-        } else {
-          alert('Lỗi: ' + (e.response?.data?.message || 'Không thể lưu sản phẩm'));
-        }
+        alert('Cảnh báo: ' + (e.response?.data?.message || 'Lỗi lưu dữ liệu'));
       } finally {
         this.saving = false;
       }
+    },
+
+    formatDate(date) {
+        if (!date) return 'NaN';
+        return new Date(date).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    },
+
+    onImgError(e) {
+      e.target.src = '/img/placeholder.png';
     }
   },
   mounted() {
@@ -182,3 +291,40 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+* {
+    font-family: 'Times New Roman', Times, serif !important;
+}
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+}
+
+input, textarea {
+  box-shadow: none !important;
+  -webkit-appearance: none;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.animate-in {
+  animation-fill-mode: both;
+}
+
+::selection {
+  background: #C8A97E;
+  color: white;
+}
+
+button, input, textarea {
+    transition: all 0.25s ease;
+}
+</style>

@@ -31,170 +31,307 @@
 
       <!-- PRODUCT TAB -->
       <div v-if="activeTab === 'products'" class="space-y-6">
-        <!-- ACTION BAR -->
-          <div class="flex items-center gap-4 flex-wrap">
-            <!-- Tìm kiếm -->
-            <div class="relative">
-              <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                <span class="material-symbols-outlined text-[20px]">search</span>
-              </span>
-              <input
-                v-model="filters.keyword"
-                @input="fetchProducts"
-                placeholder="Tìm sản phẩm..."
-                class="border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all w-64 shadow-sm"
-              />
-            </div>
+        <!-- LIST VIEW -->
+        <template v-if="!showDetailView">
+          <!-- ACTION BAR -->
+            <div class="flex items-center gap-4 flex-wrap">
+              <!-- Tìm kiếm -->
+              <div class="relative">
+                <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                  <span class="material-symbols-outlined text-[20px]">search</span>
+                </span>
+                <input
+                  v-model="filters.keyword"
+                  @input="fetchProducts"
+                  placeholder="Tìm sản phẩm..."
+                  class="border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all w-64 shadow-sm"
+                />
+              </div>
 
-            <!-- Custom Category Dropdown -->
-            <div class="relative min-w-[190px]">
-              <button @click.stop="openDropdown = openDropdown === 'category' ? null : 'category'"
-                class="w-full border border-[#C8A97E]/50 rounded-2xl pl-4 pr-10 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
-                <span class="truncate font-medium text-gray-700">{{ categories.find(c => c.maLoai === filters.categoryId)?.tenLoai || 'Tất cả danh mục' }}</span>
-                <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
-              </button>
-              <div v-if="openDropdown === 'category'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div @click="filters.categoryId = ''; fetchProducts(); openDropdown = null" 
-                  class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-[#C8A97E]/10" 
-                  :class="!filters.categoryId ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
-                  Tất cả danh mục
-                </div>
-                <div class="max-h-60 overflow-y-auto custom-scrollbar">
-                  <div v-for="c in categories" :key="c.maLoai" @click="filters.categoryId = c.maLoai; fetchProducts(); openDropdown = null" 
-                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.categoryId === c.maLoai ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">
-                    {{ c.tenLoai }}
+              <!-- Dropdowns (unchanged) -->
+              <div class="relative min-w-[190px]">
+                <button @click.stop="openDropdown = openDropdown === 'category' ? null : 'category'"
+                  class="w-full border border-[#C8A97E]/50 rounded-2xl pl-4 pr-10 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                  <span class="truncate font-medium text-gray-700">{{ categories.find(c => c.maLoai === filters.categoryId)?.tenLoai || 'Tất cả danh mục' }}</span>
+                  <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                </button>
+                <div v-if="openDropdown === 'category'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                  <div @click="filters.categoryId = ''; fetchProducts(); openDropdown = null" 
+                    class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-[#C8A97E]/10" 
+                    :class="!filters.categoryId ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
+                    Tất cả danh mục
+                  </div>
+                  <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                    <div v-for="c in categories" :key="c.maLoai" @click="filters.categoryId = c.maLoai; fetchProducts(); openDropdown = null" 
+                      class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.categoryId === c.maLoai ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">
+                      {{ c.tenLoai }}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Custom Brand Dropdown -->
-            <div class="relative min-w-[190px]">
-              <button @click.stop="openDropdown = openDropdown === 'brand' ? null : 'brand'"
-                class="w-full border border-[#C8A97E]/50 rounded-2xl pl-4 pr-10 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
-                <span class="truncate font-medium text-gray-700">{{ brands.find(b => b.maTH === filters.brandId)?.tenTH || 'Tất cả thương hiệu' }}</span>
-                <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
-              </button>
-              <div v-if="openDropdown === 'brand'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div @click="filters.brandId = ''; fetchProducts(); openDropdown = null" 
-                  class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
-                  :class="!filters.brandId ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
-                  Tất cả thương hiệu
-                </div>
-                <div class="max-h-60 overflow-y-auto custom-scrollbar">
-                  <div v-for="b in brands" :key="b.maTH" @click="filters.brandId = b.maTH; fetchProducts(); openDropdown = null" 
-                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.brandId === b.maTH ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">
-                    {{ b.tenTH }}
+              <div class="relative min-w-[190px]">
+                <button @click.stop="openDropdown = openDropdown === 'brand' ? null : 'brand'"
+                  class="w-full border border-[#C8A97E]/50 rounded-2xl pl-4 pr-10 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                  <span class="truncate font-medium text-gray-700">{{ brands.find(b => b.maTH === filters.brandId)?.tenTH || 'Tất cả thương hiệu' }}</span>
+                  <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                </button>
+                <div v-if="openDropdown === 'brand'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                  <div @click="filters.brandId = ''; fetchProducts(); openDropdown = null" 
+                    class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
+                    :class="!filters.brandId ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
+                    Tất cả thương hiệu
+                  </div>
+                  <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                    <div v-for="b in brands" :key="b.maTH" @click="filters.brandId = b.maTH; fetchProducts(); openDropdown = null" 
+                      class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.brandId === b.maTH ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">
+                      {{ b.tenTH }}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Custom Gender Dropdown -->
-            <div class="relative min-w-[170px]">
-              <button @click.stop="openDropdown = openDropdown === 'gender' ? null : 'gender'"
-                class="w-full border border-[#C8A97E]/50 rounded-2xl pl-4 pr-10 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
-                <span class="truncate font-medium text-gray-700">{{ filters.gioiTinh === '0' ? 'Nam' : filters.gioiTinh === '1' ? 'Nữ' : filters.gioiTinh === '2' ? 'Unisex' : 'Tất cả giới tính' }}</span>
-                <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
-              </button>
-              <div v-if="openDropdown === 'gender'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div @click="filters.gioiTinh = ''; fetchProducts(); openDropdown = null" 
-                  class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
-                  :class="!filters.gioiTinh ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
-                  Tất cả giới tính
+              <div class="relative min-w-[170px]">
+                <button @click.stop="openDropdown = openDropdown === 'gender' ? null : 'gender'"
+                  class="w-full border border-[#C8A97E]/50 rounded-2xl pl-4 pr-10 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                  <span class="truncate font-medium text-gray-700">{{ filters.gioiTinh === '0' ? 'Nam' : filters.gioiTinh === '1' ? 'Nữ' : filters.gioiTinh === '2' ? 'Unisex' : 'Tất cả giới tính' }}</span>
+                  <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                </button>
+                <div v-if="openDropdown === 'gender'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                  <div @click="filters.gioiTinh = ''; fetchProducts(); openDropdown = null" 
+                    class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
+                    :class="!filters.gioiTinh ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
+                    Tất cả giới tính
+                  </div>
+                  <div @click="filters.gioiTinh = '0'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.gioiTinh === '0' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Nam</div>
+                  <div @click="filters.gioiTinh = '1'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.gioiTinh === '1' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Nữ</div>
+                  <div @click="filters.gioiTinh = '2'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.gioiTinh === '2' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Unisex</div>
                 </div>
-                <div @click="filters.gioiTinh = '0'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.gioiTinh === '0' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Nam</div>
-                <div @click="filters.gioiTinh = '1'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.gioiTinh === '1' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Nữ</div>
-                <div @click="filters.gioiTinh = '2'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.gioiTinh === '2' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Unisex</div>
               </div>
-            </div>
 
-            <!-- Custom Status Dropdown -->
-            <div class="relative min-w-[170px]">
-              <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
-                class="w-full border border-[#C8A97E]/50 rounded-2xl pl-4 pr-10 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
-                <span class="truncate font-medium text-gray-700">{{ filters.status === '1' ? 'Đang bán' : filters.status === '0' ? 'Ngừng bán' : 'Tất cả trạng thái' }}</span>
-                <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
-              </button>
-              <div v-if="openDropdown === 'status'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div @click="filters.status = ''; fetchProducts(); openDropdown = null" 
-                  class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
-                  :class="!filters.status ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
-                  Tất cả trạng thái
+              <div class="relative min-w-[170px]">
+                <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
+                  class="w-full border border-[#C8A97E]/50 rounded-2xl pl-4 pr-10 py-2.5 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                  <span class="truncate font-medium text-gray-700">{{ filters.status === '1' ? 'Đang bán' : filters.status === '0' ? 'Ngừng bán' : 'Tất cả trạng thái' }}</span>
+                  <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                </button>
+                <div v-if="openDropdown === 'status'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                  <div @click="filters.status = ''; fetchProducts(); openDropdown = null" 
+                    class="px-4 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
+                    :class="!filters.status ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
+                    Tất cả trạng thái
+                  </div>
+                  <div @click="filters.status = '1'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.status === '1' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Đang bán</div>
+                  <div @click="filters.status = '0'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.status === '0' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Ngừng bán</div>
                 </div>
-                <div @click="filters.status = '1'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.status === '1' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Đang bán</div>
-                <div @click="filters.status = '0'; fetchProducts(); openDropdown = null" class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filters.status === '0' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Ngừng bán</div>
               </div>
+
+              <button @click="resetFilters" 
+                class="flex items-center justify-center size-10 rounded-2xl border border-[#C8A97E]/30 bg-white text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all shadow-sm group"
+                title="Làm mới bộ lọc">
+                <span class="material-symbols-outlined text-[22px] group-hover:rotate-180 transition-transform duration-500">refresh</span>
+              </button>
             </div>
 
-            <!-- Nút Làm mới -->
-            <button @click="resetFilters" 
-              class="flex items-center justify-center size-10 rounded-2xl border border-[#C8A97E]/30 bg-white text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all shadow-sm group"
-              title="Làm mới bộ lọc">
-              <span class="material-symbols-outlined text-[22px] group-hover:rotate-180 transition-transform duration-500">refresh</span>
-            </button>
+          <!-- PRODUCT TABLE -->
+          <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm overflow-hidden animate-in slide-in-from-bottom duration-500">
+            <table class="w-full text-sm border-collapse" style="table-layout: fixed;">
+                <thead class="bg-gray-50/50 border-b border-gray-200">
+                <tr>
+                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[6%] text-center tracking-widest">ID</th>
+                  <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase w-[32%] text-left tracking-widest">Tên Sản Phẩm</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[10%] text-center tracking-widest">Phân Loại</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[12%] text-center tracking-widest">Thương Hiệu</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[8%] text-center tracking-widest">Giới Tính</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[8%] text-center tracking-widest">Số lượng</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[12%] text-center tracking-widest">Trạng Thái</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[12%] text-center tracking-widest">Hành Động</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                <tr v-for="p in products" :key="p.id" class="hover:bg-[#C8A97E]/5 transition-colors cursor-pointer group" @click="openDetails(p.maSP)">
+                  <td class="px-4 py-5 font-mono text-[11px] text-gray-400 text-center">#{{ p.maSP }}</td>
+                  <td class="px-6 py-5">
+                    <p class="font-bold text-gray-800 text-sm leading-tight line-clamp-2 hover:text-[#C8A97E] transition-colors transition-all">{{ p.tenSP }}</p>
+                  </td>
+                  <td class="px-4 py-5 font-medium text-gray-600 text-[13px] text-center whitespace-nowrap">{{ p.loaiSanPham?.tenLoai }}</td>
+                  <td class="px-4 py-5 font-medium text-gray-600 text-[13px] text-center whitespace-nowrap">{{ p.thuongHieu?.tenTH }}</td>
+                  <td class="px-4 py-5 text-center">
+                    <span class="px-3 py-1.5 rounded-xl bg-gray-100 text-[10px] font-black text-gray-500 uppercase tracking-tighter whitespace-nowrap">
+                      {{ p.gioiTinh === 0 ? 'Nam' : p.gioiTinh === 1 ? 'Nữ' : 'Unisex' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-5 text-center">
+                    <span :class="p.totalStock < 10 ? 'text-red-500 font-black animate-pulse' : 'text-gray-800 font-black text-base tabular-nums'">
+                      {{ p.totalStock }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-5 text-center">
+                    <span class="inline-flex items-center px-3 py-1.5 text-[10px] font-black uppercase rounded-full tracking-wider whitespace-nowrap"
+                      :class="p.trangThaiSP == 1 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'">
+                      <span class="size-1.5 rounded-full mr-2" :class="p.trangThaiSP == 1 ? 'bg-green-500 shadow-sm' : 'bg-red-500'"></span>
+                      {{ p.trangThaiSP == 1 ? 'Đang bán' : 'Ngừng bán' }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-5" @click.stop>
+                    <div class="flex justify-center gap-1">
+                      <button @click="toggleStatus(p)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-gray-400 hover:text-gray-800 transition-all flex items-center justify-center shrink-0" :title="p.trangThaiSP == 1 ? 'Ẩn sản phẩm' : 'Hiện sản phẩm'">
+                        <span class="material-symbols-outlined text-[20px]">
+                          {{ p.trangThaiSP == 1 ? 'visibility' : 'visibility_off' }}
+                        </span>
+                      </button>
+                      <button @click="editProduct(p)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-blue-400 hover:text-blue-600 transition-all flex items-center justify-center shrink-0" title="Sửa">
+                        <span class="material-symbols-outlined text-[20px]">edit</span>
+                      </button>
+                      <button @click="deleteProduct(p.maSP)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-red-400 hover:text-red-600 transition-all flex items-center justify-center shrink-0" title="Xóa">
+                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-if="products.length === 0" class="flex flex-col items-center justify-center py-16 text-gray-400">
+              <span class="material-symbols-outlined text-5xl mb-3">inventory_2</span>
+              <p class="text-sm">Không có sản phẩm nào</p>
+            </div>
           </div>
+        </template>
 
-        <!-- PRODUCT TABLE -->
-        <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
-          <table class="w-full text-sm border-collapse" style="table-layout: fixed;">
-            <thead class="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th class="px-4 py-4 text-xs font-semibold text-gray-500 uppercase w-[5%] text-center">ID</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-left w-[25%]">Tên Sản Phẩm</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[12%]">Phân Loại</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[12%]">Thương Hiệu</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%]">Giới Tính</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%]">Số lượng</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[12%]">Trạng Thái</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[14%]">Hành Động</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr v-for="p in products" :key="p.id" class="hover:bg-[#C8A97E]/5 transition-colors cursor-pointer" @click="openDetails(p.maSP)">
-                <td class="px-4 py-4 font-mono text-xs text-gray-500 text-center">#{{ p.maSP }}</td>
-                <td class="px-6 py-4 font-semibold text-gray-800 text-left truncate">{{ p.tenSP }}</td>
-                <td class="px-6 py-4 text-gray-600 text-center truncate">{{ p.loaiSanPham?.tenLoai }}</td>
-                <td class="px-6 py-4 text-gray-600 text-center truncate">{{ p.thuongHieu?.tenTH }}</td>
-                <td class="px-6 py-4 text-center">
-                  <span class="px-2 py-1 rounded-lg bg-gray-100 text-[11px] font-bold text-gray-600">
-                    {{ p.gioiTinh === 0 ? 'Nam' : p.gioiTinh === 1 ? 'Nữ' : 'Unisex' }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <span :class="p.totalStock < 10 ? 'text-red-600 font-black animate-pulse' : 'text-gray-800 font-bold'">
-                    {{ p.totalStock }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                  <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full"
-                    :class="p.trangThaiSP == 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
-                    <span class="size-1.5 rounded-full mr-1.5" :class="p.trangThaiSP == 1 ? 'bg-green-500' : 'bg-red-500'"></span>
-                    {{ p.trangThaiSP == 1 ? 'Đang bán' : 'Ngừng bán' }}
-                  </span>
-                </td>
-                <td class="px-6 py-4" @click.stop>
-                  <div class="flex justify-center gap-2">
-                    <button @click="toggleStatus(p)" class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-all" :title="p.trangThaiSP == 1 ? 'Ẩn sản phẩm' : 'Hiện sản phẩm'">
-                      <span class="material-symbols-outlined text-[20px]">
-                        {{ p.trangThaiSP == 1 ? 'visibility' : 'visibility_off' }}
-                      </span>
-                    </button>
-                    <button @click="editProduct(p)" class="p-2 rounded-lg hover:bg-yellow-50 text-yellow-700 transition-all" title="Sửa">
-                      <span class="material-symbols-outlined text-[20px]">edit</span>
-                    </button>
-                    <button @click="deleteProduct(p.maSP)" class="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-all" title="Xóa">
-                      <span class="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-if="products.length === 0" class="flex flex-col items-center justify-center py-16 text-gray-400">
-            <span class="material-symbols-outlined text-5xl mb-3">inventory_2</span>
-            <p class="text-sm">Không có sản phẩm nào</p>
-          </div>
+        <!-- INLINE DETAIL VIEW -->
+        <div v-else class="space-y-8 animate-in slide-in-from-right duration-500">
+           <!-- Navigation & Header -->
+           <div class="flex items-center justify-between bg-white p-6 rounded-[2rem] border border-[#C8A97E]/20 shadow-sm">
+              <div class="flex items-center gap-6">
+                <button @click="showDetailView = false" class="size-12 rounded-2xl bg-gray-50 hover:bg-[#C8A97E]/10 text-gray-600 hover:text-[#C8A97E] transition-all flex items-center justify-center group">
+                   <span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                </button>
+                <div>
+                  <h3 class="text-2xl font-black text-gray-800 tracking-tight">{{ selectedProduct?.tenSP }}</h3>
+                  <p class="text-[10px] font-black text-[#C8A97E] uppercase tracking-widest mt-1">QUẢN LÝ BIẾN THỂ & TỒN KHO</p>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                 <button @click="editProduct(selectedProduct)" class="px-6 py-3 rounded-2xl bg-gray-800 text-white font-black text-sm hover:bg-black transition-all shadow-lg flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px]">edit_square</span>
+                    SỬA SẢN PHẨM
+                 </button>
+              </div>
+           </div>
+
+           <div class="bg-white rounded-[2.5rem] border border-[#C8A97E]/20 shadow-xl overflow-hidden p-8">
+              <div v-if="loadingDetails" class="flex flex-col items-center justify-center py-20 gap-4">
+                <span class="material-symbols-outlined animate-spin text-4xl text-[#C8A97E]">progress_activity</span>
+                <p class="text-sm font-bold text-gray-400 italic">Đang tải thông tin sản phẩm...</p>
+              </div>
+              
+              <template v-else>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    <!-- Left: Image -->
+                    <div class="lg:col-span-4 space-y-6">
+                        <div class="aspect-square rounded-[2rem] bg-gray-50 border border-gray-100 p-4 shadow-inner overflow-hidden group">
+                            <img v-if="selectedProduct?.anhChinh" :src="selectedProduct.anhChinh" class="w-full h-full object-cover rounded-[1.5rem] transition-transform duration-700 group-hover:scale-110" />
+                            <div v-else class="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                                 <span class="material-symbols-outlined text-6xl">image_not_supported</span>
+                                 <p class="text-xs font-bold mt-2 font-mono italic">NO PHOTO</p>
+                            </div>
+                        </div>
+
+                        <!-- Description Under Image -->
+                        <div class="p-8 bg-gray-50/50 rounded-[2rem] border border-gray-100">
+                            <h4 class="text-xs font-black text-gray-400 uppercase mb-4 flex items-center gap-2 tracking-widest">
+                                <span class="material-symbols-outlined text-[20px]">subject</span>
+                                Mô tả chi tiết
+                            </h4>
+                            <p class="text-gray-700 text-sm leading-relaxed italic font-medium">{{ selectedProduct?.moTa || 'Không có mô tả.' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Right: Basic Info -->
+                    <div class="lg:col-span-8 space-y-8">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="p-5 bg-gray-50/50 rounded-2xl border border-gray-100/50">
+                                 <p class="text-xs text-gray-400 font-black uppercase mb-2 tracking-widest">Brand</p>
+                                 <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-[#C8A97E] text-[20px]">verified</span>
+                                    <p class="font-black text-gray-800 uppercase text-sm">{{ selectedProduct?.thuongHieu?.tenTH }}</p>
+                                 </div>
+                            </div>
+                            <div class="p-5 bg-gray-50/50 rounded-2xl border border-gray-100/50">
+                                 <p class="text-xs text-gray-400 font-black uppercase mb-2 tracking-widest">Type</p>
+                                 <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-gray-600 text-[20px]">category</span>
+                                    <p class="font-black text-gray-800 text-sm text-nowrap truncate">{{ selectedProduct?.loaiSanPham?.tenLoai }}</p>
+                                 </div>
+                            </div>
+                            <div class="p-5 bg-gray-50/50 rounded-2xl border border-gray-100/50">
+                                 <p class="text-xs text-gray-400 font-black uppercase mb-2 tracking-widest">Gender</p>
+                                 <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-gray-600 text-[20px]">wc</span>
+                                    <p class="font-black text-gray-800 text-sm uppercase">
+                                         {{ selectedProduct?.gioiTinh === 0 ? 'NAM' : selectedProduct?.gioiTinh === 1 ? 'NỮ' : 'UNISEX' }}
+                                    </p>
+                                 </div>
+                            </div>
+                            <div class="p-5 bg-gray-50/50 rounded-2xl border border-gray-100/50">
+                                 <p class="text-xs text-gray-400 font-black uppercase mb-2 tracking-widest">Status</p>
+                                 <div class="flex items-center gap-3">
+                                    <span class="size-2.5 rounded-full" :class="selectedProduct?.trangThaiSP == 1 ? 'bg-green-500 shadow-md animate-pulse' : 'bg-red-500'"></span>
+                                    <p class="font-black text-sm" :class="selectedProduct?.trangThaiSP == 1 ? 'text-green-600' : 'text-red-600'">
+                                         {{ selectedProduct?.trangThaiSP == 1 ? 'ACTIVE' : 'INACTIVE' }}
+                                    </p>
+                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Variants Area -->
+                        <div class="space-y-6">
+                            <h4 class="text-lg font-black text-gray-800 flex items-center gap-3 uppercase tracking-wide border-b border-gray-100 pb-4">
+                                <span class="material-symbols-outlined text-[#C8A97E] text-[24px]">inventory_2</span>
+                                Bảng kích cỡ & Tồn kho
+                            </h4>
+
+                            <div v-if="Object.keys(groupedVariants).length === 0" class="py-12 bg-gray-50 rounded-3xl flex flex-col items-center justify-center text-gray-400">
+                                <span class="material-symbols-outlined text-6xl">inventory</span>
+                                <p class="text-base font-bold mt-2">Chưa có phân loại!</p>
+                            </div>
+
+                            <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div v-for="(variants, size) in groupedVariants" :key="size" class="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300">
+                                    <div class="bg-gray-50/80 px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xs font-black text-gray-400 uppercase tracking-widest">SIZE</span>
+                                            <span class="size-10 rounded-2xl bg-gray-800 text-white flex items-center justify-center font-black text-base shadow-lg">{{ size }}</span>
+                                        </div>
+                                        <span class="text-xs font-bold text-gray-400 uppercase tracking-tight">{{ variants.length }} Màu</span>
+                                    </div>
+                                    <div class="p-4 space-y-3">
+                                        <div v-for="v in variants" :key="v.maBienThe" class="flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                                            <div class="flex items-center gap-4">
+                                                <div class="size-11 rounded-2xl border border-gray-100 flex items-center justify-center p-0.5 shadow-sm" :style="{ backgroundColor: v.mauSacSP?.maHex || '#ccc' }">
+                                                    <div class="size-full rounded-[14px] bg-black/5 flex items-center justify-center">
+                                                        <span v-if="isLightColor(v.mauSacSP?.maHex)" class="material-symbols-outlined text-[14px] text-black/20 font-bold">done</span>
+                                                        <span v-else class="material-symbols-outlined text-[14px] text-white/40 font-bold">done</span>
+                                                    </div>
+                                                </div>
+                                                <p class="text-sm font-black text-gray-800">{{ v.mauSacSP?.tenMau }}</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-2xl font-black tabular-nums tracking-tighter" :class="v.soLuongTon < 5 ? 'text-red-500 animate-pulse' : 'text-gray-800'">
+                                                    {{ v.soLuongTon }}
+                                                </p>
+                                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">STOCK</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+              </template>
+           </div>
         </div>
       </div>
 
@@ -213,41 +350,43 @@
           <table class="w-full text-sm border-collapse" style="table-layout: fixed;">
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="px-4 py-4 text-xs font-semibold text-gray-500 uppercase w-[10%] text-center">ID</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-left w-[20%]">Tên danh mục</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%] text-blue-600">SP Nam</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%] text-pink-600">SP Nữ</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%] text-gray-600">Unisex</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-left w-[20%]">Mô tả</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%]">Trạng thái</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%]">Hành động</th>
+                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[8%] text-center tracking-widest">ID</th>
+                <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase text-left w-[20%] tracking-widest">Tên danh mục</th>
+                <th class="px-4 py-4 text-[11px] font-black text-blue-600 uppercase text-center w-[10%] tracking-widest">SP Nam</th>
+                <th class="px-4 py-4 text-[11px] font-black text-pink-600 uppercase text-center w-[10%] tracking-widest">SP Nữ</th>
+                <th class="px-4 py-4 text-[11px] font-black text-gray-600 uppercase text-center w-[10%] tracking-widest">Unisex</th>
+                <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase text-left w-[22%] tracking-widest">Mô tả</th>
+                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase text-center w-[10%] tracking-widest">Trạng thái</th>
+                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase text-center w-[10%] tracking-widest">Hành động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-              <tr v-for="c in categories" :key="c.maLoai" class="hover:bg-yellow-50/50 transition-colors cursor-pointer" @click="openCategoryModal(c)">
-                <td class="px-4 py-4 font-mono text-xs text-gray-500 text-center">#{{ c.maLoai }}</td>
-                <td class="px-6 py-4 font-bold text-gray-800 text-left truncate">{{ c.tenLoai }}</td>
-                <td class="px-6 py-4 text-center font-bold text-blue-600">{{ c.countNam || 0 }}</td>
-                <td class="px-6 py-4 text-center font-bold text-pink-600">{{ c.countNu || 0 }}</td>
-                <td class="px-6 py-4 text-center font-bold text-gray-600">{{ c.countUnisex || 0 }}</td>
-                <td class="px-6 py-4 text-gray-500 italic text-left text-xs truncate pr-4">{{ c.moTa || 'Chưa có mô tả' }}</td>
-                <td class="px-6 py-4 text-center">
-                  <span class="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full"
-                    :class="c.trangThai == 1 ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500'">
+              <tr v-for="c in categories" :key="c.maLoai" class="hover:bg-yellow-50/50 transition-colors cursor-pointer group" @click="openCategoryModal(c)">
+                <td class="px-4 py-5 font-mono text-[11px] text-gray-400 text-center">#{{ c.maLoai }}</td>
+                <td class="px-6 py-5 font-bold text-gray-800 text-sm text-left truncate">{{ c.tenLoai }}</td>
+                <td class="px-4 py-5 text-center font-black text-blue-600 text-base tabular-nums">{{ c.countNam || 0 }}</td>
+                <td class="px-4 py-5 text-center font-black text-pink-600 text-base tabular-nums">{{ c.countNu || 0 }}</td>
+                <td class="px-4 py-5 text-center font-black text-gray-500 text-base tabular-nums">{{ c.countUnisex || 0 }}</td>
+                <td class="px-6 py-5">
+                  <p class="text-gray-500 italic text-left text-[13px] line-clamp-1 pr-4">{{ c.moTa || 'Chưa có mô tả' }}</p>
+                </td>
+                <td class="px-4 py-5 text-center">
+                  <span class="inline-flex items-center px-3 py-1.5 text-[10px] font-black uppercase rounded-full tracking-wider"
+                    :class="c.trangThai == 1 ? 'bg-blue-50 text-blue-600' : 'bg-gray-100 text-gray-500 text-nowrap'">
                     {{ c.trangThai == 1 ? 'Hiển thị' : 'Đang ẩn' }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-center" @click.stop>
-                   <div class="flex justify-center gap-2">
-                    <button @click="toggleCategoryStatus(c)" class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-all" :title="c.trangThai == 1 ? 'Ẩn danh mục' : 'Hiện danh mục'">
+                <td class="px-4 py-5 text-center" @click.stop>
+                   <div class="flex justify-center gap-1">
+                    <button @click="toggleCategoryStatus(c)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-gray-400 transition-all flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">
                         {{ c.trangThai == 1 ? 'visibility' : 'visibility_off' }}
                       </span>
                     </button>
-                    <button @click="openCategoryModal(c)" class="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition-all" title="Sửa">
+                    <button @click="openCategoryModal(c)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-blue-400 transition-all flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">edit</span>
                     </button>
-                    <button @click="deleteCategory(c.maLoai)" class="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-all" title="Xóa">
+                    <button @click="deleteCategory(c.maLoai)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-red-400 transition-all flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">delete</span>
                     </button>
                    </div>
@@ -277,41 +416,55 @@
           <table class="w-full text-sm border-collapse" style="table-layout: fixed;">
             <thead class="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th class="px-4 py-4 text-xs font-semibold text-gray-500 uppercase w-[10%] text-center">ID</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-left w-[20%]">Tên thương hiệu</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%] text-blue-600">SP Nam</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%] text-pink-600">SP Nữ</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%] text-gray-600">Unisex</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-left w-[20%]">Mô tả</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%]">Trạng thái</th>
-                <th class="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-center w-[10%]">Hành động</th>
+                <th class="px-2 py-4 text-[11px] font-black text-gray-500 uppercase w-[5%] text-center tracking-widest">ID</th>
+                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase text-left w-[23%] tracking-widest">Tên thương hiệu</th>
+                <th class="px-2 py-4 text-[11px] font-black text-blue-600 uppercase text-center w-[8%] tracking-widest whitespace-nowrap">SP Nam</th>
+                <th class="px-2 py-4 text-[11px] font-black text-pink-600 uppercase text-center w-[8%] tracking-widest whitespace-nowrap">SP Nữ</th>
+                <th class="px-2 py-4 text-[11px] font-black text-gray-600 uppercase text-center w-[8%] tracking-widest whitespace-nowrap">Unisex</th>
+                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase text-left w-[24%] tracking-widest">Mô tả</th>
+                <th class="px-2 py-4 text-[11px] font-black text-gray-500 uppercase text-center w-[12%] tracking-widest whitespace-nowrap">Trạng thái</th>
+                <th class="px-2 py-4 text-[11px] font-black text-gray-500 uppercase text-center w-[12%] tracking-widest whitespace-nowrap">Hành động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-              <tr v-for="b in brands" :key="b.maTH" class="hover:bg-yellow-50/50 transition-colors cursor-pointer" @click="openBrandModal(b)">
-                <td class="px-4 py-4 font-mono text-xs text-gray-500 text-center">#{{ b.maTH }}</td>
-                <td class="px-6 py-4 font-bold text-gray-800 text-left truncate">{{ b.tenTH }}</td>
-                <td class="px-6 py-4 text-center font-bold text-blue-600">{{ b.countNam || 0 }}</td>
-                <td class="px-6 py-4 text-center font-bold text-pink-600">{{ b.countNu || 0 }}</td>
-                <td class="px-6 py-4 text-center font-bold text-gray-600">{{ b.countUnisex || 0 }}</td>
-                <td class="px-6 py-4 text-gray-500 italic text-left text-xs truncate pr-4">{{ b.moTa || 'Chưa có mô tả' }}</td>
-                <td class="px-6 py-4 text-center">
-                  <span class="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full"
+              <tr v-for="b in brands" :key="b.maTH" class="hover:bg-yellow-50/50 transition-colors cursor-pointer group" @click="openBrandModal(b)">
+                <td class="px-2 py-5 font-mono text-[11px] text-gray-400 text-center">#{{ b.maTH }}</td>
+                <td class="px-4 py-5">
+                  <div class="flex items-center gap-4">
+                    <div class="size-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center p-2 overflow-hidden shadow-sm group-hover:scale-110 transition-transform shrink-0">
+                      <img 
+                        :src="getBrandLogo(b.tenTH)" 
+                        @error="(e) => e.target.src = '/img/placeholder.png'"
+                        class="max-w-full max-h-full object-contain"
+                        alt="Brand logo"
+                      />
+                    </div>
+                    <span class="font-bold text-gray-800 text-sm">{{ b.tenTH }}</span>
+                  </div>
+                </td>
+                <td class="px-2 py-5 text-center font-black text-blue-600 text-base tabular-nums">{{ b.countNam || 0 }}</td>
+                <td class="px-2 py-5 text-center font-black text-pink-600 text-base tabular-nums">{{ b.countNu || 0 }}</td>
+                <td class="px-2 py-5 text-center font-black text-gray-500 text-base tabular-nums">{{ b.countUnisex || 0 }}</td>
+                <td class="px-4 py-5">
+                  <p class="text-gray-500 italic text-left text-[13px] line-clamp-1 pr-2">{{ b.moTa || 'Chưa có mô tả' }}</p>
+                </td>
+                <td class="px-2 py-5 text-center">
+                  <span class="inline-flex items-center px-3 py-1.5 text-[10px] font-black uppercase rounded-full tracking-wider whitespace-nowrap"
                     :class="b.trangThai == 1 ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'">
                     {{ b.trangThai == 1 ? 'Hoạt động' : 'Đang ẩn' }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-center" @click.stop>
-                   <div class="flex justify-center gap-2">
-                    <button @click="toggleBrandStatus(b)" class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-all" :title="b.trangThai == 1 ? 'Ẩn thương hiệu' : 'Hiện thương hiệu'">
+                <td class="px-4 py-5 text-center" @click.stop>
+                   <div class="flex justify-center gap-1">
+                    <button @click="toggleBrandStatus(b)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-gray-400 transition-all flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">
                         {{ b.trangThai == 1 ? 'visibility' : 'visibility_off' }}
                       </span>
                     </button>
-                    <button @click="openBrandModal(b)" class="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition-all" title="Sửa">
+                    <button @click="openBrandModal(b)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-blue-400 transition-all flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">edit</span>
                     </button>
-                    <button @click="deleteBrand(b.maTH)" class="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-all" title="Xóa">
+                    <button @click="deleteBrand(b.maTH)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-red-400 transition-all flex items-center justify-center">
                       <span class="material-symbols-outlined text-[20px]">delete</span>
                     </button>
                    </div>
@@ -327,47 +480,6 @@
       </div>
     </div>
 
-    <!-- PRODUCT DETAIL MODAL -->
-    <div v-if="showDetails" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" @click.self="showDetails=false">
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
-          <h3 class="text-base font-bold text-gray-800">{{ selectedProduct?.tenSP }}</h3>
-          <button @click="showDetails=false" class="text-gray-400 hover:text-gray-600 transition-colors">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <div class="p-6 space-y-3 text-sm">
-          <div v-if="loadingDetails" class="flex justify-center py-8 text-gray-400">
-            <span class="material-symbols-outlined animate-spin text-3xl">progress_activity</span>
-          </div>
-          <template v-else>
-            <div class="flex justify-center mb-6">
-              <img v-if="selectedProduct?.anhChinh" :src="selectedProduct.anhChinh" class="h-48 w-48 object-cover rounded-xl shadow-md border" alt="Product image" />
-              <div v-else class="h-48 w-48 bg-gray-100 rounded-xl flex items-center justify-center text-gray-300">
-                <span class="material-symbols-outlined text-5xl">image_not_supported</span>
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="p-3 bg-gray-50 rounded-xl">
-                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Danh mục</p>
-                <p class="font-medium text-gray-800">{{ selectedProduct?.loaiSanPham?.tenLoai }}</p>
-              </div>
-              <div class="p-3 bg-gray-50 rounded-xl">
-                <p class="text-[10px] text-gray-400 uppercase font-bold mb-1">Thương hiệu</p>
-                <p class="font-medium text-gray-800">{{ selectedProduct?.thuongHieu?.tenTH }}</p>
-              </div>
-            </div>
-            <div class="p-4 bg-gray-50 rounded-xl">
-              <p class="text-[10px] text-gray-400 uppercase font-bold mb-2">Mô tả sản phẩm</p>
-              <p class="text-gray-700 leading-relaxed text-xs">{{ selectedProduct?.moTa || 'Chưa có mô tả chi tiết' }}</p>
-            </div>
-          </template>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
-          <button @click="showDetails=false" class="px-6 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-sm font-bold text-gray-600 transition-all">Đóng</button>
-        </div>
-      </div>
-    </div>
 
     <!-- CATEGORY MODAL (CRUD) -->
     <div v-if="categoryModal.show" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -421,6 +533,18 @@
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
+
+        <div v-if="brandModal.form.tenTH" class="mt-6 flex justify-center">
+            <div class="size-28 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center p-6 overflow-hidden shadow-inner group">
+              <img 
+                :src="getBrandLogo(brandModal.form.tenTH)" 
+                @error="(e) => e.target.src = '/img/placeholder.png'"
+                class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                alt="Brand logo"
+              />
+            </div>
+        </div>
+
         <form @submit.prevent="saveBrand" class="p-6 space-y-5">
           <div class="space-y-2">
             <label class="text-sm font-bold text-gray-700">Tên thương hiệu</label>
@@ -468,7 +592,6 @@ export default {
       filters: { keyword: '', categoryId: '', brandId: '', gioiTinh: '', status: '' },
       
       // Product details
-      showDetails: false,
       selectedProduct: null,
       loadingDetails: false,
 
@@ -486,6 +609,32 @@ export default {
 
       // Dropdown UI state
       openDropdown: null, // 'category', 'brand', 'gender', 'status'
+
+      showDetailView: false,
+    }
+  },
+
+  computed: {
+    groupedVariants() {
+      if (!this.selectedProduct?.variants) return {}
+      const groups = {}
+      this.selectedProduct.variants.forEach(v => {
+        const size = v.sizeSP?.tenSize || 'N/A'
+        if (!groups[size]) groups[size] = []
+        groups[size].push(v)
+      })
+      
+      const sizeOrder = ['35','36','37','38','39','40','41','42','43','44','45','XS', 'S', 'M', 'L', 'XL', '2XL', '3XL']
+      const sortedKeys = Object.keys(groups).sort((a, b) => {
+        const indexA = sizeOrder.indexOf(a)
+        const indexB = sizeOrder.indexOf(b)
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB
+        return a.localeCompare(b)
+      })
+      
+      const sortedGroups = {}
+      sortedKeys.forEach(k => { sortedGroups[k] = groups[k] })
+      return sortedGroups
     }
   },
 
@@ -494,7 +643,8 @@ export default {
     async fetchProducts() {
       try {
         const res = await axios.get('/admin/products', { params: this.filters })
-        this.products = res.data
+        // Sắp xếp theo ID tăng dần (1, 2, 3...)
+        this.products = res.data.sort((a, b) => Number(a.maSP) - Number(b.maSP))
       } catch (e) { console.error(e) }
     },
 
@@ -510,12 +660,15 @@ export default {
     },
 
     async openDetails(id) {
-      this.showDetails = true
+      this.showDetailView = true
       this.loadingDetails = true
       try {
         const res = await axios.get(`/admin/products/${id}`)
         this.selectedProduct = res.data
-      } catch (e) { console.error(e) }
+      } catch (e) {
+        console.error(e)
+        this.showDetailView = false
+      }
       finally { this.loadingDetails = false }
     },
 
@@ -639,6 +792,21 @@ export default {
 
     closeDropdowns() {
       this.openDropdown = null
+    },
+
+    getBrandLogo(name) {
+      if (!name) return '/img/placeholder.png'
+      const slug = name.toLowerCase().replace(/[\s-]+/g, '')
+      return `/images/brand/logo-${slug}.png`
+    },
+
+    isLightColor(hex) {
+      if (!hex) return true;
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 155;
     }
   },
 

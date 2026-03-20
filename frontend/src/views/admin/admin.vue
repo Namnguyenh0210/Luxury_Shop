@@ -67,7 +67,6 @@ export default {
       loading: true,
       totalRevenue: 0,
       newOrdersCount: 0,
-      uniqueVisitors: 0,
       totalCustomers: 0,
 
       allModules: [
@@ -90,7 +89,7 @@ export default {
       const list = [
         { label: 'Tổng Doanh Thu',   icon: 'payments',     iconBg: '#fef9c3', value: this.fmtCurrency(this.totalRevenue),    trend: '+100% vs tháng trước', trendColor: 'text-green-600', role: 'ADMIN', route: '/admin/reports' },
         { label: 'Đơn Chờ Xử Lý',   icon: 'pending_actions', iconBg: '#dbeafe', value: this.newOrdersCount,                  trend: 'Cần duyệt ngay',       trendColor: 'text-blue-600', route: '/admin/orders'  },
-        { label: 'Lượt Truy Cập',    icon: 'bar_chart',    iconBg: '#dcfce7', value: this.fmtNumber(this.uniqueVisitors),    trend: '+5.4% tháng này',      trendColor: 'text-green-600', role: 'ADMIN', route: '/admin/reports' },
+        { label: 'Hỗ Trợ Chat Trực Tiếp', icon: 'forum',    iconBg: '#ffedd5', value: 'Trực Tuyến',          trend: 'Hỗ trợ khách hàng',  trendColor: 'text-orange-600', role: 'ADMIN', route: '/admin/chat' },
         { label: 'Tổng Khách Hàng',  icon: 'group',        iconBg: '#fce7f3', value: this.totalCustomers,                     trend: '+12 người mới',        trendColor: 'text-green-600', role: 'ADMIN', route: '/admin/customers' },
       ]
       return list.filter(item => !item.role || (item.role === 'ADMIN' && isAdmin))
@@ -111,7 +110,6 @@ export default {
         const res = await axios.get('/admin/reports', { withCredentials: true })
         this.totalRevenue   = res.data.totalRevenue   || 0
         this.newOrdersCount = res.data.newOrders || 0
-        this.uniqueVisitors = res.data.uniqueVisitors || 0
         this.totalCustomers = res.data.totalCustomers || 0
       } else {
         try {
@@ -127,8 +125,7 @@ export default {
   },
 
   methods: {
-    fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v) + ' đ' },
-    fmtNumber(v)   { return new Intl.NumberFormat('vi-VN').format(v) }
+    fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v) + ' đ' }
   }
 }
 
