@@ -1,7 +1,7 @@
 <template>
 <header>
     <!-- Top Bar -->
-    <div class="bg-[papayawhip]">
+    <div class="bg-[#F5F1ED]">
         <div class="w-full px-4 md:px-[3.7cm]">
             <div class="flex h-10 items-center justify-end text-xs text-text-primary-light/80 dark:text-text-primary-dark/80">
                 <div class="flex items-center space-x-4">
@@ -60,15 +60,15 @@
                         
                         <!-- Dropdown Danh mục -->
                         <div class="absolute left-0 top-full pt-2 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
-                            <div class="bg-white rounded-xl shadow-2xl border-2 border-[papayawhip] overflow-hidden transform origin-top scale-95 group-hover:scale-100 transition-transform">
+                            <div class="bg-white rounded-xl shadow-2xl border-2 border-[#F5F1ED] overflow-hidden transform origin-top scale-95 group-hover:scale-100 transition-transform">
                                 <!-- Header: Nền be chữ đen -->
-                                <div class="px-4 py-3 bg-[papayawhip] border-b border-[papayawhip]">
+                                <div class="px-4 py-3 bg-[#F5F1ED] border-b border-[#F5F1ED]">
                                     <p class="text-xs font-bold uppercase tracking-wider text-black">Khám phá bộ sưu tập</p>
                                 </div>
                                 
                                 <div class="p-2 space-y-1">
                                     <!-- Mục Tất cả sản phẩm -->
-                                    <a href="/sanpham" class="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-900 rounded-lg hover:bg-gray-100 transition-all border border-transparent hover:text-accent hover:ring-1 hover:ring-blue-950/10 active:ring-1 active:ring-blue-950">
+                                    <a href="/sanpham" class="flex items-center gap-3 px-3 py-2.5 text-sm font-bold text-gray-900 rounded-lg hover:bg-[#F5F1ED] transition-all border border-transparent hover:text-[#C8A97E]">
                                         <span class="material-symbols-outlined text-xl">grid_view</span>
                                         <span>Tất cả sản phẩm</span>
                                     </a>
@@ -77,7 +77,7 @@
                                         <!-- Các mục danh mục được bo góc trong khung -->
                                         <a v-for="cat in categories" :key="cat.maLoai" :href="`/sanpham?loai=${cat.maLoai}`" 
                                            class="flex items-center gap-3 px-3 py-2 text-sm text-gray-800 rounded-lg transition-all border border-transparent hover:bg-gray-50 hover:text-accent hover:ring-1 hover:ring-blue-950/10 group active:ring-1 active:ring-blue-950">
-                                            <span class="material-symbols-outlined text-xl text-gray-400 group-hover:text-accent transition-colors">label</span>
+                                            <span class="material-symbols-outlined text-xl text-gray-400 group-hover:text-[#C8A97E] transition-colors">label</span>
                                             <span class="group-hover:font-medium">{{ cat.tenLoai }}</span>
                                         </a>
                                         
@@ -107,10 +107,10 @@
                 <div class="flex flex-1 items-center justify-end gap-2 md:gap-4">
                     <!-- Search Bar -->
                     <div class="hidden md:flex max-w-xs flex-1">
-                        <form class="flex w-full border border-secondary rounded-md overflow-hidden focus-within:border-accent group transition-all" @submit.prevent="handleSearch">
+                        <form class="flex w-full border border-gray-300 rounded-full overflow-hidden focus-within:border-[#C8A97E] group transition-all" @submit.prevent="handleSearch">
                             <label class="sr-only" for="search-header">Tìm kiếm</label>
-                            <input v-model="searchQuery" class="w-full border-none bg-transparent py-2 pl-4 text-sm focus:ring-0" id="search-header" name="search-header" placeholder="Nhập nội dung..." type="search">
-                            <button class="flex items-center justify-center bg-accent px-3 text-text-primary-light hover:bg-accent/90 transition-colors" type="submit">
+                            <input v-model="searchQuery" class="w-full border-none bg-transparent py-2 pl-5 text-sm focus:ring-0" id="search-header" name="search-header" placeholder="Nhập nội dung..." type="search">
+                            <button class="flex items-center justify-center bg-[#C8A97E] px-5 text-white hover:bg-[#B8986E] transition-colors" type="submit">
                                 <span class="material-symbols-outlined text-xl">search</span>
                             </button>
                         </form>
@@ -129,10 +129,10 @@
                         </a>
 
                         <!-- Shopping Cart with badge -->
-                        <a class="flex items-center gap-2 group px-2 py-1 rounded-md transition-all hover:text-accent hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950" href="/giohang">
+                        <a class="flex items-center gap-2 group px-4 py-2 rounded-full transition-all hover:bg-[#F5F1ED] hover:text-[#C8A97E] hover:ring-1 hover:ring-[#C8A97E]/30" href="/giohang">
                             <div class="relative">
                                 <span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">shopping_bag</span>
-                                <span v-if="cartCount > 0" class="absolute -right-3 -top-3 flex h-5 w-5 items-center justify-center rounded-full bg-yellow-500 text-[10px] font-black text-black ring-2 ring-white shadow-lg">
+                                <span v-if="cartCount > 0" class="absolute -right-3 -top-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#C8A97E] text-[10px] font-black text-white ring-2 ring-white shadow-lg">
                                     {{ cartCount }}
                                 </span>
                             </div>
@@ -141,14 +141,14 @@
 
                         <!-- User Avatar Dropdown (Only when authenticated) -->
                         <div v-if="isAuthenticated" class="relative" id="userDropdown">
-                            <button @click="toggleUserMenu" class="flex items-center gap-2 px-2 py-1 rounded-md transition-all hover:ring-1 hover:ring-blue-950/30 active:ring-1 active:ring-blue-950 focus:outline-none group">
+                            <button @click="toggleUserMenu" class="flex items-center gap-2 px-3 py-1.5 rounded-full transition-all hover:bg-[#F5F1ED] hover:ring-1 hover:ring-[#C8A97E]/30 focus:outline-none group">
                                 <!-- Avatar with fallback -->
                                 <div class="h-10 w-10 rounded-full bg-gradient-to-br from-[#D5BFA3] to-[#111111] flex items-center justify-center text-white font-bold overflow-hidden shadow-sm">
                                     <img v-if="currentUser && currentUser.avatar" :src="currentUser.avatar" :alt="currentUser.hoTen" class="h-full w-full object-cover" @error="handleImageError">
                                     <span v-else>{{ userInitial }}</span>
                                 </div>
-                                <span class="text-sm font-bold text-black group-hover:text-accent">{{ userName }}</span>
-                                <span class="material-symbols-outlined text-lg text-black group-hover:text-accent transition-transform group-hover:rotate-180">expand_more</span>
+                                <span class="text-sm font-bold text-black group-hover:text-[#C8A97E]">{{ userName }}</span>
+                                <span class="material-symbols-outlined text-lg text-black group-hover:text-[#C8A97E] transition-transform group-hover:rotate-180">expand_more</span>
                             </button>
 
                             <!-- Dropdown Menu -->

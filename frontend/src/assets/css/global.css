@@ -12,6 +12,24 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* --- Luxury Brand Palette --- */
+  --lux-black: #111111;
+  --lux-gold: #C8A97E;
+  --lux-gold-light: #D5BFA3;
+  --lux-beige: #F5F1ED;
+  --lux-cream: #FDFCFB;
+  --lux-white: #FFFFFF;
+  --lux-gray: #6B7280;
+  --lux-border: #E5E7EB;
+  
+  /* --- Semantic Colors --- */
+  --primary: var(--lux-black);
+  --accent: var(--lux-gold);
+  --bg-main: var(--lux-cream);
+  --bg-topbar: var(--lux-beige);
+}
+
 /* Material Symbols giữ nguyên icon font */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined' !important;
@@ -74,5 +92,16 @@ body {
 
 .nav-link:hover {
     color: #C8A97E !important;
+}
+
+/* --- Global Accent Hooks --- */
+.text-accent { color: var(--lux-gold) !important; }
+.bg-accent { background-color: var(--lux-gold) !important; }
+.border-accent { border-color: var(--lux-gold) !important; }
+
+/* --- Luxury Background --- */
+body {
+    background-color: var(--lux-cream);
+    color: var(--lux-black);
 }
 

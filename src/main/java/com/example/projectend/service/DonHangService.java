@@ -44,12 +44,15 @@ public class DonHangService {
     @Autowired
     private ThanhToanRepository thanhToanRepository;
 
+    @Autowired
+    private VoucherRepository voucherRepository;
+
     /**
      * TẠO ĐƠN HÀNG MỚI - HOÀN CHỈNH
      */
     @Transactional
     public DonHang createDonHang(TaiKhoan taiKhoan, Long diaChiId, Long phuongThucTTId,
-                                  List<GioHangChiTiet> gioHangItems, String ghiChu) {
+                                  List<GioHangChiTiet> gioHangItems, String ghiChu, Long voucherId) {
 
         // 1. Validate
         if (gioHangItems == null || gioHangItems.isEmpty()) {
@@ -109,6 +112,32 @@ public class DonHangService {
 
         donHang.setTongTien(tongTien);
         donHang.setPhiShip(BigDecimal.ZERO); // Miễn phí ship
+
+        // 5b. Xử lý Voucher nếu có
+        if (voucherId != null) {
+            Voucher voucher = voucherRepository.findById(voucherId).orElse(null);
+            if (voucher != null && voucher.getTrangThai()) {
+                BigDecimal discount = BigDecimal.ZERO;
+                if (voucher.getLoaiGiamGia() == 0) { // Phần trăm
+                    discount = tongTien.multiply(voucher.getGiaTri()).divide(new BigDecimal(100));
+                    if (voucher.getGiaTriToiDa() != null && discount.compareTo(voucher.getGiaTriToiDa()) > 0) {
+                        discount = voucher.getGiaTriToiDa();
+                    }
+                } else { // Số tiền cố định
+                    discount = voucher.getGiaTri();
+                }
+                
+                // Đảm bảo không giảm quá tổng hóa đơn
+                if (discount.compareTo(tongTien) > 0) discount = tongTien;
+                
+                donHang.setVoucher(voucher);
+                donHang.setGiamGia(discount);
+                
+                // Cập nhật lượt dùng voucher
+                voucher.setDaSuDung(voucher.getDaSuDung() + 1);
+                voucherRepository.save(voucher);
+            }
+        }
 
         // 6. Lưu đơn hàng
         DonHang savedDonHang = donHangRepository.save(donHang);

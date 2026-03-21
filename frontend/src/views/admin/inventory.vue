@@ -7,18 +7,27 @@
       <!-- TABS -->
       <div class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
         <button @click="activeTab = 'nhap'"
-          :class="activeTab === 'nhap' ? 'bg-white shadow-sm text-yellow-700' : 'text-gray-500 hover:text-gray-700'"
+          :class="activeTab === 'nhap' ? 'bg-white shadow-sm text-[#C8A97E]' : 'text-gray-500 hover:text-gray-700'"
           class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2">
           <span class="material-symbols-outlined text-[20px]">inventory_2</span>
           Nhập Kho
         </button>
+        <button @click="activeTab = 'yeucau'"
+          :class="activeTab === 'yeucau' ? 'bg-white shadow-sm text-[#C8A97E]' : 'text-gray-500 hover:text-gray-700'"
+          class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 relative">
+          <span class="material-symbols-outlined text-[20px]">assignment</span>
+          Yêu Cầu Nhập Hàng
+          <span v-if="isAdmin && pendingRequestCount > 0"
+            class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow">
+            {{ pendingRequestCount }}
+          </span>
+        </button>
         <button v-if="isAdmin" @click="activeTab = 'ncc'"
-          :class="activeTab === 'ncc' ? 'bg-white shadow-sm text-yellow-700' : 'text-gray-500 hover:text-gray-700'"
+          :class="activeTab === 'ncc' ? 'bg-white shadow-sm text-[#C8A97E]' : 'text-gray-500 hover:text-gray-700'"
           class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2">
           <span class="material-symbols-outlined text-[20px]">storefront</span>
           Nhà Cung Cấp
         </button>
-        
       </div>
 
       <!-- ====== TAB NHẬP KHO ====== -->
@@ -26,55 +35,58 @@
 
         <!-- STAT CARDS -->
         <div class="grid grid-cols-3 gap-4">
-          <div class="bg-white rounded-2xl border border-[#C8A97E]/40 shadow-sm p-5">
-            <p class="text-xs text-gray-500 mb-2">Tổng số phiếu nhập</p>
+          <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6 hover:shadow-md transition-all">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tổng số phiếu nhập</p>
             <p class="text-3xl font-black text-gray-800">{{ danhSachPhieu.length }}</p>
           </div>
-          <div class="bg-white rounded-2xl border border-[#C8A97E]/40 shadow-sm p-5">
-            <p class="text-xs text-gray-500 mb-2">Tổng số sản phẩm nhập</p>
+          <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6 hover:shadow-md transition-all">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tổng số sản phẩm nhập</p>
             <p class="text-3xl font-black text-[#C8A97E]">{{ totalItems }}</p>
           </div>
-          <div class="bg-white rounded-2xl border border-[#C8A97E]/40 shadow-sm p-5">
-            <p class="text-xs text-gray-500 mb-2">Nhà cung cấp</p>
+          <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6 hover:shadow-md transition-all">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Nhà cung cấp</p>
             <p class="text-3xl font-black text-[#C8A97E]">{{ supplierCount }}</p>
           </div>
         </div>
 
         <!-- LOW STOCK PANEL -->
-        <div v-if="lowStock.length > 0" class="bg-white rounded-2xl border border-yellow-300 shadow-sm overflow-hidden">
-          <div class="bg-yellow-50 px-5 py-3 flex items-center gap-2 border-b border-yellow-200">
-            <span class="material-symbols-outlined text-yellow-600 text-[22px]">warning</span>
-            <span class="text-sm font-bold text-yellow-800">Sản phẩm tồn kho thấp (dưới 5 sản phẩm)</span>
-            <span class="ml-auto px-2.5 py-0.5 bg-yellow-200 text-yellow-800 text-xs font-black rounded-full">{{ lowStock.length }}</span>
+        <div v-if="lowStock.length > 0" class="bg-white rounded-[2rem] border border-[#C8A97E]/30 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top duration-500">
+          <div class="bg-[#C8A97E]/5 px-6 py-4 flex items-center gap-3 border-b border-[#C8A97E]/10">
+            <span class="material-symbols-outlined text-[#C8A97E] text-[24px]">priority_high</span>
+            <span class="text-sm font-black text-gray-800 uppercase tracking-widest">Sản phẩm tồn kho thấp</span>
+            <span class="ml-auto px-3 py-1 bg-[#C8A97E] text-white text-[10px] font-black rounded-full shadow-sm">{{ lowStock.length }}</span>
           </div>
-          <div class="divide-y divide-gray-100 max-h-[320px] overflow-y-auto custom-scrollbar">
+          <div class="divide-y divide-gray-50 max-h-[320px] overflow-y-auto custom-scrollbar">
             <div v-for="item in lowStock" :key="item.maBienThe"
-              class="flex items-center gap-3 px-5 py-3 hover:bg-yellow-50/50 transition-colors">
-              <span class="material-symbols-outlined text-yellow-500 text-[20px]">inventory_2</span>
+              class="flex items-center gap-4 px-6 py-4 hover:bg-[#C8A97E]/5 transition-colors group">
+              <div class="size-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-white group-hover:text-[#C8A97E] transition-colors border border-transparent group-hover:border-[#C8A97E]/20">
+                <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+              </div>
               <div class="flex-1">
-                <p class="text-sm font-semibold text-gray-800">{{ item.tenSP }}</p>
-                <p class="text-xs text-gray-400">Size: {{ item.size || '—' }} &nbsp;|&nbsp; Màu: {{ item.mau || '—' }}</p>
+                <p class="text-sm font-bold text-gray-800">{{ item.tenSP }}</p>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-wider">Size: {{ item.size || '—' }} &bull; Màu: {{ item.mau || '—' }}</p>
               </div>
               <button v-if="isStaff" @click="requestStock(item)"
-                class="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-[10px] font-bold rounded-lg transition-colors flex items-center gap-1">
+                class="px-4 py-2 bg-[#C8A97E] hover:bg-[#B88A00] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2">
                 <span class="material-symbols-outlined text-[14px]">send</span>
-                Yêu cầu nhập
+                Yêu cầu
               </button>
-              <span :class="item.soLuongTon === 0
-                ? 'bg-red-100 text-red-700'
-                : 'bg-yellow-100 text-yellow-700'"
-                class="px-2.5 py-0.5 rounded-full text-xs font-black">
+              <div :class="item.soLuongTon === 0 ? 'bg-red-50 text-red-600' : 'bg-[#C8A97E]/10 text-[#C8A97E]'"
+                class="px-3 py-1.5 rounded-xl text-xs font-black min-w-[60px] text-center border border-current/10">
                 {{ item.soLuongTon }} sp
-              </span>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- SECTION HEADER -->
         <div class="flex items-center justify-between">
-          <h3 class="text-base font-bold text-gray-700">Phiếu Nhập Kho</h3>
+          <h3 class="text-base font-black text-gray-800 uppercase tracking-widest flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#C8A97E]">history</span>
+            Phiếu Nhập Kho
+          </h3>
           <button v-if="isAdmin" @click="openModal"
-            class="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-colors">
+            class="flex items-center gap-2 bg-[#C8A97E] hover:bg-[#B88A00] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg shadow-[#C8A97E]/20 transition-all">
             <span class="material-symbols-outlined text-[18px]">add</span>
             Tạo Phiếu Nhập
           </button>
@@ -83,78 +95,76 @@
         <!-- BỘ LỌC -->
         <div class="flex flex-wrap items-center gap-3">
           <select v-model="filter.maNCC"
-            class="border border-[#C8A97E]/50 rounded-2xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm min-w-[160px]">
+            class="border border-[#C8A97E]/30 rounded-2xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm min-w-[180px] font-medium text-gray-700">
             <option value="">Tất cả NCC</option>
             <option v-for="ncc in suppliers" :key="ncc.maNCC" :value="ncc.maNCC">{{ ncc.tenNCC }}</option>
           </select>
           <div class="flex items-center bg-gray-100 p-1 rounded-2xl shadow-inner">
             <button v-for="r in timeRanges" :key="r.value" @click="filter.timeRange = r.value"
-              class="px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap"
-              :class="filter.timeRange === r.value ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+              class="px-4 py-2 text-xs font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest"
+              :class="filter.timeRange === r.value ? 'bg-white text-[#C8A97E] shadow-sm' : 'text-gray-400 hover:text-gray-600'">
               {{ r.label }}
             </button>
           </div>
           <button @click="resetFilter"
             class="flex items-center justify-center size-10 rounded-2xl border border-[#C8A97E]/30 bg-white text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all shadow-sm group"
             title="Đặt lại bộ lọc">
-            <span class="material-symbols-outlined text-[22px] group-hover:rotate-180 transition-transform duration-500">refresh</span>
+            <span class="material-symbols-outlined text-[20px] group-hover:rotate-180 transition-transform duration-500">refresh</span>
           </button>
         </div>
 
         <!-- DANH SÁCH PHIẾU (CARD) -->
-        <div v-if="filteredPhieu.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div v-if="filteredPhieu.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           <div v-for="phieu in filteredPhieu" :key="phieu.maPN"
-            class="bg-white rounded-2xl border border-[#C8A97E]/40 shadow-sm hover:shadow-md hover:border-[#C8A97E] transition-all p-5">
+            class="bg-white rounded-[2rem] border border-[#C8A97E]/20 shadow-sm hover:shadow-xl hover:border-[#C8A97E]/60 transition-all p-6 group">
             <!-- Card Top -->
-            <div class="flex items-start justify-between mb-4">
+            <div class="flex items-start justify-between mb-5">
               <div>
-                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">PHIẾU NHẬP</p>
-                <p class="text-lg font-black text-yellow-700">PN{{ phieu.maPN }}</p>
+                <p class="text-[10px] text-[#C8A97E] uppercase tracking-[0.2em] font-black">PHIEU NHAP</p>
+                <p class="text-xl font-black text-gray-800">#{{ phieu.maPN }}</p>
               </div>
-              <span class="material-symbols-outlined text-[#C8A97E] text-[26px]">receipt_long</span>
+              <div class="size-12 rounded-2xl bg-[#C8A97E]/10 flex items-center justify-center transition-colors group-hover:bg-[#C8A97E] group-hover:text-white text-[#C8A97E]">
+                <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+              </div>
             </div>
             <!-- Info Rows -->
-            <div class="space-y-2.5">
-              <div class="flex gap-2 items-start">
-                <span class="material-symbols-outlined text-gray-400 text-[18px] mt-0.5">storefront</span>
+            <div class="space-y-3.5">
+              <div class="flex gap-3 items-start">
+                <span class="material-symbols-outlined text-gray-400 text-[20px] mt-0.5">storefront</span>
                 <div>
-                  <p class="text-[10px] text-gray-400 uppercase leading-3">Nhà Cung Cấp</p>
-                  <p class="text-sm font-semibold text-gray-700">{{ phieu.nhaCungCap?.tenNCC || '—' }}</p>
+                  <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-3 mb-1">Nhà Cung Cấp</p>
+                  <p class="text-sm font-bold text-gray-700">{{ phieu.nhaCungCap?.tenNCC || '—' }}</p>
                 </div>
               </div>
-              <div class="flex gap-2 items-start">
-                <span class="material-symbols-outlined text-gray-400 text-[18px] mt-0.5">person</span>
+              <div class="flex gap-3 items-start">
+                <span class="material-symbols-outlined text-gray-400 text-[20px] mt-0.5">person</span>
                 <div>
-                  <p class="text-[10px] text-gray-400 uppercase leading-3">Nhân Viên</p>
-                  <p class="text-sm font-semibold text-gray-700">{{ phieu.nhanVien?.hoTen || '—' }}</p>
+                  <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-3 mb-1">Nhân Viên</p>
+                  <p class="text-sm font-bold text-gray-700">{{ phieu.nhanVien?.hoTen || '—' }}</p>
                 </div>
               </div>
-              <div class="flex gap-2 items-start">
-                <span class="material-symbols-outlined text-gray-400 text-[18px] mt-0.5">calendar_today</span>
+              <div class="flex gap-3 items-start">
+                <span class="material-symbols-outlined text-gray-400 text-[20px] mt-0.5">calendar_today</span>
                 <div>
-                  <p class="text-[10px] text-gray-400 uppercase leading-3">Ngày Nhập</p>
-                  <p class="text-sm font-semibold text-gray-700">{{ formatDateTime(phieu.ngayNhap) }}</p>
+                  <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-3 mb-1">Ngày Nhập</p>
+                  <p class="text-sm font-bold text-gray-700">{{ formatDateTime(phieu.ngayNhap) }}</p>
                 </div>
               </div>
-              <div class="flex gap-2 items-start">
-                <span class="material-symbols-outlined text-green-600 text-[18px] mt-0.5">payments</span>
+              <div class="flex gap-3 items-start">
+                <span class="material-symbols-outlined text-[#C8A97E] text-[20px] mt-0.5">payments</span>
                 <div>
-                  <p class="text-[10px] text-gray-400 uppercase leading-3">Tổng Tiền</p>
-                  <p class="text-sm font-black text-green-600">{{ fmtCurrency(phieu.tongTien) }}</p>
-                </div>
-              </div>
-              <div v-if="phieu.ghiChu" class="flex gap-2 items-start">
-                <span class="material-symbols-outlined text-gray-400 text-[18px] mt-0.5">notes</span>
-                <div>
-                  <p class="text-[10px] text-gray-400 uppercase leading-3">Ghi Chú</p>
-                  <p class="text-xs text-gray-600">{{ phieu.ghiChu }}</p>
+                  <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest leading-3 mb-1">Tổng Tiền</p>
+                  <p class="text-base font-black text-[#C8A97E]">{{ fmtCurrency(phieu.tongTien) }}</p>
                 </div>
               </div>
             </div>
-            <button @click="openDetail(phieu)"
-              class="w-full mt-4 pt-3 border-t border-gray-100 text-sm font-semibold text-yellow-700 hover:text-yellow-800 transition-colors text-center">
-              Xem chi tiết →
-            </button>
+            <div class="mt-6 pt-5 border-t border-[#C8A97E]/10">
+              <button @click="openDetail(phieu)"
+                class="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-gray-50 hover:bg-[#C8A97E] hover:text-white text-[11px] font-black uppercase tracking-[0.2em] text-[#C8A97E] transition-all duration-300 shadow-sm hover:shadow-lg hover:shadow-[#C8A97E]/30 group/btn active:scale-95">
+                XEM CHI TIẾT
+                <span class="material-symbols-outlined text-[18px] group-hover/btn:translate-x-1.5 transition-transform duration-300">north_east</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -165,30 +175,150 @@
         </div>
       </div>
 
+      <!-- ====== TAB YÊU CẦU NHẬP HÀNG ====== -->
+      <div v-if="activeTab === 'yeucau'" class="space-y-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-black text-gray-800 uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#C8A97E]">assignment</span>
+              {{ isAdmin ? 'Danh Sách Yêu Cầu Nhập Hàng' : 'Yêu Cầu Của Tôi' }}
+            </h3>
+            <p class="text-xs text-gray-400 mt-1 font-medium">
+              {{ isAdmin ? 'Duyệt hoặc từ chối yêu cầu nhập hàng từ nhân viên' : 'Gửi yêu cầu mới hoặc kiểm tra trạng thái' }}
+            </p>
+          </div>
+          <button v-if="isStaff" @click="openNewRequestModal"
+            class="flex items-center gap-2 bg-[#C8A97E] hover:bg-[#B88A00] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg shadow-[#C8A97E]/20 transition-all">
+            <span class="material-symbols-outlined text-[18px]">add_task</span>
+            Gửi Yêu Cầu Mới
+          </button>
+        </div>
+
+        <!-- Filter tabs (Admin view) -->
+        <div v-if="isAdmin" class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
+          <button v-for="rf in requestFilters" :key="rf.val" @click="requestFilterTab = rf.val"
+            :class="requestFilterTab === rf.val ? 'bg-white shadow-sm text-[#C8A97E]' : 'text-gray-400 hover:text-gray-600'"
+            class="px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2">
+            {{ rf.label }}
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black transition-colors"
+              :class="requestFilterTab === rf.val ? 'bg-[#C8A97E] text-white shadow-sm' : 'bg-gray-200 text-gray-500'">
+              {{ stockRequests.filter(r => rf.val === 'all' || r.trangThai === rf.val).length }}
+            </span>
+          </button>
+        </div>
+
+        <!-- Table -->
+        <div v-if="filteredRequests.length > 0" class="bg-white rounded-[2rem] border border-[#C8A97E]/20 shadow-xl shadow-[#C8A97E]/5 overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-100">
+                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Mã YC</th>
+                <th v-if="isAdmin" class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Nhân Viên</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Sản Phẩm</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Biến thể</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Tồn Kho</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest font-serif italic">Qty</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Ngày Gửi</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Trạng Thái</th>
+                <th v-if="isAdmin" class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Hành Động</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+              <tr v-for="req in filteredRequests" :key="req.maYeuCau"
+                class="hover:bg-[#C8A97E]/10 transition-colors"
+                :class="req.trangThai === 0 ? 'border-l-4 border-l-[#C8A97E] shadow-sm' : req.trangThai === 1 ? 'border-l-4 border-l-green-400' : 'border-l-4 border-l-red-400'">
+                <td class="px-5 py-4">
+                  <span class="font-mono text-xs font-bold text-[#C8A97E] bg-[#C8A97E]/5 px-2 py-1 rounded-lg">#{{ req.maYeuCau }}</span>
+                </td>
+                <td v-if="isAdmin" class="px-5 py-4">
+                  <div class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-full bg-[#C8A97E]/10 flex items-center justify-center text-[#C8A97E] text-[11px] font-black">
+                      {{ req.nhanVien?.hoTen?.charAt(0) || '?' }}
+                    </span>
+                    <span class="text-sm font-semibold text-gray-700">{{ req.nhanVien?.hoTen || 'N/A' }}</span>
+                  </div>
+                </td>
+                <td class="px-5 py-4">
+                  <p class="font-semibold text-gray-800 text-sm">{{ req.sanPhamChiTiet?.sanPham?.tenSP || 'N/A' }}</p>
+                </td>
+                <td class="px-5 py-4 text-center">
+                  <span class="px-2.5 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-600">
+                    {{ req.sanPhamChiTiet?.sizeSP?.tenSize || '—' }} / {{ req.sanPhamChiTiet?.mauSacSP?.tenMau || '—' }}
+                  </span>
+                </td>
+                <td class="px-5 py-4 text-center">
+                  <span :class="(req.sanPhamChiTiet?.soLuongTon || 0) === 0 ? 'bg-red-100 text-red-700' : (req.sanPhamChiTiet?.soLuongTon || 0) < 5 ? 'bg-[#C8A97E]/10 text-[#C8A97E]' : 'bg-green-100 text-green-700'"
+                    class="px-2.5 py-1 rounded-full text-xs font-black">
+                    {{ req.sanPhamChiTiet?.soLuongTon || 0 }} sp
+                  </span>
+                </td>
+                <td class="px-5 py-4 text-center">
+                  <span class="text-lg font-black text-[#C8A97E]">{{ req.soLuongYeuCau }}</span>
+                </td>
+                <td class="px-5 py-4 text-xs text-gray-500">{{ formatDateTime(req.ngayYeuCau) }}</td>
+                <td class="px-5 py-4 text-xs text-gray-500 max-w-[150px] truncate">{{ req.ghiChu || '—' }}</td>
+                <td class="px-6 py-5 text-center">
+                  <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+                    :class="req.trangThai === 0 ? 'bg-amber-50 text-amber-600 border border-amber-200/50' : req.trangThai === 1 ? 'bg-green-50 text-green-600 border border-green-200/50' : 'bg-red-50 text-red-600 border border-red-200/50'">
+                    {{ req.trangThai === 0 ? 'Chờ duyệt' : req.trangThai === 1 ? 'Đã duyệt' : 'Từ chối' }}
+                  </span>
+                </td>
+                <td v-if="isAdmin" class="px-5 py-4">
+                  <div v-if="req.trangThai === 0" class="flex items-center justify-center gap-2">
+                    <button @click="processRequest(req)"
+                      class="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold rounded-lg transition-colors">
+                      <span class="material-symbols-outlined text-[13px]">check</span> Duyệt
+                    </button>
+                    <button @click="rejectRequest(req)"
+                      class="flex items-center gap-1 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-[11px] font-bold rounded-lg transition-colors">
+                      <span class="material-symbols-outlined text-[13px]">close</span> Từ chối
+                    </button>
+                  </div>
+                  <span v-else class="text-xs text-gray-400 italic">Đã xử lý</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else class="flex flex-col items-center justify-center py-20 text-gray-400 bg-white rounded-2xl border border-gray-100">
+          <span class="material-symbols-outlined text-6xl mb-3 text-gray-200">assignment</span>
+          <p class="text-sm font-medium">{{ isAdmin ? 'Không có yêu cầu nào' : 'Bạn chưa gửi yêu cầu nào' }}</p>
+          <button v-if="isStaff" @click="openNewRequestModal"
+            class="mt-4 flex items-center gap-2 bg-[#C8A97E] hover:bg-[#B88A00] text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
+            <span class="material-symbols-outlined text-[18px]">add</span> Gửi Yêu Cầu
+          </button>
+        </div>
+      </div>
+
       <!-- ====== TAB NHÀ CUNG CẤP ====== -->
       <div v-if="activeTab === 'ncc' && isAdmin" class="space-y-6">
         <div class="flex items-center justify-between">
-          <h3 class="text-base font-bold text-gray-700">Danh Sách Nhà Cung Cấp</h3>
+          <h3 class="text-base font-black text-gray-800 uppercase tracking-widest flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#C8A97E]">storefront</span>
+            Nhà Cung Cấp
+          </h3>
           <button @click="openNccModal()"
-            class="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-colors">
-            <span class="material-symbols-outlined text-[18px]">add</span>
+            class="flex items-center gap-2 bg-[#C8A97E] hover:bg-[#B88A00] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg shadow-[#C8A97E]/20 transition-all">
+            <span class="material-symbols-outlined text-[18px]">add_business</span>
             Thêm NCC
           </button>
         </div>
-        <div v-if="suppliers.length > 0" class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
+        <div v-if="suppliers.length > 0" class="bg-white rounded-[2rem] border border-[#C8A97E]/20 shadow-xl shadow-[#C8A97E]/5 overflow-hidden">
           <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
-                <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Tên NCC</th>
-                <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">SĐT</th>
-                <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
-                <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Địa chỉ</th>
-                <th class="px-5 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Hành động</th>
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-100">
+                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest w-[10%]">ID</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Tên Nhà Cung Cấp</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Liên Hệ</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Địa chỉ</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest w-[15%]">Hành động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-              <tr v-for="ncc in suppliers" :key="ncc.maNCC" class="hover:bg-yellow-50/50 transition-colors">
+              <tr v-for="ncc in suppliers" :key="ncc.maNCC" class="hover:bg-[#C8A97E]/10 transition-colors">
                 <td class="px-5 py-4 font-mono text-xs text-gray-500">#{{ ncc.maNCC }}</td>
                 <td class="px-5 py-4 font-semibold text-gray-800">{{ ncc.tenNCC }}</td>
                 <td class="px-5 py-4 text-gray-600">{{ ncc.soDienThoai || '—' }}</td>
@@ -196,7 +326,7 @@
                 <td class="px-5 py-4 text-gray-600">{{ ncc.diaChi || '—' }}</td>
                 <td class="px-5 py-4">
                   <div class="flex items-center justify-center gap-1">
-                    <button @click="openNccModal(ncc)" class="text-yellow-600 hover:text-yellow-800 p-1.5 rounded-lg hover:bg-yellow-50 transition-all" title="Sửa">
+                    <button @click="openNccModal(ncc)" class="text-[#C8A97E] hover:text-yellow-800 p-1.5 rounded-lg hover:bg-[#C8A97E]/5 transition-all" title="Sửa">
                       <span class="material-symbols-outlined text-[18px]">edit</span>
                     </button>
                     <button @click="deleteNcc(ncc)" class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-all" title="Xóa">
@@ -238,7 +368,7 @@
         <!-- SECTION 1: NHÀ CUNG CẤP -->
         <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6">
           <div class="flex items-center gap-2 mb-4">
-            <span class="w-6 h-6 rounded-full bg-yellow-600 text-white text-xs font-black flex items-center justify-center">1</span>
+            <span class="w-6 h-6 rounded-full bg-[#C8A97E] text-white text-xs font-black flex items-center justify-center">1</span>
             <p class="text-sm font-black text-gray-700 uppercase tracking-wider">Nhà Cung Cấp</p>
           </div>
           <div class="flex items-center gap-3">
@@ -249,17 +379,17 @@
                 @blur="hideSupplierDropdown"
                 @input="filterSupplierSearch"
                 placeholder="Tìm hoặc nhập tên nhà cung cấp..."
-                class="w-full border border-[#C8A97E]/40 rounded-2xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all shadow-sm font-medium"
+                class="w-full border border-[#C8A97E]/30 rounded-2xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all shadow-sm font-medium"
               />
               <div v-if="showSupplierDropdown && filteredSupplierList.length > 0"
                 class="absolute z-[50] w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
                 <div v-for="ncc in filteredSupplierList" :key="ncc.maNCC" @mousedown.prevent="selectSupplier(ncc)"
-                  class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
+                  class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
                   {{ ncc.tenNCC }}
                 </div>
               </div>
             </div>
-            <button @click="addSupplier" class="px-4 py-3 border border-yellow-200 rounded-2xl bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-all shadow-sm shrink-0 flex items-center gap-1.5 text-sm font-bold">
+            <button @click="addSupplier" class="px-4 py-3 border border-[#C8A97E]/30 rounded-2xl bg-[#C8A97E]/5 text-[#C8A97E] hover:bg-[#C8A97E]/10 transition-all shadow-sm shrink-0 flex items-center gap-1.5 text-sm font-bold">
               <span class="material-symbols-outlined text-[18px]">add</span>
               Tạo mới NCC
             </button>
@@ -273,7 +403,7 @@
         <!-- SECTION 2: THÊM SẢN PHẨM -->
         <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6 space-y-5">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-yellow-600 text-white text-xs font-black flex items-center justify-center">2</span>
+            <span class="w-6 h-6 rounded-full bg-[#C8A97E] text-white text-xs font-black flex items-center justify-center">2</span>
             <p class="text-sm font-black text-gray-700 uppercase tracking-wider">Thông Tin Sản Phẩm</p>
           </div>
 
@@ -294,7 +424,7 @@
                 />
                 <div v-if="showBrandDropdown" class="absolute z-[40] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
                   <div v-for="b in filteredBrandList" :key="b.maTH" @mousedown.prevent="selectBrand(b)"
-                    class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
+                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
                     {{ b.tenTH }}
                   </div>
                 </div>
@@ -316,7 +446,7 @@
                 />
                 <div v-if="showCategoryDropdown" class="absolute z-[40] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
                   <div v-for="c in filteredCategoryList" :key="c.maLoai" @mousedown.prevent="selectCategory(c)"
-                    class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
+                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
                     {{ c.tenLoai }}
                   </div>
                 </div>
@@ -337,12 +467,12 @@
                 />
                 <div v-if="showProductDropdown" class="absolute z-[35] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
                   <div v-for="p in filteredProductsList" :key="p.maSP" @mousedown.prevent="selectProduct(p)"
-                    class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-semibold">
+                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-semibold">
                     {{ p.tenSP }}
                   </div>
                 </div>
               </div>
-              <p v-if="newItem.isNewProduct && productSearchText" class="text-[10px] text-yellow-600 font-semibold mt-0.5">✦ Sẽ tạo sản phẩm mới</p>
+              <p v-if="newItem.isNewProduct && productSearchText" class="text-[10px] text-[#C8A97E] font-semibold mt-0.5">✦ Sẽ tạo sản phẩm mới</p>
             </div>
 
             <!-- Giới tính -->
@@ -362,7 +492,7 @@
             <div class="flex items-center justify-between">
               <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Size / Màu sắc / Số lượng</label>
               <button @click="addSizeRow"
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold hover:bg-yellow-100 transition-all">
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C8A97E]/5 border border-[#C8A97E]/30 text-[#C8A97E] text-xs font-bold hover:bg-[#C8A97E]/10 transition-all">
                 <span class="material-symbols-outlined text-[15px]">add</span>
                 Thêm size
               </button>
@@ -429,16 +559,16 @@
           </div>
 
           <!-- NÚT LƯU & THÊM SP KHÁC -->
-          <div class="flex items-center justify-between bg-gradient-to-r from-yellow-50 to-amber-50 p-5 rounded-2xl border border-yellow-200">
+          <div class="flex items-center justify-between bg-gradient-to-r from-[#C8A97E]/10 to-[#C8A97E]/5 p-5 rounded-2xl border border-[#C8A97E]/30">
             <div>
               <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tổng cộng (SP này)</p>
-              <p class="text-2xl font-black text-yellow-700 leading-tight">
+              <p class="text-2xl font-black text-[#C8A97E] leading-tight">
                 {{ fmtCurrency(newItem.sizeRows.reduce((s,r) => s + (r.qty || 0), 0) * (newItem.price || 0)) }}
               </p>
               <p class="text-xs text-gray-400 mt-0.5">{{ newItem.sizeRows.reduce((s,r) => s + (r.qty || 0), 0) }} sản phẩm</p>
             </div>
             <button @click="addItem"
-              class="px-8 py-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-2xl text-sm font-black shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
+              class="px-8 py-4 bg-[#C8A97E] hover:bg-[#B88A00] text-white rounded-2xl text-sm font-black shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
               <span class="material-symbols-outlined text-xl">save</span>
               Lưu &amp; Thêm SP khác
             </button>
@@ -448,9 +578,9 @@
         <!-- SECTION 3: BẢNG SẢN PHẨM ĐÃ THÊM -->
         <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm overflow-hidden">
           <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
-            <span class="w-6 h-6 rounded-full bg-yellow-600 text-white text-xs font-black flex items-center justify-center">3</span>
+            <span class="w-6 h-6 rounded-full bg-[#C8A97E] text-white text-xs font-black flex items-center justify-center">3</span>
             <p class="text-sm font-black text-gray-700 uppercase tracking-wider">Danh Sách Sản Phẩm Trong Phiếu</p>
-            <span class="ml-auto px-2.5 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-black rounded-full">{{ form.items.length }} dòng</span>
+            <span class="ml-auto px-2.5 py-0.5 bg-[#C8A97E]/10 text-[#C8A97E] text-xs font-black rounded-full">{{ form.items.length }} dòng</span>
           </div>
           <table class="w-full text-sm">
             <thead>
@@ -467,7 +597,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-              <tr v-for="(item, idx) in form.items" :key="idx" class="hover:bg-yellow-50/30 transition-colors">
+              <tr v-for="(item, idx) in form.items" :key="idx" class="hover:bg-[#C8A97E]/10 transition-colors">
                 <td class="px-5 py-4">
                   <p class="font-bold text-gray-900 text-sm">{{ item.displayName }}</p>
                   <input v-model="item.ghiChu" placeholder="Ghi chú dòng..." class="mt-0.5 text-[10px] text-gray-400 border-0 bg-transparent p-0 w-full focus:ring-0 italic" />
@@ -509,7 +639,7 @@
         <!-- SECTION 4: GHI CHÚ PHIẾU + LƯU PHIẾU -->
         <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6 space-y-4">
           <div class="flex items-center gap-2 mb-2">
-            <span class="w-6 h-6 rounded-full bg-yellow-600 text-white text-xs font-black flex items-center justify-center">4</span>
+            <span class="w-6 h-6 rounded-full bg-[#C8A97E] text-white text-xs font-black flex items-center justify-center">4</span>
             <p class="text-sm font-black text-gray-700 uppercase tracking-wider">Hoàn Tất Phiếu Nhập</p>
           </div>
           <div class="grid grid-cols-2 gap-6 items-end">
@@ -531,13 +661,13 @@
               </div>
               <div class="flex justify-between items-center py-2">
                 <span class="text-sm font-bold text-gray-700">Tổng giá trị phiếu</span>
-                <span class="text-2xl font-black text-yellow-700">{{ fmtCurrency(totalAmount) }}</span>
+                <span class="text-2xl font-black text-[#C8A97E]">{{ fmtCurrency(totalAmount) }}</span>
               </div>
               <button @click="submit"
                 :disabled="form.items.length === 0 || !form.maNCC"
-                class="w-full py-4 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white rounded-2xl text-base font-black shadow-lg transition-all transform hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3">
-                <span class="material-symbols-outlined text-[22px]">verified_user</span>
-                Lưu Phiếu Nhập
+                class="w-full py-5 bg-[#C8A97E] hover:bg-[#B88A00] disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white rounded-[1.5rem] text-base font-black shadow-xl shadow-[#C8A97E]/20 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest">
+                <span class="material-symbols-outlined text-[24px]">verified_user</span>
+                Xác Nhận Nhập Kho
               </button>
             </div>
           </div>
@@ -586,7 +716,7 @@
               Hủy
             </button>
             <button @click="saveNcc"
-              class="px-5 py-2.5 rounded-xl bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+              class="px-5 py-2.5 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] text-white text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
               <span class="material-symbols-outlined text-[18px]">save</span>
               {{ nccForm.maNCC ? 'Cập Nhật' : 'Lưu' }}
             </button>
@@ -595,62 +725,175 @@
     </div>
     
     <!-- ====== MODAL CHI TIẾT PHIẾU NHẬP ====== -->
-    <div v-if="showDetailModal && !showModal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" @click.self="showDetailModal = false">
-      <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-           <div>
-             <h2 class="text-base font-bold text-gray-800">Chi Tiết Phiếu Nhập #{{ selectedPhieu?.maPN }}</h2>
-             <p class="text-[10px] text-gray-400">Thời gian: {{ selectedPhieu?.ngayNhap ? formatDateTime(selectedPhieu.ngayNhap) : '—' }}</p>
-           </div>
-           <button @click="showDetailModal = false" class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
-              <span class="material-symbols-outlined">close</span>
-           </button>
-        </div>
+    <Transition name="modal-fade">
+      <div v-if="showDetailModal && !showModal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6" @click.self="showDetailModal = false">
+        <div class="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-[#C8A97E]/30 animate-in fade-in zoom-in-95 duration-300">
+          <div class="flex items-center justify-between px-10 py-8 border-b border-gray-100">
+             <div>
+               <p class="text-[10px] text-[#C8A97E] uppercase tracking-[0.3em] font-black mb-1">Chi Tiết Phiếu Nhập</p>
+               <h2 class="text-2xl font-black text-gray-900 tracking-tight">#{{ selectedPhieu?.maPN }}</h2>
+             </div>
+             <button @click="showDetailModal = false" class="size-12 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all rounded-2xl hover:bg-gray-100 border border-transparent hover:border-gray-200">
+                <span class="material-symbols-outlined text-2xl">close</span>
+             </button>
+          </div>
         
-        <div class="p-6 overflow-y-auto space-y-6">
-           <div class="grid grid-cols-2 gap-4">
-              <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                 <p class="text-[10px] text-gray-400 uppercase font-black mb-2">Thông tin chung</p>
-                 <div class="space-y-1">
-                    <p class="text-sm"><b>Nhân viên:</b> {{ selectedPhieu?.nhanVien?.hoTen }}</p>
-                    <p class="text-sm"><b>Nhà cung cấp:</b> {{ selectedPhieu?.nhaCungCap?.tenNCC }}</p>
-                    <p class="text-sm"><b>Tổng tiền:</b> <span class="text-green-600 font-bold">{{ fmtCurrency(selectedPhieu?.tongTien) }}</span></p>
-                 </div>
-              </div>
-              <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                 <p class="text-[10px] text-gray-400 uppercase font-black mb-2">Ghi chú</p>
-                 <p class="text-sm text-gray-600 italic">"{{ selectedPhieu?.ghiChu || 'Không có ghi chú' }}"</p>
-              </div>
-           </div>
+          <div class="p-10 overflow-y-auto custom-scrollbar space-y-10">
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gray-50/50 p-8 rounded-[2rem] border border-gray-100 relative overflow-hidden group">
+                   <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <span class="material-symbols-outlined text-6xl">info</span>
+                   </div>
+                   <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest mb-6 flex items-center gap-2">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[#C8A97E]"></span>
+                      Thông tin chung
+                   </p>
+                   <div class="space-y-4">
+                      <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                         <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Nhân viên</span>
+                         <span class="text-sm font-black text-gray-800">{{ selectedPhieu?.nhanVien?.hoTen }}</span>
+                      </div>
+                      <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                         <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Nhà cung cấp</span>
+                         <span class="text-sm font-black text-gray-800">{{ selectedPhieu?.nhaCungCap?.tenNCC }}</span>
+                      </div>
+                      <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                         <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Ngày nhập</span>
+                         <span class="text-sm font-black text-gray-800">{{ selectedPhieu?.ngayNhap ? formatDateTime(selectedPhieu.ngayNhap) : '—' }}</span>
+                      </div>
+                      <div class="flex justify-between items-center pt-2">
+                         <span class="text-xs text-[#C8A97E] font-black uppercase tracking-wider">Tổng giá trị</span>
+                         <span class="text-xl font-black text-[#C8A97E]">{{ fmtCurrency(selectedPhieu?.tongTien) }}</span>
+                      </div>
+                   </div>
+                </div>
+                <div class="bg-gray-50/50 p-8 rounded-[2rem] border border-gray-100 relative overflow-hidden group">
+                   <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                      <span class="material-symbols-outlined text-6xl">notes</span>
+                   </div>
+                   <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest mb-6 flex items-center gap-2">
+                      <span class="w-1.5 h-1.5 rounded-full bg-[#C8A97E]"></span>
+                      Ghi chú phiếu
+                   </p>
+                   <p class="text-sm text-gray-600 font-medium leading-relaxed italic">
+                      {{ selectedPhieu?.ghiChu || 'Không có ghi chú nào đi kèm cho phiếu nhập này.' }}
+                   </p>
+                </div>
+             </div>
 
-           <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-              <table class="w-full text-sm">
-                 <thead class="bg-gray-50">
-                    <tr>
-                       <th class="px-4 py-3 text-left text-xs font-bold text-gray-500">Sản phẩm</th>
-                       <th class="px-4 py-3 text-center text-xs font-bold text-gray-500">Size</th>
-                       <th class="px-4 py-3 text-center text-xs font-bold text-gray-500">Màu</th>
-                       <th class="px-4 py-3 text-center text-xs font-bold text-gray-500">SL</th>
-                       <th class="px-4 py-3 text-right text-xs font-bold text-gray-500">Đơn giá</th>
-                       <th class="px-4 py-3 text-right text-xs font-bold text-gray-500">Thành tiền</th>
-                    </tr>
-                 </thead>
-                 <tbody class="divide-y divide-gray-100 bg-white">
-                    <tr v-for="item in selectedPhieu?.chiTiet" :key="item.maNK_CT">
-                       <td class="px-4 py-3 font-medium text-gray-800">{{ item.sanPhamChiTiet?.sanPham?.tenSP }}</td>
-                       <td class="px-4 py-3 text-center text-gray-600">{{ item.sanPhamChiTiet?.sizeSP?.tenSize }}</td>
-                       <td class="px-4 py-3 text-center text-gray-600">{{ item.sanPhamChiTiet?.mauSacSP?.tenMau }}</td>
-                       <td class="px-4 py-3 text-center font-bold text-yellow-700">{{ item.soLuong }}</td>
-                       <td class="px-4 py-3 text-right text-gray-500">{{ fmtCurrency(item.donGiaNhap) }}</td>
-                       <td class="px-4 py-3 text-right font-black text-green-600">{{ fmtCurrency(item.thanhTien) }}</td>
-                    </tr>
-                 </tbody>
-              </table>
-           </div>
+             <div class="bg-white rounded-[2rem] border border-[#C8A97E]/20 overflow-hidden shadow-xl shadow-[#C8A97E]/5">
+                <table class="w-full text-sm">
+                   <thead>
+                      <tr class="bg-gray-50 border-b border-gray-100">
+                         <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Sản phẩm &amp; Thuộc tính</th>
+                         <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Kích thước</th>
+                         <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Màu sắc</th>
+                         <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Số lượng</th>
+                         <th class="px-6 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Đơn giá</th>
+                         <th class="px-8 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Thành tiền</th>
+                      </tr>
+                   </thead>
+                   <tbody class="divide-y divide-gray-50 bg-white">
+                      <tr v-for="item in selectedPhieu?.chiTiet" :key="item.maNK_CT" class="hover:bg-gray-50/50 transition-colors">
+                         <td class="px-8 py-5">
+                            <p class="font-black text-gray-800 text-sm">{{ item.sanPhamChiTiet?.sanPham?.tenSP }}</p>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Ref: #{{ item.maNK_CT }}</p>
+                         </td>
+                         <td class="px-6 py-5 text-center">
+                            <span class="px-3 py-1 bg-gray-100 rounded-lg text-xs font-black text-gray-600">{{ item.sanPhamChiTiet?.sizeSP?.tenSize }}</span>
+                         </td>
+                         <td class="px-6 py-5 text-center">
+                            <span class="px-3 py-1 bg-gray-100 rounded-lg text-xs font-black text-gray-600">{{ item.sanPhamChiTiet?.mauSacSP?.tenMau }}</span>
+                         </td>
+                         <td class="px-6 py-5 text-center font-black text-[#C8A97E] text-base">{{ item.soLuong }}</td>
+                         <td class="px-6 py-5 text-right font-medium text-gray-500">{{ fmtCurrency(item.donGiaNhap) }}</td>
+                         <td class="px-8 py-5 text-right font-black text-[#C8A97E] text-base">{{ fmtCurrency(item.thanhTien) }}</td>
+                      </tr>
+                   </tbody>
+                </table>
+             </div>
+          </div>
+          
+          <div class="px-10 py-8 border-t border-gray-100 bg-gray-50 flex justify-end">
+             <button @click="showDetailModal = false" 
+               class="px-12 py-4 rounded-2xl bg-gray-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95">
+               ĐÓNG CỬA SỔ
+             </button>
+          </div>
         </div>
-        
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end rounded-b-2xl">
-           <button @click="showDetailModal = false" class="px-6 py-2 rounded-xl bg-gray-800 text-white font-bold text-sm hover:bg-black transition-colors shadow-md">Đóng</button>
+      </div>
+    </Transition>
+
+    <!-- ====== MODAL GẬI YÊU CẦU MỚI (Staff) ====== -->
+    <div v-if="showNewRequestModal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" @click.self="showNewRequestModal = false">
+      <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#C8A97E]">assignment_add</span>
+            Gửi Yêu Cầu Nhập Hàng
+          </h2>
+          <button @click="showNewRequestModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="p-6 space-y-4">
+          <!-- Select Product -->
+          <div class="space-y-1.5 relative">
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Sản Phẩm <span class="text-red-500">*</span></label>
+            <input
+              v-model="reqForm.productSearch"
+              @input="filterReqProducts"
+              @focus="showReqProductDrop = true"
+              @blur="hideReqProductDrop"
+              placeholder="Gõ tên sản phẩm..."
+              class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all"
+            />
+            <div v-if="showReqProductDrop && reqFilteredProducts.length > 0"
+              class="absolute z-50 w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+              <div v-for="p in reqFilteredProducts" :key="p.maSP"
+                @mousedown.prevent="selectReqProduct(p)"
+                class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer border-b border-gray-50 last:border-0">
+                {{ p.tenSP }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Select Variant -->
+          <div v-if="reqVariants.length > 0" class="space-y-1.5">
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Biến Thể (Size/Màu) <span class="text-red-500">*</span></label>
+            <select v-model="reqForm.maBienThe"
+              class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all">
+              <option value="">-- Chọn biến thể --</option>
+              <option v-for="v in reqVariants" :key="v.maBienThe" :value="v.maBienThe">
+                Size {{ v.size }} / {{ v.mau }} — Tồn kho: {{ v.soLuongTon }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Qty -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Số Lượng Yêu Cầu <span class="text-red-500">*</span></label>
+            <input type="number" v-model.number="reqForm.qty" min="1"
+              class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-bold">
+          </div>
+
+          <!-- Note -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Ghi Chú</label>
+            <textarea v-model="reqForm.ghiChu" rows="2"
+              placeholder="Lý do yêu cầu nhập hàng..."
+              class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all resize-none"></textarea>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+          <button @click="showNewRequestModal = false"
+            class="px-5 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">Hủy</button>
+          <button @click="submitNewRequest"
+            :disabled="!reqForm.maBienThe || reqForm.qty < 1"
+            class="px-5 py-2.5 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">send</span>
+            Gửi Yêu Cầu
+          </button>
         </div>
       </div>
     </div>
@@ -678,7 +921,7 @@
           </button>
           <button @click="submitDialog"
             class="px-5 py-2 rounded-xl text-white text-sm font-semibold shadow-sm transition-colors"
-            :class="dialog.isError ? 'bg-red-600 hover:bg-red-700' : 'bg-yellow-600 hover:bg-yellow-700'">
+            :class="dialog.isError ? 'bg-red-600 hover:bg-red-700' : 'bg-[#C8A97E] hover:bg-[#B88A00]'">
             Xác nhận
           </button>
         </div>
@@ -740,6 +983,18 @@ export default {
       ],
       stockRequests: [],
       currentRequestId: null,
+      requestFilterTab: 'all',
+      requestFilters: [
+        { label: 'Tất cả', val: 'all' },
+        { label: '⏳ Chờ duyệt', val: 0 },
+        { label: '✅ Đã duyệt', val: 1 },
+        { label: '❌ Từ chối', val: 2 },
+      ],
+      showNewRequestModal: false,
+      reqForm: { productSearch: '', productId: '', maBienThe: '', qty: 10, ghiChu: '' },
+      reqVariants: [],
+      reqFilteredProducts: [],
+      showReqProductDrop: false,
       dialog: { show: false, type: 'alert', title: '', message: '', input: '', isError: false, resolve: null },
       filter: { maNCC: '', maNV: '', timeRange: '' },
       form: { maNCC: '', ghiChu: '', items: [] },
@@ -766,8 +1021,11 @@ export default {
        return this.stockRequests.filter(r => r.trangThai === 0).length
     },
     filteredRequests() {
-      if (this.isAdmin) return this.stockRequests
-      return this.stockRequests.filter(r => r.nhanVien?.maTK === authState.user?.maTK)
+      let list = this.isAdmin ? this.stockRequests : this.stockRequests.filter(r => r.nhanVien?.maTK === authState.user?.maTK)
+      if (this.isAdmin && this.requestFilterTab !== 'all') {
+        list = list.filter(r => r.trangThai === this.requestFilterTab)
+      }
+      return list
     },
     filteredPhieu() {
       let list = [...this.danhSachPhieu]
@@ -1204,7 +1462,49 @@ export default {
         this.stockRequests = res.data.stockRequests || []
         this.closeModal()
       } catch (e) { console.error(e); await this.showAppDialog({ isError: true, message: 'Lỗi khi lưu phiếu' }) }
-    }
+    },
+    // ===== YÊU CẦU NHẬP HÀNG - Staff =====
+    openNewRequestModal() {
+      this.reqForm = { productSearch: '', productId: '', maBienThe: '', qty: 10, ghiChu: '' }
+      this.reqVariants = []
+      this.reqFilteredProducts = this.products
+      this.showNewRequestModal = true
+    },
+    filterReqProducts() {
+      const q = this.reqForm.productSearch.toLowerCase()
+      this.reqFilteredProducts = q ? this.products.filter(p => p.tenSP.toLowerCase().includes(q)) : this.products
+      this.reqForm.maBienThe = ''
+      this.reqVariants = []
+    },
+    hideReqProductDrop() {
+      setTimeout(() => { this.showReqProductDrop = false }, 200)
+    },
+    async selectReqProduct(p) {
+      this.reqForm.productId = p.maSP
+      this.reqForm.productSearch = p.tenSP
+      this.reqForm.maBienThe = ''
+      this.showReqProductDrop = false
+      try {
+        const res = await axios.get(`/admin/inventory/variants/${p.maSP}`, { withCredentials: true })
+        this.reqVariants = res.data
+      } catch (e) { console.error(e) }
+    },
+    async submitNewRequest() {
+      if (!this.reqForm.maBienThe || this.reqForm.qty < 1) return
+      try {
+        await axios.post('/admin/inventory/request', {
+          maBienThe: this.reqForm.maBienThe,
+          qty: this.reqForm.qty,
+          ghiChu: this.reqForm.ghiChu || 'Yêu cầu nhập từ nhân viên'
+        }, { withCredentials: true })
+        await this.showAppDialog({ title: 'Thành công', message: 'Yêu cầu đã được gửi đến Admin.' })
+        this.showNewRequestModal = false
+        const res = await axios.get('/admin/inventory', { withCredentials: true })
+        this.stockRequests = res.data.stockRequests || []
+      } catch (e) {
+        await this.showAppDialog({ isError: true, message: 'Lỗi khi gửi yêu cầu.' })
+      }
+    },
   }
 }
 </script>

@@ -12,7 +12,7 @@
               <p class="text-sm text-gray-500">Quản lý thông tin cá nhân</p>
             </div>
             <div class="flex flex-col gap-1">
-              <button @click="activeTab = 'info'"
+              <button @click="changeTab('info')"
                       :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all',
                                 activeTab === 'info' ? 'bg-yellow-50 border-l-4 border-yellow-600' : 'hover:bg-gray-50']">
                 <span class="material-symbols-outlined"
@@ -23,7 +23,7 @@
                 </p>
               </button>
 
-              <button @click="activeTab = 'orders'"
+              <button @click="changeTab('orders')"
                       :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all',
                                 activeTab === 'orders' ? 'bg-yellow-50 border-l-4 border-yellow-600' : 'hover:bg-gray-50']">
                 <span class="material-symbols-outlined"
@@ -34,13 +34,13 @@
                 </p>
               </button>
 
-              <button @click="changeTab('favorites')"
+              <button @click="changeTab('wishlist')"
                       :class="['flex items-center gap-3 px-4 py-3 rounded-lg group cursor-pointer transition-all',
-                                activeTab === 'favorites' ? 'bg-yellow-50 border-l-4 border-yellow-600' : 'hover:bg-gray-50']">
+                                activeTab === 'wishlist' ? 'bg-yellow-50 border-l-4 border-yellow-600' : 'hover:bg-gray-50']">
                 <span class="material-symbols-outlined"
-                      :class="[activeTab === 'favorites' ? 'text-yellow-600' : 'text-gray-600']"
+                      :class="[activeTab === 'wishlist' ? 'text-yellow-600' : 'text-gray-600']"
                       style="font-size: 20px;">favorite</span>
-                <p :class="['text-sm font-medium', activeTab === 'favorites' ? 'text-yellow-600' : 'text-gray-700']">
+                <p :class="['text-sm font-medium', activeTab === 'wishlist' ? 'text-yellow-600' : 'text-gray-700']">
                   Sản phẩm yêu thích
                 </p>
               </button>
@@ -265,8 +265,8 @@
                 </form>
               </section>
 
-              <!-- Favorites Tab -->
-              <section v-if="activeTab === 'favorites'">
+              <!-- Favorites (Wishlist) Tab -->
+              <section v-if="activeTab === 'wishlist'">
                 <div>
                   <h1 class="text-3xl font-bold text-gray-900 mb-2">Sản phẩm yêu thích</h1>
                   <p class="text-gray-600">Những sản phẩm bạn đã lưu lại</p>
@@ -282,12 +282,14 @@
                 <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                   <div v-for="fav in favorites" :key="fav.maSPYT" class="bg-white border rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group">
                     <div class="relative h-48 sm:h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-                      <img v-if="fav.anhChinh" :src="`http://localhost:8080/products/images/${fav.anhChinh}`" :alt="fav.tenSP" class="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition duration-500" />
+                      <img v-if="fav.anhChinh" :src="fav.anhChinh" :alt="fav.tenSP" class="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition duration-500" />
                       <span v-else class="material-symbols-outlined text-gray-400 text-5xl">image</span>
                       
                       <!-- Nút xóa yêu thích (hiển thị khi hover) -->
-                      <button @click="toggleFavorite(fav.maSP)" class="absolute top-3 right-3 bg-white p-2 text-red-500 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition hover:bg-red-50">
-                        <span class="material-symbols-outlined filled text-xl">favorite</span>
+                      <button @click="toggleFavorite(fav.maSP)" 
+                              class="absolute top-3 right-3 bg-white p-2 text-red-500 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 hover:scale-110 active:scale-95 group/btn"
+                              title="Bỏ yêu thích">
+                        <span class="material-symbols-outlined fill-icon text-xl transition-transform group-hover/btn:scale-110">favorite</span>
                       </button>
                     </div>
                     
@@ -1001,7 +1003,7 @@ export default {
         this.fetchAddresses()
       }
       
-      if (tab === "favorites") {
+      if (tab === "wishlist") {
         this.fetchFavorites()
       }
     },
@@ -1199,13 +1201,10 @@ export default {
 
     async fetchOrders() {
       try {
-
-        const res = await axios.get("http://localhost:8080/api/orders/my", {
+        const res = await axios.get("/orders/my", {
           withCredentials: true
         })
-
         this.orders = res.data
-
       } catch (err) {
         console.error("Error loading orders", err)
       }
@@ -1216,7 +1215,7 @@ export default {
       if (!ok) return;
       try {
         await axios.put(
-            `http://localhost:8080/api/orders/update-status/${orderId}`,
+            `/orders/update-status/${orderId}`,
             null,
             {
               params: { status: 5 },
@@ -1232,7 +1231,7 @@ export default {
     async updateOrderStatus(orderId, status) {
       try {
         await axios.put(
-            `http://localhost:8080/api/orders/update-status/${orderId}`,
+            `/orders/update-status/${orderId}`,
             null,
             {
               params: { status: status },
@@ -1247,7 +1246,7 @@ export default {
 
     async fetchFavorites() {
       try {
-        const res = await axios.get("http://localhost:8080/api/favorites", {
+        const res = await axios.get("/favorites", {
           withCredentials: true
         })
         this.favorites = res.data
@@ -1258,7 +1257,7 @@ export default {
 
     async toggleFavorite(maSP) {
       try {
-        await axios.post(`http://localhost:8080/api/favorites/toggle`, null, {
+        await axios.post(`/favorites/toggle`, null, {
           params: { maSP: maSP },
           withCredentials: true
         })
@@ -1282,7 +1281,7 @@ export default {
       if (!this.reportData.reason) return
       try {
         await axios.put(
-          `http://localhost:8080/api/orders/${this.reportOrderId}/report-undelivered`,
+          `/orders/${this.reportOrderId}/report-undelivered`,
           null,
           {
             params: { 
@@ -1317,7 +1316,7 @@ export default {
     window.addEventListener("hashchange", () => {
       const newHash = window.location.hash.replace("#", "")
       this.activeTab = newHash
-      if (newHash === "favorites") this.fetchFavorites()
+      if (newHash === "wishlist") this.fetchFavorites()
       if (newHash === "address") this.fetchAddresses()
     })
   }

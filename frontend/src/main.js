@@ -84,6 +84,7 @@ const routes = [
       { path: 'products/add', component: () => import('./views/admin/AddProduct.vue'), meta: { title: 'Thêm Sản Phẩm' } },
       { path: 'products/edit/:id', component: () => import('./views/admin/EditProduct.vue'), meta: { title: 'Sửa Sản Phẩm' } },
       { path: 'inventory', component: () => import('./views/admin/inventory.vue'), meta: { title: 'Kho & Nhập Hàng' } },
+      { path: 'vouchers', component: () => import('./views/admin/voucher-list.vue'), meta: { title: 'Mã giảm giá' } },
       { path: 'orders', component: () => import('./views/admin/order-list.vue'), meta: { title: 'Đơn Hàng' } },
       { path: 'orders/:id', component: () => import('./views/admin/order-detail.vue'), meta: { title: 'Chi Tiết Đơn Hàng' } },
       { path: 'customers', component: () => import('./views/admin/customer-list.vue'), meta: { title: 'Người Dùng' } },

@@ -19,6 +19,16 @@ import org.springframework.data.repository.query.Param;
 @Repository
 public interface DonHangRepository extends JpaRepository<DonHang, Long> {
 
+    // COUNT FOR VOUCHER LOGIC
+    @Query("SELECT COUNT(d) FROM DonHang d WHERE d.taiKhoan = :tk AND d.voucher = :v AND d.trangThaiDH != 5")
+    long countByTaiKhoanAndVoucher(@Param("tk") com.example.projectend.entity.TaiKhoan tk, @Param("v") com.example.projectend.entity.Voucher v);
+
+    @Query("SELECT COUNT(d) FROM DonHang d WHERE d.taiKhoan = :tk AND d.trangThaiDH != 5")
+    long countByTaiKhoan(@Param("tk") com.example.projectend.entity.TaiKhoan tk);
+
+    @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.taiKhoan.maTK = :maTK AND d.trangThaiDH = 4")
+    BigDecimal sumTotalByTaiKhoan(@Param("maTK") Long maTK);
+
     List<DonHang> findTop10ByTrangThaiDHInOrderByNgayDatDesc(List<Integer> statuses);
 
     // Tìm đơn hàng theo khách hàng

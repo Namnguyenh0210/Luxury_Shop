@@ -55,8 +55,8 @@
                 <p class="text-[14.5px] text-text-primary-light/80 dark:text-text-primary-dark/80 leading-relaxed mb-5">Nhận thông tin cập nhật độc quyền, sản phẩm mới và ưu đãi nội bộ.</p>
                 <form class="flex w-full flex-col gap-3">
                     <label class="sr-only" for="email-address">Địa chỉ Email</label>
-                    <input autocomplete="email" class="w-full appearance-none rounded-xl border border-gray-300 bg-white px-4 py-3 text-[14.5px] text-gray-900 shadow-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none transition-all placeholder-gray-400" id="email-address" name="email-address" placeholder="Địa chỉ Email" required="" type="email">
-                    <button class="w-full rounded-xl bg-gray-900 px-4 py-3 text-[14.5px] font-bold text-white shadow-sm hover:bg-black transition-colors" type="submit">Đăng ký</button>
+                    <input autocomplete="email" class="w-full appearance-none rounded-full border border-gray-300 bg-white px-5 py-3 text-[14.5px] text-gray-900 shadow-sm focus:border-gray-900 focus:ring-1 focus:ring-gray-900 outline-none transition-all placeholder-gray-400" id="email-address" name="email-address" placeholder="Địa chỉ Email" required="" type="email">
+                    <button class="w-full rounded-full bg-gray-900 px-5 py-3 text-[14.5px] font-bold text-white shadow-sm hover:bg-black transition-colors" type="submit">Đăng ký</button>
                 </form>
             </div>
         </div>

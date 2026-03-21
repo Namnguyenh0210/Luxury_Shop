@@ -99,7 +99,7 @@
                                         :key="brand.maTH"
                                         @click="toggleBrand(brand.maTH)"
                                         class="py-2.5 px-2 border rounded-xl text-[13px] font-bold transition-colors flex items-center justify-center tracking-wider uppercase"
-                                        :class="filters.thuongHieu === brand.maTH ? 'border-gray-900 text-gray-900 bg-gray-100' : 'border-gray-200 text-gray-600 hover:border-gray-900 hover:text-gray-900'"
+                                        :class="filters.thuongHieu === brand.maTH ? 'border-[#C8A97E] text-[#C8A97E] bg-white shadow-sm' : 'border-gray-200 text-gray-600 hover:border-[#C8A97E] hover:text-[#C8A97E]'"
                                     >
                                         {{ brand.tenTH }}
                                     </button>
@@ -148,7 +148,7 @@
                                     <span class="text-gray-500 font-bold">~</span>
                                     <input type="text" v-model="customMaxPrice" @blur="formatInputPrice('max')" placeholder="100.000.000đ" class="w-full border border-gray-300 rounded-lg py-2 px-1 text-sm text-center outline-none focus:border-gray-900 transition-colors">
                                 </div>
-                                <button @click="applyCustomPrice" class="w-full py-2 bg-gray-100 border border-gray-200 rounded-lg text-sm font-bold text-gray-800 hover:bg-gray-200 hover:border-gray-300 transition-colors">
+                                <button @click="applyCustomPrice" class="w-full py-2 bg-black border border-black rounded-lg text-sm font-bold text-white hover:bg-[#C8A97E] hover:border-[#C8A97E] transition-colors">
                                     Áp dụng khoảng giá
                                 </button>
                             </div>
@@ -187,11 +187,11 @@
                         </div>
 
                         <!-- Product Grid -->
-                        <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">
+                        <div v-else class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
                             <div
                                 v-for="product in products"
                                 :key="product.maSP"
-                                class="product-card group flex flex-col gap-0 relative bg-white rounded-2xl border border-transparent hover:border-blue-900 overflow-hidden transition-all duration-300"
+                                class="product-card group flex flex-col gap-0 relative bg-white rounded-2xl border border-transparent hover:border-[#C8A97E] overflow-hidden transition-all duration-300 shadow-sm hover:shadow-xl"
                             >
                                 <!-- Image Container -->
                                 <div class="relative overflow-hidden bg-gray-100 aspect-[3/4]">
@@ -229,38 +229,15 @@
                                     </div>
 
                                     <!-- Wishlist button -->
-                                    <!-- <button class="wishlist-btn opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined text-lg">favorite_border</span>
-                                    </button> --> 
-                                    <!-- <button 
-                                      @click.stop="toggleWishlist(product.maSP)"
-                                      class="wishlist-btn opacity-0 group-hover:opacity-100"
-                                    >
-                                      <span 
-                                        class="material-symbols-outlined text-lg"
-                                        :class="{ 'text-red-600': isFavorite(product.maSP) }"
-                                      >
-                                        {{ isFavorite(product.maSP) ? 'favorite' : 'favorite_border' }}
-                                      </span>
-                                    </button> --> 
                                     <button 
                                       @click.stop="toggleWishlist(product.maSP)"
-                                      class="wishlist-btn opacity-0 group-hover:opacity-100"
+                                      class="wishlist-btn opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all active:scale-125 shadow-lg group/heart"
                                     >
-                                      <!-- ❤️ ĐÃ YÊU THÍCH -->
                                       <span 
-                                        v-if="isFavorite(product.maSP)" 
-                                        class="material-symbols-outlined text-lg text-red-600"
+                                        class="material-symbols-outlined text-lg transition-all"
+                                        :class="isFavorite(product.maSP) ? 'text-red-600 fill-icon scale-110' : 'text-gray-400 group-hover/heart:text-red-500'"
                                       >
-                                        favorite
-                                      </span>
-
-                                      <!-- 🤍 CHƯA YÊU THÍCH -->
-                                      <span 
-                                        v-else 
-                                        class="material-symbols-outlined text-lg"
-                                      >
-                                        favorite_border
+                                        {{ isFavorite(product.maSP) ? 'favorite' : 'favorite_border' }}
                                       </span> 
                                     </button>
                                 </div>
@@ -286,7 +263,7 @@
                                             <p v-if="getPriceStock(product.maSP)?.hasPromotion" class="text-gray-400 text-sm line-through mb-0.5">
                                                 {{ formatPrice(getPriceStock(product.maSP)?.minPrice) }}
                                             </p>
-                                            <p :class="['text-[17px] md:text-[19px] font-bold', getPriceStock(product.maSP)?.hasPromotion ? 'text-red-600' : 'text-gray-900']">
+                                            <p :class="['text-[17px] md:text-[19px] font-bold', getPriceStock(product.maSP)?.hasPromotion ? 'text-[#C8A97E]' : 'text-gray-900']">
                                                 {{ formatPrice(getPriceStock(product.maSP)?.finalPrice || getPriceStock(product.maSP)?.minPrice) }}
                                             </p>
                                         </div>
@@ -296,7 +273,7 @@
                                             <button
                                                 @click="openQuickView(product.maSP)"
                                                 :disabled="getPriceStock(product.maSP)?.outOfStock"
-                                                class="flex items-center gap-1.5 bg-gray-900 hover:bg-blue-900 text-white px-3.5 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                                                class="flex items-center gap-1.5 bg-black hover:bg-[#C8A97E] text-white px-3.5 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                                                 title="Thêm vào giỏ"
                                             >
                                                 <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
@@ -507,18 +484,35 @@ export default {
           withCredentials: true
         })
 
-        const isFav = res.data.isFavorite
+        const isFav = (res.data && res.data.isFavorite !== undefined) ? res.data.isFavorite : !this.favoriteMap[productId]
+        
+        // Cập nhật lại Map một cách tường minh để Vue bắt kịp change
+        const updatedMap = { ...this.favoriteMap }
+        updatedMap[productId] = isFav
+        this.favoriteMap = updatedMap
 
-        // ✅ CÁCH CHUẨN: tạo object mới → Vue re-render
-        this.favoriteMap = {
-          ...this.favoriteMap,
-          [productId]: isFav
+        // Hiển thị thông báo qua window.$toast
+        if (isFav) {
+          window.$toast({
+            title: 'Sản phẩm yêu thích',
+            message: 'Đã thêm vào bộ sưu tập của bạn.',
+            icon: 'favorite'
+          })
+        } else {
+          window.$toast({
+            title: 'Sản phẩm yêu thích',
+            message: 'Đã bỏ sản phẩm khỏi bộ sưu tập.',
+            icon: 'heart_broken'
+          })
         }
-
-        console.log("Updated favoriteMap:", this.favoriteMap)
 
       } catch (err) {
         console.error("Wishlist error:", err.response?.data || err)
+        window.$toast({
+          title: 'Thông báo',
+          message: 'Hành động thất bại. Có thể do lỗi kết nối hoặc phiên đăng nhập.',
+          icon: 'error'
+        })
       } 
       this.$forceUpdate()
     },
@@ -536,7 +530,7 @@ export default {
   // },
 
    isFavorite(productId) {
-      return this.favoriteMap[productId] === true
+      return !!this.favoriteMap[productId]
     }, 
 
     getPriceStock(productId) {

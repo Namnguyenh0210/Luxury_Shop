@@ -11,8 +11,8 @@
                     <h2 class="text-base font-normal text-white md:text-lg">Discover the latest collection, a symphony
                         of modern tailoring and timeless elegance.</h2>
                 </div>
-                <a class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-md h-12 px-6 bg-transparent text-white border border-white text-base font-bold tracking-wide transition-colors hover:bg-primary hover:border-primary" href="/sanpham">
-                    <span class="truncate">Mua ngay bộ sưu tập</span>
+                <a class="flex min-w-[160px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-12 px-8 bg-white text-black text-sm font-bold tracking-[0.2em] uppercase transition-all hover:bg-[#C8A97E] hover:text-white hover:scale-105 shadow-lg" href="/sanpham">
+                    <span class="truncate">Khám phá ngay</span>
                 </a>
             </div>
         </div>
@@ -44,7 +44,7 @@
         </div>
         <div class="w-full px-4 md:px-[3.7cm] py-16">
             <h2 class="text-center font-serif text-3xl font-bold tracking-tight md:text-4xl">New Arrivals</h2>
-            <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-6">
+            <div class="mt-8 grid grid-cols-2 md:grid-cols-3 lg:gap-x-12">
                 <div class="group relative">
                     <div class="aspect-w-3 aspect-h-4 w-full overflow-hidden rounded-lg bg-secondary">
                         <img class="h-full w-full object-cover object-center transition-opacity group-hover:opacity-75" data-alt="A tan leather handbag with gold hardware." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8j90vhR2OSz8gJqLtb8Se-tOP12G2NC5HCx8DPl5LRecqSKSYxv-rBI8eq0A-1mvLIHFSXXjQB60XcAzbGN_gIDv52Z-ZTnjR0vTIJutREgBYlPefiMt-AqybAwOXv-nWppPSlr2qWHx2rbScItTVybKAFcIEZ7v680QSTSMJH_b_2WRlfRufJSBd6R5PGP2cFreVQSwEfNQtHRUaiLy5SOBdVqwAzV82QlWJF4qpKa3sNHAe28BKvciJHwblT-DZuoWBBX_xNh4">
@@ -122,8 +122,8 @@
                             Autumn/Winter '24 collection. Explore the craftsmanship and vision that defines our new era
                             of design.
                         </p>
-                        <a class="mt-8 inline-block rounded-md border border-accent bg-transparent px-8 py-3 text-base font-medium text-accent transition hover:bg-accent hover:text-white" href="/gioithieu">
-                            Xem chi tiết
+                        <a class="mt-8 inline-block rounded-full bg-black px-10 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-[#C8A97E] hover:scale-105 shadow-xl" href="/gioithieu">
+                            Tìm hiểu thêm
                         </a>
                     </div>
                 </div>
