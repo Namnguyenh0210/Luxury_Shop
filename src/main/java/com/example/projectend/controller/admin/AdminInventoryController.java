@@ -226,4 +226,44 @@ public class AdminInventoryController {
         }
         return ResponseEntity.ok(result);
     }
+    
+    
+    //thêm nhà cung cấp
+    @PostMapping("/supplier")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> createSupplier(@RequestBody NhaCungCap ncc) {
+        try {
+            NhaCungCap saved = nhaCungCapRepository.save(ncc);
+            return ResponseEntity.ok(saved);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Lỗi khi thêm NCC: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/supplier/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateSupplier(@PathVariable Long id, @RequestBody NhaCungCap ncc) {
+        return nhaCungCapRepository.findById(id).map(existing -> {
+            existing.setTenNCC(ncc.getTenNCC());
+            existing.setSoDienThoai(ncc.getSoDienThoai());
+            existing.setDiaChi(ncc.getDiaChi());
+            return ResponseEntity.ok(nhaCungCapRepository.save(existing));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+    
+    @DeleteMapping("/supplier/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteSupplier(@PathVariable Long id) {
+        try {
+            if (nhaCungCapRepository.existsById(id)) {
+                nhaCungCapRepository.deleteById(id);
+                return ResponseEntity.ok(Map.of("success", true, "message", "Xóa thành công"));
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            // Lỗi này thường xảy ra nếu nhà cung cấp đã có phiếu nhập (ràng buộc khóa ngoại)
+            return ResponseEntity.internalServerError()
+                    .body("Không thể xóa nhà cung cấp này vì đã có dữ liệu liên quan (phiếu nhập).");
+        }
+    }
 }

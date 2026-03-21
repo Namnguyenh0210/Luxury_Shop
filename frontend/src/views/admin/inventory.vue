@@ -321,8 +321,7 @@
               <tr v-for="ncc in suppliers" :key="ncc.maNCC" class="hover:bg-[#C8A97E]/10 transition-colors">
                 <td class="px-5 py-4 font-mono text-xs text-gray-500">#{{ ncc.maNCC }}</td>
                 <td class="px-5 py-4 font-semibold text-gray-800">{{ ncc.tenNCC }}</td>
-                <td class="px-5 py-4 text-gray-600">{{ ncc.soDienThoai || '—' }}</td>
-                <td class="px-5 py-4 text-gray-600">{{ ncc.email || '—' }}</td>
+                <td class="px-5 py-4 text-gray-600">{{ ncc.soDienThoai || '—' }}</td>               
                 <td class="px-5 py-4 text-gray-600">{{ ncc.diaChi || '—' }}</td>
                 <td class="px-5 py-4">
                   <div class="flex items-center justify-center gap-1">
@@ -698,11 +697,7 @@
                 <input v-model="nccForm.soDienThoai" placeholder="0xxx xxx xxx"
                   class="w-full border border-[#C8A97E] rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all" />
               </div>
-              <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-gray-600">Email</label>
-                <input v-model="nccForm.email" placeholder="email@ncc.com"
-                  class="w-full border border-[#C8A97E] rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all" />
-              </div>
+              
             </div>
             <div class="space-y-1.5">
               <label class="text-xs font-semibold text-gray-600">Địa chỉ</label>
@@ -945,7 +940,7 @@ export default {
       showDetailModal: false,
       selectedPhieu: null,
       showNccModal: false,
-      nccForm: { maNCC: '', tenNCC: '', soDienThoai: '', email: '', diaChi: '' },
+      nccForm: { maNCC: '', tenNCC: '', soDienThoai: '', diaChi: '' },
       supplierSearchText: '',
       showSupplierDropdown: false,
       filteredSupplierList: [],
@@ -999,6 +994,7 @@ export default {
       filter: { maNCC: '', maNV: '', timeRange: '' },
       form: { maNCC: '', ghiChu: '', items: [] },
       newItem: {
+		brandId: '', tenTH: '',
         productId: '', maBienThe: '',
         tenSP: '', categoryId: '', brandId: '', gender: 2, isNewProduct: false,
         sizeRows: [{ size: '', color: '', qty: 1, maBienThe: '', isExisting: false }],
@@ -1194,6 +1190,8 @@ export default {
        setTimeout(() => { this.showProductDropdown = false }, 200)
     },
     filterBrandSearch() {
+	  this.newItem.brandId = ''; // Reset ID khi đang gõ
+	  this.newItem.tenTH = this.brandSearchText;
       if (!this.brandSearchText.trim()) {
          this.filteredBrandList = this.brands
          return
@@ -1505,6 +1503,8 @@ export default {
         await this.showAppDialog({ isError: true, message: 'Lỗi khi gửi yêu cầu.' })
       }
     },
+	
+	
   }
 }
 </script>
