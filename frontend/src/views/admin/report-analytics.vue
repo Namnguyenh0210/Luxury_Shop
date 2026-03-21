@@ -120,12 +120,15 @@ export default {
       // Chart handles
       mainChartTarget: null,
       categoryChartTarget: null,
-
+	  
+	  chartData: [],
+	  chartLabels: [],
       // Category Data
       categoryData: {
         labels: [],
         data: []
       }
+	 
     }
   },
 
@@ -196,12 +199,16 @@ export default {
 
     async loadData() {
       try {
+		
         // Parallel requests for totals and categories
         const [repRes, catRes] = await Promise.all([
           axios.get('/admin/reports', { withCredentials: true }),
           axios.get('/admin/categories', { withCredentials: true })
         ]);
         
+		
+		this.chartData = repRes.data.chartData || []
+		this.chartLabels = repRes.data.chartLabels || []
         // Update Totals
         this.totalRevenue = repRes.data.totalRevenue || 0
         this.newOrders = repRes.data.newOrders || 0
@@ -233,31 +240,11 @@ export default {
       }
     },
 
-    getMockDataForRange(type, range) {
-      const presets = {
-        week: { labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'], count: 7 },
-        month: { labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'], count: 4 },
-        year: { labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], count: 12 }
-      }
-      
-      const config = presets[range]
-      let data = []
-
-      if (type === 'revenue') {
-        data = Array.from({ length: config.count }, () => Math.floor(Math.random() * 5000000) + 1000000)
-      } else if (type === 'orders') {
-        data = Array.from({ length: config.count }, () => Math.floor(Math.random() * 30) + 10)
-      } else if (type === 'products') {
-        data = Array.from({ length: config.count }, () => Math.floor(Math.random() * 100) + 20)
-      } else {
-        data = Array.from({ length: config.count }, () => Math.floor(Math.random() * 15) + 5)
-      }
-
-      return { labels: config.labels, data }
-    },
+    
 
     updateCharts() {
-      const { labels, data } = this.getMockDataForRange(this.activeStat, this.timeRange)
+		const labels = this.chartLabels || []
+		const data = this.chartData || []
       this.renderMainChart(labels, data)
       
       if (this.activeStat === 'products') {

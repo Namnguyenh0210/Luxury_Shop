@@ -216,7 +216,7 @@ export default {
 
         this.originalProduct = p;
         const basePrice = (p.variants && p.variants.length > 0) ? p.variants[0].giaBan : 0;
-
+	
         this.form = {
           maSP: p.maSP,
           tenSP: p.tenSP,
@@ -235,41 +235,36 @@ export default {
       }
     },
 
-    async updateProduct() {
-      if (!this.form.tenSP.trim()) return alert("Tên sản phẩm bắt buộc nhập");
-      if (this.form.giaBan < 0) return alert("Giá trị không hợp lệ");
+	async updateProduct() {
+	  if (!this.form.tenSP.trim()) return alert("Tên sản phẩm bắt buộc nhập");
+	  if (this.form.giaBan < 0) return alert("Giá trị không hợp lệ");
 
-      this.saving = true;
-      try {
-        const payload = { 
-            ...this.originalProduct,
-            tenSP: this.form.tenSP,
-            anhChinh: this.form.anhChinh,
-            moTa: this.form.moTa,
-            trangThaiSP: this.form.trangThaiSP
-        };
+	  this.saving = true;
+	  try {
+	    const payload = { 
+	        ...this.originalProduct,
+	        tenSP: this.form.tenSP,
+	        anhChinh: this.form.anhChinh,
+	        moTa: this.form.moTa,
+	        trangThaiSP: this.form.trangThaiSP,
+			maSP: this.form.maSP
+	    };
 
-        if (payload.variants && payload.variants.length > 0) {
-            payload.variants = payload.variants.map(v => ({
-                ...v,
-                giaBan: this.form.giaBan,
-                trangThai: this.form.trangThaiSP == 1
-            }));
-        }
+	    // ❌ TẠM THỜI KHÔNG ĐỤNG VARIANTS
 
-        const response = await axios.post('/admin/products', payload);
-        
-        if (response.data) {
-          if (window.$toast) window.$toast.success('Dữ liệu đã được lưu thành công!');
-          this.$router.push('/admin/products');
-        }
-      } catch (e) {
-        console.error("Lỗi Update:", e);
-        alert('Cảnh báo: ' + (e.response?.data?.message || 'Lỗi lưu dữ liệu'));
-      } finally {
-        this.saving = false;
-      }
-    },
+	    const response = await axios.post('/admin/products', payload);
+	    
+	    if (response.data) {
+	      window.$toast?.success('Dữ liệu đã được lưu thành công!');
+	      this.$router.push('/admin/products');
+	    }
+	  } catch (e) {
+	    console.error("Lỗi Update:", e);
+	    alert('Cảnh báo: ' + (e.response?.data?.message || 'Lỗi lưu dữ liệu'));
+	  } finally {
+	    this.saving = false;
+	  }
+	},
 
     formatDate(date) {
         if (!date) return 'NaN';

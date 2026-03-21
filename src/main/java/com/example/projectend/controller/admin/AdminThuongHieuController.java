@@ -46,4 +46,15 @@ public class AdminThuongHieuController {
     public void deleteBrand(@PathVariable Long id) {
         thuongHieuService.deleteById(id);
     }
+    
+    @PutMapping("/{id}/toggle-status")
+    public ThuongHieu toggleStatus(@PathVariable Long id) {
+        ThuongHieu th = thuongHieuService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thương hiệu"));
+
+        // đảo trạng thái
+        th.setTrangThai(th.getTrangThai() == 1 ? 0 : 1);
+
+        return thuongHieuService.save(th);
+    }
 }

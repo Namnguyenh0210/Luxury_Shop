@@ -3,7 +3,7 @@ package com.example.projectend.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 /**
  * ENTITY NHAP KHO CHI TIET
  * Bảng: NhapKhoChiTiet
@@ -21,6 +21,7 @@ public class NhapKhoChiTiet {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaPN", nullable = false)
     @JsonIgnoreProperties({"chiTiet"})
+    @JsonBackReference
     private PhieuNhap phieuNhap;
 
     @ManyToOne(fetch = FetchType.EAGER)

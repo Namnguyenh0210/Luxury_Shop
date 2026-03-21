@@ -206,6 +206,11 @@ public class SanPhamService {
      * Lưu hoặc cập nhật sản phẩm
      */
     public SanPham save(SanPham sanPham) {
+    	if (sanPham.getVariants() != null) {
+            sanPham.getVariants().forEach(ct -> {
+                ct.setSanPham(sanPham);
+            });
+        }
         return sanPhamRepository.save(sanPham);
     }
 
