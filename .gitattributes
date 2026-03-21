@@ -1,0 +1,16 @@
+# Tự động chuẩn hóa line endings khi commit
+# Checkout sẽ giữ nguyên LF trên mọi hệ điều hành (cross-platform safe)
+
+* text=auto eol=lf
+
+# Các file binary — không chuyển đổi
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.jar  binary
+*.class binary

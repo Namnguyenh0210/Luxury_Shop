@@ -283,7 +283,7 @@
       </div>
     </div>
 
-    <div v-else key="form" class="space-y-8">
+    <div v-else key="form" class="space-y-6">
       <!-- Header Trang Tạo Phiếu -->
       <div class="flex items-center justify-between bg-white px-6 py-5 rounded-3xl border border-gray-100 shadow-sm">
         <div class="flex items-center gap-4">
@@ -295,260 +295,323 @@
             <p class="text-xs text-gray-400 font-medium">Hoàn tất biểu mẫu để cập nhật số lượng tồn kho</p>
           </div>
         </div>
-        
         <div class="flex items-center gap-3">
           <button @click="closeModal" class="px-5 py-2.5 rounded-xl border-2 border-gray-100 text-gray-500 font-bold text-sm hover:bg-gray-50 transition-all">
             Hủy Bỏ
-          </button>
-          <button @click="submit" 
-            class="px-6 py-2.5 rounded-xl bg-gray-900 text-white font-bold text-sm shadow-xl hover:bg-black transition-all flex items-center gap-2"
-            :disabled="form.items.length === 0 || !form.maNCC">
-            <span class="material-symbols-outlined text-[20px]">save_as</span>
-            Lưu Phiếu Nhập
           </button>
         </div>
       </div>
 
       <div class="space-y-6">
-        <!-- Thông tin phiếu -->
-        <div class="bg-gray-50 rounded-2xl border border-[#C8A97E]/30 p-5 space-y-4">
-          <p class="text-xs font-black text-gray-400 uppercase tracking-widest">Thông tin phiếu</p>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-gray-600">Nhà Cung Cấp <span class="text-red-500">*</span></label>
-              <div class="flex items-center gap-2">
-                <select v-model="form.maNCC"
-                  class="w-full border border-[#C8A97E]/40 rounded-2xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all shadow-sm">
-                  <option value="">-- Chọn nhà cung cấp --</option>
-                  <option v-for="ncc in suppliers" :key="ncc.maNCC" :value="ncc.maNCC">{{ ncc.tenNCC }}</option>
-                </select>
-                <button @click="addSupplier" class="p-3 border-2 border-yellow-50 rounded-2xl bg-white text-yellow-700 hover:bg-yellow-50 transition-all shadow-sm shrink-0">
-                   <span class="material-symbols-outlined text-sm">add</span>
-                </button>
+        <!-- SECTION 1: NHÀ CUNG CẤP -->
+        <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <span class="w-6 h-6 rounded-full bg-yellow-600 text-white text-xs font-black flex items-center justify-center">1</span>
+            <p class="text-sm font-black text-gray-700 uppercase tracking-wider">Nhà Cung Cấp</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="relative flex-1">
+              <input
+                v-model="supplierSearchText"
+                @focus="showSupplierDropdown = true"
+                @blur="hideSupplierDropdown"
+                @input="filterSupplierSearch"
+                placeholder="Tìm hoặc nhập tên nhà cung cấp..."
+                class="w-full border border-[#C8A97E]/40 rounded-2xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all shadow-sm font-medium"
+              />
+              <div v-if="showSupplierDropdown && filteredSupplierList.length > 0"
+                class="absolute z-[50] w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
+                <div v-for="ncc in filteredSupplierList" :key="ncc.maNCC" @mousedown.prevent="selectSupplier(ncc)"
+                  class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
+                  {{ ncc.tenNCC }}
+                </div>
               </div>
             </div>
-            <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-gray-600">Ghi Chú</label>
-              <input v-model="form.ghiChu" placeholder="Ghi chú phiếu nhập..."
-                class="w-full border border-[#C8A97E]/40 rounded-2xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all shadow-sm" />
-            </div>
+            <button @click="addSupplier" class="px-4 py-3 border border-yellow-200 rounded-2xl bg-yellow-50 text-yellow-700 hover:bg-yellow-100 transition-all shadow-sm shrink-0 flex items-center gap-1.5 text-sm font-bold">
+              <span class="material-symbols-outlined text-[18px]">add</span>
+              Tạo mới NCC
+            </button>
           </div>
+          <p v-if="form.maNCC" class="mt-2 text-xs text-green-600 font-semibold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">check_circle</span>
+            Đã chọn: {{ supplierSearchText }}
+          </p>
         </div>
 
-        <!-- Thêm sản phẩm -->
-        <div class="bg-gray-50 rounded-2xl border border-[#C8A97E]/30 p-5 space-y-6">
-          <p class="text-xs font-black text-gray-400 uppercase tracking-widest">Thêm Sản Phẩm Vào Phiếu</p>
+        <!-- SECTION 2: THÊM SẢN PHẨM -->
+        <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6 space-y-5">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-yellow-600 text-white text-xs font-black flex items-center justify-center">2</span>
+            <p class="text-sm font-black text-gray-700 uppercase tracking-wider">Thông Tin Sản Phẩm</p>
+          </div>
 
-          <div class="space-y-6 bg-[#FDFBF7]/80 p-6 rounded-3xl border border-[#C8A97E]/20 shadow-inner">
-            <!-- ROW 1: CORE METADATA -->
-            <div class="grid grid-cols-4 gap-4 items-end">
-              <div class="space-y-1.5 relative">
-                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Danh mục <span class="text-red-500">*</span></label>
-                <div class="relative">
-                  <input
-                    v-model="categorySearchText"
-                    @focus="showCategoryDropdown = true"
-                    @blur="hideCategoryDropdown"
-                    @input="filterCategorySearch"
-                    placeholder="Chọn danh mục..."
-                    :disabled="!newItem.isNewProduct && newItem.productId"
-                    class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50/50"
-                  />
-                  <div v-if="showCategoryDropdown" class="absolute z-[40] w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
-                    <div v-for="c in filteredCategoryList" :key="c.maLoai" @mousedown.prevent="selectCategory(c)"
-                        class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
-                        {{ c.tenLoai }}
-                    </div>
+          <!-- ROW 1: Thương hiệu + Danh mục + Tên SP + Giới tính -->
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Nhà cung cấp -->
+            <div class="space-y-1.5 relative">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Thương Hiệu <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <input
+                  v-model="brandSearchText"
+                  @focus="showBrandDropdown = true"
+                  @blur="hideBrandDropdown"
+                  @input="filterBrandSearch"
+                  placeholder="Gõ tên hoặc chọn thương hiệu..."
+                  :disabled="!newItem.isNewProduct && newItem.productId"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50"
+                />
+                <div v-if="showBrandDropdown" class="absolute z-[40] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
+                  <div v-for="b in filteredBrandList" :key="b.maTH" @mousedown.prevent="selectBrand(b)"
+                    class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
+                    {{ b.tenTH }}
                   </div>
                 </div>
-              </div>
-
-              <div class="space-y-1.5 relative">
-                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Thương Hiệu <span class="text-red-500">*</span></label>
-                <div class="relative">
-                  <input
-                    v-model="brandSearchText"
-                    @focus="showBrandDropdown = true"
-                    @blur="hideBrandDropdown"
-                    @input="filterBrandSearch"
-                    placeholder="Chọn thương hiệu..."
-                    :disabled="!newItem.isNewProduct && newItem.productId"
-                    class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50/50"
-                  />
-                  <div v-if="showBrandDropdown" class="absolute z-[30] w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
-                    <div v-for="b in filteredBrandList" :key="b.maTH" @mousedown.prevent="selectBrand(b)"
-                      class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
-                      {{ b.tenTH }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="space-y-1.5 relative">
-                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Tên Sản Phẩm <span class="text-red-500">*</span></label>
-                <div class="relative">
-                  <input
-                    v-model="productSearchText"
-                    @focus="showProductDropdown = true"
-                    @blur="hideProductDropdown"
-                    @input="filterProducts"
-                    placeholder="Nhập tên SP mới hoặc chọn..."
-                    class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-bold text-gray-800"
-                  />
-                  <div v-if="showProductDropdown" class="absolute z-[20] w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
-                    <div v-for="p in filteredProductsList" :key="p.maSP" @mousedown.prevent="selectProduct(p)"
-                      class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-semibold">
-                      {{ p.tenSP }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="space-y-1.5">
-                <label class="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Giới Tính <span class="text-red-500">*</span></label>
-                <select v-model.number="newItem.gender" :disabled="!newItem.isNewProduct && newItem.productId"
-                  class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50/50">
-                   <option :value="0">Nam</option>
-                   <option :value="1">Nữ</option>
-                   <option :value="2">Unisex</option>
-                </select>
               </div>
             </div>
 
-            <!-- ROW 2: VARIANT INFO -->
-            <div class="grid grid-cols-3 gap-6 bg-white/60 p-5 rounded-2xl border border-white shadow-sm">
-              <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-gray-600">Size</label>
-                <select v-model="newItem.size" @change="checkExistingVariant" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-medium">
+            <!-- Danh mục -->
+            <div class="space-y-1.5 relative">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Danh Mục <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <input
+                  v-model="categorySearchText"
+                  @focus="showCategoryDropdown = true"
+                  @blur="hideCategoryDropdown"
+                  @input="filterCategorySearch"
+                  placeholder="Gõ tên hoặc chọn danh mục..."
+                  :disabled="!newItem.isNewProduct && newItem.productId"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50"
+                />
+                <div v-if="showCategoryDropdown" class="absolute z-[40] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
+                  <div v-for="c in filteredCategoryList" :key="c.maLoai" @mousedown.prevent="selectCategory(c)"
+                    class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
+                    {{ c.tenLoai }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tên sản phẩm -->
+            <div class="space-y-1.5 relative">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tên Sản Phẩm <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <input
+                  v-model="productSearchText"
+                  @focus="showProductDropdown = true"
+                  @blur="hideProductDropdown"
+                  @input="filterProducts"
+                  placeholder="Nhập tên SP mới hoặc chọn có sẵn..."
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-semibold text-gray-800"
+                />
+                <div v-if="showProductDropdown" class="absolute z-[35] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
+                  <div v-for="p in filteredProductsList" :key="p.maSP" @mousedown.prevent="selectProduct(p)"
+                    class="px-4 py-2.5 text-sm hover:bg-yellow-50 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-semibold">
+                    {{ p.tenSP }}
+                  </div>
+                </div>
+              </div>
+              <p v-if="newItem.isNewProduct && productSearchText" class="text-[10px] text-yellow-600 font-semibold mt-0.5">✦ Sẽ tạo sản phẩm mới</p>
+            </div>
+
+            <!-- Giới tính -->
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Giới Tính</label>
+              <select v-model.number="newItem.gender" :disabled="!newItem.isNewProduct && newItem.productId"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50">
+                <option :value="0">Nam</option>
+                <option :value="1">Nữ</option>
+                <option :value="2">Unisex</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- SECTION SIZE / MÀU / SỐ LƯỢNG -->
+          <div class="space-y-3 bg-gray-50 rounded-2xl p-4 border border-gray-100">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Size / Màu sắc / Số lượng</label>
+              <button @click="addSizeRow"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-bold hover:bg-yellow-100 transition-all">
+                <span class="material-symbols-outlined text-[15px]">add</span>
+                Thêm size
+              </button>
+            </div>
+
+            <div v-for="(row, idx) in newItem.sizeRows" :key="idx"
+              class="grid gap-3 items-center bg-white rounded-xl p-3 border border-gray-100 shadow-sm"
+              style="grid-template-columns: 1fr 1fr 1fr auto;">
+              <div>
+                <label class="text-[10px] text-gray-400 font-semibold mb-1 block">Size</label>
+                <select v-model="row.size" @change="checkExistingVariantRow(idx)"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-medium">
                   <option value="">-- Size --</option>
                   <option v-for="s in sizes" :key="s.maSize" :value="s.tenSize">{{ s.tenSize }}</option>
                 </select>
               </div>
-              <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-gray-600">Màu Sắc</label>
-                <select v-model="newItem.color" @change="checkExistingVariant" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-medium">
+              <div>
+                <label class="text-[10px] text-gray-400 font-semibold mb-1 block">Màu sắc</label>
+                <select v-model="row.color" @change="checkExistingVariantRow(idx)"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-medium">
                   <option value="">-- Màu --</option>
                   <option v-for="m in colors" :key="m.maMau" :value="m.tenMau">{{ m.tenMau }}</option>
                 </select>
               </div>
-              <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-gray-600">Số Lượng</label>
-                <input type="number" v-model.number="newItem.qty" min="1" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-black text-gray-800" />
+              <div>
+                <label class="text-[10px] text-gray-400 font-semibold mb-1 block">Số lượng</label>
+                <input type="number" v-model.number="row.qty" min="1"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-black text-gray-800" />
               </div>
+              <button v-if="newItem.sizeRows.length > 1" @click="removeSizeRow(idx)"
+                class="mt-5 p-2 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-all">
+                <span class="material-symbols-outlined text-[18px]">delete</span>
+              </button>
+              <div v-else class="mt-5 w-9"></div>
             </div>
+          </div>
 
-            <!-- ROW 3: PRICING & DESCRIPTION -->
-            <div class="grid grid-cols-4 gap-4 items-end">
-              <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-gray-600">Giá Nhập <span class="text-red-500">*</span></label>
-                <div class="relative">
-                   <input type="number" v-model.number="newItem.price" min="0" class="w-full border border-gray-200 rounded-xl pl-4 pr-8 py-2.5 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-bold text-gray-700" />
-                   <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold uppercase">đ</span>
-                </div>
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-gray-600">Giá Bán Lẻ <span v-if="newItem.isNewProduct" class="text-red-500">*</span></label>
-                <div class="relative">
-                   <input type="number" v-model.number="newItem.giaBan" min="0" :disabled="!newItem.isNewProduct && newItem.productId"
-                     class="w-full border border-gray-200 rounded-xl pl-4 pr-8 py-2.5 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-bold text-yellow-800 disabled:bg-gray-50/50" />
-                   <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold uppercase">đ</span>
-                </div>
-              </div>
-              <div class="col-span-2 space-y-1.5">
-                <label class="text-xs font-semibold text-gray-600">Mô tả sản phẩm</label>
-                <input v-model="newItem.moTa" placeholder="Nhập mô tả sản phẩm (dành cho SP mới)..." :disabled="!newItem.isNewProduct && newItem.productId"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:border-[#C8A97E] transition-all outline-none font-medium truncate disabled:bg-gray-50/50" />
+          <!-- GIÁ NHẬP & GIÁ BÁN LẺ + MÔ TẢ -->
+          <div class="grid grid-cols-3 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Giá Nhập <span class="text-red-500">*</span></label>
+              <div class="relative">
+                <input type="number" v-model.number="newItem.price" min="0"
+                  class="w-full border border-gray-200 rounded-xl pl-4 pr-8 py-2.5 text-sm bg-white focus:border-[#C8A97E] focus:outline-none transition-all font-bold text-gray-700" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">đ</span>
               </div>
             </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Giá Bán Lẻ <span v-if="newItem.isNewProduct" class="text-red-500">*</span></label>
+              <div class="relative">
+                <input type="number" v-model.number="newItem.giaBan" min="0"
+                  :disabled="!newItem.isNewProduct && newItem.productId"
+                  class="w-full border border-gray-200 rounded-xl pl-4 pr-8 py-2.5 text-sm bg-white focus:border-[#C8A97E] focus:outline-none transition-all font-bold text-yellow-800 disabled:bg-gray-50" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">đ</span>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Mô Tả SP</label>
+              <input v-model="newItem.moTa"
+                placeholder="Mô tả (cho SP mới)..."
+                :disabled="!newItem.isNewProduct && newItem.productId"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:border-[#C8A97E] focus:outline-none transition-all font-medium disabled:bg-gray-50" />
+            </div>
+          </div>
 
-            <div class="flex items-center justify-between bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
-               <div class="flex flex-col">
-                  <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tổng cộng (Dòng này)</span>
-                  <span class="text-3xl font-black text-yellow-700 leading-none">{{ fmtCurrency(newItem.qty * newItem.price) }}</span>
-               </div>
-               <button @click="addItem" class="px-10 py-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-2xl text-base font-black shadow-[0_10px_30px_-10px_rgba(202,138,4,0.5)] transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3">
-                  <span class="material-symbols-outlined text-2xl">add_shopping_cart</span>
-                  Thêm Vào Danh Sách
-               </button>
+          <!-- NÚT LƯU & THÊM SP KHÁC -->
+          <div class="flex items-center justify-between bg-gradient-to-r from-yellow-50 to-amber-50 p-5 rounded-2xl border border-yellow-200">
+            <div>
+              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Tổng cộng (SP này)</p>
+              <p class="text-2xl font-black text-yellow-700 leading-tight">
+                {{ fmtCurrency(newItem.sizeRows.reduce((s,r) => s + (r.qty || 0), 0) * (newItem.price || 0)) }}
+              </p>
+              <p class="text-xs text-gray-400 mt-0.5">{{ newItem.sizeRows.reduce((s,r) => s + (r.qty || 0), 0) }} sản phẩm</p>
             </div>
+            <button @click="addItem"
+              class="px-8 py-4 bg-yellow-600 hover:bg-yellow-700 text-white rounded-2xl text-sm font-black shadow-lg transition-all transform hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
+              <span class="material-symbols-outlined text-xl">save</span>
+              Lưu &amp; Thêm SP khác
+            </button>
           </div>
         </div>
 
-        <!-- Bảng sản phẩm tạm -->
-        <!-- ITEMS LIST TABLE -->
-        <div class="bg-[#FDFBF7]/50 rounded-3xl border border-[#C8A97E]/20 overflow-hidden shadow-sm">
+        <!-- SECTION 3: BẢNG SẢN PHẨM ĐÃ THÊM -->
+        <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-yellow-600 text-white text-xs font-black flex items-center justify-center">3</span>
+            <p class="text-sm font-black text-gray-700 uppercase tracking-wider">Danh Sách Sản Phẩm Trong Phiếu</p>
+            <span class="ml-auto px-2.5 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-black rounded-full">{{ form.items.length }} dòng</span>
+          </div>
           <table class="w-full text-sm">
             <thead>
-              <tr class="bg-yellow-700/90 text-white font-black uppercase tracking-widest text-[10px]">
-                <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-widest">Sản phẩm</th>
-                <th class="px-6 py-4 text-center text-[10px] font-black uppercase tracking-widest">Danh mục</th>
-                <th class="px-6 py-4 text-center text-[10px] font-black uppercase tracking-widest">Brand</th>
-                <th class="px-6 py-4 text-center text-[10px] font-black uppercase tracking-widest">Giới tính</th>
-                <th class="px-6 py-4 text-center text-[10px] font-black uppercase tracking-widest">Biến thể</th>
-                <th class="px-6 py-4 text-center text-[10px] font-black uppercase tracking-widest">SL</th>
-                <th class="px-6 py-4 text-right text-[10px] font-black uppercase tracking-widest">Đơn giá</th>
-                <th class="px-6 py-4 text-right text-[10px] font-black uppercase tracking-widest">Thành tiền</th>
-                <th class="px-6 py-4 text-center text-[10px] font-black uppercase tracking-widest">Hành động</th>
+              <tr class="bg-yellow-700/90 text-white">
+                <th class="px-5 py-3 text-left text-[10px] font-black uppercase tracking-widest">Sản phẩm</th>
+                <th class="px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest">Danh mục</th>
+                <th class="px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest">Brand</th>
+                <th class="px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest">Giới tính</th>
+                <th class="px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest">Biến thể</th>
+                <th class="px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest">SL</th>
+                <th class="px-5 py-3 text-right text-[10px] font-black uppercase tracking-widest">Đơn giá</th>
+                <th class="px-5 py-3 text-right text-[10px] font-black uppercase tracking-widest">Thành tiền</th>
+                <th class="px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest">Xóa</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
-              <tr v-for="(item, idx) in form.items" :key="idx" class="hover:bg-gray-50 transition-colors">
-                <td class="px-6 py-5">
-                  <p class="font-black text-gray-900">{{ item.displayName }}</p>
-                  <input v-model="item.ghiChu" placeholder="Ghi chú dòng..." class="mt-1 text-[10px] text-gray-400 border-0 bg-transparent p-0 w-full focus:ring-0 italic" />
+              <tr v-for="(item, idx) in form.items" :key="idx" class="hover:bg-yellow-50/30 transition-colors">
+                <td class="px-5 py-4">
+                  <p class="font-bold text-gray-900 text-sm">{{ item.displayName }}</p>
+                  <input v-model="item.ghiChu" placeholder="Ghi chú dòng..." class="mt-0.5 text-[10px] text-gray-400 border-0 bg-transparent p-0 w-full focus:ring-0 italic" />
                 </td>
-                <td class="px-6 py-5 text-center">
-                  <span class="text-xs font-bold text-gray-500">{{ item.categoryName || '—' }}</span>
+                <td class="px-5 py-4 text-center">
+                  <span class="text-xs text-gray-500">{{ item.categoryName || '—' }}</span>
                 </td>
-                <td class="px-6 py-5 text-center">
-                   <span class="text-xs font-bold text-gray-700">{{ item.brandName || '—' }}</span>
+                <td class="px-5 py-4 text-center">
+                  <span class="text-xs font-semibold text-gray-700">{{ item.brandName || '—' }}</span>
                 </td>
-                <td class="px-6 py-5 text-center">
-                   <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase" 
-                      :class="item.gender === 0 ? 'bg-blue-100 text-blue-600' : (item.gender === 1 ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600')">
-                      {{ item.gender === 0 ? 'Nam' : (item.gender === 1 ? 'Nữ' : 'Unisex') }}
-                   </span>
+                <td class="px-5 py-4 text-center">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase"
+                    :class="item.gender === 0 ? 'bg-blue-100 text-blue-600' : (item.gender === 1 ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-600')">
+                    {{ item.gender === 0 ? 'Nam' : (item.gender === 1 ? 'Nữ' : 'Unisex') }}
+                  </span>
                 </td>
-                <td class="px-6 py-5 text-center">
-                  <span class="px-3 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-600">{{ item.size }} / {{ item.color }}</span>
+                <td class="px-5 py-4 text-center">
+                  <span class="px-2 py-1 bg-gray-100 rounded-lg text-xs font-bold text-gray-600">{{ item.size }} / {{ item.color }}</span>
                 </td>
-                <td class="px-6 py-5 text-center font-black text-gray-900">{{ item.qty }}</td>
-                <td class="px-6 py-5 text-right font-medium text-gray-500">{{ fmtCurrency(item.price) }}</td>
-                <td class="px-6 py-5 text-right font-black text-gray-900">{{ fmtCurrency(item.qty * item.price) }}</td>
-                <td class="px-6 py-5 text-center">
-                  <button @click="removeItem(idx)" class="text-red-400 hover:text-red-600 p-2 rounded-xl hover:bg-red-50 transition-all">
-                    <span class="material-symbols-outlined">delete</span>
+                <td class="px-5 py-4 text-center font-black text-gray-900">{{ item.qty }}</td>
+                <td class="px-5 py-4 text-right text-gray-500 text-sm">{{ fmtCurrency(item.price) }}</td>
+                <td class="px-5 py-4 text-right font-black text-gray-900">{{ fmtCurrency(item.qty * item.price) }}</td>
+                <td class="px-5 py-4 text-center">
+                  <button @click="removeItem(idx)" class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-all">
+                    <span class="material-symbols-outlined text-[18px]">delete</span>
                   </button>
+                </td>
+              </tr>
+              <tr v-if="form.items.length === 0">
+                <td colspan="9" class="px-6 py-14 text-center">
+                  <span class="material-symbols-outlined text-5xl block mb-3 text-gray-200">inventory_2</span>
+                  <p class="text-sm text-gray-400">Chưa có sản phẩm — Điền thông tin trên và nhấn "Lưu &amp; Thêm SP khác"</p>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
 
-      <!-- Sticky Local Footer -->
-      <div v-if="form.items.length > 0" class="sticky bottom-0 z-10 -mx-8 px-8 py-6 mt-8 bg-white/90 backdrop-blur-xl border-t border-gray-100 shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.1)]">
-        <div class="flex items-center justify-between">
-           <div class="flex items-center gap-12">
-              <div class="space-y-1">
-                 <p class="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] leading-none">Tổng số lượng</p>
-                 <p class="text-2xl font-black text-gray-900 leading-none">{{ form.items.reduce((s,i) => s + i.qty, 0) }} <span class="text-sm text-gray-400">sp</span></p>
+        <!-- SECTION 4: GHI CHÚ PHIẾU + LƯU PHIẾU -->
+        <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm p-6 space-y-4">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-6 h-6 rounded-full bg-yellow-600 text-white text-xs font-black flex items-center justify-center">4</span>
+            <p class="text-sm font-black text-gray-700 uppercase tracking-wider">Hoàn Tất Phiếu Nhập</p>
+          </div>
+          <div class="grid grid-cols-2 gap-6 items-end">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-gray-600">Ghi Chú Phiếu Nhập</label>
+              <textarea v-model="form.ghiChu" rows="4"
+                placeholder="Ghi chú thêm cho toàn bộ phiếu nhập (tùy chọn)..."
+                class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 focus:border-[#C8A97E] transition-all resize-none">
+              </textarea>
+            </div>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                <span class="text-sm text-gray-500">Tổng số lượng</span>
+                <span class="font-black text-gray-900">{{ form.items.reduce((s,i) => s + i.qty, 0) }} sp</span>
               </div>
-              <div class="w-px h-10 bg-gray-200"></div>
-              <div class="space-y-1">
-                 <p class="text-[10px] text-gray-400 uppercase font-black tracking-[0.2em] leading-none">Giá trị phiếu nhập</p>
-                 <p class="text-4xl font-black text-yellow-700 leading-none">{{ fmtCurrency(totalAmount) }}</p>
+              <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                <span class="text-sm text-gray-500">Số dòng sản phẩm</span>
+                <span class="font-black text-gray-900">{{ form.items.length }} dòng</span>
               </div>
-           </div>
-           
-           <div class="flex gap-4">
-              <button @click="submit" class="px-10 py-5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-2xl text-base font-black shadow-[0_20px_40px_-15px_rgba(202,138,4,0.4)] transition-all transform hover:scale-[1.02] active:scale-95 flex items-center gap-3">
-                 <span class="material-symbols-outlined text-[28px]">verified_user</span>
-                 Hoàn Tất & Lưu Phiếu
+              <div class="flex justify-between items-center py-2">
+                <span class="text-sm font-bold text-gray-700">Tổng giá trị phiếu</span>
+                <span class="text-2xl font-black text-yellow-700">{{ fmtCurrency(totalAmount) }}</span>
+              </div>
+              <button @click="submit"
+                :disabled="form.items.length === 0 || !form.maNCC"
+                class="w-full py-4 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white rounded-2xl text-base font-black shadow-lg transition-all transform hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-3">
+                <span class="material-symbols-outlined text-[22px]">verified_user</span>
+                Lưu Phiếu Nhập
               </button>
-           </div>
+            </div>
+          </div>
         </div>
       </div>
+
     </div>
   </Transition>
 
@@ -708,6 +771,9 @@ export default {
       selectedPhieu: null,
       showNccModal: false,
       nccForm: { maNCC: '', tenNCC: '', soDienThoai: '', email: '', diaChi: '' },
+      supplierSearchText: '',
+      showSupplierDropdown: false,
+      filteredSupplierList: [],
       suppliers: [],
       products: [],
       categories: [],
@@ -748,8 +814,8 @@ export default {
       newItem: {
         productId: '', maBienThe: '',
         tenSP: '', categoryId: '', brandId: '', gender: 2, isNewProduct: false,
-        size: '', color: '', colorCode: '#000000',
-        qty: 1, price: 0, giaBan: 0, moTa: ''
+        sizeRows: [{ size: '', color: '', qty: 1, maBienThe: '', isExisting: false }],
+        price: 0, giaBan: 0, moTa: ''
       }
     }
   },
@@ -794,6 +860,7 @@ export default {
     try {
       const res = await axios.get('/admin/inventory', { withCredentials: true })
       this.suppliers       = res.data.suppliers     || []
+      this.filteredSupplierList = this.suppliers
       this.products        = res.data.products      || []
       this.filteredProducts= this.products
       this.filteredProductsList = this.products
@@ -861,8 +928,8 @@ export default {
       this.newItem = {
         productId: '', maBienThe: '',
         brandId: '', gender: 2, isNewProduct: false,
-        size: '', color: '', colorCode: '#000000',
-        qty: 1, price: 0, giaBan: 0
+        sizeRows: [{ size: '', color: '', qty: 1, maBienThe: '', isExisting: false }],
+        price: 0, giaBan: 0, moTa: ''
       }
       this.productSearchText = ''
       this.categorySearchText = ''
@@ -951,6 +1018,44 @@ export default {
     },
     hideBrandDropdown() {
        setTimeout(() => { this.showBrandDropdown = false }, 200)
+    },
+    // ===== SUPPLIER SEARCH =====
+    filterSupplierSearch() {
+      this.form.maNCC = ''
+      if (!this.supplierSearchText.trim()) {
+        this.filteredSupplierList = this.suppliers
+        return
+      }
+      const lower = this.supplierSearchText.toLowerCase()
+      this.filteredSupplierList = this.suppliers.filter(n => n.tenNCC.toLowerCase().includes(lower))
+    },
+    selectSupplier(ncc) {
+      this.form.maNCC = ncc.maNCC
+      this.supplierSearchText = ncc.tenNCC
+      this.showSupplierDropdown = false
+    },
+    hideSupplierDropdown() {
+      setTimeout(() => { this.showSupplierDropdown = false }, 200)
+    },
+    // ===== SIZE ROWS =====
+    addSizeRow() {
+      this.newItem.sizeRows.push({ size: '', color: '', qty: 1, maBienThe: '', isExisting: false })
+    },
+    removeSizeRow(idx) {
+      if (this.newItem.sizeRows.length > 1) this.newItem.sizeRows.splice(idx, 1)
+    },
+    checkExistingVariantRow(idx) {
+      const row = this.newItem.sizeRows[idx]
+      row.maBienThe = ''
+      row.isExisting = false
+      if (this.newItem.productId && row.size && row.color && this.variantOptions.length > 0) {
+        const match = this.variantOptions.find(v => v.size === row.size && v.mau === row.color)
+        if (match) {
+          row.isExisting = true
+          row.maBienThe = match.maBienThe
+          if (match.giaNhap && !this.newItem.price) this.newItem.price = parseFloat(match.giaNhap)
+        }
+      }
     },
     async addSupplier() {
        this.openNccModal()
@@ -1047,51 +1152,53 @@ export default {
       if (v && v.giaNhap) this.newItem.price = parseFloat(v.giaNhap)
     },
     async addItem() {
-      if (!this.newItem.tenSP || !this.newItem.size || !this.newItem.color || !this.newItem.qty || this.newItem.qty < 1) {
-        await this.showAppDialog({ isError: true, message: 'Vui lòng điền đầy đủ thông tin.' }); return
+      if (!this.newItem.tenSP) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập tên sản phẩm.' }); return
+      }
+      const validRows = this.newItem.sizeRows.filter(r => r.size && r.color && r.qty >= 1)
+      if (validRows.length === 0) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng điền ít nhất một dòng size/màu/số lượng hợp lệ.' }); return
       }
 
-      // If we matched an existing variant
-      if (this.isExistingVariant && this.newItem.maBienThe) {
-        this.form.items.push({
-          itemType: 'existing',
-          maBienThe: this.newItem.maBienThe,
-          displayName: this.newItem.tenSP,
-          size: this.newItem.size,
-          color: this.newItem.color,
-          qty: this.newItem.qty,
-          price: this.newItem.price,
-          ghiChu: ''
-        })
-      } else {
-        // Prepare to create NEW Variant (and optionally New Product if no productId)
-        this.form.items.push({
-          itemType: this.newItem.productId ? 'new_variant' : 'new_product',
-          productId: this.newItem.productId,
-          tenSP: this.newItem.tenSP,
-          categoryId: this.newItem.categoryId,
-          categoryName: this.categorySearchText,
-          brandId: this.newItem.brandId,
-          brandName: this.brandSearchText,
-          gender: this.newItem.gender,
-          size: this.newItem.size, 
-          color: this.newItem.color,
-          colorCode: this.newItem.colorCode,
-          qty: this.newItem.qty,
-          price: this.newItem.price,
-          giaBan: this.newItem.giaBan || (this.newItem.price * 1.5),
-          moTa: this.newItem.moTa || '',
-          displayName: this.newItem.tenSP,
-          ghiChu: ''
-        })
+      for (const row of validRows) {
+        if (row.isExisting && row.maBienThe) {
+          this.form.items.push({
+            itemType: 'existing',
+            maBienThe: row.maBienThe,
+            displayName: this.newItem.tenSP,
+            categoryName: this.categorySearchText,
+            brandName: this.brandSearchText,
+            gender: this.newItem.gender,
+            size: row.size,
+            color: row.color,
+            qty: row.qty,
+            price: this.newItem.price,
+            ghiChu: ''
+          })
+        } else {
+          this.form.items.push({
+            itemType: this.newItem.productId ? 'new_variant' : 'new_product',
+            productId: this.newItem.productId,
+            tenSP: this.newItem.tenSP,
+            categoryId: this.newItem.categoryId,
+            categoryName: this.categorySearchText,
+            brandId: this.newItem.brandId,
+            brandName: this.brandSearchText,
+            gender: this.newItem.gender,
+            size: row.size,
+            color: row.color,
+            colorCode: '#000000',
+            qty: row.qty,
+            price: this.newItem.price,
+            giaBan: this.newItem.giaBan || (this.newItem.price * 1.5),
+            moTa: this.newItem.moTa || '',
+            displayName: this.newItem.tenSP,
+            ghiChu: ''
+          })
+        }
       }
-      // Khong reset toan bo nua ma chi reset bien the
-      this.newItem.size = '';
-      this.newItem.color = '';
-      this.newItem.qty = 1;
-      this.newItem.price = 0;
-      this.isExistingVariant = false;
-      this.newItem.maBienThe = '';
+      // Reset product form (keep supplier)
+      this.resetNewItemFields()
     },
     removeItem(idx) { this.form.items.splice(idx, 1) },
     fmtCurrency(v) {

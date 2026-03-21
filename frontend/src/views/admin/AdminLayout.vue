@@ -76,7 +76,7 @@
       <main class="flex flex-1 flex-col min-w-0">
 
         <!-- Header -->
-        <header class="sticky top-0 z-10 flex h-[84px] items-center justify-between whitespace-nowrap border-b border-gray-200 bg-white/90 backdrop-blur-sm shadow-sm px-8">
+        <header class="sticky top-0 z-40 flex h-[84px] items-center justify-between whitespace-nowrap border-b border-gray-200 bg-white/90 backdrop-blur-sm shadow-sm px-8">
           <div class="flex items-center gap-3">
             <!-- Breadcrumb / Page Title -->
             <h2 class="text-base font-bold text-gray-800 tracking-tight">{{ pageTitle }}</h2>
