@@ -18,15 +18,7 @@
           <span class="material-symbols-outlined text-[20px]">storefront</span>
           Nhà Cung Cấp
         </button>
-        <button @click="activeTab = 'requests'"
-          :class="activeTab === 'requests' ? 'bg-white shadow-sm text-yellow-700' : 'text-gray-500 hover:text-gray-700'"
-          class="px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 relative">
-          <span class="material-symbols-outlined text-[20px]">notification_important</span>
-          {{ isAdmin ? 'Yêu Cầu Nhập' : 'Lịch Sử Yêu Cầu' }}
-          <span v-if="isAdmin && pendingRequestCount > 0" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold animate-pulse">
-            {{ pendingRequestCount }}
-          </span>
-        </button>
+        
       </div>
 
       <!-- ====== TAB NHẬP KHO ====== -->
@@ -94,11 +86,6 @@
             class="border border-[#C8A97E]/50 rounded-2xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm min-w-[160px]">
             <option value="">Tất cả NCC</option>
             <option v-for="ncc in suppliers" :key="ncc.maNCC" :value="ncc.maNCC">{{ ncc.tenNCC }}</option>
-          </select>
-          <select v-model="filter.maNV"
-            class="border border-[#C8A97E]/50 rounded-2xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm min-w-[160px]">
-            <option value="">Tất cả nhân viên</option>
-            <option v-for="nv in nhanViens" :key="nv.maTK" :value="nv.maTK">{{ nv.hoTen }}</option>
           </select>
           <div class="flex items-center bg-gray-100 p-1 rounded-2xl shadow-inner">
             <button v-for="r in timeRanges" :key="r.value" @click="filter.timeRange = r.value"
@@ -175,61 +162,6 @@
         <div v-else class="flex flex-col items-center justify-center py-16 text-gray-400">
           <span class="material-symbols-outlined text-5xl mb-3">inventory_2</span>
           <p class="text-sm">Chưa có phiếu nhập kho nào</p>
-        </div>
-      </div>
-
-      <!-- ====== TAB YÊU CẦU NHẬP KHO ====== -->
-      <div v-if="activeTab === 'requests'" class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-base font-bold text-gray-700">
-            {{ isAdmin ? 'Danh Sách Yêu Cầu Chờ Duyệt' : 'Lịch Sử Yêu Cầu Của Tôi' }}
-          </h3>
-        </div>
-
-        <div v-if="stockRequests.length > 0" class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm overflow-hidden">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Ngày</th>
-                <th v-if="isAdmin" class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Người yêu cầu</th>
-                <th class="px-5 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Sản phẩm</th>
-                <th class="px-5 py-4 text-center text-xs font-semibold text-gray-500 uppercase">SL</th>
-                <th class="px-5 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Trạng thái</th>
-                <th v-if="isAdmin" class="px-5 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Hành động</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              <tr v-for="req in filteredRequests" :key="req.maYeuCau" class="hover:bg-yellow-50/20 transition-colors">
-                <td class="px-5 py-4 text-xs text-gray-500">{{ formatDateTime(req.ngayYeuCau) }}</td>
-                <td v-if="isAdmin" class="px-5 py-4 font-medium text-gray-700">{{ req.nhanVien?.hoTen }}</td>
-                <td class="px-5 py-4">
-                  <p class="font-bold text-gray-800">{{ req.sanPhamChiTiet?.sanPham?.tenSP }}</p>
-                  <p class="text-[10px] text-gray-400">Size: {{ req.sanPhamChiTiet?.sizeSP?.tenSize }} | Màu: {{ req.sanPhamChiTiet?.mauSacSP?.tenMau }}</p>
-                </td>
-                <td class="px-5 py-4 text-center font-black text-yellow-700">{{ req.soLuongYeuCau }}</td>
-                <td class="px-5 py-4 text-center">
-                  <span v-if="req.trangThai === 0" class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">Đang chờ</span>
-                  <span v-else-if="req.trangThai === 1" class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">Đã nhập</span>
-                  <span v-else class="px-2 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">Từ chối</span>
-                </td>
-                <td v-if="isAdmin && req.trangThai === 0" class="px-5 py-4">
-                  <div class="flex items-center justify-center gap-2">
-                    <button @click="processRequest(req)" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-bold transition-all shadow-sm">
-                      Chấp nhận
-                    </button>
-                    <button @click="rejectRequest(req)" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-bold transition-all">
-                      Từ chối
-                    </button>
-                  </div>
-                </td>
-                <td v-else-if="isAdmin" class="px-5 py-4 text-center text-gray-400 text-xs italic">—</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div v-else class="flex flex-col items-center justify-center py-16 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-300">
-          <span class="material-symbols-outlined text-5xl mb-3">notification_important</span>
-          <p class="text-sm">Chưa có yêu cầu nhập kho nào</p>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "PhieuNhap")
@@ -36,6 +37,7 @@ public class PhieuNhap {
 
     // Chi tiết phiếu nhập
     @OneToMany(mappedBy = "phieuNhap", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference
     private List<NhapKhoChiTiet> chiTiet = new ArrayList<>();
 
     // Constructors
