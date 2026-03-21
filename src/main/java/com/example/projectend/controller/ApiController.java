@@ -253,11 +253,12 @@ public class ApiController {
     }
 
     /**
-     * API thêm sản phẩm vào giỏ hàng - HỖ TRỢ CẢ KHI CHƯA ĐĂNG NHẬP
+     * API thêm sản phẩm vào giỏ hàng - HỖ TRỢ CHỌN SIZE/MÀU & ANONYMOUS SESSIONS
      */
     @PostMapping("/cart/add-product")
     public ResponseEntity<Map<String, Object>> addProductToCart(
             @RequestParam("productId") Long productId,
+            @RequestParam(value = "variantId", required = false) Long variantId,
             @RequestParam(value = "quantity", defaultValue = "1") int quantity,
             HttpSession session) {
 
@@ -266,36 +267,37 @@ public class ApiController {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            // ✅ FIX: Hỗ trợ cả anonymous users qua session
+            // 1. CHƯA ĐĂNG NHẬP - Lưu vào Session (Dùng variantId làm key nếu có)
             if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-                // Anonymous user - use session cart
                 @SuppressWarnings("unchecked")
-                Map<Long, Integer> cart = (Map<Long, Integer>) session.getAttribute("cart");
-                if (cart == null) {
-                    cart = new HashMap<>();
-                }
-                cart.put(productId, cart.getOrDefault(productId, 0) + quantity);
-                session.setAttribute("cart", cart);
+                Map<String, Integer> cart = (Map<String, Integer>) session.getAttribute("cart_v2");
+                if (cart == null) cart = new HashMap<>();
+
+                // Key định danh (nếu có variantId thì dùng nó, không thì dùng productId)
+                String targetKey = (variantId != null) ? "v" + variantId : "p" + productId;
+                
+                cart.put(targetKey, cart.getOrDefault(targetKey, 0) + quantity);
+                session.setAttribute("cart_v2", cart);
 
                 long cartCount = cart.values().stream().mapToLong(Integer::longValue).sum();
                 response.put("success", true);
-                response.put("message", "Đã thêm sản phẩm vào giỏ hàng");
+                response.put("message", "Đã thêm vào giỏ hàng tạm thời");
                 response.put("cartCount", cartCount);
                 return ResponseEntity.ok(response);
             }
 
-            // Logged in user - use database
+            // 2. ĐÃ ĐĂNG NHẬP - Lưu vào Database
             String email = auth.getName();
-            boolean added = gioHangService.addProductToCart(email, productId, quantity);
+            boolean added = gioHangService.addProductToCart(email, productId, variantId, quantity);
 
             if (added) {
                 int cartCount = gioHangService.getCartItemCount(email);
                 response.put("success", true);
-                response.put("message", "Đã thêm sản phẩm vào giỏ hàng");
+                response.put("message", "Đã thêm vào giỏ hàng");
                 response.put("cartCount", cartCount);
             } else {
                 response.put("success", false);
-                response.put("message", "Không thể thêm sản phẩm. Sản phẩm có thể hết hàng.");
+                response.put("message", "Sản phẩm hoặc kích cỡ này hiện đã hết hàng.");
             }
 
             return ResponseEntity.ok(response);
@@ -754,7 +756,8 @@ public class ApiController {
     public ResponseEntity<Map<String, Object>> placeOrder(
             @RequestParam Long diaChiId,
             @RequestParam Long paymentMethod,
-            @RequestParam(required = false) String ghiChu) {
+            @RequestParam(required = false) String ghiChu,
+            @RequestParam(required = false) Long voucherId) {
 
         Map<String, Object> response = new HashMap<>();
 
@@ -779,7 +782,7 @@ public class ApiController {
 
             com.example.projectend.entity.DonHang donHang = this.donHangService.createDonHang(tk, diaChiId,
                     paymentMethod,
-                    items, ghiChu);
+                    items, ghiChu, voucherId);
 
             if (donHang == null) {
                 response.put("success", false);

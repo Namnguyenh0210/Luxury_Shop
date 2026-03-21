@@ -62,7 +62,7 @@
               <!-- RIGHT: Product Info -->
               <div class="quickview-info">
                 <!-- Brand -->
-                <p class="product-brand">{{ product.thuongHieu?.tenTH || 'LUXURY' }}</p>
+                <p class="product-brand">{{ product.thuongHieu?.tenTH || 'Thương hiệu' }}</p>
 
                 <!-- Name -->
                 <h2 class="product-name">{{ product.tenSP }}</h2>
@@ -219,10 +219,12 @@ export default {
       return imgs.length > 0 ? imgs : ['/img/placeholder.png']
     },
     availableSizes() {
-      return [...new Set(this.variants.filter(v => v.sizeSP).map(v => v.sizeSP.tenSize))]
+      if (!this.variants) return []
+      return [...new Set(this.variants.filter(v => v.sizeSP && v.sizeSP.tenSize).map(v => v.sizeSP.tenSize))].sort()
     },
     availableColors() {
-      return [...new Set(this.variants.filter(v => v.mauSacSP).map(v => v.mauSacSP.tenMau))]
+      if (!this.variants) return []
+      return [...new Set(this.variants.filter(v => v.mauSacSP && v.mauSacSP.tenMau).map(v => v.mauSacSP.tenMau))]
     },
     selectedVariant() {
       return this.variants.find(v =>
@@ -296,9 +298,17 @@ export default {
       if (this.totalStock === 0) return
       this.addingToCart = true
       try {
-        const res = await axios.post('/cart/add-product', null, {
-          params: { productId: this.product.maSP, quantity: this.quantity }
-        })
+        const params = { 
+          productId: this.product.maSP, 
+          quantity: this.quantity 
+        }
+        
+        // ✨ Gửi thêm variantId để server biết khách chọn size/màu nào
+        if (this.selectedVariant) {
+          params.variantId = this.selectedVariant.maBienThe
+        }
+
+        const res = await axios.post('/cart/add-product', null, { params })
         if (res.data.success) {
           this.showToast('Đã thêm vào giỏ hàng! 🛍️', 'success')
           this.$emit('cart-updated')
@@ -472,7 +482,7 @@ export default {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  background: #C8A97E;
   color: #fff;
   font-size: 11px;
   font-weight: 800;
@@ -573,7 +583,7 @@ export default {
 .price-sale {
   font-size: 24px;
   font-weight: 900;
-  color: #DC2626;
+  color: #C8A97E;
 }
 .price-main {
   font-size: 24px;
@@ -614,8 +624,8 @@ export default {
 }
 .size-btn:hover { border-color: #1a1a2e; color: #1a1a2e; }
 .size-btn.active {
-  border-color: #1a1a2e;
-  background: #1a1a2e;
+  border-color: #C8A97E;
+  background: #C8A97E;
   color: #fff;
 }
 .size-btn.sold {
@@ -637,11 +647,11 @@ export default {
 }
 .color-btn:hover { border-color: #1a1a2e; }
 .color-btn.active {
-  border-color: #1a1a2e;
-  background: #F8F9FA;
-  color: #1a1a2e;
+  border-color: #C8A97E;
+  background: #FDFCFB;
+  color: #C8A97E;
   font-weight: 700;
-  box-shadow: inset 0 0 0 1px #1a1a2e;
+  box-shadow: inset 0 0 0 1px #C8A97E;
 }
 
 /* Quantity */
@@ -699,7 +709,7 @@ export default {
   height: 50px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #DC2626, #B91C1C);
+  background: linear-gradient(135deg, #111111, #333333);
   color: #fff;
   font-size: 14px;
   font-weight: 800;
@@ -710,7 +720,8 @@ export default {
 }
 .btn-add-cart:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.45);
+  background: #C8A97E;
+  box-shadow: 0 8px 24px rgba(200, 169, 126, 0.4);
 }
 .btn-add-cart:disabled {
   background: #9CA3AF;

@@ -130,6 +130,7 @@ export default {
         { to: '/admin/products',  icon: 'diamond',      label: 'Sản Phẩm'  },
         { to: '/admin/orders',    icon: 'receipt_long', label: 'Đơn Hàng'  },
         { to: '/admin/inventory', icon: 'inventory_2',  label: 'Kho & Nhập Hàng' },
+        { to: '/admin/vouchers',  icon: 'redeem',       label: 'Khuyến Mãi & Voucher' },
         { to: '/admin/reviews',   icon: 'star_rate',    label: 'Đánh Giá' },
 
         { isHeader: true, label: 'Người Dùng' },

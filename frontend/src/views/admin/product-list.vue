@@ -127,7 +127,7 @@
               </div>
 
               <button @click="resetFilters" 
-                class="flex items-center justify-center size-10 rounded-2xl border border-[#C8A97E]/30 bg-white text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all shadow-sm group"
+                class="flex items-center justify-center size-10 rounded-full border border-[#C8A97E]/30 bg-white text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all shadow-sm group"
                 title="Làm mới bộ lọc">
                 <span class="material-symbols-outlined text-[22px] group-hover:rotate-180 transition-transform duration-500">refresh</span>
               </button>
@@ -212,7 +212,7 @@
                 </div>
               </div>
               <div class="flex gap-3">
-                 <button @click="editProduct(selectedProduct)" class="px-6 py-3 rounded-2xl bg-gray-800 text-white font-black text-sm hover:bg-black transition-all shadow-lg flex items-center gap-2">
+                 <button @click="editProduct(selectedProduct)" class="px-6 py-3 rounded-full bg-gray-800 text-white font-black text-sm hover:bg-black transition-all shadow-lg flex items-center gap-2">
                     <span class="material-symbols-outlined text-[20px]">edit_square</span>
                     SỬA SẢN PHẨM
                  </button>
@@ -513,8 +513,8 @@
             ></textarea>
           </div>
           <div class="flex items-center justify-end gap-3 pt-4">
-            <button type="button" @click="categoryModal.show = false" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-500 font-bold hover:bg-gray-50 transition-all">Hủy</button>
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold shadow-lg shadow-[#C8A97E]/20 transition-all">
+            <button type="button" @click="categoryModal.show = false" class="px-5 py-2.5 rounded-full border border-gray-200 text-gray-500 font-bold hover:bg-gray-50 transition-all">Hủy</button>
+            <button type="submit" class="px-6 py-2.5 rounded-full bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold shadow-lg shadow-[#C8A97E]/20 transition-all">
               {{ categoryModal.form.maLoai ? 'Lưu thay đổi' : 'Tạo ngay' }}
             </button>
           </div>
@@ -566,8 +566,8 @@
             ></textarea>
           </div>
           <div class="flex items-center justify-end gap-3 pt-4">
-            <button type="button" @click="brandModal.show = false" class="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-500 font-bold hover:bg-gray-50 transition-all">Hủy</button>
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold shadow-lg shadow-[#C8A97E]/20 transition-all">
+            <button type="button" @click="brandModal.show = false" class="px-5 py-2.5 rounded-full border border-gray-200 text-gray-500 font-bold hover:bg-gray-50 transition-all">Hủy</button>
+            <button type="submit" class="px-6 py-2.5 rounded-full bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold shadow-lg shadow-[#C8A97E]/20 transition-all">
               {{ brandModal.form.maTH ? 'Lưu thay đổi' : 'Thêm mới' }}
             </button>
           </div>

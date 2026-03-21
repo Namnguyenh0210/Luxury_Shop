@@ -217,24 +217,29 @@ public class GioHangService {
     }
 
     /**
-     * TỐI ƯU: Thêm sản phẩm vào giỏ hàng - tự động tìm biến thể còn hàng
+     * TỐI ƯU: Thêm sản phẩm vào giỏ hàng - hỗ trợ chọn đúng Size/Màu qua variantId
      */
-    public boolean addProductToCart(String email, Long productId, int quantity) {
+    public boolean addProductToCart(String email, Long productId, Long variantId, int quantity) {
         try {
             TaiKhoan taiKhoan = taiKhoanRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
 
-            // Tìm biến thể còn hàng đầu tiên
-            List<SanPhamChiTiet> variants = sanPhamChiTietRepository.findBySanPham_MaSP(productId);
-            SanPhamChiTiet availableVariant = variants.stream()
-                    .filter(v -> v.getSoLuongTon() != null && v.getSoLuongTon() > 0)
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Sản phẩm đã hết hàng"));
+            Long maBienTheToUse = variantId;
 
-            // Thêm vào giỏ hàng
-            addToCart(taiKhoan, availableVariant.getMaBienThe(), quantity);
+            // Nếu không gửi variantId, hệ thống tự tìm biến thể còn hàng đầu tiên (để đảm bảo tính tương thích cũ)
+            if (maBienTheToUse == null) {
+                List<SanPhamChiTiet> variants = sanPhamChiTietRepository.findBySanPham_MaSP(productId);
+                maBienTheToUse = variants.stream()
+                        .filter(v -> v.getSoLuongTon() != null && v.getSoLuongTon() > 0)
+                        .map(SanPhamChiTiet::getMaBienThe)
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Sản phẩm đã hết hàng"));
+            }
 
-            log.info("Added product {} (variant {}) to cart for user {}", productId, availableVariant.getMaBienThe(), email);
+            // Thêm vào giỏ hàng với đúng mã biến thể
+            addToCart(taiKhoan, maBienTheToUse, quantity);
+
+            log.info("Added product {} (variant {}) to cart for user {}", productId, maBienTheToUse, email);
             return true;
 
         } catch (Exception e) {

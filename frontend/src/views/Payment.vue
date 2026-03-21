@@ -262,9 +262,8 @@ export default {
       if (!codeToCheck) return
 
       try {
-        // Dùng absolute URL vì endpoint này KHÔNG có /api prefix
-        // (axios.defaults.baseURL = '/api' → phải dùng full URL)
-        const res = await axios.get(`http://localhost:5173/payment/payos/check/${codeToCheck}`)
+        // Dùng proxy /payment qua Vite để bảo mật và đồng nhất host
+        const res = await axios.get(`/payment/payos/check/${codeToCheck}`)
 
         if (res.data.success) {
           this.paymentStatus = res.data.status

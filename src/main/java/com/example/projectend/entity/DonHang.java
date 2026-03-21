@@ -81,6 +81,13 @@ public class DonHang {
     @Column(name = "MoTaChuaNhan", length = 1000)
     private String moTaChuaNhan;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaVoucher")
+    private Voucher voucher;
+
+    @Column(name = "GiamGia", precision = 18, scale = 2)
+    private BigDecimal giamGia = BigDecimal.ZERO;
+
     @OneToMany(mappedBy = "donHang", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("donHang")
     private List<DonHangChiTiet> chiTietList = new ArrayList<>();
@@ -283,5 +290,21 @@ public class DonHang {
             case 1: return "Đã thanh toán";
             default: return "Không xác định";
         }
+    }
+
+    public Voucher getVoucher() {
+        return voucher;
+    }
+
+    public void setVoucher(Voucher voucher) {
+        this.voucher = voucher;
+    }
+
+    public BigDecimal getGiamGia() {
+        return giamGia;
+    }
+
+    public void setGiamGia(BigDecimal giamGia) {
+        this.giamGia = giamGia;
     }
 }

@@ -1,231 +1,248 @@
 <template>
-  <div class="relative flex min-h-screen w-full flex-col bg-gray-50">
+  <div class="relative flex min-h-screen w-full flex-col" style="background:#FDFCFB;">
     <AppHeader />
-    
+
     <main class="flex-grow">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-20 py-8 lg:py-12">
-        <!-- Page Title -->
-        <div class="mb-8">
-          <h1 class="text-3xl lg:text-4xl font-black font-heading text-gray-900 tracking-tight">Thanh toán</h1>
-          <p class="text-gray-500 mt-2">Vui lòng kiểm tra thông tin trước khi đặt hàng</p>
+      <div class="w-full px-4 md:px-[3.7cm] py-10">
+
+        <!-- Page Title — Luxury serif style khớp Home.vue -->
+        <div class="mb-12">
+          <p class="text-[11px] font-bold uppercase tracking-[0.4em] text-[#C8A97E] mb-3">Luxury Experience</p>
+          <h1 class="font-serif text-4xl md:text-5xl font-bold text-[#111111] tracking-tight uppercase">Thanh toán</h1>
+          <div class="w-20 h-[3px] mt-5 bg-[#C8A97E]"></div>
+          <p class="mt-5 text-[13px] text-gray-400 uppercase tracking-[0.1em] font-medium">Hoàn tất đơn hàng kiệt tác của bạn</p>
         </div>
 
-        <!-- Alert Messages -->
-        <div v-if="error" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-red-600">error</span>
-            <p class="text-red-800">{{ error }}</p>
-          </div>
+        <!-- Alert -->
+        <div v-if="error" class="mb-6 p-4 border-l-4 border-red-600 bg-red-50">
+          <p class="text-red-800 font-bold text-sm">{{ error }}</p>
         </div>
 
-        <div v-if="success" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-green-600">check_circle</span>
-            <p class="text-green-800">{{ success }}</p>
-          </div>
+        <!-- Loading -->
+        <div v-if="loading" class="flex flex-col items-center justify-center py-24">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C8A97E] mb-4"></div>
+          <p class="text-[#C8A97E] text-sm tracking-widest uppercase font-bold">Đang tải...</p>
         </div>
 
-        <!-- Loading State -->
-        <div v-if="loading" class="flex flex-col items-center justify-center py-20">
-          <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-600 mb-4"></div>
-          <p class="text-gray-600">Đang tải thông tin...</p>
-        </div>
+        <!-- Main grid -->
+        <form v-else @submit.prevent="handleSubmit" class="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
-        <!-- Main Content Grid -->
-        <form v-else @submit.prevent="handleSubmit" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <!-- Left Column: Shipping & Payment Info -->
-          <div class="lg:col-span-7 space-y-6">
-            <!-- Shipping Address Section -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class= "p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <span class="material-symbols-outlined">local_shipping</span>
-                  Địa chỉ giao hàng
-                </h2>
+          <!-- LEFT: Shipping & Payment -->
+          <div class="lg:col-span-7 space-y-8">
+
+            <!-- ĐỊA CHỈ GIAO HÀNG -->
+            <div class="bg-white border border-[#E5E7EB] shadow-sm">
+              <div class="px-8 py-5 border-b border-[#F5F1ED] flex items-center justify-between" style="background:#FDFCFB;">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-[#C8A97E] text-xl">location_on</span>
+                  <h2 class="font-serif font-bold text-[#111111] tracking-[0.1em] text-sm uppercase">1. Địa chỉ giao hàng</h2>
+                </div>
               </div>
-
               <div class="p-6">
-                <!-- Existing Addresses -->
                 <div v-if="diaChiList.length > 0" class="space-y-3">
-                  <div v-for="(diaChi, index) in diaChiList" :key="diaChi.maDiaChi"
-                       @click="selectedAddress = diaChi.maDiaChi"
-                       :class="['relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-yellow-600',
-                                selectedAddress === diaChi.maDiaChi ? 'border-yellow-600 bg-yellow-50' : 'border-gray-200']">
+                  <div v-for="diaChi in diaChiList" :key="diaChi.maDiaChi"
+                    @click="selectedAddress = diaChi.maDiaChi"
+                    :class="['flex items-start p-4 border cursor-pointer transition-all',
+                              selectedAddress === diaChi.maDiaChi
+                                ? 'border-[#C8A97E] bg-[#FDFCFB]'
+                                : 'border-[#E5E7EB] hover:border-[#C8A97E]/50']">
                     <input type="radio" v-model="selectedAddress" :value="diaChi.maDiaChi" required
-                           class="mt-1 h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-600" />
-                    <label class="ml-3 flex-1 cursor-pointer">
-                      <div class="flex items-center gap-2 mb-1">
-                        <span class="font-semibold text-gray-900">{{ diaChi.hoTenNguoiNhan }}</span>
-                        <span v-if="diaChi.laMacDinh" class="px-2 py-0.5 bg-yellow-600 text-white text-xs rounded-full">Mặc định</span>
+                           class="mt-1 h-4 w-4 accent-[#C8A97E]" />
+                    <div class="ml-4 flex-1">
+                      <div class="flex items-center gap-2 mb-0.5">
+                        <span class="font-bold text-[#111111] text-sm">{{ diaChi.hoTenNguoiNhan }}</span>
+                        <span v-if="diaChi.laMacDinh"
+                          class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white"
+                          style="background:#C8A97E;">Mặc định</span>
                       </div>
-                      <p class="text-sm text-gray-600">{{ diaChi.soDienThoai }}</p>
-                      <p class="text-sm text-gray-600 mt-1">{{ diaChi.diaChiChiTiet }}</p>
-                    </label>
+                      <p class="text-xs text-gray-500 mt-0.5">{{ diaChi.soDienThoai }}</p>
+                      <p class="text-sm text-gray-600 mt-1 leading-relaxed">{{ diaChi.diaChiChiTiet }}</p>
+                    </div>
                   </div>
                 </div>
-
-                <!-- No Address Available -->
-                <div v-else class="text-center py-8 text-gray-500">
-                  <span class="material-symbols-outlined text-5xl mb-3 text-gray-400">location_off</span>
-                  <p class="mb-4">Bạn chưa có địa chỉ giao hàng nào.</p>
-                  <a href="/profile" class="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 text-white rounded-lg font-semibold hover:bg-yellow-700 transition">
-                    <span class="material-symbols-outlined">add</span>
-                    Thêm địa chỉ mới
+                <div v-else class="text-center py-10">
+                  <span class="material-symbols-outlined text-5xl text-gray-200 block mb-3">location_off</span>
+                  <p class="text-gray-500 text-sm mb-4">Bạn chưa có địa chỉ giao hàng.</p>
+                  <a href="/profile"
+                     class="inline-flex items-center gap-2 px-6 py-2.5 bg-[#111111] text-white text-xs uppercase font-bold tracking-widest hover:bg-[#C8A97E] transition-colors">
+                    <span class="material-symbols-outlined text-sm">add</span>Thêm địa chỉ
                   </a>
                 </div>
-
-                <!-- Add New Address Button -->
-                <div v-if="diaChiList.length > 0" class="mt-4">
-                  <a href="/profile" class="inline-flex items-center gap-2 text-yellow-600 hover:text-yellow-700 font-semibold text-sm transition">
-                    <span class="material-symbols-outlined text-lg">add_circle</span>
-                    Thêm địa chỉ mới
+                <div v-if="diaChiList.length > 0" class="mt-4 pt-4 border-t border-[#E5E7EB]">
+                  <a href="/profile"
+                     class="inline-flex items-center gap-1.5 text-[#C8A97E] hover:underline text-xs font-bold uppercase tracking-widest nav-link">
+                    <span class="material-symbols-outlined text-sm">add_circle</span>Thêm địa chỉ mới
                   </a>
                 </div>
               </div>
             </div>
 
-            <!-- Payment Method Section -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <span class="material-symbols-outlined">payment</span>
-                  Phương thức thanh toán
-                </h2>
-              </div>
-
-              <div class="p-6 space-y-3">
-                <div v-if="paymentMethods.length > 0">
-                  <div v-for="(method, index) in paymentMethods" :key="method.maHinhThucTT"
-                       @click="selectedPayment = method.maHinhThucTT"
-                       :class="['relative flex items-start p-4 border-2 rounded-lg cursor-pointer hover:border-yellow-600 transition',
-                                selectedPayment === method.maHinhThucTT ? 'border-yellow-600 bg-yellow-50' : 'border-gray-200']">
-                    <input type="radio" v-model="selectedPayment" :value="method.maHinhThucTT" required
-                           class="mt-1 h-4 w-4 text-yellow-600 border-gray-300 focus:ring-yellow-600" />
-                    <label class="ml-3 flex-1 cursor-pointer">
-                      <div class="flex items-center gap-2 mb-1">
-                        <span class="material-symbols-outlined text-yellow-600">{{ method.icon || 'credit_card' }}</span>
-                        <span class="font-semibold text-gray-900">{{ method.tenHinhThuc }}</span>
-                        <span v-if="method.tenHinhThuc && method.tenHinhThuc.toLowerCase().includes('payos')"
-                              class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">💳 Quét QR</span>
-                      </div>
-                      <p class="text-sm text-gray-600">{{ method.moTa || 'Không có mô tả' }}</p>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Fallback nếu không có phương thức nào -->
-                <div v-else class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p class="text-sm text-yellow-800">⚠️ Chưa có phương thức thanh toán nào. Vui lòng liên hệ admin.</p>
+            <!-- PHƯƠNG THỨC THANH TOÁN -->
+            <div class="bg-white border border-[#E5E7EB] shadow-sm">
+              <div class="px-8 py-5 border-b border-[#F5F1ED] flex items-center justify-between" style="background:#FDFCFB;">
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-[#C8A97E] text-xl">account_balance_wallet</span>
+                  <h2 class="font-serif font-bold text-[#111111] tracking-[0.1em] text-sm uppercase">2. Phương thức thanh toán</h2>
                 </div>
               </div>
-            </div>
-
-            <!-- Order Notes Section -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <span class="material-symbols-outlined">note_alt</span>
-                  Ghi chú đơn hàng
-                </h2>
-              </div>
-
               <div class="p-6">
-                <textarea v-model="orderNote" rows="4"
-                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-600 focus:border-transparent bg-white text-gray-900"
-                          placeholder="Ghi chú thêm về đơn hàng (tùy chọn)..."></textarea>
+                <div v-if="paymentMethods.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label v-for="method in paymentMethods" :key="method.maHinhThucTT"
+                    :class="['flex items-center p-5 border rounded-xl cursor-pointer transition-all shadow-sm',
+                              selectedPayment === method.maHinhThucTT
+                                ? 'border-[#C8A97E] bg-[#FDFCFB] ring-1 ring-[#C8A97E]'
+                                : 'border-[#E5E7EB] bg-white hover:border-[#C8A97E]/50']">
+                    <input type="radio" v-model="selectedPayment" :value="method.maHinhThucTT" required
+                           class="h-5 w-5 accent-[#C8A97E]" />
+                    <div class="ml-4 flex items-center gap-3">
+                      <span class="material-symbols-outlined text-[#C8A97E] text-2xl">{{ method.icon || 'credit_card' }}</span>
+                      <div>
+                        <p class="font-bold text-[#111111] text-[13px] uppercase tracking-wider">{{ method.tenHinhThuc }}</p>
+                        <p v-if="method.tenHinhThuc && method.tenHinhThuc.toLowerCase().includes('payos')"
+                           class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">PayOS Security QR</p>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                <div v-else class="p-4 border-l-4 border-amber-400 bg-amber-50 text-sm text-amber-800">
+                  Chưa có phương thức thanh toán. Vui lòng liên hệ hỗ trợ.
+                </div>
               </div>
             </div>
+
+            <!-- GHI CHÚ -->
+            <div class="bg-white border border-[#E5E7EB] shadow-sm">
+              <div class="px-8 py-5 border-b border-[#F5F1ED] flex items-center gap-3" style="background:#FDFCFB;">
+                <span class="material-symbols-outlined text-[#C8A97E] text-lg">chat_bubble_outline</span>
+                <h2 class="font-serif font-bold text-[#111111] tracking-[0.1em] text-sm uppercase">3. Ghi chú đơn hàng</h2>
+              </div>
+              <div class="p-6">
+                <textarea v-model="orderNote" rows="3"
+                  class="w-full px-4 py-3 border border-[#E5E7EB] text-sm outline-none focus:border-[#C8A97E] transition-colors bg-[#FDFCFB]"
+                  placeholder="Yêu cầu riêng cho chúng tôi..."></textarea>
+              </div>
+            </div>
+
           </div>
 
-          <!-- Right Column: Order Summary -->
+          <!-- RIGHT: Order Summary -->
           <div class="lg:col-span-5">
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 lg:sticky lg:top-6">
-              <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-900">Đơn hàng của bạn</h2>
+            <div class="sticky top-6 bg-white border border-[#E5E7EB]">
+
+              <!-- Header -->
+              <div class="px-6 py-4 flex items-center gap-2" style="background:#111111;">
+                <h2 class="font-serif font-bold text-white uppercase tracking-widest text-sm">Đơn hàng của bạn</h2>
               </div>
 
               <!-- Cart Items -->
-              <div class="p-6 max-h-96 overflow-y-auto">
-                <div class="space-y-4">
-                  <div v-for="item in cartItems" :key="item.id" class="flex gap-4 pb-4 border-b border-gray-200 last:border-0 last:pb-0">
-                    <div class="relative flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg overflow-hidden">
-                      <img :src="`/api/img/${item.anh}`" :alt="item.tenSP"
-                           class="w-full h-full object-cover"
-                           @error="$event.target.src='/img/placeholder.png'" />
-                      <span class="absolute -top-2 -right-2 bg-yellow-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                        {{ item.soLuong }}
-                      </span>
+              <div class="max-h-80 overflow-y-auto custom-scrollbar">
+                <div v-for="item in cartItems" :key="item.id"
+                  class="flex gap-4 p-4 border-b border-[#E5E7EB] last:border-0">
+                  <div class="relative flex-shrink-0 w-20 h-24 bg-[#F5F1ED] overflow-hidden">
+                    <img :src="`/api/img/${item.anh}`" :alt="item.tenSP"
+                         class="w-full h-full object-cover"
+                         @error="$event.target.src='/img/placeholder.png'" />
+                    <span class="absolute top-0 right-0 bg-[#111111] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center">
+                      {{ item.soLuong }}
+                    </span>
+                  </div>
+                  <div class="flex-1 min-w-0 py-1">
+                    <p class="text-[10px] font-bold text-[#C8A97E] uppercase tracking-widest">{{ item.thuongHieu }}</p>
+                    <h3 class="text-xs font-bold text-[#111111] mt-0.5 leading-tight uppercase line-clamp-2">{{ item.tenSP }}</h3>
+                    <div class="flex gap-2 mt-1.5">
+                      <span v-if="item.size" class="text-[10px] text-gray-500 font-bold px-1.5 py-0.5 border border-[#E5E7EB]">{{ item.size }}</span>
+                      <span v-if="item.mau" class="text-[10px] text-gray-500 font-bold px-1.5 py-0.5 border border-[#E5E7EB]">{{ item.mau }}</span>
                     </div>
-                    <div class="flex-1 min-w-0">
-                      <p class="text-xs font-semibold text-gray-500 uppercase mb-1">{{ item.thuongHieu }}</p>
-                      <h3 class="text-sm font-bold text-gray-900 line-clamp-1">{{ item.tenSP }}</h3>
-                      <p class="text-xs text-gray-500 mt-1">
-                        <span v-if="item.size">Size: {{ item.size }}</span>
-                        <span v-if="item.size && item.mau"> • </span>
-                        <span v-if="item.mau">Màu: {{ item.mau }}</span>
-                      </p>
-                      <p class="text-sm font-bold text-gray-900 mt-1">{{ formatPrice(item.thanhTien) }}</p>
-                    </div>
+                    <p class="text-sm font-bold text-[#111111] mt-2">{{ formatPrice(item.thanhTien) }}</p>
                   </div>
                 </div>
+              </div>
+
+              <!-- Voucher -->
+              <div class="p-8 border-t border-[#E5E7EB]" style="background:#F9F7F5;">
+                <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C8A97E] mb-4">Mã ưu đãi (Voucher)</p>
+                <div class="flex gap-3">
+                  <input
+                    v-model="voucherCode"
+                    type="text"
+                    placeholder="ENTER CODE"
+                    :disabled="!!appliedVoucher"
+                    class="flex-1 px-5 py-3.5 border border-[#E5E7EB] text-xs uppercase font-bold tracking-[0.2em] outline-none focus:border-[#C8A97E] bg-white transition-all shadow-sm rounded-sm"
+                  />
+                  <button v-if="!appliedVoucher"
+                    @click="applyVoucher" type="button"
+                    class="px-6 py-3.5 bg-[#111111] text-white text-[11px] rounded-full uppercase font-bold tracking-[0.2em] hover:bg-[#C8A97E] transition-all shadow-md active:scale-95">
+                    Áp dụng
+                  </button>
+                  <button v-else
+                    @click="removeVoucher" type="button"
+                    class="px-6 py-3.5 bg-red-600 text-white text-[11px] rounded-full uppercase font-bold tracking-[0.2em] hover:bg-red-700 transition-all shadow-md active:scale-95">
+                    Gỡ bỏ
+                  </button>
+                </div>
+                <p v-if="voucherMessage"
+                   :class="['text-[11px] mt-4 font-bold tracking-wide flex items-center gap-2', appliedVoucher ? 'text-green-700' : 'text-red-600']">
+                  <span class="material-symbols-outlined text-sm">{{ appliedVoucher ? 'check_circle' : 'error' }}</span>
+                  {{ voucherMessage }}
+                </p>
               </div>
 
               <!-- Price Summary -->
-              <div class="p-6 border-t border-gray-200 space-y-3">
+              <div class="p-8 border-t border-[#E5E7EB] space-y-4">
                 <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Tạm tính:</span>
-                  <span class="font-semibold text-gray-900">{{ formatPrice(orderSubtotal) }}</span>
+                  <span class="text-gray-400 uppercase tracking-[0.2em] text-[10px] font-bold">Tạm tính:</span>
+                  <span class="font-bold text-[#111111]">{{ formatPrice(orderSubtotal) }}</span>
+                </div>
+                <div v-if="appliedVoucher && discountAmount > 0" class="flex justify-between text-sm">
+                  <span class="text-gray-400 uppercase tracking-[0.2em] text-[10px] font-bold">Mã ưu đãi:</span>
+                  <span class="font-bold text-green-700 tracking-wide">- {{ formatPrice(discountAmount) }}</span>
                 </div>
                 <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Phí vận chuyển:</span>
-                  <span class="font-semibold text-green-600">Miễn phí</span>
+                  <span class="text-gray-400 uppercase tracking-[0.2em] text-[10px] font-bold">Vận chuyển:</span>
+                  <span class="font-bold text-[#C8A97E] text-[11px] tracking-widest uppercase">Premium Delivery Service</span>
                 </div>
-                <div class="pt-3 border-t border-gray-200">
-                  <div class="flex justify-between items-center">
-                    <span class="text-lg font-bold text-gray-900">Tổng cộng:</span>
-                    <span class="text-2xl font-black text-yellow-600">{{ formatPrice(orderTotal) }}</span>
+                <div class="flex justify-between text-[10px]">
+                  <span class="text-gray-400 uppercase tracking-[0.1em]">Phí vận chuyển:</span>
+                  <span class="text-green-600 font-bold uppercase tracking-widest">Miễn phí</span>
+                </div>
+
+                <!-- Total -->
+                <div class="pt-4 border-t border-[#E5E7EB]">
+                  <div class="flex justify-between items-baseline">
+                    <span class="text-xs font-bold uppercase tracking-widest text-[#111111]">Tổng cộng:</span>
+                    <span class="text-2xl font-bold" style="color:#C8A97E;">{{ formatPrice(finalTotal) }}</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Action Buttons -->
-              <div class="p-6 border-t border-gray-200 space-y-3">
+              <!-- Submit Button -->
+              <div class="px-5 pb-5 space-y-3">
                 <button type="submit" :disabled="isSubmitting"
-                        class="w-full flex items-center justify-center gap-2 h-12 rounded-lg bg-yellow-600 text-white font-bold text-base hover:bg-yellow-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                  <span v-if="!isSubmitting" class="material-symbols-outlined">shopping_bag</span>
-                  <span v-if="!isSubmitting">Đặt hàng ngay</span>
-                  <span v-else class="flex items-center gap-2">
-                    <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Đang xử lý...
-                  </span>
+                  class="w-full flex items-center justify-center gap-3 py-5 bg-[#111111] text-white text-[11px] rounded-full font-bold uppercase tracking-[0.3em] hover:bg-[#C8A97E] transition-all shadow-xl disabled:opacity-50 active:scale-[0.98]">
+                  <span v-if="!isSubmitting" class="material-symbols-outlined text-base leading-none">diamond</span>
+                  <span>{{ isSubmitting ? 'ĐANG XỬ LÝ GIAO DỊCH...' : 'XÁC NHẬN THANH TOÁN' }}</span>
                 </button>
                 <a href="/giohang"
-                   class="w-full flex items-center justify-center gap-2 h-12 rounded-lg border-2 border-gray-300 text-gray-900 font-semibold text-base hover:bg-gray-50 transition-all">
-                  <span class="material-symbols-outlined">arrow_back</span>
-                  <span>Quay lại giỏ hàng</span>
+                  class="w-full flex items-center justify-center gap-2 py-4 border border-[#E5E7EB] text-gray-400 text-[10px] rounded-full font-bold uppercase tracking-[0.2em] hover:border-[#111111] hover:text-[#111111] transition-all">
+                  <span class="material-symbols-outlined text-sm">arrow_back</span>Quay lại túi hàng
                 </a>
               </div>
 
-              <!-- Security Badge -->
-              <div class="p-6 bg-gray-50 space-y-3">
-                <div class="flex items-center gap-3 text-sm text-gray-600">
-                  <span class="material-symbols-outlined text-green-600">verified</span>
-                  <span>Giao dịch an toàn & bảo mật</span>
+              <!-- Security Badges -->
+              <div class="grid grid-cols-2 divide-x divide-[#E5E7EB] border-t border-[#E5E7EB]" style="background:#F5F1ED;">
+                <div class="flex flex-col items-center gap-1 p-4 text-center">
+                  <span class="material-symbols-outlined text-xl text-[#C8A97E]">verified</span>
+                  <p class="text-[9px] font-bold uppercase tracking-widest text-gray-500">Giao dịch bảo mật</p>
                 </div>
-                <div class="flex items-center gap-3 text-sm text-gray-600">
-                  <span class="material-symbols-outlined text-green-600">policy</span>
-                  <span>Chính sách đổi trả linh hoạt</span>
-                </div>
-                <div class="flex items-center gap-3 text-sm text-gray-600">
-                  <span class="material-symbols-outlined text-green-600">support_agent</span>
-                  <span>Hỗ trợ 24/7</span>
+                <div class="flex flex-col items-center gap-1 p-4 text-center">
+                  <span class="material-symbols-outlined text-xl text-[#C8A97E]">local_shipping</span>
+                  <p class="text-[9px] font-bold uppercase tracking-widest text-gray-500">Giao hàng Premium</p>
                 </div>
               </div>
+
             </div>
           </div>
+
         </form>
       </div>
     </main>
@@ -241,15 +258,11 @@ import axios from 'axios'
 
 export default {
   name: 'Checkout',
-  components: {
-    AppHeader,
-    AppFooter
-  },
+  components: { AppHeader, AppFooter },
   data() {
     return {
       loading: true,
       error: null,
-      success: null,
       isSubmitting: false,
       diaChiList: [],
       paymentMethods: [],
@@ -258,102 +271,114 @@ export default {
       selectedPayment: null,
       orderNote: '',
       orderSubtotal: 0,
-      orderTotal: 0
+      voucherCode: '',
+      appliedVoucher: null,
+      voucherMessage: '',
+      discountAmount: 0
+    }
+  },
+  computed: {
+    finalTotal() {
+      return Math.max(0, (this.orderSubtotal || 0) - this.discountAmount)
     }
   },
   methods: {
     async fetchCheckoutData() {
       this.loading = true
       this.error = null
-      
       try {
-        const response = await axios.get('/checkout')
-        
-        if (response.data.diaChiList) {
-          this.diaChiList = response.data.diaChiList
-          // Auto-select default address
-          const defaultAddress = this.diaChiList.find(d => d.laMacDinh)
-          if (defaultAddress) {
-            this.selectedAddress = defaultAddress.maDiaChi
-          } else if (this.diaChiList.length > 0) {
-            this.selectedAddress = this.diaChiList[0].maDiaChi
-          }
+        const res = await axios.get('/checkout')
+        if (res.data.diaChiList) {
+          this.diaChiList = res.data.diaChiList
+          const def = this.diaChiList.find(d => d.laMacDinh)
+          this.selectedAddress = def ? def.maDiaChi : (this.diaChiList[0]?.maDiaChi || null)
         }
-        
-        if (response.data.paymentMethods) {
-          this.paymentMethods = response.data.paymentMethods
-          // Auto-select first payment method
-          if (this.paymentMethods.length > 0) {
-            this.selectedPayment = this.paymentMethods[0].maHinhThucTT
-          }
+        if (res.data.paymentMethods) {
+          this.paymentMethods = res.data.paymentMethods
+          if (this.paymentMethods.length > 0) this.selectedPayment = this.paymentMethods[0].maHinhThucTT
         }
-        
-        if (response.data.cartItems) {
-          this.cartItems = response.data.cartItems
-        }
-        
-        this.orderSubtotal = response.data.orderSubtotal || 0
-        this.orderTotal = response.data.orderTotal || 0
-        
+        if (res.data.cartItems) this.cartItems = res.data.cartItems
+        this.orderSubtotal = res.data.orderSubtotal || 0
       } catch (err) {
-        console.error('Error fetching checkout data:', err)
         this.error = 'Không thể tải thông tin thanh toán. Vui lòng thử lại.'
       } finally {
         this.loading = false
       }
     },
-    
+
+    async applyVoucher() {
+      if (!this.voucherCode) return
+      this.voucherMessage = ''
+      try {
+        const res = await axios.get('/vouchers/check', {
+          params: { code: this.voucherCode, orderAmount: this.orderSubtotal }
+        })
+        if (res.data.success) {
+          this.appliedVoucher = res.data
+          this.calculateDiscount()
+          this.voucherMessage = '✓ Đã áp dụng mã ưu đãi thành công.'
+        } else {
+          this.voucherMessage = res.data.message || 'Mã không hợp lệ.'
+        }
+      } catch {
+        this.voucherMessage = 'Không thể kiểm tra mã. Vui lòng thử lại.'
+      }
+    },
+
+    calculateDiscount() {
+      if (!this.appliedVoucher) { this.discountAmount = 0; return }
+      const v = this.appliedVoucher
+      if (v.loaiGiamGia === 0) {
+        let disc = this.orderSubtotal * (v.giaTri / 100)
+        if (v.giaTriToiDa && disc > v.giaTriToiDa) disc = v.giaTriToiDa
+        this.discountAmount = disc
+      } else {
+        this.discountAmount = Math.min(v.giaTri, this.orderSubtotal)
+      }
+    },
+
+    removeVoucher() {
+      this.appliedVoucher = null
+      this.discountAmount = 0
+      this.voucherCode = ''
+      this.voucherMessage = ''
+    },
+
     async handleSubmit() {
-      if (!this.selectedAddress) {
-        this.error = 'Vui lòng chọn địa chỉ giao hàng!'
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        return
-      }
-      
-      if (!this.selectedPayment) {
-        this.error = 'Vui lòng chọn phương thức thanh toán!'
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        return
-      }
-      
+      if (!this.selectedAddress) return this.showError('Vui lòng chọn địa chỉ giao hàng.')
+      if (!this.selectedPayment) return this.showError('Vui lòng chọn phương thức thanh toán.')
       this.isSubmitting = true
       this.error = null
-      
       try {
-        const response = await axios.post('/checkout/place-order', null, {
+        const res = await axios.post('/checkout/place-order', null, {
           params: {
             diaChiId: this.selectedAddress,
             paymentMethod: this.selectedPayment,
-            ghiChu: this.orderNote || ''
+            ghiChu: this.orderNote || '',
+            voucherId: this.appliedVoucher ? this.appliedVoucher.maVoucher : null
           }
         })
-        
-        if (response.data.success) {
-          // Redirect to success page or payment page
-          if (response.data.redirectUrl) {
-            window.location.href = response.data.redirectUrl
-          } else {
-            window.location.href = '/checkout-success'
-          }
+        if (res.data.success) {
+          window.location.href = res.data.redirectUrl || '/checkout-success'
         } else {
-          this.error = response.data.message || 'Đặt hàng thất bại'
-          window.scrollTo({ top: 0, behavior: 'smooth' })
+          this.showError(res.data.message || 'Đặt hàng thất bại.')
         }
-      } catch (err) {
-        console.error('Error placing order:', err)
-        this.error = err.response?.data?.message || 'Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.'
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } catch {
+        this.showError('Có lỗi xảy ra. Vui lòng thử lại.')
       } finally {
         this.isSubmitting = false
       }
     },
-    
+
+    showError(msg) {
+      this.error = msg
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    },
+
     formatPrice(price) {
-      if (!price) return '0 đ'
-      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price || 0)
     }
   },
-  
   mounted() {
     this.fetchCheckoutData()
   }
@@ -361,5 +386,7 @@ export default {
 </script>
 
 <style scoped>
-/* Checkout specific styles */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #F5F1ED; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #C8A97E; }
 </style>

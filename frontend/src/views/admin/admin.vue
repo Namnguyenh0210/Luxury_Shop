@@ -103,28 +103,37 @@ export default {
     }
   },
 
-  async mounted() {
-    try {
-      // Load dashboard stats
-      if (this.currentUser.roles.includes('ADMIN')) {
-        const res = await axios.get('/admin/reports', { withCredentials: true })
-        this.totalRevenue   = res.data.totalRevenue   || 0
-        this.newOrdersCount = res.data.newOrders || 0
-        this.totalCustomers = res.data.totalCustomers || 0
-      } else {
-        try {
-          const res = await axios.get('/admin/reports', { withCredentials: true })
-          this.newOrdersCount = res.data.newOrders || 0
-        } catch { /* ignore */ }
-      }
-    } catch (e) {
-      console.error('Dashboard error:', e)
-    } finally {
-      this.loading = false
+  watch: {
+    currentUser: {
+      handler(newVal) {
+        if (newVal && newVal.roles && newVal.roles.length > 0) {
+          this.fetchStats()
+        }
+      },
+      immediate: false
     }
   },
 
+  async mounted() {
+    await this.fetchStats()
+  },
+
   methods: {
+    async fetchStats() {
+      try {
+        this.loading = true
+        const res = await axios.get('/admin/reports', { withCredentials: true })
+        if (res.data) {
+          this.totalRevenue = res.data.totalRevenue || 0
+          this.newOrdersCount = res.data.newOrders || 0
+          this.totalCustomers = res.data.totalCustomers || 0
+        }
+      } catch (e) {
+        console.error('Dashboard error:', e)
+      } finally {
+        this.loading = false
+      }
+    },
     fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v) + ' đ' }
   }
 }
