@@ -4,19 +4,18 @@
     <ChatWidget />
     <ConfirmModal />
 
-    <!-- Global Luxury Toast -->
     <transition-group name="toast-fade" tag="div" class="fixed top-24 right-4 md:right-10 z-[99999] space-y-4 pointer-events-none">
       <div v-for="toast in toasts" :key="toast.id" 
-           class="flex items-center gap-4 bg-white/95 backdrop-blur-md border-l-4 border-[#C8A97E] shadow-[0_15px_40px_rgba(0,0,0,0.15)] px-6 py-4 rounded-r-2xl min-w-[300px] md:min-w-[360px] pointer-events-auto transform transition-all duration-500">
-        <div class="flex items-center justify-center size-10 rounded-full bg-[#FDF8F3] text-[#C8A97E] flex-shrink-0">
-          <span class="material-symbols-outlined text-2xl">{{ toast.icon || 'diamond' }}</span>
+           class="flex items-center gap-5 bg-white/95 backdrop-blur-md border-l-4 border-[#C8A97E] shadow-[0_20px_50px_rgba(0,0,0,0.15)] px-6 py-5 rounded-r-2xl min-w-[320px] md:min-w-[400px] pointer-events-auto transform transition-all duration-500 border border-gray-100">
+        <div class="flex items-center justify-center size-12 rounded-full bg-[#FDF8F3] text-[#C8A97E] flex-shrink-0 shadow-sm border border-[#C8A97E]/10">
+          <span class="material-symbols-outlined text-3xl">{{ toast.icon || 'diamond' }}</span>
         </div>
-        <div class="flex flex-col min-w-0">
-          <p class="font-bold text-[#111111] text-[12px] md:text-[13px] uppercase tracking-[0.2em] mb-1 truncate">{{ toast.title }}</p>
-          <p class="text-[11px] md:text-xs text-gray-500 font-medium tracking-wide leading-relaxed">{{ toast.message }}</p>
+        <div class="flex flex-col min-w-0 flex-1">
+          <p class="font-bold text-[#111111] text-[13px] md:text-[14px] uppercase tracking-[0.3em] mb-1.5 truncate leading-none">{{ toast.title }}</p>
+          <p class="text-[11px] md:text-xs text-gray-500 font-semibold tracking-wide leading-relaxed">{{ toast.message }}</p>
         </div>
-        <button @click="removeToast(toast.id)" class="ml-auto text-gray-300 hover:text-gray-900 transition-colors p-1 flex-shrink-0">
-          <span class="material-symbols-outlined text-[18px]">close</span>
+        <button @click="removeToast(toast.id)" class="ml-auto text-gray-300 hover:text-gray-900 transition-colors p-1.5 flex-shrink-0">
+          <span class="material-symbols-outlined text-[20px]">close</span>
         </button>
       </div>
     </transition-group>
@@ -69,6 +68,10 @@ export default {
   mounted() {
     // Expose $toast globally via window
     window.$toast = (payload) => this.addToast(payload)
+    window.$toast.success = (msg) => this.addToast({ title: 'THÀNH CÔNG', message: msg, icon: 'verified' })
+    window.$toast.error = (msg) => this.addToast({ title: 'LỖI HỆ THỐNG', message: msg, icon: 'error' })
+    window.$toast.info = (msg) => this.addToast({ title: 'THÔNG BÁO', message: msg, icon: 'info' })
+    window.$toast.warning = (msg) => this.addToast({ title: 'CẢNH BÁO', message: msg, icon: 'warning' })
     
     // Listen to custom events from non-vue parts if needed
     window.addEventListener('show-toast', (e) => this.addToast(e.detail))

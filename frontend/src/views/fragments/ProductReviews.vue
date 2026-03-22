@@ -110,12 +110,8 @@
             </button>
           </div>
 
-          <!-- Toast -->
-          <Transition name="toast">
-            <div v-if="toastMsg" :class="['toast', toastType]">
-              {{ toastMsg }}
-            </div>
-          </Transition>
+          <!-- Internal Toast removed to use global system -->
+
         </div>
 
 
@@ -307,9 +303,9 @@ export default {
     },
 
     showToast(msg, type = 'success') {
-      this.toastMsg = msg
-      this.toastType = type
-      setTimeout(() => { this.toastMsg = null }, 4000)
+      if (type === 'success') window.$toast.success(msg)
+      else if (type === 'error') window.$toast.error(msg)
+      else window.$toast.info(msg)
     },
 
     handleAvatarError(e) {

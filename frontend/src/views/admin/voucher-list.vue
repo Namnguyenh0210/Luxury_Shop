@@ -172,11 +172,19 @@
               <div class="grid grid-cols-3 gap-0 border border-[#EDF1F5] rounded-sm overflow-hidden shadow-sm">
                 <div class="p-5 border-r border-[#EDF1F5] bg-white">
                   <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-2">Giá trị giảm</label>
-                  <input v-model="currentVoucher.giaTri" type="number" class="w-full text-xl font-bold text-[#111111] outline-none bg-transparent" required>
+                  <input type="text"
+                    :value="formatCurrency(currentVoucher.giaTri)"
+                    @input="e => currentVoucher.giaTri = parseCurrency(e.target.value)"
+                    @blur="e => e.target.value = formatCurrency(currentVoucher.giaTri)"
+                    class="w-full text-xl font-bold text-[#111111] outline-none bg-transparent" required>
                 </div>
                 <div class="p-5 border-r border-[#EDF1F5] bg-white">
                   <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-2">Giảm tối đa</label>
-                  <input v-model="currentVoucher.giaTriToiDa" type="number" class="w-full text-xl font-bold text-[#111111] outline-none bg-transparent" placeholder="BỎ TRỐNG">
+                  <input type="text"
+                    :value="formatCurrency(currentVoucher.giaTriToiDa)"
+                    @input="e => currentVoucher.giaTriToiDa = parseCurrency(e.target.value)"
+                    @blur="e => e.target.value = formatCurrency(currentVoucher.giaTriToiDa)"
+                    class="w-full text-xl font-bold text-[#111111] outline-none bg-transparent" placeholder="BỎ TRỐNG">
                 </div>
                 <div class="p-5 bg-white">
                   <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em] mb-2">Tổng số lượt</label>
@@ -187,7 +195,11 @@
               <div class="grid grid-cols-2 gap-6">
                 <div>
                   <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-3">Đơn hàng tối thiểu</label>
-                  <input v-model="currentVoucher.giaTriToiThieu" type="number" class="lux-input text-lg" placeholder="0">
+                  <input type="text"
+                    :value="formatCurrency(currentVoucher.giaTriToiThieu)"
+                    @input="e => currentVoucher.giaTriToiThieu = parseCurrency(e.target.value)"
+                    @blur="e => e.target.value = formatCurrency(currentVoucher.giaTriToiThieu)"
+                    class="lux-input text-lg" placeholder="0">
                 </div>
                 <div>
                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-3">Mỗi User dùng</label>
@@ -223,7 +235,11 @@
 
               <div v-if="currentVoucher.apDungCho === 'VIP'" class="bg-[#FDFCFB] p-6 border border-[#E5E7EB] animate-fade-in shadow-inner">
                 <label class="block text-[10px] font-bold text-[#C8A97E] uppercase tracking-[0.2em] mb-3">Điều kiện VIP: Tổng chi tiêu ≥</label>
-                <input v-model="currentVoucher.minTotalSpendingVIP" type="number" class="lux-input bg-white text-lg" placeholder="50.000.000">
+                <input type="text"
+                    :value="formatCurrency(currentVoucher.minTotalSpendingVIP)"
+                    @input="e => currentVoucher.minTotalSpendingVIP = parseCurrency(e.target.value)"
+                    @blur="e => e.target.value = formatCurrency(currentVoucher.minTotalSpendingVIP)"
+                    class="lux-input bg-white text-lg" placeholder="50,000,000">
               </div>
 
               <div class="grid grid-cols-2 gap-6">
@@ -378,6 +394,15 @@ export default {
     formatPrice(price) {
       if (!price) return '0đ';
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    },
+    formatCurrency(value) {
+      if (!value) return '';
+      return Number(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    },
+    parseCurrency(value) {
+      if (!value) return null;
+      const parsed = parseInt(value.replace(/,/g, '').replace(/\D/g, ''), 10);
+      return isNaN(parsed) ? null : parsed;
     },
     formatDate(dateStr) {
       if (!dateStr) return '';

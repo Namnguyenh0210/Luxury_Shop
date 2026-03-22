@@ -6,7 +6,6 @@ import com.example.projectend.entity.DonHang;
 import com.example.projectend.entity.DonHangChiTiet;
 import com.google.gson.Gson;
 import okhttp3.*;
-import org.apache.commons.codec.digest.HmacUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * ✨ PAYOS SERVICE

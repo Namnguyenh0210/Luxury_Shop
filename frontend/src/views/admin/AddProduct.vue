@@ -129,11 +129,11 @@ export default {
       try {
         const response = await axios.post('/admin/products', this.form);
         if (response.data) {
-          alert('Thêm sản phẩm thành công!');
+          window.$toast.success('Thêm sản phẩm thành công!')
           this.$router.push('/admin/products');
         }
       } catch (e) {
-        alert('Lỗi: ' + (e.response?.data?.message || 'Không thể tạo sản phẩm'));
+        window.$toast.error('Lỗi: ' + (e.response?.data?.message || 'Không thể tạo sản phẩm'))
       } finally {
         this.saving = false;
       }

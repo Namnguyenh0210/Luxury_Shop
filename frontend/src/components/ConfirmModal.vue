@@ -5,35 +5,33 @@
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="handleCancel"></div>
       
       <!-- Modal Content -->
-      <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-sm relative z-10 overflow-hidden transform transition-all border border-gray-100">
+      <div class="bg-white rounded-[40px] shadow-[0_30px_100px_rgba(0,0,0,0.25)] w-full max-w-sm relative z-10 overflow-hidden transform transition-all border border-gray-100">
         <!-- Top accent -->
-        <div :class="['h-2 w-full', state.type === 'confirm' ? 'bg-yellow-400' : 'bg-blue-500']"></div>
+        <div class="h-2 w-full bg-[#C8A97E]"></div>
         
-        <div class="p-8">
+        <div class="p-10">
           <!-- Icon -->
-          <div :class="['w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg', 
-                       state.type === 'confirm' ? 'bg-yellow-50 text-yellow-600' : 'bg-blue-50 text-blue-600']">
-            <span class="material-symbols-outlined text-3xl">
-              {{ state.type === 'confirm' ? 'help_outline' : 'info' }}
+          <div class="w-20 h-20 rounded-3xl flex items-center justify-center mb-8 mx-auto shadow-xl bg-[#FDF8F3] text-[#C8A97E] border border-[#C8A97E]/10">
+            <span class="material-symbols-outlined text-4xl">
+              {{ state.type === 'confirm' ? 'help' : 'info' }}
             </span>
           </div>
           
           <!-- Text -->
-          <div class="text-center space-y-2 mb-8">
-            <h3 class="text-xl font-black text-gray-900 leading-tight">{{ state.title }}</h3>
-            <p class="text-gray-500 font-medium text-sm leading-relaxed">{{ state.message }}</p>
+          <div class="text-center space-y-3 mb-10">
+            <h3 class="text-2xl font-black text-gray-900 leading-tight uppercase tracking-wider">{{ state.title }}</h3>
+            <p class="text-gray-500 font-medium text-sm leading-relaxed px-2">{{ state.message }}</p>
           </div>
           
           <!-- Buttons -->
-          <div class="flex gap-3">
+          <div class="flex gap-4">
             <button v-if="state.type === 'confirm'"
                     @click="handleCancel"
-                    class="flex-1 py-3 px-4 bg-gray-50 text-gray-400 rounded-xl font-bold text-sm hover:bg-gray-100 hover:text-gray-600 transition-all active:scale-95">
+                    class="flex-1 py-4 px-6 bg-gray-50 text-gray-400 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-gray-100 hover:text-gray-600 transition-all active:scale-95 border border-gray-200/50">
               {{ state.cancelText }}
             </button>
             <button @click="handleConfirm"
-                    :class="['flex-1 py-3 px-4 text-white rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95',
-                             state.type === 'confirm' ? 'bg-yellow-500 hover:bg-yellow-600 shadow-yellow-200' : 'bg-blue-500 hover:bg-blue-600 shadow-blue-200']">
+                    class="flex-1 py-4 px-6 bg-[#C8A97E] text-white rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[#B8986E] transition-all shadow-lg shadow-[#C8A97E]/30 active:scale-95">
               {{ state.confirmText }}
             </button>
           </div>

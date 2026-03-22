@@ -534,7 +534,10 @@
             <div class="space-y-1.5">
               <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Giá Nhập <span class="text-red-500">*</span></label>
               <div class="relative">
-                <input type="number" v-model.number="newItem.price" min="0"
+                <input type="text"
+                  :value="formatCurrency(newItem.price)"
+                  @input="e => newItem.price = parseCurrency(e.target.value)"
+                  @blur="e => e.target.value = formatCurrency(newItem.price)"
                   class="w-full border border-gray-200 rounded-xl pl-4 pr-8 py-2.5 text-sm bg-white focus:border-[#C8A97E] focus:outline-none transition-all font-bold text-gray-700" />
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">đ</span>
               </div>
@@ -542,7 +545,10 @@
             <div class="space-y-1.5">
               <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Giá Bán Lẻ <span v-if="newItem.isNewProduct" class="text-red-500">*</span></label>
               <div class="relative">
-                <input type="number" v-model.number="newItem.giaBan" min="0"
+                <input type="text"
+                  :value="formatCurrency(newItem.giaBan)"
+                  @input="e => newItem.giaBan = parseCurrency(e.target.value)"
+                  @blur="e => e.target.value = formatCurrency(newItem.giaBan)"
                   :disabled="!newItem.isNewProduct && newItem.productId"
                   class="w-full border border-gray-200 rounded-xl pl-4 pr-8 py-2.5 text-sm bg-white focus:border-[#C8A97E] focus:outline-none transition-all font-bold text-yellow-800 disabled:bg-gray-50" />
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">đ</span>
@@ -1391,6 +1397,15 @@ export default {
     removeItem(idx) { this.form.items.splice(idx, 1) },
     fmtCurrency(v) {
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v || 0)
+    },
+    formatCurrency(value) {
+      if (!value) return '0';
+      return Number(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    },
+    parseCurrency(value) {
+      if (!value) return 0;
+      const parsed = parseInt(value.replace(/,/g, '').replace(/\D/g, ''), 10);
+      return isNaN(parsed) ? 0 : parsed;
     },
     formatDateTime(d) {
       if (!d) return '—'
