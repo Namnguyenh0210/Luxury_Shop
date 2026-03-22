@@ -1,16 +1,13 @@
 package com.example.projectend.controller;
 
-import com.example.projectend.entity.SanPham;
 import com.example.projectend.entity.SanPhamYeuThich;
 import com.example.projectend.entity.TaiKhoan;
-import com.example.projectend.repository.SanPhamRepository;
 import com.example.projectend.repository.SanPhamYeuThichRepository;
 import com.example.projectend.service.SanPhamYeuThichService;
 import com.example.projectend.service.TaiKhoanService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import jakarta.transaction.Transactional;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,9 +21,6 @@ public class SanPhamYeuThichController {
 
     @Autowired
     private SanPhamYeuThichRepository sanPhamYeuThichRepository;
-
-    @Autowired
-    private SanPhamRepository sanPhamRepository;
 
     @Autowired
     private TaiKhoanService taiKhoanService;

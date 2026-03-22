@@ -34,7 +34,7 @@ public class SanPham {
     @Column(name = "MoTa", columnDefinition = "NVARCHAR(MAX)")
     private String moTa;
 
-    @Column(name = "AnhChinh", length = 255)
+    @Column(name = "AnhChinh", columnDefinition = "NVARCHAR(MAX)")
     private String anhChinh;
 
     @Column(name = "GioiTinh", nullable = false)
@@ -52,7 +52,7 @@ public class SanPham {
     @Transient
     private Integer totalStock = 0;
 
-    @OneToMany(mappedBy = "sanPham", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sanPham", cascade = { CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JsonIgnoreProperties("sanPham") // THÊM DÒNG NÀY ĐỂ CHẠY ĐƯỢC JSON
     private java.util.List<SanPhamChiTiet> variants = new java.util.ArrayList<>();
 

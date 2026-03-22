@@ -1,4 +1,5 @@
 <template>
+ <div class="admin-products-view-root">
   <div class="w-full mx-auto p-8 space-y-6">
       
       <!-- NAVIGATION TABS -->
@@ -574,7 +575,7 @@
         </form>
       </div>
     </div>
-
+  </div>
 </template>
 
 <script>

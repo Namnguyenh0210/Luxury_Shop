@@ -87,7 +87,7 @@ public class SanPhamController {
             return ResponseEntity.ok(Map.of("success", false, "message", "Sản phẩm không tồn tại"));
         }
         Optional<SanPhamChiTiet> variantOpt = sanPhamChiTietRepository
-                .findTop1BySanPham_MaSPAndSoLuongTonGreaterThanOrderBySoLuongTonDesc(id, 0);
+                .findTop1BySanPham_MaSPAndSoLuongTonGreaterThanAndTrangThaiTrueOrderBySoLuongTonDesc(id, 0);
         if (variantOpt.isEmpty()) {
             return ResponseEntity.ok(Map.of("success", false, "message", "Sản phẩm tạm hết hàng"));
         }

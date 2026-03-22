@@ -44,7 +44,7 @@ public class SanPhamChiTiet {
     @Column(name = "SoLuongDaBan")
     private Integer soLuongDaBan = 0;
 
-    @Column(name = "AnhBienThe", length = 255)
+    @Column(name = "AnhBienThe", columnDefinition = "NVARCHAR(MAX)")
     private String anhBienThe;
 
     @Column(name = "SKU", length = 100, unique = true)

@@ -74,10 +74,10 @@
             </div>
 
             <div class="mt-auto pt-6 border-t border-gray-200">
-              <a href="/api/auth/logout" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 group transition-all">
+              <button @click="handleLogout" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 group transition-all text-left">
                 <span class="material-symbols-outlined text-red-600 group-hover:text-red-700" style="font-size: 20px;">logout</span>
                 <p class="text-sm font-medium text-red-600 group-hover:text-red-700">Đăng xuất</p>
-              </a>
+              </button>
             </div>
           </div>
         </aside>
@@ -111,15 +111,8 @@
               <!-- Account Information Tab -->
               <section v-if="activeTab === 'info'">
 
-                <!-- Success/Error Messages -->
-                <div v-if="successMessage" class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-3 mb-6 animate-fade-in">
-                  <span class="material-symbols-outlined text-green-600">check_circle</span>
-                  <p class="font-medium">{{ successMessage }}</p>
-                </div>
-                <div v-if="errorMessage" class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-3 mb-6">
-                  <span class="material-symbols-outlined text-red-600">error</span>
-                  <p class="font-medium">{{ errorMessage }}</p>
-                </div>
+                <!-- Success/Error Messages Removed (Now using toasts) -->
+
 
                 <form @submit.prevent="updateProfile" enctype="multipart/form-data">
                   <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -1063,19 +1056,18 @@ export default {
         })
 
         if (response.data.success) {
-          this.successMessage = 'Cập nhật thông tin thành công!'
+          window.$toast.success('Cập nhật thông tin thành công!')
           if (response.data.avatar) this.user.avatar = response.data.avatar
           if (response.data.hoTen) this.user.hoTen = response.data.hoTen
           this.isEditingInfo = false
           this.avatarPreview = null
           this.userSnapshot = null
-          setTimeout(() => { this.successMessage = '' }, 3000)
         } else {
-          this.errorMessage = response.data.message || 'Cập nhật thất bại'
+          window.$toast.error(response.data.message || 'Cập nhật thất bại')
         }
       } catch (err) {
         console.error('Error updating profile:', err)
-        this.errorMessage = 'Có lỗi xảy ra khi cập nhật thông tin'
+        window.$toast.error('Có lỗi xảy ra khi cập nhật thông tin')
       } finally {
         this.isUpdating = false
       }
@@ -1121,7 +1113,7 @@ export default {
         })
 
         if (response.data.success) {
-          this.passwordSuccess = 'Đổi mật khẩu thành công!'
+          window.$toast.success('Đổi mật khẩu thành công!')
           this.passwordForm = {
             currentPassword: '',
             newPassword: '',
@@ -1131,15 +1123,14 @@ export default {
           this.showNewPassword = false
           this.showConfirmPassword = false
           setTimeout(() => {
-            this.passwordSuccess = ''
             this.showPasswordModal = false
           }, 1500)
         } else {
-          this.passwordError = response.data.message || 'Đổi mật khẩu thất bại'
+          window.$toast.error(response.data.message || 'Đổi mật khẩu thất bại')
         }
       } catch (err) {
         console.error('Error changing password:', err)
-        this.passwordError = err.response?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu'
+        window.$toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu')
       } finally {
         this.isChangingPassword = false
       }
@@ -1166,10 +1157,10 @@ export default {
         this.newAddress = { ten: '', phone: '', diaChi: '', ghiChu: '' }
         this.showAddAddress = false // Đóng popup khi thêm thành công
         this.fetchAddresses()
-        window.$alert("Đã thêm địa chỉ mới!", "Thành công");
+        window.$toast.success("Đã thêm địa chỉ mới!");
       } catch (err) {
         console.error("Save address error", err)
-        window.$alert("Lỗi khi thêm địa chỉ!", "Lỗi");
+        window.$toast.error("Lỗi khi thêm địa chỉ!");
       }
     },
 
@@ -1179,9 +1170,10 @@ export default {
         formData.append("id", id)
         await axios.post("/profile/address/set-default", formData)
         this.fetchAddresses()
+        window.$toast.success("Đã đặt địa chỉ mặc định!");
       } catch (err) {
         console.error("Set default address error", err)
-        window.$alert("Lỗi khi đặt địa chỉ mặc định!", "Lỗi");
+        window.$toast.error("Lỗi khi đặt địa chỉ mặc định!");
       }
     },
 
@@ -1193,9 +1185,10 @@ export default {
         formData.append("id", id)
         await axios.post("/profile/address/delete", formData)
         this.fetchAddresses()
+        window.$toast.success("Đã xóa địa chỉ!");
       } catch (err) {
         console.error("Delete address error", err)
-        window.$alert("Lỗi khi xóa địa chỉ!", "Lỗi");
+        window.$toast.error("Lỗi khi xóa địa chỉ!");
       }
     },
 
@@ -1291,12 +1284,32 @@ export default {
             withCredentials: true
           }
         )
-        window.$alert('Đã gửi báo cáo cho Admin!', 'Thành công')
+        window.$toast.success('Đã gửi báo cáo cho Admin!')
         this.closeReportModal()
         this.fetchOrders()
       } catch (err) {
         console.error('Submit report error', err)
-        window.$alert('Lỗi: ' + (err.response?.data?.message || 'Không thể gửi báo cáo'), 'Lỗi')
+        window.$toast.error((err.response?.data?.message || 'Không thể gửi báo cáo'))
+      }
+    },
+    
+    async handleLogout() {
+      try {
+        console.log('🔴 Starting logout process in Profile...')
+        
+        // 1. Invalidate local session
+        this.user = { hoTen: '', email: '', soDienThoai: '', avatar: null }
+        
+        // 2. Call logout function
+        await axios.post('/auth/logout', null, { withCredentials: true })
+        
+        // 3. Force navigate to home
+        window.location.href = '/'
+        
+      } catch (error) {
+        console.error('🔴 Logout failed:', error)
+        // Force reload even if error
+        window.location.href = '/'
       }
     },
   },

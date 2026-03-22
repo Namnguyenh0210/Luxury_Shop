@@ -64,7 +64,13 @@
 
                     <!-- Price -->
                     <div class="border-t border-b border-gray-200 py-4">
-                        <div v-if="minPrice && maxPrice && minPrice.toString() !== maxPrice.toString()" class="text-3xl font-bold text-[#C8A97E]">
+                        <!-- Hiển thị giá cụ thể khi ĐÃ CHỌN đủ cấu hình -->
+                        <div v-if="selectedVariant" class="text-3xl font-bold text-[#C8A97E]">
+                            {{ formatPrice(selectedVariant.giaBan) }}
+                        </div>
+
+                        <!-- Hiển thị khoảng giá Min/Max khi CHƯA CHỌN đủ cấu hình -->
+                        <div v-else-if="minPrice && maxPrice && minPrice.toString() !== maxPrice.toString()" class="text-3xl font-bold text-[#C8A97E]">
                             {{ formatPrice(minPrice) }} - {{ formatPrice(maxPrice) }}
                         </div>
                         <div v-else-if="minPrice" class="text-3xl font-bold text-[#C8A97E]">
@@ -73,7 +79,14 @@
                         <div v-else class="text-3xl font-bold text-[#C8A97E]">
                             Liên hệ
                         </div>
-                        <p class="text-sm text-gray-600 mt-1">{{ totalStock > 0 ? `${totalStock} sản phẩm trong kho` : 'Hết hàng' }}</p>
+
+                        <!-- Hiển thị số lượng tồn kho -->
+                        <p v-if="selectedVariant" class="text-sm text-gray-600 mt-1">
+                            {{ selectedVariant.soLuongTon > 0 ? `${selectedVariant.soLuongTon} sản phẩm có sẵn cho phân loại này` : 'Phân loại này đã hết hàng' }}
+                        </p>
+                        <p v-else class="text-sm text-gray-600 mt-1">
+                            {{ totalStock > 0 ? `${totalStock} sản phẩm trong kho` : 'Hết hàng' }}
+                        </p>
                     </div>
 
                     <!-- Variant Selection -->
@@ -85,9 +98,11 @@
                                 <button 
                                     v-for="size in availableSizes" 
                                     :key="size"
-                                    @click="selectedSize = size"
+                                    @click="selectSize(size)"
+                                    :disabled="!isSizeAvailable(size)"
                                     :class="['px-4 py-2 border rounded-md font-medium transition-all duration-200 min-w-[3rem] text-center',
-                                             selectedSize === size ? 'item-active' : 'item-inactive']"
+                                             selectedSize === size ? 'item-active' : 'item-inactive',
+                                             !isSizeAvailable(size) ? 'opacity-30 cursor-not-allowed bg-gray-100 italic' : 'hover:border-black cursor-pointer']"
                                 >
                                     {{ size }}
                                 </button>
@@ -101,9 +116,11 @@
                                 <button 
                                     v-for="color in availableColors" 
                                     :key="color"
-                                    @click="selectedColor = color"
+                                    @click="selectColor(color)"
+                                    :disabled="!isColorAvailable(color)"
                                     :class="['px-4 py-2 border rounded-md font-medium transition-all duration-200 min-w-[4rem] text-center',
-                                             selectedColor === color ? 'item-active' : 'item-inactive']"
+                                             selectedColor === color ? 'item-active' : 'item-inactive',
+                                             !isColorAvailable(color) ? 'opacity-30 cursor-not-allowed bg-gray-100 italic' : 'hover:border-black cursor-pointer']"
                                 >
                                     {{ color }}
                                 </button>
@@ -224,7 +241,6 @@ export default {
       variants: [],
       minPrice: null,
       maxPrice: null,
-      totalStock: 0,
       reviews: [],
       reviewCount: 0,
       relatedProducts: [],
@@ -258,17 +274,47 @@ export default {
       return this.variants.find(v => 
         (!this.selectedSize || v.sizeSP?.tenSize === this.selectedSize) &&
         (!this.selectedColor || v.mauSacSP?.tenMau === this.selectedColor) &&
-        v.soLuongTon > 0
+        v.soLuongTon > 0 && v.trangThai !== false
       )
     },
     maxQuantity() {
       return this.selectedVariant?.soLuongTon || this.totalStock || 99
     },
     canAddToCart() {
-      return this.totalStock > 0 && this.quantity > 0 && this.quantity <= this.maxQuantity
+      return this.selectedVariant != null && this.totalStock > 0 && this.quantity > 0 && this.quantity <= this.maxQuantity
+    },
+    totalStock() {
+      if (!this.variants) return 0;
+      return this.variants
+        .filter(v => v.trangThai !== false)
+        .reduce((sum, v) => sum + (v.soLuongTon || 0), 0);
     }
   },
   methods: {
+    isSizeAvailable(size) {
+        if (!this.selectedColor) return true;
+        return this.variants.some(v => v.sizeSP?.tenSize === size && v.mauSacSP?.tenMau === this.selectedColor && v.soLuongTon > 0 && v.trangThai !== false);
+    },
+    isColorAvailable(color) {
+        if (!this.selectedSize) return true;
+        return this.variants.some(v => v.mauSacSP?.tenMau === color && v.sizeSP?.tenSize === this.selectedSize && v.soLuongTon > 0 && v.trangThai !== false);
+    },
+    selectSize(size) {
+        if (this.selectedSize === size) {
+            this.selectedSize = null; // Unselect to unlock colors
+            return;
+        }
+        if (!this.isSizeAvailable(size)) return; // Strict lock
+        this.selectedSize = size;
+    },
+    selectColor(color) {
+        if (this.selectedColor === color) {
+            this.selectedColor = null; // Unselect to unlock sizes
+            return;
+        }
+        if (!this.isColorAvailable(color)) return; // Strict lock
+        this.selectedColor = color;
+    },
     async fetchProduct() {
       this.loading = true
       this.error = null
@@ -282,16 +328,21 @@ export default {
           this.variants = response.data.variants || []
           this.minPrice = response.data.minPrice
           this.maxPrice = response.data.maxPrice
-          this.totalStock = response.data.totalStock || 0
           this.reviews = response.data.reviews || []
           this.reviewCount = response.data.reviewCount || 0
           this.relatedProducts = response.data.relatedProducts || []
           
           this.currentImage = this.productImages[0]
           
-          // Auto-select first available variant
-          if (this.availableSizes.length > 0) this.selectedSize = this.availableSizes[0]
-          if (this.availableColors.length > 0) this.selectedColor = this.availableColors[0]
+          // Auto-select first valid variant combination
+          const firstAvailable = this.variants.find(v => v.soLuongTon > 0 && v.trangThai !== false);
+          if (firstAvailable) {
+              this.selectedSize = firstAvailable.sizeSP?.tenSize || null;
+              this.selectedColor = firstAvailable.mauSacSP?.tenMau || null;
+          } else if (this.variants.length > 0) {
+              this.selectedSize = this.variants[0].sizeSP?.tenSize || null;
+              this.selectedColor = this.variants[0].mauSacSP?.tenMau || null;
+          }
         } else {
           this.error = response.data.message || 'Product not found'
         }
@@ -384,14 +435,14 @@ export default {
         const response = await axios.post('/cart/add-product', null, { params })
         
         if (response.data.success) {
-          window.$alert(response.data.message, 'Thành công')
+          window.$toast.success(response.data.message)
           this.quantity = 1
         } else {
-          window.$alert(response.data.message, 'Thông báo')
+          window.$toast.info(response.data.message)
         }
       } catch (err) {
         console.error('Error adding to cart:', err)
-        window.$alert('Không thể thêm sản phẩm vào giỏ hàng', 'Lỗi')
+        window.$toast.error('Không thể thêm sản phẩm vào giỏ hàng')
       }
     }
   },

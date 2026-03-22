@@ -150,7 +150,7 @@ export default {
         }
       } catch (err) {
         console.error('Error fetching cart:', err)
-        window.$alert('Không thể tải giỏ hàng', 'Lỗi')
+        window.$toast.error('Không thể tải giỏ hàng')
       } finally {
         this.loading = false
       }
@@ -167,11 +167,11 @@ export default {
         if (response.data.success) {
           item.soLuong = newQuantity
         } else {
-          window.$alert(response.data.message, 'Thông báo')
+          window.$toast.info(response.data.message)
         }
       } catch (err) {
         console.error('Error updating quantity:', err)
-        window.$alert('Không thể cập nhật số lượng', 'Lỗi')
+        window.$toast.error('Không thể cập nhật số lượng')
       }
     },
     
@@ -186,12 +186,13 @@ export default {
         
         if (response.data.success) {
           this.items = this.items.filter(i => i.maGHCT !== item.maGHCT)
+          window.$toast.success('Đã xóa sản phẩm khỏi giỏ hàng')
         } else {
-          window.$alert(response.data.message, 'Lỗi')
+          window.$toast.error(response.data.message)
         }
       } catch (err) {
         console.error('Error removing item:', err)
-        window.$alert('Không thể xóa sản phẩm', 'Lỗi')
+        window.$toast.error('Không thể xóa sản phẩm')
       }
     },
     

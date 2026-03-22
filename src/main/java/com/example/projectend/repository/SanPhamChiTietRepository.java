@@ -26,19 +26,19 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
     );
 
     // Lấy giá rẻ nhất của 1 sản phẩm
-    @Query("SELECT MIN(spct.giaBan) FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP = :maSP")
+    @Query("SELECT MIN(spct.giaBan) FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP = :maSP AND spct.trangThai = true")
     BigDecimal findMinPriceBySanPham(@Param("maSP") Long maSP);
 
     // Lấy giá đắt nhất của 1 sản phẩm
-    @Query("SELECT MAX(spct.giaBan) FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP = :maSP")
+    @Query("SELECT MAX(spct.giaBan) FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP = :maSP AND spct.trangThai = true")
     BigDecimal findMaxPriceBySanPham(@Param("maSP") Long maSP);
 
     // Lấy tổng tồn kho của 1 sản phẩm
-    @Query("SELECT SUM(spct.soLuongTon) FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP = :maSP")
+    @Query("SELECT SUM(spct.soLuongTon) FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP = :maSP AND spct.trangThai = true")
     Integer findTotalStockBySanPham(@Param("maSP") Long maSP);
 
     // Lấy biến thể còn hàng đầu tiên của một sản phẩm
-    java.util.Optional<SanPhamChiTiet> findTop1BySanPham_MaSPAndSoLuongTonGreaterThanOrderBySoLuongTonDesc(Long maSP, Integer soLuongTon);
+    java.util.Optional<SanPhamChiTiet> findTop1BySanPham_MaSPAndSoLuongTonGreaterThanAndTrangThaiTrueOrderBySoLuongTonDesc(Long maSP, Integer soLuongTon);
 
     // Lấy tồn kho hiện tại trực tiếp (tránh cache) - trả về null nếu không có
     @Query(value = "SELECT SoLuongTon FROM SanPhamChiTiet WHERE MaBienThe = :id", nativeQuery = true)
@@ -56,6 +56,6 @@ public interface SanPhamChiTietRepository extends JpaRepository<SanPhamChiTiet, 
         Integer getTotalStock();
     }
 
-    @Query("SELECT spct.sanPham.maSP as maSP, MIN(spct.giaBan) as minPrice, MAX(spct.giaBan) as maxPrice, SUM(spct.soLuongTon) as totalStock FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP IN :ids GROUP BY spct.sanPham.maSP")
+    @Query("SELECT spct.sanPham.maSP as maSP, MIN(spct.giaBan) as minPrice, MAX(spct.giaBan) as maxPrice, SUM(spct.soLuongTon) as totalStock FROM SanPhamChiTiet spct WHERE spct.sanPham.maSP IN :ids AND spct.trangThai = true GROUP BY spct.sanPham.maSP")
     List<PriceStockProjection> aggregateForProducts(@Param("ids") List<Long> ids);
 }

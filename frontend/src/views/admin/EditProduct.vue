@@ -67,7 +67,10 @@
                             <label class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest mb-3 block">Giá bán niêm yết (VNĐ)</label>
                             <div class="relative flex items-center">
                                 <span class="absolute left-6 text-[#C8A97E] material-symbols-outlined text-[20px]">payments</span>
-                                <input v-model.number="form.giaBan" type="number" 
+                                <input type="text"
+                                    :value="formatCurrency(form.giaBan)"
+                                    @input="e => form.giaBan = parseCurrency(e.target.value)"
+                                    @blur="e => e.target.value = formatCurrency(form.giaBan)"
                                     class="w-full bg-transparent border border-[#C8A97E]/30 rounded-[1.5rem] pl-14 pr-12 py-4 text-xl font-bold text-[#C8A97E] outline-none focus:border-[#C8A97E] focus:ring-1 focus:ring-[#C8A97E] transition-all shadow-sm tabular-nums" />
                                 <span class="absolute right-6 text-lg font-bold text-[#C8A97E]/50 italic">₫</span>
                             </div>
@@ -107,6 +110,7 @@
                             <input v-model="form.anhChinh" placeholder="https://..." 
                                 class="w-full bg-transparent border border-[#C8A97E]/30 rounded-[1.2rem] px-5 py-3.5 text-sm font-bold text-gray-600 focus:border-[#C8A97E] transition-all outline-none" />
                         </div>
+                        
                     </div>
 
                     <!-- DESCRIPTION (FOOTER AREA) -->
@@ -180,6 +184,108 @@
                 </div>
              </div>
         </div>
+
+        <!-- FRAME 3: VARIANTS (BOTTOM - FULL WIDTH) -->
+        <div class="lg:col-span-12 mt-4 bg-white rounded-[3.5rem] border border-[#C8A97E]/30 p-12 shadow-[0_30px_100px_rgba(200,169,126,0.1)] relative overflow-hidden group/variants">
+             <!-- Background Luxury Watermark -->
+             <span class="absolute right-[-5%] top-[-5%] text-[#C8A97E]/5 font-black text-[150px] italic pointer-events-none select-none">SKU</span>
+
+             <div class="flex items-center justify-between mb-12 relative z-10">
+                <div class="flex items-center gap-6">
+                   <div class="size-20 bg-gradient-to-br from-[#C8A97E]/20 to-[#C8A97E]/5 rounded-3xl flex items-center justify-center text-[#C8A97E] shadow-inner border border-[#C8A97E]/20">
+                      <span class="material-symbols-outlined text-[40px]">inventory_2</span>
+                   </div>
+                   <div>
+                      <h2 class="text-3xl font-black text-gray-900 tracking-tight uppercase leading-none">Danh sách biến thể</h2>
+                      <p class="text-[11px] text-[#C8A97E] font-black uppercase tracking-[0.4em] italic mt-2 opacity-80">Cấu hình chi tiết kích thước, màu sắc & giá lẻ</p>
+                   </div>
+                </div>
+             </div>
+
+             <div class="overflow-x-auto custom-scrollbar relative z-10">
+                <table class="w-full border-separate border-spacing-y-4 px-2">
+                   <thead>
+                      <tr class="text-[11px] font-black uppercase tracking-[0.2em] text-[#C8A97E]/60 text-left">
+                         <th class="px-10 pb-4">Kích thước</th>
+                         <th class="px-10 pb-4">Màu sắc</th>
+                         <th class="px-10 pb-4 text-center">Tồn kho</th>
+                         <th class="px-10 pb-4">Giá bán lẻ (VNĐ)</th>
+                         <th class="px-10 pb-4 text-center">Trạng thái</th>
+                         <th class="px-10 pb-4 text-right">Tùy chọn</th>
+                      </tr>
+                   </thead>
+                   <tbody>
+                      <tr v-for="(v, idx) in variants" :key="idx" 
+                          class="bg-[#FCFAF7] hover:bg-white hover:shadow-[0_15px_40px_rgba(200,169,126,0.15)] transition-all duration-500 rounded-[2.5rem] group/v-item border border-transparent hover:border-[#C8A97E]/30">
+                         <!-- Size -->
+                         <td class="px-4 py-5 first:rounded-l-[2.5rem]">
+                            <div class="w-full bg-white border border-[#C8A97E]/10 rounded-2xl px-5 py-3 text-sm font-black text-gray-800 text-center shadow-sm relative overflow-hidden">
+                               {{ getVariantSizeName(v.maSize) }}
+                            </div>
+                         </td>
+                         <!-- Color -->
+                         <td class="px-4 py-5">
+                            <div class="w-full bg-white border border-[#C8A97E]/10 rounded-2xl px-5 py-3 text-sm font-black text-gray-800 text-center shadow-sm relative overflow-hidden">
+                               {{ getVariantColorName(v.maMau) }}
+                            </div>
+                         </td>
+                         <!-- Stock -->
+                         <td class="px-10 py-5 text-center">
+                            <div class="inline-flex flex-col items-center">
+                                <span class="text-xl font-black text-gray-900 leading-none">{{ v.soLuongTon || 0 }}</span>
+                                <span class="text-[9px] text-[#C8A97E] font-black uppercase tracking-widest mt-1 opacity-60">Sản phẩm</span>
+                            </div>
+                         </td>
+                         <!-- Price -->
+                         <td class="px-4 py-5">
+                            <div class="relative group/price-input">
+                               <input type="text" 
+                                      :value="formatCurrency(v.giaBan)"
+                                      @input="e => v.giaBan = parseCurrency(e.target.value)"
+                                      @blur="e => e.target.value = formatCurrency(v.giaBan)"
+                                      class="w-full bg-white border border-[#C8A97E]/20 rounded-2xl px-6 py-3 text-base font-black text-gray-900 placeholder-gray-300 focus:border-[#C8A97E] focus:ring-1 focus:ring-[#C8A97E] outline-none transition-all shadow-sm pr-10">
+                               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] text-[#C8A97E] font-black italic">đ</span>
+                            </div>
+                         </td>
+                         <!-- Status Switch -->
+                         <td class="px-10 py-5 text-center">
+                            <div class="flex flex-col items-center gap-2">
+                                <label class="relative inline-flex items-center cursor-pointer scale-110">
+                                  <input type="checkbox" v-model="v.trangThai" class="sr-only peer">
+                                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C8A97E]"></div>
+                                </label>
+                                <span class="text-[9px] font-black uppercase tracking-[0.2em]" :class="v.trangThai ? 'text-green-600' : 'text-gray-400'">
+                                    {{ v.trangThai ? 'Đang bán' : 'Tạm ẩn' }}
+                                </span>
+                            </div>
+                         </td>
+                         <!-- Delete Action -->
+                         <td class="px-10 py-5 text-right last:rounded-r-[2.5rem]">
+                            <button v-if="v.soLuongTon === 0" @click.prevent="removeVariant(idx)" 
+                                class="size-12 bg-white border border-red-50 rounded-2xl flex items-center justify-center text-red-300 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all shadow-sm hover:shadow-lg hover:shadow-red-500/20 active:scale-90 ml-auto" title="Xóa tùy chọn">
+                               <span class="material-symbols-outlined text-[24px]">delete_outline</span>
+                            </button>
+                            <div v-else class="size-12 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-center text-gray-300 ml-auto cursor-not-allowed group/hint relative" title="Chỉ được xóa khi tồn kho = 0">
+                               <span class="material-symbols-outlined text-[24px]">delete_outline</span>
+                               <!-- Tooltip on hover -->
+                               <span class="absolute right-full mr-2 opacity-0 group-hover/hint:opacity-100 transition-opacity whitespace-nowrap bg-gray-800 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-lg tracking-widest pointer-events-none z-20">Không thể xóa khi còn tồn</span>
+                            </div>
+                         </td>
+                      </tr>
+                   </tbody>
+                </table>
+             </div>
+             
+             <!-- EMPTY STATE -->
+             <div v-if="variants.length === 0" class="flex flex-col items-center justify-center py-28 text-gray-400 bg-[#FCFAF7] rounded-[3rem] border-2 border-dashed border-[#C8A97E]/30 mt-10">
+                <div class="size-24 bg-white rounded-full flex items-center justify-center shadow-xl mb-8 border border-[#C8A97E]/10">
+                    <span class="material-symbols-outlined text-5xl text-[#C8A97E]/20">inventory_2</span>
+                </div>
+                <h3 class="text-lg font-black text-gray-800 tracking-tight text-center">Sản phẩm chưa có lựa chọn phân loại</h3>
+                <p class="text-sm text-[#C8A97E] italic mt-2 opacity-70">Các biến thể cụ thể (Màu sắc, Size) sẽ được tự tạo thông qua phiếu tạo và nhập kho.</p>
+             </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -201,8 +307,16 @@ export default {
         anhChinh: '',
         giaBan: 0,
         moTa: '',
-        trangThaiSP: 1
-      }
+        trangThaiSP: 1,
+        maLoai: '',
+        maTH: '',
+        gioiTinh: 2
+      },
+      categories: [],
+      brands: [],
+      sizes: [],
+      colors: [],
+      variants: []
     }
   },
   methods: {
@@ -210,11 +324,28 @@ export default {
       const productId = this.$route.params.id;
       this.loading = true;
       try {
-        const res = await axios.get(`/admin/products/${productId}`);
-        const p = res.data;
+        const [prodRes, catRes, brandRes, sizeRes, colorRes] = await Promise.all([
+          axios.get(`/admin/products/${productId}`),
+          axios.get('/admin/categories'),
+          axios.get('/admin/brands'),
+          axios.get('/admin/products/sizes'),
+          axios.get('/admin/products/colors')
+        ]);
+
+        const p = prodRes.data;
         if (!p) throw new Error("Thông tin sản phẩm không tồn tại");
 
         this.originalProduct = p;
+        this.categories = catRes.data;
+        this.brands = brandRes.data;
+        this.sizes = sizeRes.data;
+        this.colors = colorRes.data;
+        this.variants = (p.variants || []).map(v => ({
+            ...v,
+            maSize: v.sizeSP?.maSize || '',
+            maMau: v.mauSacSP?.maMau || ''
+        }));
+
         const basePrice = (p.variants && p.variants.length > 0) ? p.variants[0].giaBan : 0;
 	
         this.form = {
@@ -223,12 +354,15 @@ export default {
           anhChinh: p.anhChinh || '',
           giaBan: basePrice,
           moTa: p.moTa || '',
-          trangThaiSP: p.trangThaiSP ?? 1
+          trangThaiSP: p.trangThaiSP ?? 1,
+          maLoai: p.loaiSanPham?.maLoai || '',
+          maTH: p.thuongHieu?.maTH || '',
+          gioiTinh: p.gioiTinh ?? 2
         };
 
       } catch (e) {
         console.error("Lỗi FetchData:", e);
-        if (window.$alert) window.$alert(e.message || 'Hệ thống gián đoạn!', 'Lỗi');
+        window.$toast.error(e.message || 'Hệ thống gián đoạn!')
         this.$router.push('/admin/products');
       } finally {
         this.loading = false;
@@ -236,35 +370,78 @@ export default {
     },
 
 	async updateProduct() {
-	  if (!this.form.tenSP.trim()) return alert("Tên sản phẩm bắt buộc nhập");
-	  if (this.form.giaBan < 0) return alert("Giá trị không hợp lệ");
+	  if (!this.form.tenSP.trim()) return window.$toast.warning("Tên sản phẩm bắt buộc nhập");
+	  if (this.form.giaBan < 0) return window.$toast.warning("Giá trị không hợp lệ");
 
 	  this.saving = true;
 	  try {
+        // Tìm object đầy đủ cho các quan hệ
+        const selectedCat = this.categories.find(c => c.maLoai == this.form.maLoai);
+        const selectedBrand = this.brands.find(b => b.maTH == this.form.maTH);
+
 	    const payload = { 
 	        ...this.originalProduct,
 	        tenSP: this.form.tenSP,
 	        anhChinh: this.form.anhChinh,
 	        moTa: this.form.moTa,
 	        trangThaiSP: this.form.trangThaiSP,
-			maSP: this.form.maSP
+			maSP: this.form.maSP,
+            gioiTinh: this.form.gioiTinh,
+            loaiSanPham: selectedCat,
+            thuongHieu: selectedBrand,
+            variants: this.variants.map(v => {
+                // Ensure correct objects for size/color
+                const s = this.sizes.find(sz => sz.maSize == v.maSize || sz.maSize == v.sizeSP?.maSize);
+                const c = this.colors.find(cl => cl.maMau == v.maMau || cl.maMau == v.mauSacSP?.maMau);
+                return {
+                    ...v,
+                    sizeSP: s,
+                    mauSacSP: c,
+                    sanPham: { maSP: this.form.maSP }
+                };
+            })
 	    };
-
-	    // ❌ TẠM THỜI KHÔNG ĐỤNG VARIANTS
 
 	    const response = await axios.post('/admin/products', payload);
 	    
 	    if (response.data) {
-	      window.$toast?.success('Dữ liệu đã được lưu thành công!');
+          window.$toast.success('Dữ liệu đã được lưu thành công!')
 	      this.$router.push('/admin/products');
 	    }
 	  } catch (e) {
 	    console.error("Lỗi Update:", e);
-	    alert('Cảnh báo: ' + (e.response?.data?.message || 'Lỗi lưu dữ liệu'));
+		const msg = e.response?.data?.message || e.message || 'Lỗi lưu dữ liệu';
+	    window.$toast.error('Cảnh báo: ' + msg);
 	  } finally {
 	    this.saving = false;
 	  }
 	},
+
+
+    removeVariant(idx) {
+        this.variants.splice(idx, 1);
+    },
+
+    formatCurrency(value) {
+        if (!value) return '';
+        return Number(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    },
+
+    parseCurrency(value) {
+        if (!value) return 0;
+        const parsed = parseInt(String(value).replace(/,/g, '').replace(/\D/g, ''), 10);
+        return isNaN(parsed) ? 0 : parsed;
+    },
+
+    getVariantSizeName(id) {
+        const s = this.sizes.find(sz => sz.maSize == id);
+        return s ? s.tenSize : '---';
+    },
+
+    getVariantColorName(id) {
+        const c = this.colors.find(cl => cl.maMau == id);
+        return c ? c.tenMau : '---';
+    },
 
     formatDate(date) {
         if (!date) return 'NaN';
@@ -299,15 +476,18 @@ export default {
 input, textarea {
   box-shadow: none !important;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
+  appearance: none;
   margin: 0;
 }
 input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .animate-in {
