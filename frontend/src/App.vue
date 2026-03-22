@@ -52,6 +52,7 @@ export default {
     }
   },
   methods: {
+
     addToast(payload) {
       const id = ++this.toastId
       const toast = typeof payload === 'string' 
@@ -73,6 +74,7 @@ export default {
     window.addEventListener('show-toast', (e) => this.addToast(e.detail))
   }
 }
+
 </script>
 
 <style>
