@@ -486,7 +486,7 @@ public class ApiController {
     /**
      * API đăng xuất
      */
-    @PostMapping("/auth/logout")
+    @RequestMapping(value = "/auth/logout", method = {RequestMethod.GET, RequestMethod.POST})
     public ResponseEntity<Map<String, Object>> logout(
             jakarta.servlet.http.HttpServletRequest request,
             jakarta.servlet.http.HttpServletResponse response) {

@@ -425,17 +425,18 @@ export default {
         await this.fetchOrder()
       } catch (e) {
         console.error(e)
-        window.$alert('Không thể hủy đơn hàng: ' + (e.response?.data?.message || 'Vui lòng thử lại.'), 'Lỗi')
+        window.$toast.error('Không thể hủy đơn hàng: ' + (e.response?.data?.message || 'Vui lòng thử lại.'))
       }
     },
 
     async confirmReceived() {
       try {
         await axios.put(`/orders/complete/${this.order.maDH}`, null, { withCredentials: true })
+        window.$toast.success('Xác nhận đã nhận hàng thành công!')
         await this.fetchOrder()
       } catch (e) {
         console.error(e)
-        alert('Có lỗi xảy ra.')
+        window.$toast.error('Có lỗi xảy ra.')
       }
     },
 
@@ -454,11 +455,12 @@ export default {
           },
           withCredentials: true
         })
+        window.$toast.success('Đã gửi báo cáo cho Shop!')
         this.showReportModal = false
         await this.fetchOrder()
       } catch (e) {
         console.error(e)
-        alert('Không thể gửi báo cáo.')
+        window.$toast.error('Không thể gửi báo cáo.')
       }
     },
 

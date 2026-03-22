@@ -252,7 +252,7 @@ export default {
         this.closeModal()
         this.loadData() 
       } catch (e) { 
-        window.$alert("Lỗi lưu dữ liệu! Kiểm tra console để biết thêm chi tiết.", "Lỗi")
+        window.$toast.error("Lỗi lưu dữ liệu! Kiểm tra console để biết thêm chi tiết.")
         console.error(e)
       }
     },

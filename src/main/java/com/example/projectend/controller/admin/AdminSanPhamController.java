@@ -18,6 +18,22 @@ public class AdminSanPhamController {
     @Autowired
     private SanPhamService sanPhamService;
 
+    @Autowired
+    private com.example.projectend.repository.SizeSPRepository sizeRepository;
+
+    @Autowired
+    private com.example.projectend.repository.MauSacSPRepository colorRepository;
+
+    @GetMapping("/sizes")
+    public List<com.example.projectend.entity.SizeSP> getAllSizes() {
+        return sizeRepository.findAll();
+    }
+
+    @GetMapping("/colors")
+    public List<com.example.projectend.entity.MauSacSP> getAllColors() {
+        return colorRepository.findAll();
+    }
+
     // =============================
     // LẤY DANH SÁCH
     // Sử dụng hàm findAll() đã có sẵn trong Service của bạn
@@ -28,22 +44,27 @@ public class AdminSanPhamController {
             @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Integer gioiTinh,
             @RequestParam(required = false) Integer status) {
-    	// BỔ SUNG DÒNG NÀY: Khởi tạo pageable để lấy dữ liệu trang đầu tiên và sắp xếp mới nhất lên đầu
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "maSP"));
-        
+        // BỔ SUNG DÒNG NÀY: Khởi tạo pageable để lấy dữ liệu trang đầu tiên và sắp xếp
+        // mới nhất lên đầu
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000,
+                org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "maSP"));
+
         // Gọi hàm có sẵn trong Service của bạn
-        List<SanPham> products = sanPhamService.findWithFilters(keyword, categoryId, gioiTinh, brandId, null, null, status, null, pageable).getContent();
-        
+        List<SanPham> products = sanPhamService
+                .findWithFilters(keyword, categoryId, gioiTinh, brandId, null, null, status, null, pageable)
+                .getContent();
+
         // Populate total stock for Each product
         if (!products.isEmpty()) {
-            java.util.Map<Long, com.example.projectend.service.SanPhamService.PriceStockInfo> statsMap = sanPhamService.buildPriceStockMap(products);
+            java.util.Map<Long, com.example.projectend.service.SanPhamService.PriceStockInfo> statsMap = sanPhamService
+                    .buildPriceStockMap(products);
             for (SanPham p : products) {
                 if (statsMap.containsKey(p.getMaSP())) {
                     p.setTotalStock(statsMap.get(p.getMaSP()).getTotalStock());
                 }
             }
         }
-        
+
         return products;
     }
 

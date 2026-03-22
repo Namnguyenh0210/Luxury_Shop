@@ -260,13 +260,14 @@ export default {
             { params: { status: newStatus }, withCredentials: true }
         )
         if (res.data.success) {
+          window.$toast.success('Cập nhật trạng thái thành công!')
           this.fetchOrderDetail()
         } else {
-          alert(res.data.message)
+          window.$toast.error(res.data.message)
         }
       } catch (err) {
         console.error("Update error", err)
-        window.$alert(err.response?.data?.message || err.response?.data || 'Không thể cập nhật trạng thái', 'Lỗi cập nhật')
+        window.$toast.error(err.response?.data?.message || err.response?.data || 'Không thể cập nhật trạng thái')
       }
     },
     
@@ -280,11 +281,11 @@ export default {
             null,
             { params: { status: 5, reason: reason }, withCredentials: true }
         )
-        window.$alert("Đơn hàng đã được hủy và lưu lý do!", "Thành công")
+        window.$toast.success("Đơn hàng đã được hủy và lưu lý do!")
         this.fetchOrderDetail()
       } catch (err) {
         console.error("Cancel reported order error", err)
-        window.$alert(err.response?.data?.message || err.response?.data || 'Không thể hủy đơn hàng', 'Lỗi')
+        window.$toast.error(err.response?.data?.message || err.response?.data || 'Không thể hủy đơn hàng')
       }
     },
 
@@ -297,16 +298,16 @@ export default {
             { params: { status: 5, reason: this.cancelReason }, withCredentials: true }
         )
         if (res.data.success) {
-          window.$alert("Đơn hàng đã được hủy thành công!", "Thành công")
+          window.$toast.success("Đơn hàng đã được hủy thành công!")
           this.showCancelForm = false;
           this.cancelReason = '';
           this.fetchOrderDetail()
         } else {
-          window.$alert(res.data.message, "Lỗi")
+          window.$toast.error(res.data.message)
         }
       } catch (err) {
         console.error("Cancel error", err)
-        window.$alert(err.response?.data?.message || 'Không thể hủy đơn hàng', "Lỗi")
+        window.$toast.error(err.response?.data?.message || 'Không thể hủy đơn hàng')
       }
     },
     fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v || 0) + ' đ' },
