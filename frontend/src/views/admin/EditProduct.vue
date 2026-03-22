@@ -340,11 +340,22 @@ export default {
         this.brands = brandRes.data;
         this.sizes = sizeRes.data;
         this.colors = colorRes.data;
+        const sizeOrder = ['S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL'];
         this.variants = (p.variants || []).map(v => ({
             ...v,
             maSize: v.sizeSP?.maSize || '',
             maMau: v.mauSacSP?.maMau || ''
-        }));
+        })).sort((a, b) => {
+            const tenA = a.sizeSP?.tenSize?.toUpperCase() || '';
+            const tenB = b.sizeSP?.tenSize?.toUpperCase() || '';
+            const idxA = sizeOrder.indexOf(tenA);
+            const idxB = sizeOrder.indexOf(tenB);
+            
+            if (idxA === -1 && idxB === -1) return tenA.localeCompare(tenB);
+            if (idxA === -1) return 1;
+            if (idxB === -1) return -1;
+            return idxA - idxB;
+        });
 
         const basePrice = (p.variants && p.variants.length > 0) ? p.variants[0].giaBan : 0;
 	

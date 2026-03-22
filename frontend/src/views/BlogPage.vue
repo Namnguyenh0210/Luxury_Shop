@@ -26,7 +26,7 @@
     </section>
 
     <!-- BREADCRUMB -->
-    <div class="w-full px-4 md:px-[3.7cm] py-8 border-b border-gray-100 dark:border-gray-800">
+    <div class="w-full px-4 md:px-[2cm] py-8 border-b border-gray-100 dark:border-gray-800">
       <nav class="flex items-center gap-2 text-xs uppercase tracking-widest text-gray-400">
         <router-link to="/" class="hover:text-[#C8A97E] transition-colors">TRANG CHỦ</router-link>
         <span class="material-symbols-outlined text-[12px]">chevron_right</span>
@@ -35,7 +35,7 @@
     </div>
 
     <!-- NỘI DUNG CHÍNH -->
-    <main class="w-full px-4 md:px-[3.7cm] py-16" id="bai-viet">
+    <main class="w-full px-4 md:px-[2cm] py-16" id="bai-viet">
 
       <!-- Loading -->
       <div v-if="dangTai" class="flex flex-col items-center justify-center py-24">

@@ -50,6 +50,8 @@ public class SanPhamYeuThichController {
                 map.put("tenSP", fa.getSanPham().getTenSP());
                 map.put("anhChinh", fa.getSanPham().getAnhChinh());
                 map.put("thuongHieu", fa.getSanPham().getThuongHieu() != null ? fa.getSanPham().getThuongHieu().getTenTH() : "");
+                map.put("category", fa.getSanPham().getLoaiSanPham() != null ? fa.getSanPham().getLoaiSanPham().getTenLoai() : "");
+                map.put("gioiTinh", fa.getSanPham().getGioiTinh());
 
                 // Lấy giá thấp nhất nếu có biến thể
                 int giaMin = 0;
@@ -95,16 +97,14 @@ public class SanPhamYeuThichController {
     @PostMapping("/toggle")
     public ResponseEntity<?> toggleFavorite(@RequestParam Long maSP, Principal principal) {
         try {
-
             if (principal == null) {
-                return ResponseEntity.ok(Map.of("isFavorite", false));
+                return ResponseEntity.status(401).body(Map.of("message", "Vui lòng đăng nhập trước nhé."));
             }
 
             TaiKhoan tk = taiKhoanService.findByEmail(principal.getName());
 
-            // ✅ FIX: nếu tk null thì KHÔNG cho crash
             if (tk == null) {
-                return ResponseEntity.ok(Map.of("isFavorite", false));
+                return ResponseEntity.status(401).body(Map.of("message", "Tài khoản không tồn tại hoặc đã bị đăng xuất."));
             }
 
             boolean isFavorite = favoriteService.toggleFavorite(tk, maSP);
@@ -112,8 +112,7 @@ public class SanPhamYeuThichController {
             return ResponseEntity.ok(Map.of("isFavorite", isFavorite));
 
         } catch (Exception e) {
-            // NUỐT LỖI → KHÔNG BAO GIỜ 500
-            return ResponseEntity.ok(Map.of(
+            return ResponseEntity.status(500).body(Map.of(
                     "isFavorite", false,
                     "error", e.getMessage()
             ));

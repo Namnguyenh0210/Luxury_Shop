@@ -95,9 +95,11 @@
                     <button
                       v-for="size in availableSizes"
                       :key="size"
-                      @click="selectedSize = size"
-                      :class="['size-btn', { active: selectedSize === size, sold: isSizeSoldOut(size) }]"
-                      :disabled="isSizeSoldOut(size)"
+                      @click="selectSize(size)"
+                      :class="['size-btn', { 
+                        active: selectedSize === size, 
+                        'not-available': !isSizeAvailable(size)
+                      }]"
                     >
                       {{ size }}
                     </button>
@@ -113,8 +115,11 @@
                     <button
                       v-for="color in availableColors"
                       :key="color"
-                      @click="selectedColor = color"
-                      :class="['color-btn', { active: selectedColor === color }]"
+                      @click="selectColor(color)"
+                      :class="['color-btn', { 
+                        active: selectedColor === color,
+                        'not-available': !isColorAvailable(color)
+                      }]"
                     >
                       {{ color }}
                     </button>
@@ -220,17 +225,27 @@ export default {
     },
     availableSizes() {
       if (!this.variants) return []
-      return [...new Set(this.variants.filter(v => v.sizeSP && v.sizeSP.tenSize).map(v => v.sizeSP.tenSize))].sort()
+      const sizes = [...new Set(this.variants.filter(v => v.sizeSP && v.sizeSP.tenSize).map(v => v.sizeSP.tenSize))]
+      const sizeOrder = ['S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL']
+      return sizes.sort((a, b) => {
+        const idxA = sizeOrder.indexOf(a.toUpperCase())
+        const idxB = sizeOrder.indexOf(b.toUpperCase())
+        if (idxA === -1 && idxB === -1) return a.localeCompare(b)
+        if (idxA === -1) return 1
+        if (idxB === -1) return -1
+        return idxA - idxB
+      })
     },
     availableColors() {
       if (!this.variants) return []
       return [...new Set(this.variants.filter(v => v.mauSacSP && v.mauSacSP.tenMau).map(v => v.mauSacSP.tenMau))]
     },
     selectedVariant() {
+      if (!this.selectedSize || !this.selectedColor) return null
       return this.variants.find(v =>
-        (!this.selectedSize || v.sizeSP?.tenSize === this.selectedSize) &&
-        (!this.selectedColor || v.mauSacSP?.tenMau === this.selectedColor) &&
-        v.soLuongTon > 0
+        v.sizeSP?.tenSize === this.selectedSize &&
+        v.mauSacSP?.tenMau === this.selectedColor &&
+        v.soLuongTon > 0 && v.trangThai !== false
       )
     },
     maxQty() {
@@ -267,9 +282,9 @@ export default {
           this.totalStock = res.data.totalStock || 0
           this.currentImage = this.allImages[0]
 
-          // Auto-select first variant
-          if (this.availableSizes.length > 0) this.selectedSize = this.availableSizes[0]
-          if (this.availableColors.length > 0) this.selectedColor = this.availableColors[0]
+          // Force user to choose
+          this.selectedSize = null
+          this.selectedColor = null
 
           // Check promotion from priceStockMap if available
           const listRes = await axios.get(`/sanpham`, { params: { page: 0, size: 1 } })
@@ -289,23 +304,58 @@ export default {
       }
     },
 
-    isSizeSoldOut(size) {
-      const matchVariants = this.variants.filter(v => v.sizeSP?.tenSize === size)
-      return matchVariants.every(v => v.soLuongTon === 0)
+    isSizeAvailable(size) {
+      if (!this.selectedColor) {
+        // Nếu chưa chọn màu, xem size này có màu nào còn hàng không
+        return this.variants.some(v => v.sizeSP?.tenSize === size && v.soLuongTon > 0 && v.trangThai !== false)
+      }
+      return this.variants.some(v => 
+        v.sizeSP?.tenSize === size && 
+        v.mauSacSP?.tenMau === this.selectedColor && 
+        v.soLuongTon > 0 && v.trangThai !== false
+      )
+    },
+    isColorAvailable(color) {
+      if (!this.selectedSize) {
+        // Nếu chưa chọn size, xem màu này có size nào còn hàng không
+        return this.variants.some(v => v.mauSacSP?.tenMau === color && v.soLuongTon > 0 && v.trangThai !== false)
+      }
+      return this.variants.some(v => 
+        v.mauSacSP?.tenMau === color && 
+        v.sizeSP?.tenSize === this.selectedSize && 
+        v.soLuongTon > 0 && v.trangThai !== false
+      )
+    },
+    selectSize(size) {
+      if (this.selectedSize === size) this.selectedSize = null
+      else this.selectedSize = size
+    },
+    selectColor(color) {
+      if (this.selectedColor === color) this.selectedColor = null
+      else this.selectedColor = color
     },
 
     async addToCart() {
       if (this.totalStock === 0) return
+      
+      // 1. Kiểm tra lựa chọn đầy đủ
+      if (!this.selectedSize || !this.selectedColor) {
+        this.showToast('Vui lòng chọn Size và Màu sắc!', 'error')
+        return
+      }
+
+      const variant = this.selectedVariant
+      if (!variant) {
+        this.showToast('Phiên bản này hiện đang hết hàng.', 'error')
+        return
+      }
+
       this.addingToCart = true
       try {
         const params = { 
           productId: this.product.maSP, 
-          quantity: this.quantity 
-        }
-        
-        // ✨ Gửi thêm variantId để server biết khách chọn size/màu nào
-        if (this.selectedVariant) {
-          params.variantId = this.selectedVariant.maBienThe
+          quantity: this.quantity,
+          variantId: variant.maBienThe
         }
 
         const res = await axios.post('/cart/add-product', null, { params })
@@ -628,10 +678,12 @@ export default {
   background: #C8A97E;
   color: #fff;
 }
-.size-btn.sold {
-  opacity: 0.35;
+.size-btn.not-available,
+.color-btn.not-available {
+  opacity: 0.25;
+  font-style: italic;
+  filter: grayscale(1);
   cursor: not-allowed;
-  text-decoration: line-through;
 }
 
 .color-btn {

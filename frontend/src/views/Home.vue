@@ -133,7 +133,7 @@
         </div>
       </div>
         <div class="bg-background-light dark:bg-background-dark py-16">
-            <div class="w-full px-4 md:px-[3.7cm]">
+            <div class="w-full px-4 md:px-[2cm]">
                 <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
                     <div class="relative h-96 overflow-hidden rounded-lg lg:h-[32rem]">
                         <img class="h-full w-full object-cover" data-alt="An artistic, black and white shot of a designer sketching in a studio." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXiuB0kQSHby6ccYOmju4ElSbioXSvBbWzop5Nikd3QRA0q-L1pPSFupZo2Yuj8BiG9Y-JEp82UEzpmKC8DGb1C16c8ojcksklRm0OAEsj1UgVusuRyQFtYYsfyWP9ozIEfI3TUhwkfY5Twyo1VNcT4XZpw8GVHVoaVRyBIUzwlVToC2P62iIVFc8R9ZLiabJFzQQqeVNt7auKaGA80baXKiDugJADmVBROykiw5KmidXMFWg4zhHMm7asCiw0bMKDQToMzXJMEP8">

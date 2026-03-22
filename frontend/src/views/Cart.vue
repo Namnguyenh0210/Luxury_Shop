@@ -2,7 +2,7 @@
 <div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
     <AppHeader />
     
-    <main class="flex-grow w-full px-4 md:px-[3.7cm] py-10">
+    <main class="flex-grow w-full px-4 md:px-[2cm] py-10">
         <h1 class="text-3xl font-bold mb-8">Giỏ hàng</h1>
 
         <!-- Loading State -->

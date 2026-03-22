@@ -18,7 +18,7 @@
 
     <template v-else>
       <!-- BREADCRUMB -->
-      <div class="w-full px-4 md:px-[3.7cm] py-8 border-b border-gray-100 dark:border-gray-800">
+      <div class="w-full px-4 md:px-[2cm] py-8 border-b border-gray-100 dark:border-gray-800">
         <nav class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-gray-400">
           <router-link to="/" class="hover:text-[#C8A97E] transition-colors">TRANG CHỦ</router-link>
           <span class="material-symbols-outlined text-[12px]">chevron_right</span>
@@ -29,7 +29,7 @@
       </div>
 
       <!-- NỘI DUNG BÀI VIẾT -->
-      <article class="w-full px-4 md:px-[3.7cm] py-16">
+      <article class="w-full px-4 md:px-[2cm] py-16">
         <div class="max-w-4xl mx-auto">
           <!-- Header bài viết -->
           <header class="mb-12 text-center">

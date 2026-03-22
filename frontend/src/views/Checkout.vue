@@ -3,7 +3,7 @@
     <AppHeader />
 
     <main class="flex-grow">
-      <div class="w-full px-4 md:px-[3.7cm] py-10">
+      <div class="w-full px-4 md:px-[2cm] py-10">
 
         <!-- Page Title — Luxury serif style khớp Home.vue -->
         <div class="mb-12">

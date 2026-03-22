@@ -200,7 +200,7 @@ public class ApiController {
                 relatedProducts = sanPhamService.findRelatedProducts(
                         sanPham.getLoaiSanPham().getMaLoai(),
                         sanPham.getMaSP(),
-                        6);
+                        4); // Hiển thị 4 sản phẩm cùng danh mục
             }
 
             response.put("success", true);
@@ -212,6 +212,7 @@ public class ApiController {
             response.put("reviews", danhGiaList);
             response.put("reviewCount", danhGiaList != null ? danhGiaList.size() : 0);
             response.put("relatedProducts", relatedProducts);
+            response.put("relatedPriceMap", sanPhamService.buildPriceStockMap(relatedProducts));
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

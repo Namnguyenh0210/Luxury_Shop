@@ -1,6 +1,6 @@
 <template>
 <footer class="bg-[papayawhip] border-t border-secondary/50">
-    <div class="w-full px-4 md:px-[3.7cm] py-8 max-w-full">
+    <div class="w-full px-4 md:px-[2cm] py-8 max-w-full">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             <!-- Col 1: Logo & Info -->
             <div class="flex flex-col items-center text-center -mt-16">
