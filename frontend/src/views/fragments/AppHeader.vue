@@ -1,7 +1,7 @@
 <template>
 <header>
     <!-- Top Bar -->
-    <div class="bg-[#F5F1ED]">
+    <div class="bg-[papayawhip]">
         <div class="w-full px-4 md:px-[3.7cm]">
             <div class="flex h-10 items-center justify-end text-xs text-text-primary-light/80 dark:text-text-primary-dark/80">
                 <div class="flex items-center space-x-4">
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Main Header -->
-    <div class="border-y border-secondary/50">
+    <div class="bg-white border-y border-secondary/50">
         <div class="w-full px-4 md:px-[3.7cm]">
             <div class="flex h-32 items-center justify-between gap-4">
                 <!-- Logo -->

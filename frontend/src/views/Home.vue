@@ -4,8 +4,8 @@
     <AppHeader />
     
     <main class="flex-grow">
-        <div class="w-full px-4 md:px-[3.7cm] py-4">
-            <div class="flex min-h-[60vh] flex-col items-center justify-center gap-6 rounded-lg bg-cover bg-center bg-no-repeat p-4 text-center md:gap-8" data-alt="A high-fashion model posing in a minimalist, modern setting, wearing an elegant outfit from the new collection." style="background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuA2RLsd-sCd1DS_TgR8LSOXwcPO_XfMapD3C5LhyLuf2p6bLLleNeiMm37yA5eAKO-GmDxoQclsNVZJxX_fRpxphaAoN8adFL6BnGC6nCdNHsNoZzXbnchw6JsZg6hvOSv1bNwRA1XKdm4JFROKCw3zojoJ7nr9xGQfcyRBMEqZ4ueW8fCGty1jzBEkobgbZXZ66LBrKIpVTjp85aUppDbXObeUM1zj_iI7dfgW3Ap4EJ9QVQ-F7hxAuVH8hEzE2yAYOUYJNcDdoNo&quot;);">
+        <div class="container mx-auto px-4 lg:px-[1cm] xl:px-[2cm] py-4">
+            <div class="flex min-h-[60vh] flex-col items-center justify-center gap-6 rounded-lg bg-cover bg-center bg-no-repeat p-4 text-center md:gap-8" data-alt="A high-fashion model posing in a minimalist, modern setting, wearing an elegant outfit from the new collection." style="background-image: linear-gradient(rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%), url('/images/banner/image.png');">
                 <div class="flex flex-col gap-4">
                     <h1 class="font-serif text-4xl font-bold text-white md:text-6xl">Luxury Shop</h1>
                     <h2 class="text-base font-normal text-white md:text-lg">Thương hiệu thời trang dẫn đầu xu thế</h2>
@@ -15,7 +15,7 @@
                 </a>
             </div>
         </div>
-      <div class="w-full px-4 md:px-[3.7cm] py-16">
+      <div class="container mx-auto px-4 lg:px-[1cm] xl:px-[2cm] py-16">
         <h2 class="text-center font-serif text-3xl font-bold tracking-tight md:text-4xl">
           Featured Brands
         </h2>
@@ -28,7 +28,7 @@
             class="group relative cursor-pointer overflow-hidden rounded-lg border border-gray-200 hover:border-[#C8A97E] transition"
         >
           <div class="aspect-[3/4] w-full">
-            <img src="/images/brand/logo-chanel.png"
+            <img src="/images/banner/chanel-brand.png"
                  class="w-full h-full object-cover transition duration-500 group-hover:scale-105" />
           </div>
 
@@ -68,71 +68,68 @@
           </div>
         </div>
         </div>
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="container mx-auto px-4 lg:px-[1cm] xl:px-[2cm] py-16 border-t border-gray-100">
         <h2 class="text-center font-serif text-3xl font-bold tracking-tight md:text-4xl">New Arrivals</h2>
-        <div class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-6">
-          <div class="group relative">
-            <div class="aspect-w-3 aspect-h-4 w-full overflow-hidden rounded-lg bg-secondary">
-              <img class="h-full w-full object-cover object-center transition-opacity group-hover:opacity-75" data-alt="A tan leather handbag with gold hardware." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8j90vhR2OSz8gJqLtb8Se-tOP12G2NC5HCx8DPl5LRecqSKSYxv-rBI8eq0A-1mvLIHFSXXjQB60XcAzbGN_gIDv52Z-ZTnjR0vTIJutREgBYlPefiMt-AqybAwOXv-nWppPSlr2qWHx2rbScItTVybKAFcIEZ7v680QSTSMJH_b_2WRlfRufJSBd6R5PGP2cFreVQSwEfNQtHRUaiLy5SOBdVqwAzV82QlWJF4qpKa3sNHAe28BKvciJHwblT-DZuoWBBX_xNh4">
+        
+        <!-- Loading Skeleton / Placeholder if needed -->
+        <div v-if="loading" class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-6">
+            <div v-for="i in 4" :key="i" class="animate-pulse">
+                <div class="aspect-w-3 aspect-h-4 w-full rounded-lg bg-gray-200" style="aspect-ratio: 3/4;"></div>
+                <div class="mt-4 h-4 w-3/4 bg-gray-200 rounded"></div>
+                <div class="mt-2 h-4 w-1/4 bg-gray-200 rounded"></div>
             </div>
-            <div class="mt-4 flex justify-between">
-              <div>
-                <h3 class="text-sm font-medium">
-                  <a href="/sanpham"><span aria-hidden="true" class="absolute inset-0"></span>The Classic
-                    Tote</a>
-                </h3>
-                <p class="mt-1 text-sm text-text-primary-light/70 dark:text-text-primary-dark/70">Leather
-                  Goods</p>
+        </div>
+
+        <div v-else class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-6">
+          <div v-for="(product, index) in newArrivals" :key="product.maSP" class="group relative flex flex-col">
+            <div @click="goToDetail(product.maSP)" class="aspect-[3/4] w-full overflow-hidden rounded-lg bg-secondary cursor-pointer relative shadow-sm hover:shadow-md transition-shadow">
+              <img 
+                class="absolute inset-0 h-full w-full object-cover object-center transition-all duration-500 group-hover:scale-105" 
+                :class="{'scale-110': index === 0, 'p-4': index !== 0}"
+                :alt="product.tenSP"
+                :src="product.anhChinh || '/images/placeholder.png'"
+                @error="(e) => e.target.src = '/images/placeholder.png'"
+              >
+            </div>
+            <div class="flex flex-col flex-1 p-4 bg-white">
+              <!-- Brand and Title -->
+              <div class="mb-2 w-full">
+                <p class="text-[12px] text-gray-400 uppercase tracking-widest font-bold mb-1">
+                  {{ product.thuongHieu?.tenTH || 'Brand' }}
+                </p>
+                <h4 class="text-gray-900 text-[16px] md:text-[17px] font-semibold leading-snug truncate w-full" :title="product.tenSP">
+                  <a :href="`/sanpham/${product.maSP}`">
+                    {{ product.tenSP }}
+                  </a>
+                </h4>
               </div>
-              <p class="text-sm font-semibold">$890</p>
+
+              <!-- Bottom Row: Price (Left) & Add Button (Right) -->
+              <div class="flex flex-row justify-between items-end mt-auto pt-1">
+                <!-- Price -->
+                <div class="flex flex-col justify-end">
+                  <p class="text-[17px] md:text-[19px] font-bold text-gray-900">
+                    {{ formatPrice(getPrice(product.maSP)) }}
+                  </p>
+                </div>
+
+                <!-- Add Button -->
+                <div class="flex-shrink-0">
+                  <button
+                      @click.stop="goToDetail(product.maSP)"
+                      class="flex items-center gap-1.5 bg-black hover:bg-[#C8A97E] text-white px-3 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-sm"
+                      title="Xem chi tiết"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="group relative">
-            <div class="aspect-w-3 aspect-h-4 w-full overflow-hidden rounded-lg bg-secondary">
-              <img class="h-full w-full object-cover object-center transition-opacity group-hover:opacity-75" data-alt="A pair of stylish white sneakers with beige accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDi-BUNUHtshSAU9flWAwGmk08O4MW2cZ82zfILqudYylnNQEPzhbYxLYe48lpBEUiysgIrJ9aos-EMxH08vSUeV_5KVnFVbnq82C-3yvfxpqcezYhB5or0PE5lBoWQGWr76lv6cpOirR-RDA-d6e_PXz_iqZeIZggS07nDB4vShzShLJIyviL0hgTzjFyGfpmJeVYuyuYJZZEwocyHEmFi8N2eVOicxtHv0txdOPnjkcjjE3XJi4YE_8oRJwAPlP3YE9yWBOGZGw">
-            </div>
-            <div class="mt-4 flex justify-between">
-              <div>
-                <h3 class="text-sm font-medium">
-                  <a href="/sanpham"><span aria-hidden="true" class="absolute inset-0"></span>Minimalist Sneaker</a>
-                </h3>
-                <p class="mt-1 text-sm text-text-primary-light/70 dark:text-text-primary-dark/70">
-                  Footwear</p>
-              </div>
-              <p class="text-sm font-semibold">$450</p>
-            </div>
-          </div>
-          <div class="group relative">
-            <div class="aspect-w-3 aspect-h-4 w-full overflow-hidden rounded-lg bg-secondary">
-              <img class="h-full w-full object-cover object-center transition-opacity group-hover:opacity-75" data-alt="A woman wearing a flowing silk midi dress in a neutral tone." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2N4z42RdmZMLIb-W5Q46VBWY6m0lerZnSGjUYqxpl0wYFXna18Ppg5GTC_CPa1B0S-wy4BQC-Xm3bqhlKVgbiUEA7LUCwHxAcXLzljHzHBM_mnQOJ7r0GZM0-yCKXojJTzzgUw6r2cz-hGT0_n2pfYO_BJM8uiKKXOgR5Iun6wkGwDRZomGs2kHp1NvGp2lv2iQA5kMA2-odCLou1tmt0oozBrsWyheZbGvkOaHBDQWlUYqNJjSg9NRv_Uj-Wu6qjU4DIOTjCrms">
-            </div>
-            <div class="mt-4 flex justify-between">
-              <div>
-                <h3 class="text-sm font-medium">
-                  <a href="/sanpham"><span aria-hidden="true" class="absolute inset-0"></span>Silk Slip Dress</a>
-                </h3>
-                <p class="mt-1 text-sm text-text-primary-light/70 dark:text-text-primary-dark/70">
-                  Dresses</p>
-              </div>
-              <p class="text-sm font-semibold">$620</p>
-            </div>
-          </div>
-          <div class="group relative">
-            <div class="aspect-w-3 aspect-h-4 w-full overflow-hidden rounded-lg bg-secondary">
-              <img class="h-full w-full object-cover object-center transition-opacity group-hover:opacity-75" data-alt="A close-up of a classic trench coat in beige." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABowtrLcV6USi_eNxlPfgRkm3nGmTL0Zi_0l6G8Dyfs6X7HkzfCJi7XG4oCv80A8NnLQyJLolfE0_LkhnpQHdhcKkNjehdegl90RBDmjRQ8KuECgch27nuzjPJBH9pIWdusfJmIa-fYcQnlnGL-oqHxAm9UeE1fIgKmKI_GRL4OY3lB23MvXwTI0LdxtUfqkQc4cE9HQc6j6gwrvBivr_H6CRwtDd9mwD94Z6o-ghthbJ-vH8cfPidsnx1cq7wvbLFIKz-svQT-g0">
-            </div>
-            <div class="mt-4 flex justify-between">
-              <div>
-                <h3 class="text-sm font-medium">
-                  <a href="/sanpham"><span aria-hidden="true" class="absolute inset-0"></span>The London
-                    Trench</a>
-                </h3>
-                <p class="mt-1 text-sm text-text-primary-light/70 dark:text-text-primary-dark/70">
-                  Outerwear</p>
-              </div>
-              <p class="text-sm font-semibold">$1,250</p>
-            </div>
-          </div>
+        </div>
+
+        <div v-if="!loading && newArrivals.length === 0" class="text-center py-10 opacity-60">
+            Không có sản phẩm nào mới.
         </div>
       </div>
         <div class="bg-background-light dark:bg-background-dark py-16">
@@ -164,6 +161,7 @@
 <script>
 import AppHeader from './fragments/AppHeader.vue'
 import AppFooter from './fragments/AppFooter.vue'
+import axios from 'axios'
 
 export default {
   name: 'Home',
@@ -179,13 +177,46 @@ export default {
           thuongHieu: brandId
         }
       })
+    },
+    async fetchNewArrivals() {
+        this.loading = true
+        try {
+            const res = await axios.get('/sanpham', {
+                params: {
+                    page: 0,
+                    size: 4,
+                    sort: 'moi'
+                }
+            })
+            if (res.data.success) {
+                this.newArrivals = res.data.content
+                this.priceMap = res.data.priceStockMap
+            }
+        } catch (e) {
+            console.error('Error fetching new arrivals:', e)
+        } finally {
+            this.loading = false
+        }
+    },
+    getPrice(maSP) {
+        return this.priceMap[maSP]?.minPrice || 0
+    },
+    formatPrice(price) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    },
+    goToDetail(id) {
+        this.$router.push(`/sanpham/${id}`)
     }
   },
   data() {
-    return {}
+    return {
+        newArrivals: [],
+        priceMap: {},
+        loading: true
+    }
   },
   mounted() {
-    // TODO: fetch data via axios or hydrate server state
+    this.fetchNewArrivals()
   }
 }
 </script>

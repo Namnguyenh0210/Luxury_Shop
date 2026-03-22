@@ -464,16 +464,17 @@ export default {
         })
 
         const map = {}
-        res.data.forEach(item => {
-          map[item.maSP] = true
-        })
+        if (res.data && Array.isArray(res.data)) {
+          res.data.forEach(item => {
+            map[item.maSP] = true
+          })
+        }
 
         this.favoriteMap = map
-
-        console.log("Favorites loaded:", map)
-
       } catch (e) {
-        console.error("Load favorites failed", e)
+        if (e.response?.status !== 401) {
+          console.error("Load favorites failed", e)
+        }
       }
     },
 

@@ -169,7 +169,7 @@
             </div>
 
             <!-- Reviews Section - Component mới -->
-            <div class="mt-16 max-w-4xl">
+            <div class="mt-16 max-w-4xl mx-auto">
                 <ProductReviews :productId="product.maSP" />
             </div>
 
@@ -308,9 +308,15 @@ export default {
       try {
         const productId = this.$route.params.id
         const res = await axios.get('/favorites', { withCredentials: true })
-        this.isFavorite = res.data.some(item => item.maSP == productId)
+        if (res.data && Array.isArray(res.data)) {
+          this.isFavorite = res.data.some(item => item.maSP == productId)
+        }
       } catch (e) {
-        console.error("Check favorite failed", e)
+        // 401 là do chưa đăng nhập, không cần báo lỗi
+        this.isFavorite = false
+        if (e.response?.status !== 401) {
+            console.error("Check favorite failed", e)
+        }
       }
     },
 

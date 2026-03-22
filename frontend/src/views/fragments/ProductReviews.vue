@@ -15,47 +15,47 @@
     <template v-else>
       <!-- ========== SUMMARY PANEL ========== -->
       <div class="rating-summary">
-        <!-- Điểm lớn bên trái -->
-        <div class="avg-score-box">
-          <div class="avg-number">{{ diemTrungBinh > 0 ? diemTrungBinh.toFixed(1) : '—' }}</div>
-          <div class="avg-stars">
-            <span v-for="s in 5" :key="s" class="star-icon" :class="{ filled: s <= Math.round(diemTrungBinh) }">★</span>
+        <div class="summary-content">
+          <!-- Điểm lớn bên trái -->
+          <div class="avg-score-box">
+            <div class="avg-number">{{ diemTrungBinh > 0 ? diemTrungBinh.toFixed(1) : '—' }}</div>
+            <div class="avg-stars">
+              <span v-for="s in 5" :key="s" class="star-icon" :class="{ filled: s <= Math.round(diemTrungBinh) }">★</span>
+            </div>
+            <div class="avg-count">{{ tongSoDanhGia }} đánh giá</div>
           </div>
-          <div class="avg-count">{{ tongSoDanhGia }} đánh giá</div>
+
+          <!-- Phân bố sao -->
+          <div class="star-distribution">
+            <div v-for="(count, star) in thongKeSao" :key="star" class="star-bar-row">
+              <div class="star-label">
+                <span class="star-icon filled" style="font-size:13px">★</span>
+                <span>{{ star }}</span>
+              </div>
+              <div class="star-bar-track">
+                <div class="star-bar-fill" :style="{ width: tongSoDanhGia > 0 ? (count / tongSoDanhGia * 100) + '%' : '0%' }"></div>
+              </div>
+              <span class="star-count">{{ count }}</span>
+            </div>
+          </div>
         </div>
 
-        <!-- Phân bố sao -->
-        <div class="star-distribution">
-          <div v-for="(count, star) in thongKeSao" :key="star" class="star-bar-row">
-            <div class="star-label">
-              <span class="star-icon filled" style="font-size:13px">★</span>
-              <span>{{ star }}</span>
-            </div>
-            <div class="star-bar-track">
-              <div class="star-bar-fill" :style="{ width: tongSoDanhGia > 0 ? (count / tongSoDanhGia * 100) + '%' : '0%' }"></div>
-            </div>
-            <span class="star-count">{{ count }}</span>
+        <!-- Các thông báo (chưa đăng nhập, chưa mua, hoặc đã đánh giá xong) lồng vào trong khung vàng -->
+        <div class="review-status-messages">
+          <div v-if="!daDangNhap || (coTheReview.length === 0 && !daDanhGiaHet)" class="review-notice">
+            <p>Bạn hãy mua hàng để trải nghiệm và đánh giá sản phẩm</p>
+          </div>
+          
+          <div v-else-if="daDanhGiaHet" class="review-notice review-done-notice">
+            <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 4px; color: #10B981;">check_circle</span>
+            Bạn đã hoàn tất đánh giá cho tất cả sản phẩm đã mua. Cảm ơn bạn!
           </div>
         </div>
       </div>
 
-      <!-- ========== FORM ĐÁNH GIÁ ========== -->
-      <div class="review-form-wrap">
-        <!-- Nếu chưa đăng nhập -->
-        <div v-if="!daDangNhap" class="review-auth-prompt">
-          <span class="material-symbols-outlined prompt-icon">lock</span>
-          <p>Đăng nhập để viết đánh giá về sản phẩm này</p>
-          <a href="/login" class="btn-login-prompt">Đăng nhập</a>
-        </div>
-
-        <!-- Đã đăng nhập nhưng chưa mua -->
-        <div v-else-if="coTheReview.length === 0 && !daDanhGiaHet" class="review-not-purchased">
-          <span class="material-symbols-outlined prompt-icon">shopping_bag</span>
-          <p>Chỉ khách hàng đã mua và nhận được sản phẩm mới có thể đánh giá.</p>
-        </div>
-
-        <!-- Form đánh giá (đã mua + đơn đã giao) -->
-        <div v-else-if="coTheReview.length > 0" class="review-form">
+      <!-- ========== FORM ĐÁNH GIÁ (Chỉ hiện khi thực sự có thể viết) ========== -->
+      <div v-if="daDangNhap && coTheReview.length > 0" class="review-form-wrap">
+        <div class="review-form">
           <h3 class="form-title">
             <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle; margin-right: 6px;">edit_document</span>
             Viết đánh giá của bạn
@@ -118,18 +118,13 @@
           </Transition>
         </div>
 
-        <!-- Đã đánh giá hết rồi -->
-        <div v-else-if="daDanhGiaHet" class="review-done">
-          <span class="material-symbols-outlined prompt-icon" style="color: #10B981;">check_circle</span>
-          <p>Bạn đã hoàn tất đánh giá cho tất cả sản phẩm đã mua. Cảm ơn bạn!</p>
-        </div>
+
       </div>
 
       <!-- ========== DANH SÁCH ĐÁNH GIÁ ========== -->
       <div class="reviews-list">
-        <div v-if="danhGiaList.length === 0" class="no-reviews">
-          <span class="material-symbols-outlined" style="font-size:48px;color:#D1D5DB">reviews</span>
-          <p>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!</p>
+        <div v-if="danhGiaList.length === 0" class="no-reviews-hidden">
+          <!-- Đã ẩn thông báo trống theo yêu cầu -->
         </div>
 
         <div v-else class="review-cards">
@@ -375,31 +370,51 @@ export default {
 /* ===== SUMMARY PANEL ===== */
 .rating-summary {
   display: flex;
-  gap: 40px;
+  flex-direction: column;
+  gap: 32px;
   background: linear-gradient(135deg, #FAFAFA, #F9F5ED);
   border: 1px solid #F0E6C8;
-  border-radius: 16px;
-  padding: 28px 32px;
+  border-radius: 20px;
+  padding: 40px;
   margin-bottom: 32px;
   align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+.summary-content {
+  display: flex;
+  width: 100%;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 .avg-score-box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 100px;
+  min-width: 140px;
   border-right: 1px solid #E5E7EB;
-  padding-right: 32px;
+  padding-right: 40px;
+}
+@media (max-width: 768px) {
+  .avg-score-box {
+    border-right: none;
+    border-bottom: 1px solid #E5E7EB;
+    padding-right: 0;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
 }
 .avg-number {
-  font-size: 52px;
+  font-size: 64px;
   font-weight: 900;
   color: #111827;
   line-height: 1;
   font-family: 'Times New Roman', Times, serif;
 }
-.avg-stars { display: flex; gap: 3px; margin: 8px 0; }
-.avg-count { font-size: 12px; color: #6B7280; }
+.avg-stars { display: flex; gap: 4px; margin: 12px 0; }
+.avg-count { font-size: 14px; color: #6B7280; font-weight: 500; }
 
 .review-summary { flex: 1; display: flex; align-items: center; gap: 32px; padding-right: 28px; border-right: 1px solid #E5E7EB; }
 .sum-left { text-align: center; display: flex; flex-direction: column; align-items: center; }
@@ -414,14 +429,17 @@ export default {
 .btn-report:hover { color: #DC2626; }
 
 .star-bars { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.star-bar-row { display: flex; align-items: center; gap: 10px; }
-.star-label { display: flex; align-items: center; gap: 3px; font-size: 13px; color: #374151; min-width: 28px; }
+.star-bar-row { display: flex; align-items: center; gap: 12px; }
+.star-label { display: flex; align-items: center; gap: 4px; font-size: 14px; color: #374151; min-width: 32px; }
 .star-bar-track {
-  flex: 1;
-  height: 8px;
+  width: 200px;
+  height: 10px;
   background: #E5E7EB;
   border-radius: 99px;
   overflow: hidden;
+}
+@media (max-width: 480px) {
+  .star-bar-track { width: 140px; }
 }
 .star-bar-fill {
   height: 100%;
@@ -429,7 +447,7 @@ export default {
   border-radius: 99px;
   transition: width 0.6s ease;
 }
-.star-count { font-size: 12px; color: #6B7280; min-width: 20px; text-align: right; }
+.star-count { font-size: 13px; color: #6B7280; min-width: 20px; text-align: right; }
 
 /* Stars */
 .star-icon { font-size: 16px; color: #D1D5DB; }
@@ -444,15 +462,12 @@ export default {
   margin-bottom: 36px;
   position: relative;
 }
-.review-auth-prompt, .review-not-purchased, .review-done {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 32px 0;
+.review-notice {
   text-align: center;
-  color: #4B5563;
-  font-size: 14.5px;
+  padding: 40px 0;
+  color: #6B7280;
+  font-style: italic;
+  font-size: 15px;
 }
 .prompt-icon {
   font-size: 36px;
