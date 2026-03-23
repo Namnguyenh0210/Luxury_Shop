@@ -93,8 +93,8 @@
                             <input name="remember-me" type="checkbox" class="w-4 h-4 text-[#D5BFA3] border-gray-300 rounded focus:ring-[#D5BFA3] focus:ring-2 cursor-pointer">
                             <span class="text-sm text-gray-600 group-hover:text-[#D5BFA3] transition-colors">Ghi nhớ đăng nhập</span>
                         </label>
-                        <a class="text-sm text-[#8B5E3C] hover:text-[#5D3E28] font-medium hover:underline transition-colors" href="/quen-mat-khau">
-                            Quên mật khẩu?
+                        <a class="text-sm text-[#8B5E3C] hover:text-[#5D3E28] font-medium hover:underline transition-colors" href="/forgot-password">
+                          Forgot Password?
                         </a>
                     </div>
 

@@ -1,24 +1,25 @@
 package com.example.projectend.controller;
 
+import com.example.projectend.entity.PasswordResetToken;
 import com.example.projectend.entity.TaiKhoan;
 import com.example.projectend.entity.VaiTro;
+import com.example.projectend.repository.PasswordResetTokenRepository;
 import com.example.projectend.repository.TaiKhoanRepository;
 import com.example.projectend.repository.VaiTroRepository;
+import com.example.projectend.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.Random;
 
-/**
- * Controller xử lý đăng nhập và đăng ký tài khoản
- */
-@Controller
-public class AuthController extends BaseController {
+@RestController
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173") // dev Vue
+public class AuthController {
 
     @Autowired
     private TaiKhoanRepository taiKhoanRepository;
@@ -26,127 +27,112 @@ public class AuthController extends BaseController {
     @Autowired
     private VaiTroRepository vaiTroRepository;
 
-    /**
-     * GET /login — Redirect về Vue SPA
-     * (SPA Vue tự xử lý route /login via Vue Router)
-     */
-    @GetMapping("/login")
-    public String loginPage(
-            @RequestParam(value = "error", required = false) String error,
-            @RequestParam(value = "logout", required = false) String logout,
-            HttpServletRequest request) {
-        // Detect Vite dev server (port 5173) vs production
-        String origin = request.getHeader("Origin");
-        String referer = request.getHeader("Referer");
-        boolean isDevMode = (origin != null && origin.contains("5173"))
-                || (referer != null && referer.contains("5173"));
+    @Autowired
+    private PasswordResetTokenRepository tokenRepository;
 
-        String suffix = "";
-        if (error != null)
-            suffix = "?error=true";
-        else if (logout != null)
-            suffix = "?logout=success";
+    @Autowired
+    private EmailService emailService;
 
-        if (isDevMode) {
-            return "redirect:http://localhost:5173/login" + suffix;
-        }
-        // Production: Vue SPA served from Spring Boot, forward to SPA index
-        return "redirect:/login" + suffix;
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    /**
-     * GET /register — Redirect về Vue SPA
-     */
-    @GetMapping("/register")
-    public String registerPage(HttpServletRequest request) {
-        String referer = request.getHeader("Referer");
-        if (referer != null && referer.contains("5173")) {
-            return "redirect:http://localhost:5173/register";
-        }
-        return "redirect:/register";
-    }
-
-    /**
-     * Xử lý đăng ký tài khoản mới
-     */
+    // ================= REGISTER API =================
     @PostMapping("/register")
-    public String registerSubmit(@RequestParam String hoTen,
-            @RequestParam String email,
-            @RequestParam String matKhau,
-            @RequestParam String confirmPassword,
-            @RequestParam(required = false) String soDienThoai,
-            RedirectAttributes redirectAttributes) {
+    public ResponseEntity<?> registerApi(@RequestBody Map<String, String> body) {
+        String hoTen = body.get("hoTen");
+        String email = body.get("email");
+        String matKhau = body.get("matKhau");
+        String confirmPassword = body.get("confirmPassword");
+        String soDienThoai = body.get("soDienThoai");
 
-        // Kiểm tra họ tên
-        if (hoTen == null || hoTen.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Họ tên không được để trống!");
-            return "redirect:/register";
-        }
-
-        // Kiểm tra email
-        if (email == null || email.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Email không được để trống!");
-            return "redirect:/register";
-        }
-
-        // Kiểm tra mật khẩu
-        if (matKhau == null || matKhau.length() < 6) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu phải có ít nhất 6 ký tự!");
-            return "redirect:/register";
-        }
-
-        // Kiểm tra xác nhận mật khẩu
-        if (!matKhau.equals(confirmPassword)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu xác nhận không khớp!");
-            return "redirect:/register";
-        }
-
-        // Kiểm tra email đã tồn tại
-        if (taiKhoanRepository.existsByEmail(email)) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Email đã tồn tại trong hệ thống!");
-            return "redirect:/register";
-        }
+        if (hoTen == null || hoTen.trim().isEmpty()) return ResponseEntity.badRequest().body("Họ tên không được để trống");
+        if (email == null || email.trim().isEmpty()) return ResponseEntity.badRequest().body("Email không được để trống");
+        if (matKhau == null || matKhau.length() < 6) return ResponseEntity.badRequest().body("Mật khẩu phải có ít nhất 6 ký tự");
+        if (!matKhau.equals(confirmPassword)) return ResponseEntity.badRequest().body("Mật khẩu xác nhận không khớp");
+        if (taiKhoanRepository.existsByEmail(email)) return ResponseEntity.badRequest().body("Email đã tồn tại");
 
         try {
-            // Lấy vai trò khách hàng (KHACHHANG trong database - khớp với db.sql)
             VaiTro vaiTroUser = vaiTroRepository.findByTenVaiTro("KHACHHANG")
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò KHACHHANG"));
 
-            // Tạo tài khoản mới
             TaiKhoan taiKhoanMoi = new TaiKhoan();
             taiKhoanMoi.setHoTen(hoTen.trim());
             taiKhoanMoi.setEmail(email.trim().toLowerCase());
-            taiKhoanMoi.setMatKhau(matKhau); // Plain text password (NoOpPasswordEncoder)
+            taiKhoanMoi.setMatKhau(passwordEncoder.encode(matKhau));
             taiKhoanMoi.setSoDienThoai(soDienThoai);
-            // Thêm vai trò vào Set (Many-to-Many)
             taiKhoanMoi.addVaiTro(vaiTroUser);
             taiKhoanMoi.setTrangThai(true);
             taiKhoanMoi.setNgayTao(LocalDateTime.now());
 
-            // Lưu vào database
             taiKhoanRepository.save(taiKhoanMoi);
 
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
-            return "redirect:/login";
-
+            return ResponseEntity.ok("Đăng ký thành công");
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Có lỗi xảy ra khi đăng ký: " + e.getMessage());
-            return "redirect:/register";
+            return ResponseEntity.status(500).body("Có lỗi xảy ra khi đăng ký: " + e.getMessage());
         }
     }
 
-    /**
-     * GET /403 — Redirect về Vue SPA error page
-     */
-    @GetMapping("/403")
-    public String accessDenied(HttpServletRequest request) {
-        String referer = request.getHeader("Referer");
-        if (referer != null && referer.contains("5173")) {
-            return "redirect:http://localhost:5173/403";
-        }
-        return "redirect:/403";
+    // ================= FORGOT PASSWORD =================
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isEmpty()) return ResponseEntity.badRequest().body("Email không hợp lệ");
+
+        TaiKhoan tk = taiKhoanRepository.findByEmail(email).orElse(null);
+        if (tk == null) return ResponseEntity.badRequest().body("Email không tồn tại");
+
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
+
+        PasswordResetToken token = new PasswordResetToken();
+        token.setEmail(email);
+        token.setOtp(otp);
+        token.setExpiry(LocalDateTime.now().plusMinutes(5));
+        token.setTrangThai(true);
+        tokenRepository.save(token);
+
+        emailService.sendOtpEmail(email, otp);
+
+        return ResponseEntity.ok("OTP đã được gửi (check email console)");
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String otp = body.get("otp");
+
+        PasswordResetToken token = tokenRepository
+                .findTopByEmailAndOtpAndTrangThaiTrueOrderByNgayTaoDesc(email, otp)
+                .orElse(null);
+
+        if (token == null) return ResponseEntity.badRequest().body("OTP không đúng");
+        if (token.getExpiry().isBefore(LocalDateTime.now())) return ResponseEntity.badRequest().body("OTP đã hết hạn");
+
+        return ResponseEntity.ok("OTP hợp lệ");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String otp = body.get("otp");
+        String newPassword = body.get("newPassword");
+
+        PasswordResetToken token = tokenRepository
+                .findTopByEmailAndOtpAndTrangThaiTrueOrderByNgayTaoDesc(email, otp)
+                .orElse(null);
+
+        if (token == null) return ResponseEntity.badRequest().body("OTP không hợp lệ");
+        if (token.getExpiry().isBefore(LocalDateTime.now())) return ResponseEntity.badRequest().body("OTP đã hết hạn");
+
+        TaiKhoan tk = taiKhoanRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản"));
+
+        tk.setMatKhau(passwordEncoder.encode(newPassword));
+        taiKhoanRepository.save(tk);
+
+        token.setTrangThai(false);
+        tokenRepository.save(token);
+
+        return ResponseEntity.ok("Đổi mật khẩu thành công");
     }
 }

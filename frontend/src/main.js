@@ -51,7 +51,10 @@ const routes = [
   // Auth - Using ComingSoon wrapper (Register renamed)
   { path: '/login', component: () => import('./views/Login.vue') },
   { path: '/register', component: () => import('./views/Register.vue') }, // Was ĐkiTk.vue
-  { path: '/dangky', component: () => import('./views/Register.vue') },
+  { path: '/dang-ky', component: () => import('./views/Register.vue') },
+  { path: '/forgot-password', component: () => import('./views/ForgotPassword.vue') },
+  { path: '/verify-otp', component: () => import('./views/VerifyOtp.vue') },
+  { path: '/reset-password', component: () => import('./views/ResetPassword.vue') },
 
   // User Profile
   { path: '/profile', component: () => import('./views/Profile.vue') },
