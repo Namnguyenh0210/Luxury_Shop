@@ -117,6 +117,11 @@
             <version>3.5.2</version>
         </dependency>
 
+        <!-- GỬI EMAIL OTP THẬT -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

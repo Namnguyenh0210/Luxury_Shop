@@ -236,4 +236,38 @@ public class EmailService {
                 items.toString(), tongTien
         );
     }
+    @Async
+    public void sendOtpEmail(String toEmail, String otp) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail, fromName);
+            helper.setTo(toEmail);
+            helper.setSubject("🔐 Mã xác nhận đổi mật khẩu - Luxury Fashion");
+
+            String content = """
+                <html>
+                <body style="font-family:Arial,sans-serif;">
+                    <h2>🔐 Xác nhận đổi mật khẩu</h2>
+                    <p>Mã OTP của bạn là:</p>
+                    <h1 style="color:#0f3460;">%s</h1>
+                    <p>Mã có hiệu lực trong <b>5 phút</b>.</p>
+                    <br>
+                    <p>Nếu bạn không yêu cầu, hãy bỏ qua email này.</p>
+                    <p>— Luxury Fashion</p>
+                </body>
+                </html>
+                """.formatted(otp);
+
+            helper.setText(content, true);
+
+            mailSender.send(message);
+
+            log.info("✅ Đã gửi OTP tới {}", toEmail);
+
+        } catch (Exception e) {
+            log.error("❌ Lỗi gửi OTP email: {}", e.getMessage());
+        }
+    }
 }
