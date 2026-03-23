@@ -31,7 +31,7 @@
           <div class="lg:col-span-7 space-y-8">
 
             <!-- ĐỊA CHỈ GIAO HÀNG -->
-            <div class="bg-white border border-[#E5E7EB] shadow-sm">
+            <div class="bg-white border border-[#C8A97E]/30 shadow-sm rounded-2xl overflow-hidden">
               <div class="px-8 py-5 border-b border-[#F5F1ED] flex items-center justify-between" style="background:#FDFCFB;">
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-[#C8A97E] text-xl">location_on</span>
@@ -63,22 +63,37 @@
                 <div v-else class="text-center py-10">
                   <span class="material-symbols-outlined text-5xl text-gray-200 block mb-3">location_off</span>
                   <p class="text-gray-500 text-sm mb-4">Bạn chưa có địa chỉ giao hàng.</p>
-                  <a href="/profile"
-                     class="inline-flex items-center gap-2 px-6 py-2.5 bg-[#111111] text-white text-xs uppercase font-bold tracking-widest hover:bg-[#C8A97E] transition-colors">
+                  <button @click="showAddAddress = true"
+                     class="inline-flex items-center gap-2 px-6 py-2.5 bg-[#111111] text-white text-xs uppercase font-bold tracking-widest hover:bg-[#C8A97E] transition-colors rounded-xl">
                     <span class="material-symbols-outlined text-sm">add</span>Thêm địa chỉ
-                  </a>
+                  </button>
                 </div>
+                <!-- Inline Add Address Toggle -->
                 <div v-if="diaChiList.length > 0" class="mt-4 pt-4 border-t border-[#E5E7EB]">
-                  <a href="/profile"
+                  <button @click="showAddAddress = !showAddAddress" type="button"
                      class="inline-flex items-center gap-1.5 text-[#C8A97E] hover:underline text-xs font-bold uppercase tracking-widest nav-link">
-                    <span class="material-symbols-outlined text-sm">add_circle</span>Thêm địa chỉ mới
-                  </a>
+                    <span class="material-symbols-outlined text-sm">{{ showAddAddress ? 'remove_circle' : 'add_circle' }}</span>
+                    {{ showAddAddress ? 'Hủy thêm địa chỉ' : 'Thêm địa chỉ mới' }}
+                  </button>
+                </div>
+
+                <!-- Inline Add Address Form -->
+                <div v-if="showAddAddress" class="mt-5 p-5 bg-[#FDFCFB] border border-[#C8A97E]/40 rounded-xl space-y-4 shadow-inner">
+                  <h3 class="text-xs font-bold text-[#111111] uppercase tracking-widest mb-1">Thêm địa chỉ mới</h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input v-model="newAddress.ten" type="text" placeholder="Họ và tên người nhận (*)" class="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm focus:border-[#C8A97E] outline-none transition-colors" />
+                    <input v-model="newAddress.phone" type="text" placeholder="Số điện thoại (*)" class="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm focus:border-[#C8A97E] outline-none transition-colors" />
+                  </div>
+                  <textarea v-model="newAddress.diaChi" rows="2" placeholder="Địa chỉ chi tiết (Số nhà, đường, phường/xã, quận/huyện, tỉnh/TP) (*)" class="w-full px-4 py-3 bg-white border border-[#E5E7EB] rounded-xl text-sm focus:border-[#C8A97E] outline-none transition-colors"></textarea>
+                  <button @click="saveNewAddress" type="button" :disabled="isSavingAddress" class="px-6 py-3 bg-[#111111] text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#C8A97E] disabled:opacity-50 transition-colors shadow-md">
+                    {{ isSavingAddress ? 'Đang lưu...' : 'Lưu địa chỉ' }}
+                  </button>
                 </div>
               </div>
             </div>
 
             <!-- PHƯƠNG THỨC THANH TOÁN -->
-            <div class="bg-white border border-[#E5E7EB] shadow-sm">
+            <div class="bg-white border border-[#C8A97E]/30 shadow-sm rounded-2xl overflow-hidden mt-8">
               <div class="px-8 py-5 border-b border-[#F5F1ED] flex items-center justify-between" style="background:#FDFCFB;">
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-[#C8A97E] text-xl">account_balance_wallet</span>
@@ -111,7 +126,7 @@
             </div>
 
             <!-- GHI CHÚ -->
-            <div class="bg-white border border-[#E5E7EB] shadow-sm">
+            <div class="bg-white border border-[#C8A97E]/30 shadow-sm rounded-2xl overflow-hidden mt-8">
               <div class="px-8 py-5 border-b border-[#F5F1ED] flex items-center gap-3" style="background:#FDFCFB;">
                 <span class="material-symbols-outlined text-[#C8A97E] text-lg">chat_bubble_outline</span>
                 <h2 class="font-serif font-bold text-[#111111] tracking-[0.1em] text-sm uppercase">3. Ghi chú đơn hàng</h2>
@@ -127,7 +142,7 @@
 
           <!-- RIGHT: Order Summary -->
           <div class="lg:col-span-5">
-            <div class="sticky top-6 bg-white border border-[#E5E7EB]">
+            <div class="sticky top-6 bg-white border border-[#C8A97E]/30 shadow-md rounded-2xl overflow-hidden">
 
               <!-- Header -->
               <div class="px-6 py-4 flex items-center gap-2" style="background:#111111;">
@@ -138,11 +153,11 @@
               <div class="max-h-80 overflow-y-auto custom-scrollbar">
                 <div v-for="item in cartItems" :key="item.id"
                   class="flex gap-4 p-4 border-b border-[#E5E7EB] last:border-0">
-                  <div class="relative flex-shrink-0 w-20 h-24 bg-[#F5F1ED] overflow-hidden">
-                    <img :src="`/api/img/${item.anh}`" :alt="item.tenSP"
+                  <div class="relative flex-shrink-0 w-20 h-24 bg-[#F5F1ED] overflow-hidden rounded-xl">
+                    <img :src="item.anh && item.anh.startsWith('http') ? item.anh : `/api/img/${item.anh}`" :alt="item.tenSP"
                          class="w-full h-full object-cover"
                          @error="$event.target.src='/img/placeholder.png'" />
-                    <span class="absolute top-0 right-0 bg-[#111111] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center">
+                    <span class="absolute top-0 right-0 bg-[#111111] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-bl-lg">
                       {{ item.soLuong }}
                     </span>
                   </div>
@@ -161,6 +176,25 @@
               <!-- Voucher -->
               <div class="p-8 border-t border-[#E5E7EB]" style="background:#F9F7F5;">
                 <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C8A97E] mb-4">Mã ưu đãi (Voucher)</p>
+                
+                <!-- Display available vouchers -->
+                <div v-if="!appliedVoucher && availableVouchers.length > 0" class="mb-5 space-y-2">
+                  <div class="max-h-40 overflow-y-auto custom-scrollbar space-y-2 pr-1">
+                    <div v-for="v in availableVouchers" :key="v.maVoucher" 
+                         @click="voucherCode = v.code; applyVoucher()"
+                         class="p-4 bg-white border border-[#C8A97E]/40 rounded-xl cursor-pointer hover:border-[#C8A97E] hover:shadow-md active:bg-yellow-50 flex justify-between items-center transition-all group">
+                       <div>
+                         <p class="font-bold text-[#111111] text-[13px] uppercase tracking-wider group-hover:text-[#C8A97E] transition-colors">{{ v.code }}</p>
+                         <p class="text-[10px] text-gray-500 mt-1 uppercase tracking-widest font-semibold flex items-center gap-1">
+                           <span class="material-symbols-outlined text-[12px] text-green-600">sell</span>
+                           Giảm {{ v.loaiGiamGia === 0 ? v.giaTri + '%' : formatPrice(v.giaTri) }} {{ v.giaTriToiDa ? '(Tối đa ' + formatPrice(v.giaTriToiDa) + ')' : '' }}
+                         </p>
+                       </div>
+                       <span class="text-[9px] font-black text-white tracking-[0.2em] uppercase py-2 px-4 bg-[#111111] rounded-full group-hover:bg-[#C8A97E] transition-all shadow-sm">Áp dụng</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div class="flex gap-3">
                   <input
                     v-model="voucherCode"
@@ -274,7 +308,13 @@ export default {
       voucherCode: '',
       appliedVoucher: null,
       voucherMessage: '',
-      discountAmount: 0
+      discountAmount: 0,
+      
+      // Address creation state & Vouchers
+      showAddAddress: false,
+      isSavingAddress: false,
+      newAddress: { ten: '', phone: '', diaChi: '' },
+      availableVouchers: []
     }
   },
   computed: {
@@ -299,8 +339,16 @@ export default {
         }
         if (res.data.cartItems) this.cartItems = res.data.cartItems
         this.orderSubtotal = res.data.orderSubtotal || 0
+        
+        // After establishing subtotal, fetch available vouchers
+        this.fetchAvailableVouchers()
       } catch (err) {
-        this.error = 'Không thể tải thông tin thanh toán. Vui lòng thử lại.'
+        if (err.response?.status === 401) {
+          window.$toast.warning('Vui lòng đăng nhập để trải nghiệm mua hàng!')
+          setTimeout(() => { window.location.href = '/login' }, 2000)
+        } else {
+          this.error = 'Không thể tải thông tin thanh toán. Vui lòng thử lại.'
+        }
       } finally {
         this.loading = false
       }
@@ -322,6 +370,47 @@ export default {
         }
       } catch {
         this.voucherMessage = 'Không thể kiểm tra mã. Vui lòng thử lại.'
+      }
+    },
+
+    async fetchAvailableVouchers() {
+      if (this.orderSubtotal <= 0) return;
+      try {
+        const res = await axios.get('/vouchers/available', {
+          params: { orderAmount: this.orderSubtotal }
+        })
+        if (res.data && Array.isArray(res.data)) {
+          this.availableVouchers = res.data
+        }
+      } catch (err) {
+        console.error("Voucher fetch err", err)
+      }
+    },
+
+    async saveNewAddress() {
+      if (!this.newAddress.ten || !this.newAddress.phone || !this.newAddress.diaChi) {
+        window.$toast.error('Vui lòng nhập đầy đủ thông tin địa chỉ (*)');
+        return;
+      }
+      this.isSavingAddress = true;
+      try {
+        const formData = new FormData()
+        formData.append("hoTenNguoiNhan", this.newAddress.ten)
+        formData.append("soDienThoai", this.newAddress.phone)
+        formData.append("diaChiChiTiet", this.newAddress.diaChi)
+        
+        await axios.post("/profile/address/add", formData)
+        window.$toast.success("Đã thêm địa chỉ mới!")
+        this.showAddAddress = false
+        this.newAddress = { ten: '', phone: '', diaChi: '' }
+        
+        // Refresh checkout data to load new address
+        await this.fetchCheckoutData()
+      } catch (e) {
+        console.error("Save address err", e)
+        window.$toast.error("Không thể thêm địa chỉ mới. Thử lại sau.")
+      } finally {
+        this.isSavingAddress = false
       }
     },
 

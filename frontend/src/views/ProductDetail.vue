@@ -427,28 +427,21 @@ export default {
         if (this.isFavorite) {
           window.$toast({
             title: 'SẢN PHẨM YÊU THÍCH',
-            message: 'Đã thêm sản phẩm này vào bộ sưu tập của bạn.',
-            icon: 'favorite'
+            message: 'Đã thêm sản phẩm này vào bộ sưu tập của bạn.'
           })
         } else {
           window.$toast({
             title: 'SẢN PHẨM YÊU THÍCH',
-            message: 'Đã bỏ sản phẩm khỏi bộ sưu tập.',
-            icon: 'heart_broken'
+            message: 'Đã bỏ sản phẩm khỏi bộ sưu tập.'
           })
         }
       } catch (err) {
         if (err.response?.status === 401) {
-          window.$toast({
-            title: 'THÔNG BÁO',
-            message: 'Vui lòng đăng nhập để sử dụng tính năng yêu thích.',
-            icon: 'person'
-          })
+          window.$toast.warning('Vui lòng đăng nhập để trải nghiệm mua hàng!')
         } else {
           window.$toast({
             title: 'THÔNG BÁO',
-            message: 'Hành động không thành công. Vui lòng thử lại sau.',
-            icon: 'error'
+            message: 'Hành động không thành công. Vui lòng thử lại sau.'
           })
         }
       } finally {
@@ -519,7 +512,11 @@ export default {
         }
       } catch (err) {
         console.error('Error adding to cart:', err)
-        window.$toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!')
+        if (err.response?.status === 401) {
+          window.$toast.warning('Vui lòng đăng nhập để trải nghiệm mua hàng!')
+        } else {
+          window.$toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!')
+        }
       }
     }
   },

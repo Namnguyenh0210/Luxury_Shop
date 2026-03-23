@@ -42,12 +42,14 @@
 
         <!-- Các thông báo (chưa đăng nhập, chưa mua, hoặc đã đánh giá xong) lồng vào trong khung vàng -->
         <div class="review-status-messages">
-          <div v-if="!daDangNhap || (coTheReview.length === 0 && !daDanhGiaHet)" class="review-notice">
+          <div v-if="!daDangNhap" class="review-notice">
+            <p>Vui lòng đăng nhập để trải nghiệm mua hàng!</p>
+          </div>
+          <div v-else-if="coTheReview.length === 0 && !daDanhGiaHet" class="review-notice">
             <p>Bạn hãy mua hàng để trải nghiệm và đánh giá sản phẩm</p>
           </div>
           
           <div v-else-if="daDanhGiaHet" class="review-notice review-done-notice">
-            <span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 4px; color: #10B981;">check_circle</span>
             Bạn đã hoàn tất đánh giá cho tất cả sản phẩm đã mua. Cảm ơn bạn!
           </div>
         </div>

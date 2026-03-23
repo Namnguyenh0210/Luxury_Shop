@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,6 +25,18 @@ public class VoucherController {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
+
+    @GetMapping("/available")
+    public ResponseEntity<List<Voucher>> getAvailableVouchers(@RequestParam BigDecimal orderAmount) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        TaiKhoan tk = null;
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            tk = userDetailsService.getTaiKhoanByEmail(auth.getName());
+        }
+        
+        List<Voucher> vouchers = voucherService.getAvailableForUser(tk, orderAmount);
+        return ResponseEntity.ok(vouchers);
+    }
 
     @GetMapping("/check")
     public ResponseEntity<Map<String, Object>> checkVoucher(

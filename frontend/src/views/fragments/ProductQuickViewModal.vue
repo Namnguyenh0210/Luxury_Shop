@@ -161,8 +161,6 @@
                 <!-- Toast Notification -->
                 <Transition name="toast-anim">
                   <div v-if="toastMessage" :class="['toast-notify', toastType]">
-                    <span v-if="toastType === 'success'">✅</span>
-                    <span v-else>❌</span>
                     {{ toastMessage }}
                   </div>
                 </Transition>
@@ -360,14 +358,18 @@ export default {
 
         const res = await axios.post('/cart/add-product', null, { params })
         if (res.data.success) {
-          this.showToast('Đã thêm vào giỏ hàng! 🛍️', 'success')
+          this.showToast('Đã thêm vào giỏ hàng thành công!', 'success')
           this.$emit('cart-updated')
           if (window.refreshCartCount) window.refreshCartCount()
         } else {
           this.showToast(res.data.message || 'Không thể thêm sản phẩm', 'error')
         }
       } catch (err) {
-        this.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error')
+        if (err.response?.status === 401) {
+          this.showToast('Vui lòng đăng nhập để trải nghiệm mua hàng!', 'error')
+        } else {
+          this.showToast('Có lỗi xảy ra, vui lòng thử lại', 'error')
+        }
       } finally {
         this.addingToCart = false
       }
@@ -805,10 +807,10 @@ export default {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 50px;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   white-space: nowrap;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   z-index: 10;

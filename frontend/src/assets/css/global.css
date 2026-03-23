@@ -22,7 +22,7 @@
   --lux-white: #FFFFFF;
   --lux-gray: #6B7280;
   --lux-border: #E5E7EB;
-  
+
   /* --- Semantic Colors --- */
   --primary: var(--lux-black);
   --accent: var(--lux-gold);
@@ -58,50 +58,61 @@ body {
 }
 
 /* --- Tailwind font overrides --- */
-.font-sans {
+.font-sans,
+.font-display,
+.font-body {
   font-family: 'Times New Roman', Times, serif !important;
 }
+
 .font-serif {
   font-family: 'Times New Roman', Times, serif !important;
 }
+
 .font-mono {
   font-family: 'Courier New', Courier, monospace !important;
 }
 
 /* --- Luxury Nav Link Style --- */
 .nav-link {
-    position: relative;
-    text-decoration: none;
-    transition: color 0.3s;
+  position: relative;
+  text-decoration: none;
+  transition: color 0.3s;
 }
 
 .nav-link::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -4px;
-    width: 0;
-    height: 2px;
-    background: #C8A97E;
-    transition: 0.3s;
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0;
+  height: 2px;
+  background: #C8A97E;
+  transition: 0.3s;
 }
 
 .nav-link:hover::after {
-    width: 100%;
+  width: 100%;
 }
 
 .nav-link:hover {
-    color: #C8A97E !important;
+  color: #C8A97E !important;
 }
 
 /* --- Global Accent Hooks --- */
-.text-accent { color: var(--lux-gold) !important; }
-.bg-accent { background-color: var(--lux-gold) !important; }
-.border-accent { border-color: var(--lux-gold) !important; }
+.text-accent {
+  color: var(--lux-gold) !important;
+}
+
+.bg-accent {
+  background-color: var(--lux-gold) !important;
+}
+
+.border-accent {
+  border-color: var(--lux-gold) !important;
+}
 
 /* --- Luxury Background --- */
 body {
-    background-color: var(--lux-cream);
-    color: var(--lux-black);
+  background-color: var(--lux-cream);
+  color: var(--lux-black);
 }
-

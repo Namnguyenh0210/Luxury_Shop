@@ -150,7 +150,12 @@ export default {
         }
       } catch (err) {
         console.error('Error fetching cart:', err)
-        window.$toast.error('Không thể tải giỏ hàng')
+        if (err.response?.status === 401) {
+          window.$toast.warning('Vui lòng đăng nhập để trải nghiệm mua hàng!')
+          this.items = []
+        } else {
+          window.$toast.error('Không thể tải giỏ hàng')
+        }
       } finally {
         this.loading = false
       }

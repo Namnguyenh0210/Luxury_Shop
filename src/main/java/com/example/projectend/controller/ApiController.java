@@ -268,23 +268,11 @@ public class ApiController {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            // 1. CHƯA ĐĂNG NHẬP - Lưu vào Session (Dùng variantId làm key nếu có)
+            // 1. CHƯA ĐĂNG NHẬP - Chặn khách vãng lai (Yêu cầu login)
             if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-                @SuppressWarnings("unchecked")
-                Map<String, Integer> cart = (Map<String, Integer>) session.getAttribute("cart_v2");
-                if (cart == null) cart = new HashMap<>();
-
-                // Key định danh (nếu có variantId thì dùng nó, không thì dùng productId)
-                String targetKey = (variantId != null) ? "v" + variantId : "p" + productId;
-                
-                cart.put(targetKey, cart.getOrDefault(targetKey, 0) + quantity);
-                session.setAttribute("cart_v2", cart);
-
-                long cartCount = cart.values().stream().mapToLong(Integer::longValue).sum();
-                response.put("success", true);
-                response.put("message", "Đã thêm vào giỏ hàng tạm thời");
-                response.put("cartCount", cartCount);
-                return ResponseEntity.ok(response);
+                response.put("success", false);
+                response.put("message", "Vui lòng đăng nhập để thực hiện");
+                return ResponseEntity.status(401).body(response);
             }
 
             // 2. ĐÃ ĐĂNG NHẬP - Lưu vào Database
