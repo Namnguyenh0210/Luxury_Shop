@@ -31,6 +31,10 @@ public class DonHangChiTiet {
     @Column(name = "DonGia", precision = 18, scale = 2)
     private BigDecimal donGia;
 
+    @OneToOne(mappedBy = "donHangChiTiet", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("donHangChiTiet")
+    private DanhGia danhGia;
+
     public DonHangChiTiet() {}
 
     public DonHangChiTiet(DonHang donHang, SanPhamChiTiet sanPhamChiTiet, Integer soLuong, BigDecimal donGia) {
@@ -78,6 +82,14 @@ public class DonHangChiTiet {
 
     public void setDonGia(BigDecimal donGia) {
         this.donGia = donGia;
+    }
+
+    public DanhGia getDanhGia() {
+        return danhGia;
+    }
+
+    public void setDanhGia(DanhGia danhGia) {
+        this.danhGia = danhGia;
     }
 
     @Transient

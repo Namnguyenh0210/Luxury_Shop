@@ -19,7 +19,7 @@
         </div>
 
         <!-- Product Detail -->
-        <div v-else-if="product" class="container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div v-else-if="product" class="w-full px-4 md:px-[2cm] py-10">
             <!-- Breadcrumb -->
             <nav class="mb-6 text-sm">
                 <a href="/" class="text-gray-500 hover:text-gray-700">Trang chủ</a>
@@ -159,18 +159,18 @@
                     <div class="flex gap-4">
                         <button 
                             @click="addToCart"
-                            :disabled="!canAddToCart"
-                            class="flex-grow bg-black text-white text-lg font-bold py-4 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-lg shadow-black/10"
+                            class="flex-grow bg-black text-white text-lg font-bold py-4 rounded-lg hover:bg-gray-800 transition-all active:scale-[0.98] shadow-lg shadow-black/10"
                         >
                             {{ totalStock > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng' }}
                         </button>
                         <button 
                             @click="toggleWishlist"
-                            class="w-16 flex items-center justify-center border-2 border-gray-900 rounded-lg hover:bg-gray-50 transition-all group"
+                            :disabled="isToggling"
+                            class="w-16 flex items-center justify-center border-2 border-gray-900 rounded-lg hover:bg-gray-50 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <span 
                                 class="material-symbols-outlined text-2xl transition-all group-active:scale-125"
-                                :class="isFavorite ? 'text-red-600 fill-icon' : 'text-gray-900'"
+                                :class="[isFavorite ? 'text-red-600 fill-icon' : 'text-gray-900', isToggling ? 'animate-pulse' : '']"
                             >
                                 {{ isFavorite ? 'favorite' : 'favorite_border' }}
                             </span>
@@ -186,31 +186,58 @@
             </div>
 
             <!-- Reviews Section - Component mới -->
-            <div class="mt-16 max-w-4xl">
+            <div class="mt-16 max-w-4xl mx-auto">
                 <ProductReviews :productId="product.maSP" />
             </div>
 
 
             <!-- Related Products -->
-            <div v-if="relatedProducts.length > 0" class="border-t border-gray-200 pt-12">
-                <h2 class="text-2xl font-bold mb-6">Có thể bạn quan tâm</h2>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <a 
+            <div v-if="relatedProducts.length > 0" class="border-t border-gray-200 mt-20 pt-16">
+                <h2 class="text-3xl font-bold mb-10 font-serif">Có thể bạn quan tâm</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div 
                         v-for="item in relatedProducts" 
                         :key="item.maSP"
-                        :href="`/sanpham/${item.maSP}`"
-                        class="group"
+                        class="group flex flex-col h-full bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-50"
                     >
-                        <div class="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden mb-3">
+                        <!-- Image Wrapper -->
+                        <div @click="goToDetail(item.maSP)" class="aspect-[3/4] bg-[#f8f8f8] relative overflow-hidden cursor-pointer">
                             <img 
-                                :src="item.anhChinh || '/img/placeholder.png'" 
+                                :src="item.anhChinh || '/images/placeholder.png'" 
                                 :alt="item.tenSP"
-                                class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             >
+                            <!-- Heart Overlay (Optional matching theme) -->
+                            <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="material-symbols-outlined text-gray-400 hover:text-red-500 bg-white/80 p-2 rounded-full cursor-pointer backdrop-blur-sm">favorite</span>
+                            </div>
                         </div>
-                        <p class="text-xs text-gray-600 uppercase">{{ item.thuongHieu?.tenTH || 'Brand' }}</p>
-                        <h4 class="font-medium text-sm">{{ item.tenSP }}</h4>
-                    </a>
+
+                        <!-- Product Info -->
+                        <div class="p-5 flex flex-col flex-1">
+                            <p class="text-[11px] text-[#A0A0A0] uppercase tracking-[0.15em] font-bold mb-1.5">
+                                {{ item.thuongHieu?.tenTH || 'Brand' }}
+                            </p>
+                            <h4 @click="goToDetail(item.maSP)" class="font-bold text-[16px] text-gray-900 mb-4 line-clamp-1 cursor-pointer hover:text-accent transition-colors">
+                                {{ item.tenSP }}
+                            </h4>
+                            
+                            <!-- Bottom Row -->
+                            <div class="flex items-center justify-between mt-auto">
+                                <div class="flex flex-col">
+                                    <span class="text-[17px] font-black text-gray-900">
+                                        {{ formatPrice(getRelatedPrice(item.maSP)) }}
+                                    </span>
+                                </div>
+                                <button 
+                                    @click="goToDetail(item.maSP)"
+                                    class="bg-black text-white w-10 h-10 rounded-xl flex items-center justify-center hover:bg-accent transition-colors shadow-lg shadow-black/10 active:scale-95"
+                                >
+                                    <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -244,11 +271,13 @@ export default {
       reviews: [],
       reviewCount: 0,
       relatedProducts: [],
+      relatedPriceMap: {},
       currentImage: '',
       selectedSize: null,
       selectedColor: null,
       quantity: 1,
-      isFavorite: false
+      isFavorite: false,
+      isToggling: false
     }
   },
   computed: {
@@ -263,7 +292,21 @@ export default {
     availableSizes() {
       if (!this.variants) return []
       const sizes = [...new Set(this.variants.filter(v => v.sizeSP && v.sizeSP.tenSize).map(v => v.sizeSP.tenSize))]
-      return sizes.sort() // Sắp xếp cho dễ nhìn
+      
+      // Define correct order for garment sizes
+      const sizeOrder = ['S', 'M', 'L', 'XL', 'XXL', '2XL', '3XL'];
+      
+      return sizes.sort((a, b) => {
+        const indexA = sizeOrder.indexOf(a.toUpperCase());
+        const indexB = sizeOrder.indexOf(b.toUpperCase());
+        
+        // If size not in list, put at end
+        if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        
+        return indexA - indexB;
+      });
     },
     availableColors() {
       if (!this.variants) return []
@@ -271,9 +314,10 @@ export default {
       return colors
     },
     selectedVariant() {
+      if (!this.selectedSize || !this.selectedColor) return null
       return this.variants.find(v => 
-        (!this.selectedSize || v.sizeSP?.tenSize === this.selectedSize) &&
-        (!this.selectedColor || v.mauSacSP?.tenMau === this.selectedColor) &&
+        (v.sizeSP?.tenSize === this.selectedSize) &&
+        (v.mauSacSP?.tenMau === this.selectedColor) &&
         v.soLuongTon > 0 && v.trangThai !== false
       )
     },
@@ -331,18 +375,13 @@ export default {
           this.reviews = response.data.reviews || []
           this.reviewCount = response.data.reviewCount || 0
           this.relatedProducts = response.data.relatedProducts || []
+          this.relatedPriceMap = response.data.relatedPriceMap || {}
           
           this.currentImage = this.productImages[0]
           
-          // Auto-select first valid variant combination
-          const firstAvailable = this.variants.find(v => v.soLuongTon > 0 && v.trangThai !== false);
-          if (firstAvailable) {
-              this.selectedSize = firstAvailable.sizeSP?.tenSize || null;
-              this.selectedColor = firstAvailable.mauSacSP?.tenMau || null;
-          } else if (this.variants.length > 0) {
-              this.selectedSize = this.variants[0].sizeSP?.tenSize || null;
-              this.selectedColor = this.variants[0].mauSacSP?.tenMau || null;
-          }
+          // reset selection to null to force user to choose
+          this.selectedSize = null;
+          this.selectedColor = null;
         } else {
           this.error = response.data.message || 'Product not found'
         }
@@ -359,13 +398,23 @@ export default {
       try {
         const productId = this.$route.params.id
         const res = await axios.get('/favorites', { withCredentials: true })
-        this.isFavorite = res.data.some(item => item.maSP == productId)
+        if (res.data && Array.isArray(res.data)) {
+          this.isFavorite = res.data.some(item => item.maSP == productId)
+        }
       } catch (e) {
-        console.error("Check favorite failed", e)
+        // 401 (Unauthorized) status - User is likely not logged in
+        this.isFavorite = false
+        // No need to log 401s as they are expected for guest users
+        if (e.response && e.response.status !== 401) {
+            console.error("Check favorite failed", e)
+        }
       }
     },
 
     async toggleWishlist() {
+      if (this.isToggling) return
+      this.isToggling = true
+      
       try {
         const productId = this.product.maSP
         const res = await axios.post('/favorites/toggle', null, {
@@ -377,29 +426,38 @@ export default {
 
         if (this.isFavorite) {
           window.$toast({
-            title: 'Sản phẩm yêu thích',
-            message: 'Đã thêm sản phẩm này vào bộ sưu tập của bạn.',
-            icon: 'favorite'
+            title: 'SẢN PHẨM YÊU THÍCH',
+            message: 'Đã thêm sản phẩm này vào bộ sưu tập của bạn.'
           })
         } else {
           window.$toast({
-            title: 'Sản phẩm yêu thích',
-            message: 'Đã bỏ sản phẩm khỏi bộ sưu tập.',
-            icon: 'heart_broken'
+            title: 'SẢN PHẨM YÊU THÍCH',
+            message: 'Đã bỏ sản phẩm khỏi bộ sưu tập.'
           })
         }
       } catch (err) {
-        window.$toast({
-          title: 'Thông báo',
-          message: 'Hành động không thành công. Bạn vui lòng đăng nhập trước nhé.',
-          icon: 'error'
-        })
+        if (err.response?.status === 401) {
+          window.$toast.warning('Vui lòng đăng nhập để trải nghiệm mua hàng!')
+        } else {
+          window.$toast({
+            title: 'THÔNG BÁO',
+            message: 'Hành động không thành công. Vui lòng thử lại sau.'
+          })
+        }
+      } finally {
+        this.isToggling = false
       }
     },
     
     formatPrice(price) {
-      if (!price) return 'Liên hệ'
+      if (price === undefined || price === null || price === 0) return '0 ₫'
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
+    },
+    getRelatedPrice(maSP) {
+      return this.relatedPriceMap[maSP]?.minPrice || 0
+    },
+    goToDetail(id) {
+      window.location.href = `/sanpham/${id}`;
     },
     
     handleImageError(event) {
@@ -419,30 +477,46 @@ export default {
     },
     
     async addToCart() {
-      if (!this.canAddToCart) return
-      
+      // 1. Kiểm tra lựa chọn đầy đủ
+      if (!this.selectedSize || !this.selectedColor) {
+          window.$toast.warning('Vui lòng chọn Size và Màu sắc trước khi đặt hàng!');
+          return;
+      }
+
+      const variant = this.selectedVariant;
+      if (!variant) {
+          window.$toast.warning('Phiên bản sản phẩm này hiện đang hết hàng.');
+          return;
+      }
+
+      if (this.quantity > variant.soLuongTon) {
+          window.$toast.warning(`Chỉ còn ${variant.soLuongTon} sản phẩm trong kho!`);
+          return;
+      }
+
       try {
         const params = {
           productId: this.product.maSP,
-          quantity: this.quantity
-        }
-        
-        // ✨ Quan trọng: Gửi variantId chính xác của Size/Màu khách chọn
-        if (this.selectedVariant) {
-          params.variantId = this.selectedVariant.maBienThe
+          quantity: this.quantity,
+          variantId: variant.maBienThe
         }
 
         const response = await axios.post('/cart/add-product', null, { params })
         
         if (response.data.success) {
-          window.$toast.success(response.data.message)
-          this.quantity = 1
+          window.$toast.success('Đã thêm sản phẩm vào giỏ hàng thành công!')
+          // Optionally refresh cart count if needed
+          if (window.refreshCartCount) window.refreshCartCount()
         } else {
           window.$toast.info(response.data.message)
         }
       } catch (err) {
         console.error('Error adding to cart:', err)
-        window.$toast.error('Không thể thêm sản phẩm vào giỏ hàng')
+        if (err.response?.status === 401) {
+          window.$toast.warning('Vui lòng đăng nhập để trải nghiệm mua hàng!')
+        } else {
+          window.$toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!')
+        }
       }
     }
   },

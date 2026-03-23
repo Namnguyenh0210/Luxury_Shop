@@ -6,13 +6,13 @@
 
     <transition-group name="toast-fade" tag="div" class="fixed top-24 right-4 md:right-10 z-[99999] space-y-4 pointer-events-none">
       <div v-for="toast in toasts" :key="toast.id" 
-           class="flex items-center gap-5 bg-white/95 backdrop-blur-md border-l-4 border-[#C8A97E] shadow-[0_20px_50px_rgba(0,0,0,0.15)] px-6 py-5 rounded-r-2xl min-w-[320px] md:min-w-[400px] pointer-events-auto transform transition-all duration-500 border border-gray-100">
-        <div class="flex items-center justify-center size-12 rounded-full bg-[#FDF8F3] text-[#C8A97E] flex-shrink-0 shadow-sm border border-[#C8A97E]/10">
-          <span class="material-symbols-outlined text-3xl">{{ toast.icon || 'diamond' }}</span>
-        </div>
+           class="flex items-center gap-4 bg-white/95 backdrop-blur-md border-l-4 border-[#C8A97E] shadow-[0_20px_50px_rgba(0,0,0,0.15)] px-6 py-5 rounded-2xl min-w-[320px] md:min-w-[400px] pointer-events-auto transform transition-all duration-500 border border-gray-100">
         <div class="flex flex-col min-w-0 flex-1">
-          <p class="font-bold text-[#111111] text-[13px] md:text-[14px] uppercase tracking-[0.3em] mb-1.5 truncate leading-none">{{ toast.title }}</p>
-          <p class="text-[11px] md:text-xs text-gray-500 font-semibold tracking-wide leading-relaxed">{{ toast.message }}</p>
+          <p v-if="toast.title" class="font-bold text-[#111111] text-[14px] md:text-[15px] uppercase tracking-[0.3em] mb-1.5 truncate leading-none">{{ toast.title }}</p>
+          <p :class="[
+            'text-[13px] md:text-[14px] font-semibold tracking-wide leading-relaxed',
+            toast.title ? 'text-gray-500' : 'text-red-600'
+          ]">{{ toast.message }}</p>
         </div>
         <button @click="removeToast(toast.id)" class="ml-auto text-gray-300 hover:text-gray-900 transition-colors p-1.5 flex-shrink-0">
           <span class="material-symbols-outlined text-[20px]">close</span>
@@ -55,7 +55,7 @@ export default {
     addToast(payload) {
       const id = ++this.toastId
       const toast = typeof payload === 'string' 
-        ? { id, title: 'Thông báo', message: payload, icon: 'info' }
+        ? { id, title: 'Thông báo', message: payload }
         : { id, ...payload }
       
       this.toasts.push(toast)
@@ -68,10 +68,10 @@ export default {
   mounted() {
     // Expose $toast globally via window
     window.$toast = (payload) => this.addToast(payload)
-    window.$toast.success = (msg) => this.addToast({ title: 'THÀNH CÔNG', message: msg, icon: 'verified' })
-    window.$toast.error = (msg) => this.addToast({ title: 'LỖI HỆ THỐNG', message: msg, icon: 'error' })
-    window.$toast.info = (msg) => this.addToast({ title: 'THÔNG BÁO', message: msg, icon: 'info' })
-    window.$toast.warning = (msg) => this.addToast({ title: 'CẢNH BÁO', message: msg, icon: 'warning' })
+    window.$toast.success = (msg) => this.addToast({ title: 'THÀNH CÔNG', message: msg })
+    window.$toast.error = (msg) => this.addToast({ title: 'LỖI HỆ THỐNG', message: msg })
+    window.$toast.info = (msg) => this.addToast({ title: 'THÔNG BÁO', message: msg })
+    window.$toast.warning = (msg) => this.addToast({ title: null, message: msg })
     
     // Listen to custom events from non-vue parts if needed
     window.addEventListener('show-toast', (e) => this.addToast(e.detail))

@@ -110,8 +110,8 @@
                    class="flex items-center gap-5 px-8 py-5 hover:bg-gray-50/50 transition-colors">
                 <!-- Product Image -->
                 <div class="w-20 h-20 rounded-2xl border border-gray-100 bg-gray-50 overflow-hidden shrink-0 flex items-center justify-center">
-                  <img v-if="item.sanPhamChiTiet?.sanPham?.mainImage"
-                       :src="item.sanPhamChiTiet.sanPham.mainImage"
+                  <img v-if="item.sanPhamChiTiet?.sanPham?.anhChinh"
+                       :src="item.sanPhamChiTiet.sanPham.anhChinh"
                        class="w-full h-full object-cover"
                        :alt="item.sanPhamChiTiet.sanPham.tenSP">
                   <span v-else class="material-symbols-outlined text-gray-300 text-3xl">image</span>
@@ -127,10 +127,10 @@
                   </p>
                   <div class="flex items-center gap-2 mt-2 flex-wrap">
                     <span class="text-[10px] font-black text-gray-500 uppercase tracking-wider bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200">
-                      Size: {{ item.sanPhamChiTiet?.kichThuoc?.tenKichThuoc || '-' }}
+                      Size: {{ item.sanPhamChiTiet?.sizeSP?.tenSize || '-' }}
                     </span>
-                    <span v-if="item.sanPhamChiTiet?.mauSac?.tenMauSac" class="text-[10px] font-black text-gray-500 uppercase tracking-wider bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200">
-                      Màu: {{ item.sanPhamChiTiet.mauSac.tenMauSac }}
+                    <span v-if="item.sanPhamChiTiet?.mauSacSP?.tenMau" class="text-[10px] font-black text-gray-500 uppercase tracking-wider bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200">
+                      Màu: {{ item.sanPhamChiTiet.mauSacSP.tenMau }}
                     </span>
                     <span class="text-[10px] font-black text-gray-500 uppercase tracking-wider bg-gray-100 px-2.5 py-1 rounded-lg border border-gray-200">
                       SL: x{{ item.soLuong }}
@@ -143,6 +143,27 @@
                   <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Thành tiền</p>
                   <p class="font-black text-gray-900 text-lg tracking-tight">{{ fmtCurrency(item.donGia * item.soLuong) }}</p>
                   <p class="text-xs text-gray-400 mt-0.5">{{ fmtCurrency(item.donGia) }} / sp</p>
+                </div>
+
+                <!-- NEW: Write Review Button (Gold/Yellow) -->
+                <div v-if="order.trangThaiDH === 4" class="ml-4 shrink-0 flex flex-col items-center justify-center min-w-[100px]">
+                  <template v-if="!item.danhGia">
+                    <button @click="openReviewModal(item)" 
+                            class="px-4 py-2.5 bg-[#C8A97E] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.1em] hover:bg-black transition-all shadow-lg active:scale-95 flex items-center gap-1.5 border border-[#C8A97E]">
+                      <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                      Viết đánh giá
+                    </button>
+                  </template>
+                  <template v-else>
+                    <div class="flex flex-col items-center gap-1">
+                      <div class="flex gap-0.5 text-yellow-500">
+                        <span v-for="star in 5" :key="star" 
+                              class="material-symbols-outlined text-[16px]"
+                              :style="{ fontVariationSettings: '\'FILL\' ' + (item.danhGia.diem >= star ? 1 : 0) }">star</span>
+                      </div>
+                      <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Đã đánh giá</span>
+                    </div>
+                  </template>
                 </div>
               </div>
             </div>
@@ -228,10 +249,8 @@
 
         <!-- RIGHT: Info sidebar — 1 unified card -->
         <div>
-
           <!-- Unified info card -->
           <div class="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-
             <!-- Section 1: Người nhận -->
             <div class="p-6 space-y-4">
               <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.25em] flex items-center gap-2">
@@ -308,7 +327,6 @@
                 <span class="font-black text-yellow-700 text-lg">{{ fmtCurrency(order.tongTien) }}</span>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -325,7 +343,65 @@
       </button>
     </div>
 
-    <!-- Report Not Received Modal -->
+    <!-- Review Modal -->
+    <div v-if="showReviewModal" class="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[99999] p-4">
+      <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden animate-fade-in border border-white/20">
+        <!-- Modal Header -->
+        <div class="bg-black p-8 text-white flex justify-between items-center relative overflow-hidden">
+          <div class="relative z-10">
+            <p class="text-[10px] font-bold text-yellow-500 uppercase tracking-[0.3em] mb-1">Feedback</p>
+            <h3 class="font-black text-2xl italic tracking-tight">Đánh giá sản phẩm</h3>
+          </div>
+          <button @click="closeReviewModal" class="relative z-10 hover:bg-white/10 rounded-full p-2 transition-all">
+            <span class="material-symbols-outlined text-white">close</span>
+          </button>
+          <!-- Decor -->
+          <div class="absolute -right-10 -top-10 w-40 h-40 bg-yellow-500/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div class="p-8 space-y-8">
+          <!-- Product Summary -->
+          <div v-if="reviewingItem" class="flex items-center gap-5 p-4 bg-gray-50 rounded-3xl border border-gray-100">
+            <div class="w-16 h-16 rounded-2xl overflow-hidden shrink-0 border border-white shadow-sm">
+               <img :src="reviewingItem.sanPhamChiTiet?.sanPham?.anhChinh" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <p class="text-[10px] font-black text-yellow-600 uppercase tracking-widest">{{ reviewingItem.sanPhamChiTiet?.sanPham?.thuongHieu?.tenTH }}</p>
+              <p class="font-black text-gray-900 text-sm leading-tight">{{ reviewingItem.sanPhamChiTiet?.sanPham?.tenSP }}</p>
+            </div>
+          </div>
+
+          <!-- Stars -->
+          <div class="text-center space-y-4">
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Chọn mức độ hài lòng</p>
+            <div class="flex justify-center gap-2">
+              <button v-for="star in 5" :key="star" @click="reviewRating = star" @mouseenter="hoverRating = star" @mouseleave="hoverRating = 0">
+                <span class="material-symbols-outlined text-4xl cursor-pointer transition-all"
+                      :class="(hoverRating || reviewRating) >= star ? 'text-yellow-500' : 'text-gray-200'"
+                      :style="{ fontVariationSettings: '\'FILL\' ' + ((hoverRating || reviewRating) >= star ? 1 : 0) }">star</span>
+              </button>
+            </div>
+            <p v-if="reviewRating" class="text-sm font-black italic" :class="ratingColor(reviewRating)">{{ ratingText(reviewRating) }}</p>
+          </div>
+
+          <!-- Comment -->
+          <div class="space-y-2">
+            <textarea v-model="reviewContent" rows="4" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
+                      class="w-full border-2 border-gray-100 rounded-3xl px-6 py-4 text-sm focus:border-[#C8A97E] outline-none transition-all resize-none bg-gray-50 shadow-inner"></textarea>
+          </div>
+        </div>
+
+        <div class="p-8 bg-gray-50 border-t flex gap-4">
+          <button @click="closeReviewModal" class="flex-1 py-4 border border-gray-200 rounded-2xl text-gray-400 font-bold text-xs">HỦY</button>
+          <button @click="submitReview" :disabled="!reviewRating || submittingReview"
+                  class="flex-[2] py-4 bg-black text-white rounded-2xl font-bold text-xs hover:bg-[#C8A97E] transition-all disabled:opacity-30">
+            {{ submittingReview ? 'ĐANG GỬI...' : 'GỬI ĐÁNH GIÁ' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Modal -->
     <div v-if="showReportModal" class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
       <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
         <div class="bg-red-600 p-6 text-white flex justify-between items-center">
@@ -352,7 +428,6 @@
             <textarea v-model="reportDesc" rows="3" placeholder="Chi tiết về vấn đề..."
                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-red-400 outline-none resize-none"></textarea>
           </div>
-          <p class="text-[11px] text-gray-400 italic">* Shop sẽ liên hệ để xử lý hủy đơn / hoàn tiền nếu cần.</p>
         </div>
         <div class="p-4 bg-gray-50 border-t flex gap-3">
           <button @click="showReportModal = false"
@@ -386,7 +461,15 @@ export default {
       showCancelForm: false,
       cancelReason: '',
       reportReasons: ['Chưa thấy giao', 'Giao nhầm địa chỉ', 'Khác'],
-      steps: ['Chờ xác\nnhận', 'Đã xác\nnhận', 'Đang\ngiao', 'Đã\ngiao', 'Hoàn\nthành']
+      steps: ['Chờ xác\nnhận', 'Đã xác\nnhận', 'Đang\ngiao', 'Đã\ngiao', 'Hoàn\nthành'],
+
+      // Review state
+      showReviewModal: false,
+      reviewingItem: null,
+      reviewRating: 0,
+      hoverRating: 0,
+      reviewContent: '',
+      submittingReview: false
     }
   },
 
@@ -462,6 +545,56 @@ export default {
         console.error(e)
         window.$toast.error('Không thể gửi báo cáo.')
       }
+    },
+
+    openReviewModal(item) {
+      this.reviewingItem = item
+      this.reviewRating = 0
+      this.reviewContent = ''
+      this.showReviewModal = true
+    },
+
+    closeReviewModal() {
+      if (this.submittingReview) return
+      this.showReviewModal = false
+      this.reviewingItem = null
+    },
+
+    async submitReview() {
+      if (!this.reviewRating || !this.reviewingItem) return
+      this.submittingReview = true
+      try {
+        const maSP = this.reviewingItem.sanPhamChiTiet.sanPham.maSP
+        const payload = {
+          diem: this.reviewRating,
+          noiDung: this.reviewContent,
+          maCT: this.reviewingItem.maCT
+        }
+        const res = await axios.post(`/san-pham/${maSP}/danh-gia`, payload, { withCredentials: true })
+        if (res.data.thanhCong) {
+          window.$toast.success('Đã gửi đánh giá thành công! Cảm ơn bạn.')
+          this.showReviewModal = false
+          await this.fetchOrder() // Refresh
+        } else {
+          window.$toast.error(res.data.thongBao || 'Không thể gửi đánh giá')
+        }
+      } catch (e) {
+        console.error(e)
+        window.$toast.error('Lỗi khi gửi đánh giá')
+      } finally {
+        this.submittingReview = false
+      }
+    },
+
+    ratingText(s) {
+      const map = { 1: 'Rất không hài lòng', 2: 'Không hài lòng', 3: 'Bình thường', 4: 'Hài lòng', 5: 'Tuyệt vời, rất hài lòng!' }
+      return map[s] || ''
+    },
+
+    ratingColor(s) {
+       if (s <= 2) return 'text-red-400'
+       if (s === 3) return 'text-orange-400'
+       return 'text-green-500'
     },
 
     statusStyle(s) {

@@ -4,7 +4,7 @@
     
     <main class="flex-grow">
         <!-- Hero Banner -->
-        <div class="w-full h-64 md:h-80 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB5W0Z1Vkco91_aJ_qkKWvtqX0Yb9RrdT2NsXC35LNW-qWI2knzUdihll3uvOo4CRQlHBcY85Vh-zFPBRLfK1bgDV4oK-x21wGeGycdUAV3LsGIuJ7CswmJt7UpnPsXc2zNxkktJoUzwzPOXr6NahbQc4xp-16Ms8jXCM_UbGr9T25x0CccdBp50sAipknWdVzd8LFXDjxsKynEsDvPxXKYFIxOU5luI-v3Afy3GlgNCko9gXki3jooTC40OzAGyVl0bLitFtWyHfI');">
+        <div class="w-full h-64 md:h-80 bg-cover bg-center" style="background-image: url('/images/banner/home.png');">
             <div class="w-full h-full flex flex-col justify-center items-center bg-black/50">
                 <h1 class="text-white text-4xl md:text-6xl font-bold tracking-tight font-serif">{{ pageTitle }}</h1>
                 <p class="text-white/80 mt-4 text-lg">Khám phá bộ sưu tập thời trang cao cấp</p>
@@ -17,7 +17,7 @@
             </div>
         </div>
 
-        <div class="py-10 flex-1 w-full px-4 md:px-[3.7cm]">
+        <div class="py-10 flex-1 w-full px-4 md:px-[2cm]">
             <div class="mx-auto w-full">
 
                 <!-- Loading State -->
@@ -231,11 +231,12 @@
                                     <!-- Wishlist button -->
                                     <button 
                                       @click.stop="toggleWishlist(product.maSP)"
-                                      class="wishlist-btn opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all active:scale-125 shadow-lg group/heart"
+                                      :disabled="togglingProducts[product.maSP]"
+                                      class="wishlist-btn opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all active:scale-125 shadow-lg group/heart disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       <span 
                                         class="material-symbols-outlined text-lg transition-all"
-                                        :class="isFavorite(product.maSP) ? 'text-red-600 fill-icon scale-110' : 'text-gray-400 group-hover/heart:text-red-500'"
+                                        :class="[isFavorite(product.maSP) ? 'text-red-600 fill-icon scale-110' : 'text-gray-400 group-hover/heart:text-red-500', togglingProducts[product.maSP] ? 'animate-pulse' : '']"
                                       >
                                         {{ isFavorite(product.maSP) ? 'favorite' : 'favorite_border' }}
                                       </span> 
@@ -345,6 +346,7 @@ export default {
   data() {
     return { 
       favoriteMap: {},
+      togglingProducts: {}, // Track loading state per product
       products: [],
       priceStockMap: {},
       loading: true,
@@ -464,27 +466,31 @@ export default {
         })
 
         const map = {}
-        res.data.forEach(item => {
-          map[item.maSP] = true
-        })
+        if (res.data && Array.isArray(res.data)) {
+          res.data.forEach(item => {
+            map[item.maSP] = true
+          })
+        }
 
         this.favoriteMap = map
-
-        console.log("Favorites loaded:", map)
-
       } catch (e) {
-        console.error("Load favorites failed", e)
+        if (e.response && e.response.status !== 401) {
+          console.error("Load favorites failed", e)
+        }
       }
     },
 
     async toggleWishlist(productId) {
+      if (this.togglingProducts[productId]) return
+      this.togglingProducts[productId] = true
+      
       try {
         const res = await axios.post('/favorites/toggle', null, {
           params: { maSP: productId },
           withCredentials: true
         })
 
-        const isFav = (res.data && res.data.isFavorite !== undefined) ? res.data.isFavorite : !this.favoriteMap[productId]
+        const isFav = res.data.isFavorite
         
         // Cập nhật lại Map một cách tường minh để Vue bắt kịp change
         const updatedMap = { ...this.favoriteMap }
@@ -494,27 +500,28 @@ export default {
         // Hiển thị thông báo qua window.$toast
         if (isFav) {
           window.$toast({
-            title: 'Sản phẩm yêu thích',
-            message: 'Đã thêm vào bộ sưu tập của bạn.',
-            icon: 'favorite'
+            title: 'SẢN PHẨM YÊU THÍCH',
+            message: 'Đã thêm sản phẩm vào bộ sưu tập.'
           })
         } else {
           window.$toast({
-            title: 'Sản phẩm yêu thích',
-            message: 'Đã bỏ sản phẩm khỏi bộ sưu tập.',
-            icon: 'heart_broken'
+            title: 'SẢN PHẨM YÊU THÍCH',
+            message: 'Đã bỏ sản phẩm khỏi bộ sưu tập.'
           })
         }
 
       } catch (err) {
-        console.error("Wishlist error:", err.response?.data || err)
-        window.$toast({
-          title: 'Thông báo',
-          message: 'Hành động thất bại. Có thể do lỗi kết nối hoặc phiên đăng nhập.',
-          icon: 'error'
-        })
-      } 
-      this.$forceUpdate()
+        if (err.response?.status === 401) {
+          window.$toast.warning('Vui lòng đăng nhập để trải nghiệm mua hàng!')
+        } else {
+          window.$toast({
+            title: 'LỖI HỆ THỐNG',
+            message: 'Không thể cập nhật danh sách yêu thích.'
+          })
+        }
+      } finally {
+        this.togglingProducts[productId] = false
+      }
     },
     
   //   async checkFavorite(productId) {

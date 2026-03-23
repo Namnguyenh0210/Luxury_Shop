@@ -26,7 +26,23 @@ public class AdminSanPhamController {
 
     @GetMapping("/sizes")
     public List<com.example.projectend.entity.SizeSP> getAllSizes() {
-        return sizeRepository.findAll();
+        List<com.example.projectend.entity.SizeSP> sizes = sizeRepository.findAll();
+        
+        // Define logical order for clothing sizes
+        java.util.List<String> sizeOrder = java.util.Arrays.asList("S", "M", "L", "XL", "XXL", "2XL", "3XL");
+        
+        sizes.sort((s1, s2) -> {
+            int i1 = sizeOrder.indexOf(s1.getTenSize().toUpperCase());
+            int i2 = sizeOrder.indexOf(s2.getTenSize().toUpperCase());
+            
+            if (i1 == -1 && i2 == -1) return s1.getTenSize().compareToIgnoreCase(s2.getTenSize());
+            if (i1 == -1) return 1;
+            if (i2 == -1) return -1;
+            
+            return Integer.compare(i1, i2);
+        });
+        
+        return sizes;
     }
 
     @GetMapping("/colors")

@@ -1,8 +1,8 @@
 <template>
 <header>
     <!-- Top Bar -->
-    <div class="bg-[#F5F1ED]">
-        <div class="w-full px-4 md:px-[3.7cm]">
+    <div class="bg-[papayawhip]">
+        <div class="w-full px-4 md:px-[2cm]">
             <div class="flex h-10 items-center justify-end text-xs text-text-primary-light/80 dark:text-text-primary-dark/80">
                 <div class="flex items-center space-x-4">
                     <a class="nav-link flex items-center gap-1.5 transition-colors" href="mailto:luxury@fashion.vn">
@@ -35,8 +35,8 @@
     </div>
 
     <!-- Main Header -->
-    <div class="border-y border-secondary/50">
-        <div class="w-full px-4 md:px-[3.7cm]">
+    <div class="bg-white border-y border-secondary/50">
+        <div class="w-full px-4 md:px-[2cm]">
             <div class="flex h-32 items-center justify-between gap-4">
                 <!-- Logo -->
                 <div class="h-full flex-shrink-0">
@@ -124,7 +124,7 @@
                     <!-- Icons -->
                     <div class="flex items-center gap-2">
                         <!-- Wishlist -->
-                        <a class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10" href="/profile">
+                        <a class="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10" href="/profile#wishlist">
                             <span class="material-symbols-outlined text-2xl">favorite_border</span>
                         </a>
 

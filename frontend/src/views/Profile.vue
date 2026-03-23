@@ -3,7 +3,7 @@
     <AppHeader />
 
     <main class="flex-grow">
-      <div class="flex flex-1 w-full px-4 md:px-[3.7cm]">
+      <div class="flex flex-1 w-full px-4 md:px-[2cm]">
         <!-- Sidebar -->
         <aside class="w-64 flex-shrink-0 bg-white border-r border-gray-200 p-6 hidden md:block sticky top-0 h-screen overflow-y-auto">
           <div class="flex flex-col gap-6">
@@ -260,9 +260,77 @@
 
               <!-- Favorites (Wishlist) Tab -->
               <section v-if="activeTab === 'wishlist'">
-                <div>
-                  <h1 class="text-3xl font-bold text-gray-900 mb-2">Sản phẩm yêu thích</h1>
-                  <p class="text-gray-600">Những sản phẩm bạn đã lưu lại</p>
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+                  <div>
+                    <h1 class="text-3xl font-black text-gray-900 mb-2">Sản phẩm yêu thích ({{ filteredFavorites.length }})</h1>
+                    <p class="text-gray-500 font-medium">Những sản phẩm bạn đã lưu lại để tham khảo sau</p>
+                  </div>
+
+                  <!-- Quick Filters (Admin Style) -->
+                  <div v-if="favorites.length > 0" class="flex flex-wrap items-center gap-4">
+                    <!-- Category Filter -->
+                    <div class="relative min-w-[200px]">
+                      <button @click.stop="openFavDropdown = openFavDropdown === 'category' ? null : 'category'"
+                              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-5 pr-10 py-3 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                        <span class="truncate font-bold text-gray-700 uppercase tracking-wider text-[11px]">{{ favFilters.category === 'all' ? 'Tất cả danh mục' : favFilters.category }}</span>
+                        <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                      </button>
+                      <div v-if="openFavDropdown === 'category'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+                        <div @click="favFilters.category = 'all'; openFavDropdown = null" 
+                             class="px-5 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#C8A97E]/10 transition-colors border-b border-gray-50"
+                             :class="favFilters.category === 'all' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-500'">
+                          Tất cả danh mục
+                        </div>
+                        <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                          <div v-for="cat in favCategories" :key="cat" 
+                               @click="favFilters.category = cat; openFavDropdown = null"
+                               class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors"
+                               :class="favFilters.category === cat ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-600'">
+                            {{ cat }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Brand Filter -->
+                    <div class="relative min-w-[200px]">
+                      <button @click.stop="openFavDropdown = openFavDropdown === 'brand' ? null : 'brand'"
+                              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-5 pr-10 py-3 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                        <span class="truncate font-bold text-gray-700 uppercase tracking-wider text-[11px]">{{ favFilters.brand === 'all' ? 'Tất cả thương hiệu' : favFilters.brand }}</span>
+                        <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                      </button>
+                      <div v-if="openFavDropdown === 'brand'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+                        <div @click="favFilters.brand = 'all'; openFavDropdown = null" 
+                             class="px-5 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#C8A97E]/10 transition-colors border-b border-gray-50"
+                             :class="favFilters.brand === 'all' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-500'">
+                          Tất cả thương hiệu
+                        </div>
+                        <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                          <div v-for="br in favBrands" :key="br" 
+                               @click="favFilters.brand = br; openFavDropdown = null"
+                               class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors"
+                               :class="favFilters.brand === br ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-600'">
+                            {{ br }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Gender Filter -->
+                    <div class="relative min-w-[180px]">
+                      <button @click.stop="openFavDropdown = openFavDropdown === 'gender' ? null : 'gender'"
+                              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-5 pr-10 py-3 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                        <span class="truncate font-bold text-gray-700 uppercase tracking-wider text-[11px]">{{ favFilters.gender === 0 ? 'Nam' : (favFilters.gender === 1 ? 'Nữ' : (favFilters.gender === 2 ? 'Unisex' : 'Mọi giới tính')) }}</span>
+                        <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                      </button>
+                      <div v-if="openFavDropdown === 'gender'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+                        <div @click="favFilters.gender = 'all'; openFavDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors border-b border-gray-50" :class="favFilters.gender === 'all' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-500'">Mọi giới tính</div>
+                        <div @click="favFilters.gender = 0; openFavDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors" :class="favFilters.gender === 0 ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-600'">Nam</div>
+                        <div @click="favFilters.gender = 1; openFavDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors" :class="favFilters.gender === 1 ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-600'">Nữ</div>
+                        <div @click="favFilters.gender = 2; openFavDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors" :class="favFilters.gender === 2 ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-600'">Unisex</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Không có sản phẩm yêu thích -->
@@ -272,31 +340,45 @@
                 </div>
 
                 <!-- Danh sách sản phẩm yêu thích -->
-                <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                  <div v-for="fav in favorites" :key="fav.maSPYT" class="bg-white border rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group">
-                    <div class="relative h-48 sm:h-56 bg-gray-100 flex items-center justify-center overflow-hidden">
-                      <img v-if="fav.anhChinh" :src="fav.anhChinh" :alt="fav.tenSP" class="w-full h-full object-cover mix-blend-multiply group-hover:scale-110 transition duration-500" />
-                      <span v-else class="material-symbols-outlined text-gray-400 text-5xl">image</span>
+                <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div v-for="fav in filteredFavorites" :key="fav.maSPYT" class="bg-white border rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-yellow-500/5 transition-all duration-300 overflow-hidden group border-gray-100 flex flex-col">
+                    <div class="relative aspect-[4/5] bg-[#F7F7F7] flex items-center justify-center overflow-hidden p-4">
+                      <img v-if="fav.anhChinh" :src="fav.anhChinh" :alt="fav.tenSP" class="w-full h-full object-contain mix-blend-multiply group-hover:scale-110 transition duration-700" />
+                      <div v-else class="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-gray-400 text-3xl">image</span>
+                      </div>
                       
-                      <!-- Nút xóa yêu thích (hiển thị khi hover) -->
-                      <button @click="toggleFavorite(fav.maSP)" 
-                              class="absolute top-3 right-3 bg-white p-2 text-red-500 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all hover:bg-red-50 hover:scale-110 active:scale-95 group/btn"
-                              title="Bỏ yêu thích">
-                        <span class="material-symbols-outlined fill-icon text-xl transition-transform group-hover/btn:scale-110">favorite</span>
-                      </button>
+                      <!-- Overlay Actions -->
+                      <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-start justify-end p-4">
+                        <button @click="toggleFavorite(fav.maSP)" 
+                                class="bg-white/90 backdrop-blur-sm p-3 text-red-500 rounded-2xl shadow-xl hover:bg-red-500 hover:text-white transition-all transform hover:scale-110 active:scale-90"
+                                title="Bỏ yêu thích">
+                          <span class="material-symbols-outlined fill-icon text-xl">favorite</span>
+                        </button>
+                      </div>
                     </div>
                     
-                    <div class="p-4">
-                      <p class="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">{{ fav.thuongHieu }}</p>
-                      <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[40px]">{{ fav.tenSP }}</h3>
-                      <div class="flex items-center justify-between mt-4">
-                        <p class="text-yellow-600 font-bold text-lg max-w-[50%] truncate">{{ fav.gia?.toLocaleString() }}₫</p>
-                        <router-link :to="`/sanpham/${fav.maSP}`" class="text-sm font-medium border border-gray-300 rounded-xl px-4 py-1.5 hover:bg-gray-50 transition max-w-[45%] truncate">
-                          Chi tiết
+                    <div class="p-6 flex-1 flex flex-col">
+                      <p class="text-[10px] text-[#C8A97E] font-black uppercase tracking-[2px] mb-2">{{ fav.thuongHieu }}</p>
+                      <h3 class="font-black text-black text-sm mb-4 line-clamp-2 min-h-[40px] leading-tight">{{ fav.tenSP }}</h3>
+                      
+                      <div class="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                        <p class="text-black font-black text-base tracking-tighter">{{ fav.gia?.toLocaleString() }}₫</p>
+                        <router-link :to="`/sanpham/${fav.maSP}`" class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-black hover:bg-black hover:text-white transition-all">
+                          <span class="material-symbols-outlined text-xl">arrow_forward</span>
                         </router-link>
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <!-- Section Khám phá thêm -->
+                <div v-if="favorites.length > 0" class="mt-20 text-center py-12 border-t border-gray-100">
+                   <p class="text-gray-400 text-xs italic mb-4">Hoặc bạn có thể tìm kiếm thêm nhiều phong cách mới tại cửa hàng công của chúng tôi</p>
+                   <router-link to="/sanpham" class="inline-flex items-center gap-3 text-black font-black uppercase tracking-[3px] text-[11px] hover:text-[#C8A97E] transition-all group">
+                        KHÁM PHÁ THÊM SẢN PHẨM
+                        <span class="material-symbols-outlined text-lg group-hover:translate-x-2 transition-transform">east</span>
+                   </router-link>
                 </div>
               </section>
 
@@ -877,6 +959,14 @@ export default {
       addresses: [],
       orders: [],
       favorites: [],
+      favFilters: {
+        category: 'all',
+        brand: 'all',
+        gender: 'all'
+      },
+      favCategories: [],
+      favBrands: [],
+      openFavDropdown: null, 
       orderStatus: "all",
       showReportModal: false,
       reportOrderId: null,
@@ -979,6 +1069,14 @@ export default {
     },
     latestOrder() {
       return this.orders.length > 0 ? this.orders[0] : null;
+    },
+    filteredFavorites() {
+      return this.favorites.filter(fav => {
+        const matchesCat = this.favFilters.category === 'all' || fav.category === this.favFilters.category;
+        const matchesBrand = this.favFilters.brand === 'all' || fav.thuongHieu === this.favFilters.brand;
+        const matchesGender = this.favFilters.gender === 'all' || fav.gioiTinh === this.favFilters.gender;
+        return matchesCat && matchesBrand && matchesGender;
+      });
     }
   },
 
@@ -1243,6 +1341,26 @@ export default {
           withCredentials: true
         })
         this.favorites = res.data
+        
+        // 2. Fetch all system categories for the filter
+        try {
+          const catRes = await axios.get("/categories")
+          this.favCategories = catRes.data.map(c => c.tenLoai).sort();
+        } catch (catErr) {
+          console.warn("Failed to load all categories, using fallback from favorites", catErr);
+          this.favCategories = [...new Set(this.favorites.map(f => f.category).filter(Boolean))].sort()
+        }
+
+        // 3. Fetch all system brands for the filter
+        try {
+          const brandRes = await axios.get("/sanpham", { params: { size: 1 } })
+          if (brandRes.data?.brands) {
+            this.favBrands = brandRes.data.brands.map(b => b.tenTH).sort();
+          }
+        } catch (brandErr) {
+          console.warn("Failed to load all brands, using fallback from favorites", brandErr);
+          this.favBrands = [...new Set(this.favorites.map(f => f.thuongHieu).filter(Boolean))].sort()
+        }
       } catch (err) {
         console.error("Error loading favorites", err)
       }
@@ -1312,6 +1430,10 @@ export default {
         window.location.href = '/'
       }
     },
+
+    closeFavDropdowns() {
+      this.openFavDropdown = null
+    },
   },
 
   mounted() {
@@ -1326,13 +1448,12 @@ export default {
       this.activeTab = hash
     }
 
-    window.addEventListener("hashchange", () => {
-      const newHash = window.location.hash.replace("#", "")
-      this.activeTab = newHash
-      if (newHash === "wishlist") this.fetchFavorites()
-      if (newHash === "address") this.fetchAddresses()
-    })
-  }
+    window.addEventListener("click", this.closeFavDropdowns)
+  },
+
+  beforeUnmount() {
+    window.removeEventListener("click", this.closeFavDropdowns)
+  },
 }
 </script>
 

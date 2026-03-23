@@ -116,6 +116,41 @@ public class VoucherService {
         return voucher;
     }
 
+    public List<Voucher> getAvailableForUser(TaiKhoan khachHang, BigDecimal orderAmount) {
+        LocalDateTime now = LocalDateTime.now();
+        List<Voucher> allVouchers = voucherRepository.findAll();
+
+        return allVouchers.stream()
+            .filter(v -> v.getTrangThai() && !v.getIsDeleted())
+            .filter(v -> (v.getNgayBatDau() == null || now.isAfter(v.getNgayBatDau())) &&
+                         (v.getNgayKetThuc() == null || now.isBefore(v.getNgayKetThuc())))
+            .filter(v -> v.getDaSuDung() < v.getSoLuong())
+            .filter(v -> v.getGiaTriToiThieu() == null || orderAmount.compareTo(v.getGiaTriToiThieu()) >= 0)
+            .filter(v -> {
+                if (khachHang == null) {
+                    // Đối với khách vãng lai, chỉ hiện voucher cho ALL
+                    return "ALL".equalsIgnoreCase(v.getApDungCho());
+                }
+                
+                // Lượt dùng của user
+                long usedCount = donHangRepository.countByTaiKhoanAndVoucher(khachHang, v);
+                if (usedCount >= (v.getGioiHanUser() != null ? v.getGioiHanUser() : 1)) return false;
+
+                // NEW / VIP
+                if ("NEW".equalsIgnoreCase(v.getApDungCho())) {
+                    return donHangRepository.countByTaiKhoan(khachHang) == 0;
+                }
+                if ("VIP".equalsIgnoreCase(v.getApDungCho())) {
+                    BigDecimal totalSpent = donHangRepository.sumTotalByTaiKhoan(khachHang.getMaTK());
+                    if (totalSpent == null) totalSpent = BigDecimal.ZERO;
+                    return totalSpent.compareTo(v.getMinTotalSpendingVIP() != null ? v.getMinTotalSpendingVIP() : BigDecimal.ZERO) >= 0;
+                }
+                
+                return true;
+            })
+            .toList();
+    }
+
     private String formatPrice(BigDecimal price) {
         return new java.text.DecimalFormat("###,###,###").format(price) + "đ";
     }
