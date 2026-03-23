@@ -22,7 +22,7 @@
               :class="filterRole === '' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
               Tất cả
             </button>
-            <button v-for="role in allRoles" :key="role.id" @click="filterRole = role.tenVaiTro"
+            <button v-for="role in allRoles" :key="role.maVaiTro" @click="filterRole = role.tenVaiTro"
               class="px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap"
               :class="filterRole === role.tenVaiTro ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
               {{ role.tenVaiTro }}
@@ -64,7 +64,7 @@
               <td class="px-6 py-4 text-gray-600">{{ u.email }}</td>
               <td class="px-6 py-4 text-gray-600">{{ u.soDienThoai || '---' }}</td>
               <td class="px-6 py-4">
-                <span v-for="r in u.vaiTros" :key="r.id"
+                <span v-for="r in u.vaiTros" :key="r.maVaiTro"
                   class="inline-block bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full text-xs font-medium mr-1">
                   {{ r.tenVaiTro }}
                 </span>
@@ -131,8 +131,8 @@
 	      </div>
 
 	      <div class="space-y-1.5">
-	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Số Điện Thoại</label>
-	        <input v-model="form.soDienThoai" placeholder="0912 345 678"
+	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Số Điện Thoại *</label>
+	        <input v-model="form.soDienThoai" placeholder="0912 345 678" required
 	          class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all"/>
 	      </div>
 
@@ -145,18 +145,18 @@
 	      <div class="space-y-2">
 	        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Vai Trò Hệ Thống</label>
 	        <div class="grid grid-cols-2 gap-2 p-3 border border-gray-100 rounded-xl bg-gray-50/50">
-	          <label v-for="role in allRoles" :key="role.id" 
+	          <label v-for="role in allRoles" :key="role.maVaiTro" 
 	            class="flex items-center gap-2 cursor-pointer bg-white p-2 rounded-lg border border-gray-200 hover:border-yellow-400 transition-colors">
 	            <input 
 	              type="checkbox" 
 	              :value="role" 
-	              v-model="form.roles" 
+	              v-model="form.vaiTros" 
 	              class="size-4 rounded accent-yellow-600 border-gray-300"
 	            />
 	            <span class="text-sm font-medium text-gray-700">{{ role.tenVaiTro }}</span>
 	          </label>
 	        </div>
-	        <p v-if="form.roles && form.roles.length === 0" class="text-[10px] text-red-400 italic">* Vui lòng chọn ít nhất 1 vai trò</p>
+	        <p v-if="form.vaiTros && form.vaiTros.length === 0" class="text-[10px] text-red-400 italic">* Vui lòng chọn ít nhất 1 vai trò</p>
 	      </div>
 	    </div>
 
@@ -193,7 +193,7 @@ export default {
       filterRole: '',
       showModal: false,
       form: {
-        roles: []
+        vaiTros: []
       }
     }
   },
@@ -233,7 +233,7 @@ export default {
       } catch (e) { console.error("Lỗi load vai trò:", e) }
     },
     openModal()  { 
-      this.form = { roles: [] }; 
+      this.form = { vaiTros: [] }; 
       this.showModal = true 
     },
     closeModal() { 
@@ -242,11 +242,24 @@ export default {
     editUser(u)  { 
       // Dùng JSON parse/stringify để tránh làm thay đổi trực tiếp dữ liệu trên bảng
       this.form = JSON.parse(JSON.stringify(u));
-      if(!this.form.roles) this.form.roles = [];
+      if(!this.form.vaiTros) {
+        this.form.vaiTros = [];
+      } else {
+        // Ánh xạ lại các vai trò của user với tham chiếu từ allRoles để hiển thị correct checkmark
+        this.form.vaiTros = this.form.vaiTros.map(
+          vr => this.allRoles.find(ar => ar.maVaiTro === vr.maVaiTro) || vr
+        );
+      }
       this.showModal = true 
     },
 
     async saveUser() {
+      const phoneRegex = /^(0)(3|5|7|8|9)[0-9]{8}$/;
+      if (!this.form.soDienThoai || !phoneRegex.test(this.form.soDienThoai)) {
+        window.$toast.error('Số điện thoại không được bỏ trống và phải đúng định dạng 10 số (vd 0912345678).');
+        return;
+      }
+
       try {
         await api.post('/admin/customers/save', this.form)
         this.closeModal()

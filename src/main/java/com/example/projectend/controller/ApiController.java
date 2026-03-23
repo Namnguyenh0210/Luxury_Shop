@@ -691,10 +691,20 @@ public class ApiController {
                         .multiply(java.math.BigDecimal.valueOf(item.getSoLuong()));
                 tongTien = tongTien.add(thanhTien);
 
-                String anh = spct.getAnhBienThe();
+                String anh = spct.getSanPham().getAnhChinh();
                 if (anh == null || anh.isEmpty()) {
-                    anh = spct.getSanPham().getAnhChinh();
+                    anh = spct.getAnhBienThe();
                 }
+                
+                // Fallback again if the link is a known dead link and main image is available
+                if (spct.getAnhBienThe() != null && spct.getAnhBienThe().contains("media.gucci.com")) {
+                     if (spct.getSanPham().getAnhChinh() != null && !spct.getSanPham().getAnhChinh().isEmpty()) {
+                         anh = spct.getSanPham().getAnhChinh();
+                     } else {
+                         anh = "placeholder.png";
+                     }
+                }
+
                 if (anh == null || anh.isEmpty()) {
                     anh = "placeholder.png";
                 }
