@@ -392,6 +392,13 @@ export default {
         window.$toast.error('Vui lòng nhập đầy đủ thông tin địa chỉ (*)');
         return;
       }
+      
+      const phoneRegex = /^(0)(3|5|7|8|9)[0-9]{8}$/;
+      if (!phoneRegex.test(this.newAddress.phone)) {
+        window.$toast.error('Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số, bắt đầu bằng 0 (vd: 0912345678).');
+        return;
+      }
+      
       this.isSavingAddress = true;
       try {
         const formData = new FormData()

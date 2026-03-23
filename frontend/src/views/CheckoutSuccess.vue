@@ -229,8 +229,17 @@ export default {
       window.print();
     },
     getImgUrl(item) {
-      let url = item.sanPhamChiTiet?.anhBienThe || item.sanPhamChiTiet?.sanPham?.anhChinh || item.anh;
+      const spct = item.sanPhamChiTiet;
+      const sp = spct?.sanPham;
+      
+      let url = sp?.anhChinh || spct?.anhBienThe || item.anh;
+      
       if (!url) return '/img/placeholder.png';
+      
+      if (url.includes('media.gucci.com') && sp?.anhChinh) {
+        url = sp.anhChinh;
+      }
+      
       if (url.startsWith('http')) return url;
       return `/api/img/${url}`;
     },

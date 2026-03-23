@@ -35,7 +35,7 @@
             
             <div class="divide-y divide-gray-100">
               <div v-for="item in orderItems" :key="item.maCTDH" class="p-6 flex items-center gap-4 hover:bg-gray-50/50 transition-colors">
-                <img :src="item.sanPhamChiTiet?.anhBienThe || 'https://via.placeholder.com/80'" 
+                <img :src="item.sanPhamChiTiet?.sanPham?.anhChinh || item.sanPhamChiTiet?.anhBienThe || 'https://via.placeholder.com/80'" 
                      class="w-20 h-20 object-cover rounded-xl border border-gray-100 shadow-sm" />
                 
                 <div class="flex-1">

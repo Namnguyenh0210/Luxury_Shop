@@ -200,12 +200,12 @@
                     <!-- Số điện thoại -->
                     <div class="px-8 py-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center gap-4">
                       <div class="sm:w-48 shrink-0">
-                        <label class="text-sm font-medium text-gray-500" for="phoneInput">Số điện thoại</label>
+                        <label class="text-sm font-medium text-gray-500" for="phoneInput">Số điện thoại *</label>
                       </div>
                       <div class="flex-1">
-                        <input v-if="isEditingInfo" id="phoneInput" type="tel" v-model="user.soDienThoai"
+                        <input v-if="isEditingInfo" id="phoneInput" type="tel" v-model="user.soDienThoai" required
                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition"
-                               placeholder="Nhập số điện thoại" />
+                               placeholder="10 số (vd: 0912345678)" />
                         <p v-else class="text-sm font-medium text-gray-900">{{ user.soDienThoai || 'Chưa cập nhật' }}</p>
                       </div>
                     </div>
@@ -437,14 +437,19 @@
                       <div v-for="item in latestOrder.chiTietList" :key="item.maCT" class="flex items-center gap-4 bg-white/50 p-3 rounded-2xl border border-gray-50 shadow-sm">
                         <!-- Image -->
                         <div class="w-16 h-16 bg-white rounded-xl border border-gray-100 overflow-hidden shrink-0">
-                          <img v-if="item.sanPhamChiTiet?.sanPham?.mainImage" :src="item.sanPhamChiTiet?.sanPham?.mainImage" class="w-full h-full object-cover">
+                          <img :src="getBestImage(item)" 
+                               class="w-full h-full object-cover"
+                               @error="e => e.target.src='/img/placeholder.png'">
                         </div>
                         
                         <!-- Info -->
                         <div class="flex-1 min-w-0">
                           <p class="text-[11px] font-[1000] text-black truncate uppercase">{{ item.sanPhamChiTiet?.sanPham?.tenSP }}</p>
                           <div class="flex items-center gap-3 mt-1">
-                            <span class="text-[9px] font-black text-black uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">Size: {{ item.sanPhamChiTiet?.kichThuoc?.tenKichThuoc }}</span>
+                            <span class="text-[9px] font-black text-black uppercase tracking-widest bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">
+                              {{ item.sanPhamChiTiet?.sizeSP?.tenSize || 'N/A' }} 
+                              - {{ item.sanPhamChiTiet?.mauSacSP?.tenMau || 'N/A' }}
+                            </span>
                             <span class="text-[9px] font-black text-black uppercase tracking-widest">SL: x{{ item.soLuong }}</span>
                           </div>
                         </div>
@@ -546,6 +551,13 @@
                          class="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:border-blue-950/30 transition-all hover:bg-gray-50/30">
                       
                       <div class="flex flex-col md:flex-row gap-6 items-center flex-1 min-w-0">
+                        <!-- Order Thumbnail -->
+                        <div class="w-16 h-16 bg-white rounded-xl border border-gray-100 overflow-hidden shrink-0 shadow-sm">
+                          <img :src="getBestImage(order.chiTietList?.[0])" 
+                               class="w-full h-full object-cover"
+                               @error="e => e.target.src='/img/placeholder.png'">
+                        </div>
+
                         <!-- Order ID Badge -->
                         <div class="w-16 h-16 bg-gray-900 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-lg">
                           <p class="text-[8px] font-black text-gray-400 uppercase leading-none mb-1">Order</p>
@@ -1141,6 +1153,13 @@ export default {
       this.successMessage = ''
       this.errorMessage = ''
 
+      const phoneRegex = /^(0)(3|5|7|8|9)[0-9]{8}$/;
+      if (!this.user.soDienThoai || !phoneRegex.test(this.user.soDienThoai)) {
+        window.$toast.error('Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số (vd: 0912345678).');
+        this.isUpdating = false;
+        return;
+      }
+
       try {
         const formData = new FormData()
         formData.append('hoTen', this.user.hoTen)
@@ -1241,6 +1260,12 @@ export default {
     async saveAddress() {
       if (!this.newAddress.ten || !this.newAddress.phone || !this.newAddress.diaChi) {
         window.$alert("Vui lòng điền đầy đủ các thông tin bắt buộc!", "Thông báo");
+        return;
+      }
+
+      const phoneRegex = /^(0)(3|5|7|8|9)[0-9]{8}$/;
+      if (!phoneRegex.test(this.newAddress.phone)) {
+        window.$alert("Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 số chuẩn Việt Nam (vd: 0912345678)!", "Thông báo");
         return;
       }
 
@@ -1429,6 +1454,25 @@ export default {
         // Force reload even if error
         window.location.href = '/'
       }
+    },
+
+    getBestImage(item) {
+      if (!item) return '/img/placeholder.png';
+      const spct = item.sanPhamChiTiet;
+      const sp = spct?.sanPham;
+      
+      // Ưu tiên anhChinh vì anhBienThe (Gucci) trên DB đang bị lỗi 404
+      let url = sp?.anhChinh || spct?.anhBienThe || sp?.mainImage || item.anh;
+      
+      if (!url) return '/img/placeholder.png';
+      
+      // Fix Gucci dead link by forcing anhChinh if the variant has it
+      if (url.includes('media.gucci.com') && sp?.anhChinh) {
+        url = sp.anhChinh;
+      }
+
+      if (url.startsWith('http')) return url;
+      return `/api/img/${url}`;
     },
 
     closeFavDropdowns() {

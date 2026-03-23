@@ -69,8 +69,8 @@
           </div>
 
           <label class="flex flex-col">
-            <p class="pb-2 text-sm font-medium leading-normal text-[#111111]">Số điện thoại</p>
-            <input v-model="form.soDienThoai" type="tel" placeholder="Nhập số điện thoại (không bắt buộc)"
+            <p class="pb-2 text-sm font-medium leading-normal text-[#111111]">Số điện thoại *</p>
+            <input v-model="form.soDienThoai" type="tel" placeholder="Nhập 10 số, bắt đầu bằng 0 (vd: 09...)" required
                    class="form-input h-12 w-full flex-1 rounded border border-[#CFCFCF] bg-white p-3 text-base placeholder:text-[#CFCFCF] focus:border-[#D5BFA3] focus:outline-none focus:ring-1 focus:ring-[#D5BFA3]"/>
           </label>
 
@@ -124,6 +124,12 @@ export default {
       // Kiểm tra client-side
       if (this.form.matKhau !== this.form.confirmPassword) {
         this.errorMessage = 'Mật khẩu xác nhận không khớp!';
+        return;
+      }
+      
+      const phoneRegex = /^(0)(3|5|7|8|9)[0-9]{8}$/;
+      if (!this.form.soDienThoai || !phoneRegex.test(this.form.soDienThoai)) {
+        this.errorMessage = 'Số điện thoại không hợp lệ. Vui lòng nhập đúng 10 chữ số chuẩn của Việt Nam!';
         return;
       }
 
