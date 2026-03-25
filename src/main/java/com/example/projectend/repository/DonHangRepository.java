@@ -84,4 +84,11 @@ public interface DonHangRepository extends JpaRepository<DonHang, Long> {
 
     // Tìm đơn hàng để auto-complete
     List<DonHang> findByTrangThaiDHAndNgayCapNhatBefore(Integer trangThai, LocalDateTime ngayCapNhat);
+    
+    @Query("SELECT COALESCE(SUM(d.tongTien), 0) FROM DonHang d WHERE d.ngayDat BETWEEN :start AND :end")
+    BigDecimal sumRevenueBetween(@Param("start") LocalDateTime start,
+                                 @Param("end") LocalDateTime end);
+
+    List<DonHang> findByNgayDatBetween(LocalDateTime start, LocalDateTime end);
+    
 }

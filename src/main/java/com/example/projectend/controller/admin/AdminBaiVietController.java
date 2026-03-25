@@ -13,7 +13,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -217,16 +221,59 @@ public class AdminBaiVietController {
     public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
+            BaiViet bv = baiVietRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy"));
+
+            // ✅ XÓA FILE ẢNH
+            if (bv.getHinhAnh() != null) {
+                String fileName = bv.getHinhAnh().substring(bv.getHinhAnh().lastIndexOf("/") + 1);
+                Path path = Paths.get("uploads/blogs/" + fileName);
+                Files.deleteIfExists(path);
+            }
+
+            // ✅ XÓA DB
             baiVietRepository.deleteById(id);
+
             response.put("thanhCong", true);
-            response.put("thongBao", "Đã xóa bài viết thành công!");
+            response.put("thongBao", "Đã xóa bài viết + ảnh!");
         } catch (Exception e) {
             response.put("thanhCong", false);
-            response.put("thongBao", "Lỗi: " + e.getMessage());
+            response.put("thongBao", e.getMessage());
         }
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/upload/{id}")
+    public ResponseEntity<?> uploadAnh(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+
+        try {
+            String fileName = "baiviet_" + id + ".jpg";
+            Path path = Paths.get("uploads/blogs/" + fileName);
+
+            Files.createDirectories(path.getParent());
+            Files.write(path, file.getBytes());
+
+            String url = "http://localhost:8080/uploads/blogs/" + fileName;
+
+            BaiViet bv = baiVietRepository.findById(id).orElseThrow();
+            bv.setHinhAnh(url);
+            baiVietRepository.save(bv);
+
+            return ResponseEntity.ok(Map.of(
+                    "thanhCong", true,
+                    "hinhAnh", url
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of(
+                    "thanhCong", false,
+                    "thongBao", e.getMessage()
+            ));
+        }
+    }
+    
     // Helper: tạo slug từ tiêu đề
     private String taoSlug(String tieuDe) {
         if (tieuDe == null)
@@ -245,4 +292,5 @@ public class AdminBaiVietController {
                 .replaceAll("^-|-$", "");
         return slug.isEmpty() ? "bai-viet" : slug;
     }
+    
 }
