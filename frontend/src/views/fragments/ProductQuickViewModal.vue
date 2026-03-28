@@ -43,7 +43,7 @@
                     -{{ discountPercent }}%
                   </span>
                   <!-- Out of Stock Badge -->
-                  <span v-if="totalStock === 0" class="badge-outofstock">Hết hàng</span>
+                  <span v-if="totalStock === 0" class="badge-outofstock">Sắp mở bán</span>
                 </div>
 
                 <!-- Thumbnail Strip -->
@@ -70,11 +70,11 @@
                 <!-- Stock Status -->
                 <div class="stock-status" :class="totalStock > 0 ? 'in-stock' : 'out-stock'">
                   <span class="status-dot"></span>
-                  <span>{{ totalStock > 0 ? `Còn hàng (${totalStock})` : 'Hết hàng' }}</span>
+                  <span>{{ totalStock > 0 ? `Còn hàng (${totalStock})` : 'HÀNG SẮP VỀ' }}</span>
                 </div>
 
                 <!-- Price -->
-                <div class="price-section">
+                <div v-if="totalStock > 0" class="price-section">
                   <template v-if="hasPromotion">
                     <span class="price-original">{{ formatPrice(minPrice) }}</span>
                     <span class="price-sale">{{ formatPrice(finalPrice) }}</span>
@@ -127,7 +127,7 @@
                 </div>
 
                 <!-- Quantity -->
-                <div class="quantity-group">
+                <div v-if="totalStock > 0" class="quantity-group">
                   <div class="variant-label">Số lượng:</div>
                   <div class="qty-controls">
                     <button @click="decreaseQty" :disabled="quantity <= 1" class="qty-btn">−</button>
@@ -141,16 +141,16 @@
                 <!-- Action Buttons -->
                 <div class="action-buttons">
                   <button
-                    @click="addToCart"
-                    :disabled="totalStock === 0 || addingToCart"
+                    @click="totalStock > 0 ? addToCart() : openAIChat()"
+                    :disabled="addingToCart"
                     class="btn-add-cart"
                   >
                     <span v-if="addingToCart" class="btn-spinner"></span>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg v-if="totalStock > 0 && !addingToCart" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                       <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
                       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                     </svg>
-                    {{ totalStock === 0 ? 'Hết hàng' : (addingToCart ? 'Đang thêm...' : 'THÊM VÀO GIỎ') }}
+                    {{ totalStock === 0 ? 'SẮP RA MẮT - LIÊN HỆ TƯ VẤN' : (addingToCart ? 'Đang thêm...' : 'THÊM VÀO GIỎ') }}
                   </button>
 
                   <a :href="`/sanpham/${product.maSP}`" class="btn-view-detail">
@@ -380,6 +380,13 @@ export default {
       this.toastMessage = msg
       this.toastType = type
       this.toastTimer = setTimeout(() => { this.toastMessage = null }, 3000)
+    },
+    
+    openAIChat() {
+      if (window.$openChat) {
+        window.$openChat();
+        this.closeModal();
+      }
     },
 
     closeModal() {

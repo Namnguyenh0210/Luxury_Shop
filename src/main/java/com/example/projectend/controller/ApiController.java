@@ -943,7 +943,8 @@ public class ApiController {
 
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> uploadImage(
-            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+            @RequestParam(value = "type", defaultValue = "products") String type) {
         
         Map<String, Object> response = new HashMap<>();
         try {
@@ -955,7 +956,7 @@ public class ApiController {
             }
 
             if (file != null && !file.isEmpty()) {
-                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/uploads/";
+                String uploadDir = System.getProperty("user.dir") + "/uploads/" + type + "/";
                 java.io.File dir = new java.io.File(uploadDir);
                 if (!dir.exists()) dir.mkdirs();
 
@@ -967,7 +968,7 @@ public class ApiController {
                 java.nio.file.Files.write(filePath, file.getBytes());
 
                 response.put("success", true);
-                response.put("url", "/images/uploads/" + fileName);
+                response.put("url", "http://localhost:8080/uploads/" + type + "/" + fileName);
                 return ResponseEntity.ok(response);
             } else {
                 response.put("success", false);

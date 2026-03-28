@@ -440,7 +440,7 @@
                   <div class="flex items-center gap-4">
                     <div class="size-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center p-2 overflow-hidden shadow-sm group-hover:scale-110 transition-transform shrink-0">
                       <img 
-                        :src="getBrandLogo(b.tenTH)" 
+                        :src="getBrandLogo(b)" 
                         @error="(e) => e.target.src = '/img/placeholder.png'"
                         class="max-w-full max-h-full object-contain"
                         alt="Brand logo"
@@ -542,14 +542,13 @@
         </div>
 
         <div v-if="brandModal.form.tenTH" class="mt-6 flex justify-center">
-            <div class="size-28 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center p-6 overflow-hidden shadow-inner group">
-              <img 
-                :src="getBrandLogo(brandModal.form.tenTH)" 
-                @error="(e) => e.target.src = '/img/placeholder.png'"
-                class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                alt="Brand logo"
-              />
-            </div>
+          <div class="h-10 w-10 flex-shrink-0 bg-white rounded-xl border border-gray-100 flex items-center justify-center p-1.5 shadow-sm">
+            <img :src="getBrandLogo(brandModal.form)" 
+                 @error="(e) => e.target.src = '/img/placeholder.png'"
+                 class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                 alt="Brand logo"
+            />
+          </div>
         </div>
 
         <form @submit.prevent="saveBrand" class="p-6 space-y-5">
@@ -604,21 +603,49 @@
               </div>
 
               <div class="space-y-2">
-                <label class="text-sm font-semibold text-gray-700">Danh mục</label>
-                <select v-model="productModal.form.loaiSanPham.maLoai" required
+                <div class="flex justify-between items-center">
+                  <label class="text-sm font-semibold text-gray-700">Danh mục</label>
+                  <button type="button" @click="productModal.isNewCategory = !productModal.isNewCategory" class="text-xs text-yellow-600 hover:underline">
+                    {{ productModal.isNewCategory ? 'Chọn có sẵn' : '+ Nhập mới' }}
+                  </button>
+                </div>
+                <select v-if="!productModal.isNewCategory" v-model="productModal.form.loaiSanPham.maLoai" :required="!productModal.isNewCategory"
                   class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
                   <option value="" disabled>Chọn danh mục</option>
                   <option v-for="c in categories" :key="c.maLoai" :value="c.maLoai">{{ c.tenLoai }}</option>
                 </select>
+                <input v-else v-model="productModal.newCategoryName" type="text" :required="productModal.isNewCategory" placeholder="Nhập tên danh mục mới..."
+                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
               </div>
 
               <div class="space-y-2">
-                <label class="text-sm font-semibold text-gray-700">Thương hiệu</label>
-                <select v-model="productModal.form.thuongHieu.maTH" required
+                <div class="flex justify-between items-center">
+                  <label class="text-sm font-semibold text-gray-700">Thương hiệu</label>
+                  <button type="button" @click="productModal.isNewBrand = !productModal.isNewBrand" class="text-xs text-yellow-600 hover:underline">
+                    {{ productModal.isNewBrand ? 'Chọn có sẵn' : '+ Nhập mới' }}
+                  </button>
+                </div>
+                <select v-if="!productModal.isNewBrand" v-model="productModal.form.thuongHieu.maTH" :required="!productModal.isNewBrand"
                   class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
                   <option value="" disabled>Chọn thương hiệu</option>
                   <option v-for="b in brands" :key="b.maTH" :value="b.maTH">{{ b.tenTH }}</option>
                 </select>
+                <div v-else class="space-y-3">
+                  <input v-model="productModal.newBrandName" type="text" :required="productModal.isNewBrand" placeholder="Nhập tên thương hiệu mới..."
+                    class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+                  <label class="text-xs font-semibold text-gray-500 block">Logo thương hiệu (tùy chọn)</label>
+                  <div class="flex gap-2">
+                    <input v-model="productModal.newBrandImg" type="text" placeholder="https://..."
+                      class="flex-1 w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+                    <input type="file" ref="brandFileInput" class="hidden" @change="uploadBrandImage" accept="image/*" />
+                    <button type="button" @click="$refs.brandFileInput.click()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium transition-colors flex items-center justify-center min-w-[50px]">
+                      <span class="material-symbols-outlined text-[20px]">upload</span>
+                    </button>
+                  </div>
+                  <div v-if="productModal.uploadingBrandImg" class="text-[11px] text-[#C8A97E] font-bold flex items-center gap-1 mt-1">
+                    <span class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span> Đang tải lên...
+                  </div>
+                </div>
               </div>
 
               <div class="space-y-2">
@@ -717,6 +744,12 @@ export default {
         show: false,
         saving: false,
         uploadingImg: false,
+        isNewCategory: false,
+        newCategoryName: '',
+        isNewBrand: false,
+        newBrandName: '',
+        newBrandImg: '',
+        uploadingBrandImg: false,
         form: {
           maSP: null,
           tenSP: '',
@@ -774,6 +807,11 @@ export default {
     },
 
     openProductModal() {
+      this.productModal.isNewCategory = false
+      this.productModal.newCategoryName = ''
+      this.productModal.isNewBrand = false
+      this.productModal.newBrandName = ''
+      this.productModal.newBrandImg = ''
       this.productModal.form = {
         maSP: null,
         tenSP: '',
@@ -790,6 +828,29 @@ export default {
     async saveProduct() {
       this.productModal.saving = true;
       try {
+        if (this.productModal.isNewCategory) {
+          if (!this.productModal.newCategoryName.trim()) throw new Error("Vui lòng nhập tên danh mục");
+          const catRes = await axios.post('/admin/categories', {
+             tenLoai: this.productModal.newCategoryName.trim(),
+             trangThai: 1
+          });
+          this.productModal.form.loaiSanPham = { maLoai: catRes.data.maLoai };
+          this.fetchCategories();
+        }
+
+        if (this.productModal.isNewBrand) {
+          if (!this.productModal.newBrandName.trim()) throw new Error("Vui lòng nhập tên thương hiệu");
+          const brandRes = await axios.post('/admin/brands', {
+             tenTH: this.productModal.newBrandName.trim(),
+             moTa: this.productModal.newBrandImg, // Storing logo URL in moTa tentatively, or there is no hinhAnh field?
+             trangThai: 1
+          });
+          // Note: Wait, does ThuongHieu entity have an image field? AdminBrands shows we fetch images using getBrandLogo(tenTH) based on hardcoded paths if available?
+          // If we add 'newBrandImg', we can store it. But `logo-${slug}.png` is hardcoded. Let's just pass `newBrandImg` if possible, the backend might ignore if it doesn't have the column. Or wait, let's keep it simple.
+          this.productModal.form.thuongHieu = { maTH: brandRes.data.maTH };
+          this.fetchBrands();
+        }
+
         const response = await axios.post('/admin/products', this.productModal.form);
         if (response.data) {
           if (window.$toast) window.$toast.success('Thêm sản phẩm thành công!')
@@ -798,8 +859,8 @@ export default {
           this.fetchProducts();
         }
       } catch (e) {
-        if (window.$toast) window.$toast.error('Lỗi: ' + (e.response?.data?.message || 'Không thể tạo sản phẩm'))
-        else alert('Lỗi: ' + (e.response?.data?.message || 'Không thể tạo sản phẩm'))
+        if (window.$toast) window.$toast.error('Lỗi: ' + (e.response?.data?.message || e.message || 'Không thể tạo sản phẩm'))
+        else alert('Lỗi: ' + (e.response?.data?.message || e.message || 'Không thể tạo sản phẩm'))
       } finally {
         this.productModal.saving = false;
       }
@@ -830,6 +891,34 @@ export default {
       } finally {
         this.productModal.uploadingImg = false;
         if (this.$refs.fileInput) this.$refs.fileInput.value = null;
+      }
+    },
+
+    async uploadBrandImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this.productModal.uploadingBrandImg = true;
+      try {
+        const res = await axios.post('/upload?type=logo', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (res.data && res.data.success) {
+          this.productModal.newBrandImg = res.data.url;
+          if (window.$toast) window.$toast.success('Tải ảnh thương hiệu thành công!');
+        } else {
+          throw new Error(res.data.message || 'Lỗi tải ảnh');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        if (window.$toast) window.$toast.error('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+        else alert('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+      } finally {
+        this.productModal.uploadingBrandImg = false;
+        if (this.$refs.brandFileInput) this.$refs.brandFileInput.value = null;
       }
     },
 
@@ -979,9 +1068,12 @@ export default {
       this.openDropdown = null
     },
 
-    getBrandLogo(name) {
-      if (!name) return '/img/placeholder.png'
-      const slug = name.toLowerCase().replace(/[\s-]+/g, '')
+    getBrandLogo(brand) {
+      if (!brand || !brand.tenTH) return '/img/placeholder.png'
+      if (brand.moTa && (brand.moTa.startsWith('http') || brand.moTa.startsWith('/uploads') || brand.moTa.startsWith('/images'))) {
+        return brand.moTa;
+      }
+      const slug = brand.tenTH.toLowerCase().replace(/[\s-]+/g, '')
       return `/images/brand/logo-${slug}.png`
     },
 

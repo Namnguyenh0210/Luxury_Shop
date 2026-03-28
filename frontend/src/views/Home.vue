@@ -87,8 +87,8 @@
                 class="absolute inset-0 h-full w-full object-cover object-center transition-all duration-500 group-hover:scale-105" 
                 :class="{'scale-110': index === 0, 'p-4': index !== 0}"
                 :alt="product.tenSP"
-                :src="product.anhChinh || '/images/placeholder.png'"
-                @error="(e) => e.target.src = '/images/placeholder.png'"
+                :src="product.anhChinh || '/img/placeholder.png'"
+                @error="(e) => e.target.src = '/img/placeholder.png'"
               >
             </div>
             <div class="flex flex-col flex-1 p-4 bg-white">

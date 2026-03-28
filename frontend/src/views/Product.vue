@@ -211,7 +211,7 @@
 
                                     <!-- Badges -->
                                     <span v-if="getPriceStock(product.maSP)?.outOfStock" class="badge badge-soldout">
-                                        HẾT HÀNG
+                                        SẮP RA MẮT
                                     </span>
                                     <span v-if="getPriceStock(product.maSP)?.hasPromotion" class="badge badge-sale">
                                         -{{ Math.round(getPriceStock(product.maSP)?.discountPercent || 0) }}%

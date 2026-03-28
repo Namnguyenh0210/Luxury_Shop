@@ -63,7 +63,7 @@
                     </div>
 
                     <!-- Price -->
-                    <div class="border-t border-b border-gray-200 py-4">
+                    <div v-if="totalStock > 0" class="border-t border-b border-gray-200 py-4">
                         <!-- Hiển thị giá cụ thể khi ĐÃ CHỌN đủ cấu hình -->
                         <div v-if="selectedVariant" class="text-3xl font-bold text-[#C8A97E]">
                             {{ formatPrice(selectedVariant.giaBan) }}
@@ -79,13 +79,16 @@
                         <div v-else class="text-3xl font-bold text-[#C8A97E]">
                             Liên hệ
                         </div>
+                    </div>
 
+                    <!-- Stock Status (Always show but style accordingly) -->
+                    <div :class="{'py-4 border-b border-gray-200': totalStock <= 0}">
                         <!-- Hiển thị số lượng tồn kho -->
                         <p v-if="selectedVariant" class="text-sm text-gray-600 mt-1">
-                            {{ selectedVariant.soLuongTon > 0 ? `${selectedVariant.soLuongTon} sản phẩm có sẵn cho phân loại này` : 'Phân loại này đã hết hàng' }}
+                            {{ selectedVariant.soLuongTon > 0 ? `${selectedVariant.soLuongTon} sản phẩm có sẵn cho phân loại này` : 'Phiên bản này hiện không có sẵn (Sắp về hàng)' }}
                         </p>
                         <p v-else class="text-sm text-gray-600 mt-1">
-                            {{ totalStock > 0 ? `${totalStock} sản phẩm trong kho` : 'Hết hàng' }}
+                            {{ totalStock > 0 ? `${totalStock} sản phẩm trong kho` : 'HÀNG SẮP VỀ - VUI LÒNG LIÊN HỆ' }}
                         </p>
                     </div>
 
@@ -129,7 +132,7 @@
                     </div>
 
                     <!-- Quantity -->
-                    <div>
+                    <div v-if="totalStock > 0">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Số lượng</label>
                         <div class="flex items-center space-x-4">
                             <button 
@@ -158,10 +161,10 @@
                     <!-- Actions: Add to Cart & Wishlist -->
                     <div class="flex gap-4">
                         <button 
-                            @click="addToCart"
+                            @click="totalStock > 0 ? addToCart() : openAIChat()"
                             class="flex-grow bg-black text-white text-lg font-bold py-4 rounded-lg hover:bg-gray-800 transition-all active:scale-[0.98] shadow-lg shadow-black/10"
                         >
-                            {{ totalStock > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng' }}
+                            {{ totalStock > 0 ? 'Thêm vào giỏ hàng' : 'SẮP RA MẮT - LIÊN HỆ TƯ VẤN' }}
                         </button>
                         <button 
                             @click="toggleWishlist"
@@ -203,7 +206,7 @@
                         <!-- Image Wrapper -->
                         <div @click="goToDetail(item.maSP)" class="aspect-[3/4] bg-[#f8f8f8] relative overflow-hidden cursor-pointer">
                             <img 
-                                :src="item.anhChinh || '/images/placeholder.png'" 
+                                :src="item.anhChinh || '/img/placeholder.png'"
                                 :alt="item.tenSP"
                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             >
@@ -517,6 +520,12 @@ export default {
         } else {
           window.$toast.error('Có lỗi xảy ra khi thêm vào giỏ hàng!')
         }
+      }
+    },
+    
+    openAIChat() {
+      if (window.$openChat) {
+        window.$openChat();
       }
     }
   },

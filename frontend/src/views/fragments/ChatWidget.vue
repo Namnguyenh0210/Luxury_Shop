@@ -322,10 +322,17 @@ export default {
           this.assignedStaff = convRes.data.nhanVien?.hoTen;
         }
       } catch (e) {}
+    },
+    openChat() {
+      this.isOpen = true;
+      if (!this.conversationId) {
+        this.initChat();
+      }
     }
   },
   mounted() {
     this.startPolling();
+    window.$openChat = () => this.openChat();
   },
   beforeUnmount() {
     this.stopPolling();

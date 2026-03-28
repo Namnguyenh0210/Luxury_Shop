@@ -20,21 +20,49 @@
             </div>
 
             <div class="space-y-2">
-              <label class="text-sm font-semibold text-gray-700">Danh mục</label>
-              <select v-model="form.loaiSanPham.maLoai" required
+              <div class="flex justify-between items-center">
+                <label class="text-sm font-semibold text-gray-700">Danh mục</label>
+                <button type="button" @click="isNewCategory = !isNewCategory" class="text-xs text-yellow-600 hover:underline">
+                  {{ isNewCategory ? 'Chọn có sẵn' : '+ Nhập mới' }}
+                </button>
+              </div>
+              <select v-if="!isNewCategory" v-model="form.loaiSanPham.maLoai" :required="!isNewCategory"
                 class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
                 <option value="" disabled>Chọn danh mục</option>
                 <option v-for="c in categories" :key="c.maLoai" :value="c.maLoai">{{ c.tenLoai }}</option>
               </select>
+              <input v-else v-model="newCategoryName" type="text" :required="isNewCategory" placeholder="Nhập tên danh mục mới..."
+                class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
             </div>
 
             <div class="space-y-2">
-              <label class="text-sm font-semibold text-gray-700">Thương hiệu</label>
-              <select v-model="form.thuongHieu.maTH" required
+              <div class="flex justify-between items-center">
+                <label class="text-sm font-semibold text-gray-700">Thương hiệu</label>
+                <button type="button" @click="isNewBrand = !isNewBrand" class="text-xs text-yellow-600 hover:underline">
+                  {{ isNewBrand ? 'Chọn có sẵn' : '+ Nhập mới' }}
+                </button>
+              </div>
+              <select v-if="!isNewBrand" v-model="form.thuongHieu.maTH" :required="!isNewBrand"
                 class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
                 <option value="" disabled>Chọn thương hiệu</option>
                 <option v-for="b in brands" :key="b.maTH" :value="b.maTH">{{ b.tenTH }}</option>
               </select>
+              <div v-else class="space-y-3">
+                <input v-model="newBrandName" type="text" :required="isNewBrand" placeholder="Nhập tên thương hiệu mới..."
+                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+                <label class="text-xs font-semibold text-gray-500 block">Logo thương hiệu (tùy chọn)</label>
+                <div class="flex gap-2">
+                  <input v-model="newBrandImg" type="text" placeholder="https://..."
+                    class="flex-1 w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+                  <input type="file" ref="brandFileInput" class="hidden" @change="uploadBrandImage" accept="image/*" />
+                  <button type="button" @click="$refs.brandFileInput.click()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium transition-colors flex items-center justify-center min-w-[50px]">
+                    <span class="material-symbols-outlined text-[20px]">upload</span>
+                  </button>
+                </div>
+                <div v-if="uploadingBrandImg" class="text-[11px] text-[#C8A97E] font-bold flex items-center gap-1 mt-1">
+                  <span class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span> Đang tải lên...
+                </div>
+              </div>
             </div>
 
             <div class="space-y-2">
@@ -106,6 +134,12 @@ export default {
     return {
       saving: false,
       uploadingImg: false,
+      isNewCategory: false,
+      newCategoryName: '',
+      isNewBrand: false,
+      newBrandName: '',
+      newBrandImg: '',
+      uploadingBrandImg: false,
       categories: [],
       brands: [],
       form: {
@@ -137,9 +171,29 @@ export default {
     async saveProduct() {
       this.saving = true;
       try {
+        if (this.isNewCategory) {
+          if (!this.newCategoryName.trim()) throw new Error("Vui lòng nhập tên danh mục");
+          const catRes = await axios.post('/admin/categories', {
+             tenLoai: this.newCategoryName.trim(),
+             trangThai: 1
+          });
+          this.form.loaiSanPham = { maLoai: catRes.data.maLoai };
+        }
+
+        if (this.isNewBrand) {
+          if (!this.newBrandName.trim()) throw new Error("Vui lòng nhập tên thương hiệu");
+          const brandRes = await axios.post('/admin/brands', {
+             tenTH: this.newBrandName.trim(),
+             moTa: this.newBrandImg,
+             trangThai: 1
+          });
+          this.form.thuongHieu = { maTH: brandRes.data.maTH };
+        }
+
         const response = await axios.post('/admin/products', this.form);
         if (response.data) {
-          window.$toast.success('Thêm sản phẩm thành công!')
+          if (window.$toast) window.$toast.success('Thêm sản phẩm thành công!')
+          else alert('Thêm sản phẩm thành công!')
           this.$router.push('/admin/products');
         }
       } catch (e) {
@@ -173,6 +227,33 @@ export default {
       } finally {
         this.uploadingImg = false;
         if (this.$refs.fileInput) this.$refs.fileInput.value = null;
+      }
+    },
+    async uploadBrandImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this.uploadingBrandImg = true;
+      try {
+        const res = await axios.post('/upload?type=logo', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (res.data && res.data.success) {
+          this.newBrandImg = res.data.url;
+          if (window.$toast) window.$toast.success('Tải ảnh thương hiệu thành công!');
+        } else {
+          throw new Error(res.data.message || 'Lỗi tải ảnh');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        if (window.$toast) window.$toast.error('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+        else alert('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+      } finally {
+        this.uploadingBrandImg = false;
+        if (this.$refs.brandFileInput) this.$refs.brandFileInput.value = null;
       }
     }
   },
