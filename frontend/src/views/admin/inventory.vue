@@ -471,7 +471,7 @@
                   </div>
                 </div>
               </div>
-              <p v-if="newItem.isNewProduct && productSearchText" class="text-[10px] text-[#C8A97E] font-semibold mt-0.5">✦ Sẽ tạo sản phẩm mới</p>
+              <p v-if="productSearchText && !newItem.productId" class="text-[10px] text-red-500 font-semibold mt-0.5">✦ Vui lòng chọn sản phẩm có sẵn</p>
             </div>
 
             <!-- Giới tính -->
@@ -542,7 +542,7 @@
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">đ</span>
               </div>
             </div>
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" v-if="false">
               <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Giá Bán Lẻ <span v-if="newItem.isNewProduct" class="text-red-500">*</span></label>
               <div class="relative">
                 <input type="text"
@@ -554,7 +554,7 @@
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">đ</span>
               </div>
             </div>
-            <div class="space-y-1.5">
+            <div class="space-y-1.5" v-if="false">
               <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Mô Tả SP</label>
               <input v-model="newItem.moTa"
                 placeholder="Mô tả (cho SP mới)..."
@@ -1354,7 +1354,15 @@ export default {
         await this.showAppDialog({ isError: true, message: 'Vui lòng điền ít nhất một dòng size/màu/số lượng hợp lệ.' }); return
       }
 
+      if (!this.newItem.productId) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng chọn một sản phẩm có sẵn từ danh sách.' }); return
+      }
+
       for (const row of validRows) {
+        if (!row.isExisting || !row.maBienThe) {
+          await this.showAppDialog({ isError: true, message: `Biến thể Size ${row.size} / Màu ${row.color} chưa tồn tại cho sản phẩm này. Chỉ được phép nhập hàng cho biến thể đã có sẵn.` }); return
+        }
+        
         if (row.isExisting && row.maBienThe) {
           this.form.items.push({
             itemType: 'existing',
@@ -1367,26 +1375,6 @@ export default {
             color: row.color,
             qty: row.qty,
             price: this.newItem.price,
-            ghiChu: ''
-          })
-        } else {
-          this.form.items.push({
-            itemType: this.newItem.productId ? 'new_variant' : 'new_product',
-            productId: this.newItem.productId,
-            tenSP: this.newItem.tenSP,
-            categoryId: this.newItem.categoryId,
-            categoryName: this.categorySearchText,
-            brandId: this.newItem.brandId,
-            brandName: this.brandSearchText,
-            gender: this.newItem.gender,
-            size: row.size,
-            color: row.color,
-            colorCode: '#000000',
-            qty: row.qty,
-            price: this.newItem.price,
-            giaBan: this.newItem.giaBan || (this.newItem.price * 1.5),
-            moTa: this.newItem.moTa || '',
-            displayName: this.newItem.tenSP,
             ghiChu: ''
           })
         }

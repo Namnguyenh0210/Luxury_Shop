@@ -940,4 +940,44 @@ public class ApiController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Map<String, Object>> uploadImage(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        
+        Map<String, Object> response = new HashMap<>();
+        try {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                response.put("success", false);
+                response.put("message", "Từ chối truy cập");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            if (file != null && !file.isEmpty()) {
+                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/uploads/";
+                java.io.File dir = new java.io.File(uploadDir);
+                if (!dir.exists()) dir.mkdirs();
+
+                String originalName = file.getOriginalFilename();
+                String ext = originalName != null && originalName.contains(".") ? originalName.substring(originalName.lastIndexOf(".")) : ".jpg";
+                String fileName = "up_" + System.currentTimeMillis() + ext;
+
+                java.nio.file.Path filePath = java.nio.file.Paths.get(uploadDir + fileName);
+                java.nio.file.Files.write(filePath, file.getBytes());
+
+                response.put("success", true);
+                response.put("url", "/images/uploads/" + fileName);
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("success", false);
+                response.put("message", "File trống");
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi upload: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
 }

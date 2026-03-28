@@ -60,8 +60,17 @@
 
             <div class="space-y-2 md:col-span-2">
               <label class="text-sm font-semibold text-gray-700">URL Ảnh chính</label>
-              <input v-model="form.anhChinh" type="text" placeholder="https://..."
-                class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+              <div class="flex gap-2">
+                <input v-model="form.anhChinh" type="text" placeholder="https://..."
+                  class="flex-1 w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+                <input type="file" ref="fileInput" class="hidden" @change="uploadImage" accept="image/*" />
+                <button type="button" @click="$refs.fileInput.click()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium transition-colors flex items-center justify-center min-w-[50px]">
+                  <span class="material-symbols-outlined text-[20px]">upload</span>
+                </button>
+              </div>
+              <div v-if="uploadingImg" class="text-[11px] text-[#C8A97E] font-bold flex items-center gap-1 mt-1">
+                <span class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span> Đang tải lên...
+              </div>
             </div>
 
             <div class="space-y-2 md:col-span-2">
@@ -96,6 +105,7 @@ export default {
   data() {
     return {
       saving: false,
+      uploadingImg: false,
       categories: [],
       brands: [],
       form: {
@@ -136,6 +146,33 @@ export default {
         window.$toast.error('Lỗi: ' + (e.response?.data?.message || 'Không thể tạo sản phẩm'))
       } finally {
         this.saving = false;
+      }
+    },
+
+    async uploadImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this.uploadingImg = true;
+      try {
+        const res = await axios.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (res.data && res.data.success) {
+          this.form.anhChinh = res.data.url;
+          window.$toast.success('Tải ảnh lên thành công!');
+        } else {
+          throw new Error(res.data.message || 'Lỗi tải ảnh');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        window.$toast.error('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+      } finally {
+        this.uploadingImg = false;
+        if (this.$refs.fileInput) this.$refs.fileInput.value = null;
       }
     }
   },
