@@ -125,12 +125,16 @@
           </div>
 
           <!-- Hình Ảnh -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">URL Hình Ảnh</label>
-            <input v-model="form.hinhAnh" placeholder="https://..."
-              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"/>
-            <img v-if="form.hinhAnh" :src="form.hinhAnh" class="w-full h-40 object-cover rounded-xl mt-2" @error="form.hinhAnh = ''" />
-          </div>
+		  <div class="space-y-1.5">
+		    <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+		      Hình Ảnh
+		    </label>
+		    <input type="file" @change="chonAnh"
+		      class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm"/>
+
+		    <img v-if="previewAnh" :src="previewAnh"
+		      class="w-full h-40 object-cover rounded-xl mt-2"/>
+		  </div>
 
           <!-- Nội Dung -->
           <div class="space-y-1.5">
@@ -199,6 +203,8 @@ export default {
       dangLuu: false,
       dangLuuLoai: false,
       tenLoaiMoi: '',
+	  fileAnh: null,
+	  previewAnh: '',
       form: {
         maBV: null,
         tieuDe: '',
@@ -253,6 +259,8 @@ export default {
         maLoaiBV: bv.loaiBaiViet?.maLoaiBV || '',
         trangThai: bv.trangThai !== false
       }
+	  this.previewAnh = bv.hinhAnh || ''
+	  this.fileAnh = null
       // Tải nội dung đầy đủ
       axios.get(`/admin/blogs/${bv.maBV}`, { withCredentials: true }).then(r => {
         if (r.data.thanhCong) {
@@ -278,12 +286,39 @@ export default {
           trangThai: this.form.trangThai
         }
 
-        let res
-        if (this.form.maBV) {
-          res = await axios.put(`/admin/blogs/${this.form.maBV}`, payload, { withCredentials: true })
-        } else {
-          res = await axios.post('/admin/blogs', payload, { withCredentials: true })
-        }
+		let res
+
+		if (this.form.maBV) {
+		  res = await axios.put(`/admin/blogs/${this.form.maBV}`, payload, { withCredentials: true })
+		  
+		  if (res.data.thanhCong && this.fileAnh) {
+		      const formData = new FormData()
+		      formData.append("file", this.fileAnh)
+
+		      await axios.post(`/admin/blogs/upload/${this.form.maBV}`, formData, {
+		        headers: { "Content-Type": "multipart/form-data" },
+		        withCredentials: true
+		      })
+		    }
+		} else {
+		  const resCreate = await axios.post('/admin/blogs', payload, { withCredentials: true })
+
+		  if (resCreate.data.thanhCong) {
+		    const id = resCreate.data.maBV
+
+		    if (this.fileAnh) {
+		      const formData = new FormData()
+		      formData.append("file", this.fileAnh)
+
+		      await axios.post(`/admin/blogs/upload/${id}`, formData, {
+		        headers: { "Content-Type": "multipart/form-data" },
+		        withCredentials: true
+		      })
+		    }
+		  }
+
+		  res = resCreate // ✅ QUAN TRỌNG
+		}
 
         if (res.data.thanhCong) {
           window.$alert(res.data.thongBao || 'Thành công!', 'Thành công')
@@ -322,6 +357,14 @@ export default {
     dongModalLoai() {
       this.hienModalLoai = false
     },
+	
+	chonAnh(e) {
+	  const file = e.target.files[0]
+	  if (!file) return
+
+	  this.fileAnh = file
+	  this.previewAnh = URL.createObjectURL(file)
+	},
 
     async luuLoaiBaiViet() {
       if (!this.tenLoaiMoi.trim()) return

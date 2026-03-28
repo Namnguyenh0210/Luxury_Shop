@@ -50,6 +50,23 @@
             </div>
             
             <!-- Time Filter Buttons -->
+			<div class="flex gap-2 items-center">
+			  <input type="date" v-model="startDate" class="border px-2 py-1 rounded">
+			  <span>-</span>
+			  <input type="date" v-model="endDate" class="border px-2 py-1 rounded">
+			  
+			  <button 
+			    @click="filterByDate"
+			    class="bg-yellow-600 text-white px-3 py-1 rounded text-xs">
+			    Lọc
+			  </button>
+
+			  <button 
+			    @click="resetFilter"
+			    class="bg-gray-300 text-gray-700 px-3 py-1 rounded text-xs hover:bg-gray-400">
+			    Xóa lọc
+			  </button>
+			</div>
             <div class="flex bg-gray-100 p-1 rounded-xl w-fit">
               <button 
                 v-for="(label, key) in timeRangeLabels" 
@@ -107,6 +124,9 @@ export default {
       todayOrders: 0,
       todaySoldProducts: 0,
       todayNewCustomers: 0,
+	  
+	  startDate: '',
+	  endDate: '',
 
       // UI State
       activeStat: 'revenue',
@@ -197,6 +217,36 @@ export default {
       }).format(v || 0)
     },
 
+	resetFilter() {
+	  this.startDate = ''
+	  this.endDate = ''
+
+	  // load lại data mặc định (tuần này)
+	  this.loadData()
+	},
+	
+	async filterByDate() {
+	  if (!this.startDate || !this.endDate) return
+
+	  try {
+	    const res = await axios.get('/admin/reports/by-date', {
+	      params: {
+	        startDate: this.startDate,
+	        endDate: this.endDate
+	      },
+	      withCredentials: true
+	    })
+
+	    this.chartLabels = res.data.chartLabels || []
+	    this.chartData = res.data.chartData || []
+
+	    this.updateCharts()
+
+	  } catch (e) {
+	    console.error("Lỗi lọc theo ngày", e)
+	  }
+	},
+	
     async loadData() {
       try {
 		
@@ -212,23 +262,21 @@ export default {
         // Update Totals
         this.totalRevenue = repRes.data.totalRevenue || 0
         this.newOrders = repRes.data.newOrders || 0
-        this.soldProducts = repRes.data.soldProducts || 124 
+        this.soldProducts = repRes.data.soldProducts || 0 
         this.totalCustomers = repRes.data.totalCustomers || 0
 
         // Today's data
-        this.todayRevenue = repRes.data.todayRevenue || 4500000
-        this.todayOrders = repRes.data.todayOrders || 12
-        this.todaySoldProducts = repRes.data.todaySoldProducts || 45
-        this.todayNewCustomers = repRes.data.todayNewCustomers || 8
+        this.todayRevenue = repRes.data.todayRevenue || 0
+        this.todayOrders = repRes.data.todayOrders || 0
+        this.todaySoldProducts = repRes.data.todaySoldProducts || 0
+        this.todayNewCustomers = repRes.data.todayNewCustomers || 0
 
         // Real Categories
         if (catRes.data && Array.isArray(catRes.data)) {
-          this.categoryData.labels = catRes.data.map(c => c.tenLoai)
-          // Mock data distribution based on real labels
-          this.categoryData.data = this.categoryData.labels.map(() => Math.floor(Math.random() * 50) + 10)
+          this.categoryData.labels = catRes.data.map(c => c.tenLoai)         
         } else {
-          this.categoryData.labels = ['Áo thun', 'Sơ mi', 'Quần Tây', 'Phụ kiện', 'Giày']
-          this.categoryData.data = [35, 20, 15, 10, 20]
+			this.categoryData.labels = repRes.data.categoryLabels || []
+			this.categoryData.data = repRes.data.categoryData || []
         }
 
         this.$nextTick(() => {

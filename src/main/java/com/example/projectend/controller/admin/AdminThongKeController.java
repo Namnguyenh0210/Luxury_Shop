@@ -1,5 +1,6 @@
 package com.example.projectend.controller.admin;
 
+import com.example.projectend.entity.DonHang;
 import com.example.projectend.repository.DonHangChiTietRepository;
 import com.example.projectend.repository.DonHangRepository;
 import com.example.projectend.repository.TaiKhoanRepository;
@@ -8,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +59,38 @@ public class AdminThongKeController {
         if (todayNewCustomers == null) todayNewCustomers = 0L;
 
         // TODO: Sau này query thật theo ngày/tháng
-        List<Integer> chartData = List.of(15, 25, 18, 30, 22, 40, 55);
-        List<String> chartLabels = List.of("T2", "T3", "T4", "T5", "T6", "T7", "CN");
+        LocalDate today = LocalDate.now();
+        LocalDate startWeek = today.minusDays(6);
+
+        LocalDateTime start = startWeek.atStartOfDay();
+        LocalDateTime end = today.atTime(LocalTime.MAX);
+
+        List<DonHang> orders = donHangRepository.findByNgayDatBetween(start, end);
+
+        // Map ngày -> doanh thu
+        Map<LocalDate, BigDecimal> revenueMap = new HashMap<>();
+
+        for (int i = 0; i < 7; i++) {
+            revenueMap.put(startWeek.plusDays(i), BigDecimal.ZERO);
+        }
+
+        // Cộng tiền theo ngày
+        for (DonHang dh : orders) {
+            LocalDate date = dh.getNgayDat().toLocalDate();
+            revenueMap.put(date,
+                revenueMap.get(date).add(dh.getTongTien()));
+        }
+
+        // Convert sang list
+        List<String> chartLabels = new ArrayList<>();
+        List<Double> chartData = new ArrayList<>();
+
+        for (int i = 0; i < 7; i++) {
+            LocalDate d = startWeek.plusDays(i);
+            chartLabels.add("T" + d.getDayOfWeek().getValue());
+            chartData.add(revenueMap.get(d).doubleValue());
+        }
+        
 
         Map<String, Object> response = new HashMap<>();
         response.put("totalRevenue", totalRevenue);
@@ -75,5 +107,47 @@ public class AdminThongKeController {
         response.put("chartLabels", chartLabels);
 
         return response;
+    }
+    
+    @GetMapping("/by-date")
+    public Map<String, Object> getByDate(
+            @RequestParam String startDate,
+            @RequestParam String endDate) {
+
+        LocalDateTime start = LocalDate.parse(startDate).atStartOfDay();
+        LocalDateTime end = LocalDate.parse(endDate).atTime(LocalTime.MAX);
+
+        List<DonHang> orders = donHangRepository.findByNgayDatBetween(start, end);
+
+        Map<LocalDate, BigDecimal> revenueMap = new HashMap<>();
+
+        // init ngày
+        LocalDate current = start.toLocalDate();
+        while (!current.isAfter(end.toLocalDate())) {
+            revenueMap.put(current, BigDecimal.ZERO);
+            current = current.plusDays(1);
+        }
+
+        // cộng tiền
+        for (DonHang dh : orders) {
+            LocalDate d = dh.getNgayDat().toLocalDate();
+            revenueMap.put(d,
+                revenueMap.get(d).add(dh.getTongTien()));
+        }
+
+        // convert
+        List<String> labels = new ArrayList<>();
+        List<Double> data = new ArrayList<>();
+
+        for (Map.Entry<LocalDate, BigDecimal> entry : revenueMap.entrySet()) {
+            labels.add(entry.getKey().toString()); // yyyy-MM-dd
+            data.add(entry.getValue().doubleValue());
+        }
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("chartLabels", labels);
+        res.put("chartData", data);
+
+        return res;
     }
 }
