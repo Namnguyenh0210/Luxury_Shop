@@ -44,6 +44,9 @@ public class AdminThuongHieuController {
 
     @DeleteMapping("/{id}")
     public void deleteBrand(@PathVariable Long id) {
+        if (sanPhamRepository.existsByThuongHieu_MaTH(id)) {
+            throw new RuntimeException("Không thể xóa thương hiệu này vì vẫn còn sản phẩm thuộc thương hiệu!");
+        }
         thuongHieuService.deleteById(id);
     }
     

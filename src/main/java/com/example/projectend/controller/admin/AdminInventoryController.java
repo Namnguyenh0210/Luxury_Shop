@@ -149,8 +149,6 @@ public class AdminInventoryController {
                     String tenSP = item.get("tenSP") != null ? item.get("tenSP").toString() : "";
                     String size = item.get("size") != null ? item.get("size").toString() : "";
                     String color = item.get("color") != null ? item.get("color").toString() : "";
-                    Integer qty = Integer.parseInt(item.get("qty").toString());
-                    BigDecimal price = new BigDecimal(item.get("price").toString());
                     Integer gender = item.get("gender") != null ? Integer.parseInt(item.get("gender").toString()) : 2;
                     Long categoryId = item.get("categoryId") != null ? Long.parseLong(item.get("categoryId").toString()) : null;
                     Long brandId = item.get("brandId") != null ? Long.parseLong(item.get("brandId").toString()) : null;

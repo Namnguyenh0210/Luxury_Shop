@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,12 +43,87 @@ public class AdminDonHangController {
     }
 
     // ==========================================
-    // 2. CHI TIẾT ĐƠN HÀNG
+    // 2. CHI TIẾT ĐƠN HÀNG (Safe DTO for Admin)
     // ==========================================
     @GetMapping("/{id}")
-    public DonHang orderDetail(@PathVariable Long id) {
-        return donHangService.findById(id)
+    public Map<String, Object> orderDetail(@PathVariable Long id) {
+        DonHang order = donHangService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        Map<String, Object> dto = new HashMap<>();
+        dto.put("maDH", order.getMaDH());
+        dto.put("ngayDat", order.getNgayDat());
+        dto.put("tongTien", order.getTongTien());
+        dto.put("phiShip", order.getPhiShip());
+        dto.put("giamGia", order.getGiamGia());
+        dto.put("ghiChu", order.getGhiChu());
+        dto.put("trangThaiDH", order.getTrangThaiDH());
+        dto.put("trangThaiThanhToan", order.getTrangThaiThanhToan());
+        dto.put("lyDoHuy", order.getLyDoHuy());
+        dto.put("khachBaoChuaNhan", order.getKhachBaoChuaNhan());
+        dto.put("lyDoChuaNhan", order.getLyDoChuaNhan());
+        dto.put("moTaChuaNhan", order.getMoTaChuaNhan());
+
+        // Account
+        if (order.getTaiKhoan() != null) {
+            Map<String, Object> tk = new HashMap<>();
+            tk.put("hoTen", order.getTaiKhoan().getHoTen());
+            tk.put("email", order.getTaiKhoan().getEmail());
+            tk.put("soDienThoai", order.getTaiKhoan().getSoDienThoai());
+            dto.put("taiKhoan", tk);
+        }
+
+        // Address
+        if (order.getDiaChiGiao() != null) {
+            Map<String, Object> dc = new HashMap<>();
+            dc.put("diaChiChiTiet", order.getDiaChiGiao().getDiaChiChiTiet());
+            dc.put("hoTenNguoiNhan", order.getDiaChiGiao().getHoTenNguoiNhan());
+            dc.put("soDienThoai", order.getDiaChiGiao().getSoDienThoai());
+            dto.put("diaChiGiao", dc);
+        }
+
+        // Payment Method
+        if (order.getHinhThucThanhToan() != null) {
+            Map<String, Object> pt = new HashMap<>();
+            pt.put("tenHinhThuc", order.getHinhThucThanhToan().getTenHinhThuc());
+            dto.put("hinhThucThanhToan", pt);
+        }
+
+        // Voucher
+        if (order.getVoucher() != null) {
+            Map<String, Object> v = new HashMap<>();
+            v.put("code", order.getVoucher().getCode());
+            dto.put("voucher", v);
+        }
+
+        // Items (chiTietList)
+        java.util.List<Map<String, Object>> items = new java.util.ArrayList<>();
+        for (com.example.projectend.entity.DonHangChiTiet ct : order.getChiTietList()) {
+            Map<String, Object> ctDto = new HashMap<>();
+            ctDto.put("maCT", ct.getMaCT());
+            ctDto.put("soLuong", ct.getSoLuong());
+            ctDto.put("donGia", ct.getDonGia());
+
+            com.example.projectend.entity.SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+            if (spct != null) {
+                ctDto.put("tenSP", spct.getSanPham().getTenSP());
+                
+                String imgUrl = spct.getSanPham().getAnhChinh();
+                if (imgUrl == null) imgUrl = spct.getAnhBienThe();
+                if (imgUrl != null && !imgUrl.startsWith("http") && !imgUrl.startsWith("/")) {
+                    imgUrl = "/uploads/products/" + imgUrl;
+                }
+                ctDto.put("anh", imgUrl != null ? imgUrl : "/img/placeholder.png");
+                
+                ctDto.put("size", spct.getSizeSP().getTenSize());
+                ctDto.put("mau", spct.getMauSacSP().getTenMau());
+                ctDto.put("thuongHieu", spct.getSanPham().getThuongHieu().getTenTH());
+            }
+            items.add(ctDto);
+        }
+        dto.put("chiTietList", items);
+
+        return dto;
     }
 
     // ==========================================
@@ -66,9 +140,9 @@ public class AdminDonHangController {
         try {
             String nguoiCapNhat = "ADMIN";
             String ghiChu = (status == 5) ? "Hủy đơn: " + reason : "Cập nhật qua Admin";
-            
+
             boolean updated = donHangService.capNhatTrangThai(id, status, nguoiCapNhat, ghiChu);
-            
+
             if (updated && reason != null && !reason.isBlank()) {
                 DonHang dh = donHangRepository.findById(id).orElse(null);
                 if (dh != null) {

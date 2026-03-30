@@ -4,7 +4,6 @@ import com.example.projectend.entity.*;
 import com.example.projectend.repository.*;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -111,12 +110,76 @@ public class DonHangService {
         }
 
         donHang.setTongTien(tongTien);
-        donHang.setPhiShip(BigDecimal.ZERO); // Miễn phí ship
+        
+        // 5b. Tính phí vận chuyển (Marketing Logic: Mặc định 30k, Free ship từ 2 SP)
+        int totalQuantity = gioHangItems.stream().mapToInt(GioHangChiTiet::getSoLuong).sum();
+        BigDecimal phiShip = (totalQuantity >= 2) ? BigDecimal.ZERO : new BigDecimal(30000);
+        donHang.setPhiShip(phiShip);
+        
+        // Cộng phí ship vào tổng tiền trước khi áp voucher
+        tongTien = tongTien.add(phiShip);
+        donHang.setTongTien(tongTien);
 
-        // 5b. Xử lý Voucher nếu có
+        // 5b. Xử lý Voucher nếu có (Nâng cấp theo thiết kế db.sql)
         if (voucherId != null) {
             Voucher voucher = voucherRepository.findById(voucherId).orElse(null);
-            if (voucher != null && voucher.getTrangThai()) {
+            LocalDateTime now = LocalDateTime.now();
+            
+            if (voucher != null && Boolean.TRUE.equals(voucher.getTrangThai()) && !Boolean.TRUE.equals(voucher.getIsDeleted())) {
+                
+                // 1. Kiểm tra thời hạn
+                if (voucher.getNgayBatDau() != null && now.isBefore(voucher.getNgayBatDau())) {
+                    throw new RuntimeException("Voucher chưa đến thời gian áp dụng");
+                }
+                if (voucher.getNgayKetThuc() != null && now.isAfter(voucher.getNgayKetThuc())) {
+                    throw new RuntimeException("Voucher đã hết hạn");
+                }
+
+                // 2. Kiểm tra số lượng
+                if (voucher.getSoLuong() != null && voucher.getDaSuDung() >= voucher.getSoLuong()) {
+                    throw new RuntimeException("Voucher đã hết lượt sử dụng");
+                }
+
+                // 3. Kiểm tra giá trị tối thiểu
+                if (tongTien.compareTo(voucher.getGiaTriToiThieu()) < 0) {
+                    throw new RuntimeException("Đơn hàng chưa đạt giá trị tối thiểu để dùng voucher này");
+                }
+
+                // 4. Kiểm tra điều kiện Thương hiệu / Danh mục (Nếu có)
+                boolean matchesCondition = true;
+                if (voucher.getMaLoaiApDung() != null || voucher.getMaTHApDung() != null) {
+                    matchesCondition = false;
+                    for (GioHangChiTiet item : gioHangItems) {
+                        SanPham sp = item.getSanPhamChiTiet().getSanPham();
+                        
+                        // Kiểm tra danh mục
+                        if (voucher.getMaLoaiApDung() != null) {
+                            String[] allowedLoai = voucher.getMaLoaiApDung().split(",");
+                            for (String idStr : allowedLoai) {
+                                if (sp.getLoaiSanPham() != null && sp.getLoaiSanPham().getMaLoai().toString().equals(idStr.trim())) {
+                                    matchesCondition = true; break;
+                                }
+                            }
+                        }
+                        
+                        // Kiểm tra thương hiệu
+                        if (voucher.getMaTHApDung() != null) {
+                            String[] allowedTH = voucher.getMaTHApDung().split(",");
+                            for (String idStr : allowedTH) {
+                                if (sp.getThuongHieu() != null && sp.getThuongHieu().getMaTH().toString().equals(idStr.trim())) {
+                                    matchesCondition = true; break;
+                                }
+                            }
+                        }
+                        if (matchesCondition) break;
+                    }
+                }
+
+                if (!matchesCondition) {
+                    throw new RuntimeException("Voucher không áp dụng cho các sản phẩm trong giỏ hàng của bạn");
+                }
+
+                // 5. Tính toán giảm giá
                 BigDecimal discount = BigDecimal.ZERO;
                 if (voucher.getLoaiGiamGia() == 0) { // Phần trăm
                     discount = tongTien.multiply(voucher.getGiaTri()).divide(new BigDecimal(100));
@@ -127,15 +190,17 @@ public class DonHangService {
                     discount = voucher.getGiaTri();
                 }
                 
-                // Đảm bảo không giảm quá tổng hóa đơn
                 if (discount.compareTo(tongTien) > 0) discount = tongTien;
                 
                 donHang.setVoucher(voucher);
                 donHang.setGiamGia(discount);
                 
-                // Cập nhật lượt dùng voucher
+                // Cập nhật lượt dùng
                 voucher.setDaSuDung(voucher.getDaSuDung() + 1);
                 voucherRepository.save(voucher);
+
+                // TRỪ GIẢM GIÁ VÀO TỔNG TIỀN CUỐI CÙNG
+                donHang.setTongTien(tongTien.subtract(discount));
             }
         }
 
@@ -173,6 +238,7 @@ public class DonHangService {
         return donHangRepository.findAllByOrderByNgayDatDesc();
     }
 
+    @SuppressWarnings("null")
     public void updateStatus(Long id, Integer status){
 
         DonHang dh = donHangRepository.findById(id)
@@ -248,6 +314,8 @@ public class DonHangService {
      */
     @Transactional
     public boolean capNhatTrangThai(Long maDH, Integer trangThaiMoi, String nguoiCapNhat, String ghiChu) {
+        if (maDH == null) return false;
+        
         Optional<DonHang> dhOpt = donHangRepository.findById(maDH);
         if (!dhOpt.isPresent()) {
             return false;
@@ -312,12 +380,14 @@ public class DonHangService {
      */
     @Transactional
     public boolean updateOrderStatus(Long orderId, Integer newStatus, String updatedBy) {
+        if (orderId == null) return false;
         return capNhatTrangThai(orderId, newStatus, updatedBy, null);
     }
 
     /**
      * LẤY LỊCH SỬ ĐƠN HÀNG
      */
+    @SuppressWarnings("null")
     public List<LichSuDonHang> getLichSuDonHang(Long maDH) {
         return lichSuDonHangRepository.findByDonHang_MaDHOrderByThoiGianAsc(maDH);
     }
@@ -376,6 +446,7 @@ public class DonHangService {
      * TÌM ĐƠN HÀNG THEO ID
      */
     public Optional<DonHang> findById(Long maDH) {
+        if (maDH == null) return Optional.empty();
         return donHangRepository.findById(maDH);
     }
 

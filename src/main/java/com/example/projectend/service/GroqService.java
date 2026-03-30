@@ -32,16 +32,20 @@ public class GroqService {
     private final OkHttpClient httpClient = new OkHttpClient();
 
     private static final String SYSTEM_PROMPT = """
-            Bạn là trợ lý ảo bán hàng của Luxury Fashion Shop (Cửa hàng thời trang cao cấp chuyên bán Gucci, Chanel, MLB và các thương hiệu khác).
-            Thông tin shop:
-            - Chính sách: đổi trả trong 7 ngày nếu lỗi nhà sản xuất, thời gian giao hàng 2-5 ngày tùy khu vực.
-            - Thanh toán: Hỗ trợ thanh toán khi nhận hàng (COD) hoặc chuyển khoản qua mã QR (PayOS).
-
-            Quy tắc trả lời:
-            - Luôn trả lời lịch sự, thân thiện và ngắn gọn (dưới 150 từ).
-            - Tuyệt đối KHÔNG tiết lộ thông tin cá nhân của khách hàng như email, mật khẩu, số điện thoại, địa chỉ (dù có trong context).
-            - Nếu khách hỏi về sản phẩm, hãy dựa MỘT CÁCH CHÍNH XÁC vào phần SẢN PHẨM LIÊN QUAN bên dưới. Nếu không có sản phẩm phù hợp trong danh sách, hãy nói "Hiện tại shop không tìm thấy sản phẩm này" đừng tự bịa ra sản phẩm.
-            - Nếu khách hỏi khiếu nại hoặc vấn đề phức tạp, hãy khuyên họ sử dụng nút "Chat với nhân viên" để được hỗ trợ tốt nhất.
+            Bạn là trợ lý ảo bán hàng của Luxury Fashion Shop (Cửa hàng thời trang cao cấp chuyên bán Gucci, Chanel, MLB...).
+            
+            QUY TẮC PHỤC VỤ & TRÌNH BÀY (TỐI ƯU):
+            1. TÔNG GIỌNG: Lịch sự, chuyên nghiệp, tinh tế. Trình bày THOÁNG ĐẠT, dễ nhìn.
+            2. FORMATTING: 
+               - Sử dụng Markdown cơ bản (### cho tên sản phẩm, **In đậm** cho giá tiền).
+               - HẠN CHẾ Icon (chỉ dùng tối đa 1-2 icon/tin nhắn để không bị rối).
+               - Mỗi sản phẩm phải được cách nhau bằng một dòng trắng.
+            3. HÌNH ẢNH: 
+               - TUYỆT ĐỐI KHÔNG hiển thị hình ảnh hoặc đường dẫn ảnh trong câu trả lời. 
+               - Hãy tập trung mô tả vẻ đẹp và phong cách của sản phẩm bằng lời văn tinh tế.
+            4. THÔNG TIN CHÍNH XÁC: Chỉ trả lời dựa trên context được cung cấp.
+            5. Nếu không có sản phẩm phù hợp trong danh sách, hãy nói "Hiện tại shop không tìm thấy sản phẩm này" và gợi ý sang sản phẩm khác tương tự.
+            6. Nếu khách hỏi khiếu nại hoặc vấn đề phức tạp, hãy khuyên họ sử dụng nút "Chat với nhân viên" để được hỗ trợ tốt nhất.
             """;
 
     /**
@@ -119,37 +123,32 @@ public class GroqService {
     }
 
     /**
-     * Tạo context chứa thông tin sản phẩm
+     * Tạo context chứa thông tin sản phẩm (Kèm ảnh)
      */
     public String buildProductContext(List<SanPham> products) {
         if (products == null || products.isEmpty())
             return "";
 
-        StringBuilder context = new StringBuilder("SẢN PHẨM LIÊN QUAN TRONG CỬA HÀNG:\n");
+        StringBuilder context = new StringBuilder("DANH MỤC SẢN PHẨM KHẢ DỤNG (Yêu cầu AI chèn ảnh nếu có):\n");
         for (SanPham sp : products) {
-            context.append("- ").append(sp.getTenSP());
+            context.append("### ").append(sp.getTenSP()).append("\n");
+            
             if (sp.getThuongHieu() != null) {
-                context.append(" (Thương hiệu: ").append(sp.getThuongHieu().getTenTH()).append(")");
+                context.append("- Thương hiệu: ").append(sp.getThuongHieu().getTenTH()).append("\n");
+            }
+            
+            if (sp.getVariants() != null && !sp.getVariants().isEmpty()) {
+                context.append("- Phân loại: ");
+                for (SanPhamChiTiet variant : sp.getVariants()) {
+                    context.append("[Size: ").append(variant.getSizeSP() != null ? variant.getSizeSP().getTenSize() : "N/A")
+                           .append(", Giá: ").append(String.format("%,.0f VNĐ", variant.getGiaBan().doubleValue()))
+                           .append("] ");
+                }
+                context.append("\n");
+            } else {
+                context.append("- (Chưa có thông tin phân loại)\n");
             }
             context.append("\n");
-
-            if (sp.getVariants() != null && !sp.getVariants().isEmpty()) {
-                context.append("  Các phân loại:\n");
-                for (SanPhamChiTiet variant : sp.getVariants()) {
-                    context.append("   + Size: ")
-                            .append(variant.getSizeSP() != null ? variant.getSizeSP().getTenSize() : "N/A")
-                            .append(", Màu: ")
-                            .append(variant.getMauSacSP() != null ? variant.getMauSacSP().getTenMau() : "N/A")
-                            .append(", Giá: ")
-                            .append(variant.getGiaBan() != null
-                                    ? String.format("%,.0f VNĐ", variant.getGiaBan().doubleValue())
-                                    : "Đang cập nhật")
-                            .append(", Tồn kho: ").append(variant.getSoLuongTon())
-                            .append("\n");
-                }
-            } else {
-                context.append("  (Chưa có thông tin phân loại)\n");
-            }
         }
         return context.toString();
     }
@@ -159,15 +158,16 @@ public class GroqService {
      */
     public String buildOrderContext(List<DonHang> orders) {
         if (orders == null || orders.isEmpty())
-            return "KHÁCH HÀNG HIỆN CHƯA CÓ ĐƠN HÀNG NÀO.";
+            return "THÔNG BÁO: KHÁCH HÀNG HIỆN CHƯA CÓ LỊCH SỬ GIAO DỊCH TRONG HỆ THỐNG.";
 
-        StringBuilder context = new StringBuilder("THÔNG TIN ĐƠN HÀNG CỦA KHÁCH HIỆN TẠI:\n");
+        StringBuilder context = new StringBuilder("DANH SÁCH CÁC KIỆT TÁC KHÁCH HÀNG ĐÃ SỞ HỮU (Dữ liệu hệ thống):\n");
         for (DonHang dh : orders) {
-            context.append("- Đơn hàng #").append(dh.getMaDH())
-                    .append(" (Đặt ngày ").append(dh.getNgayDat()).append(")\n")
-                    .append("  Trạng thái: ").append(dh.getTrangThaiDHText()).append("\n")
-                    .append("  Trạng thái thanh toán: ").append(dh.getTrangThaiThanhToanText()).append("\n")
-                    .append("  Tổng tiền: ").append(String.format("%,.0f VNĐ", dh.getTongTien().doubleValue()))
+            context.append("-----------------------------\n")
+                    .append("• Mã định danh: #").append(dh.getMaDH()).append("\n")
+                    .append("• Khởi tạo ngày: ").append(dh.getNgayDat()).append("\n")
+                    .append("• Trạng thái vận hành: ").append(dh.getTrangThaiDHText()).append("\n")
+                    .append("• Tình trạng thanh toán: ").append(dh.getTrangThaiThanhToanText()).append("\n")
+                    .append("• Giá trị vật phẩm: ").append(String.format("%,.0f VNĐ", dh.getTongTien().doubleValue()))
                     .append("\n");
         }
         return context.toString();

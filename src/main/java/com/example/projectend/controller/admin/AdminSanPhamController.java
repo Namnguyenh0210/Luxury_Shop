@@ -25,24 +25,21 @@ public class AdminSanPhamController {
     @Autowired
     private com.example.projectend.repository.MauSacSPRepository colorRepository;
 
+    @Autowired
+    private com.example.projectend.repository.SanPhamChiTietRepository sanPhamChiTietRepository;
+
     @GetMapping("/sizes")
     public List<com.example.projectend.entity.SizeSP> getAllSizes() {
         List<com.example.projectend.entity.SizeSP> sizes = sizeRepository.findAll();
-        
-        // Define logical order for clothing sizes
         java.util.List<String> sizeOrder = java.util.Arrays.asList("S", "M", "L", "XL", "XXL", "2XL", "3XL");
-        
         sizes.sort((s1, s2) -> {
             int i1 = sizeOrder.indexOf(s1.getTenSize().toUpperCase());
             int i2 = sizeOrder.indexOf(s2.getTenSize().toUpperCase());
-            
             if (i1 == -1 && i2 == -1) return s1.getTenSize().compareToIgnoreCase(s2.getTenSize());
             if (i1 == -1) return 1;
             if (i2 == -1) return -1;
-            
             return Integer.compare(i1, i2);
         });
-        
         return sizes;
     }
 
@@ -52,8 +49,7 @@ public class AdminSanPhamController {
     }
 
     // =============================
-    // LẤY DANH SÁCH
-    // Sử dụng hàm findAll() đã có sẵn trong Service của bạn
+    // LAY DANH SACH
     // =============================
     @GetMapping
     public List<SanPham> getAllProducts(@RequestParam(required = false) String keyword,
@@ -61,17 +57,11 @@ public class AdminSanPhamController {
             @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Integer gioiTinh,
             @RequestParam(required = false) Integer status) {
-        // BỔ SUNG DÒNG NÀY: Khởi tạo pageable để lấy dữ liệu trang đầu tiên và sắp xếp
-        // mới nhất lên đầu
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 1000,
                 org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "maSP"));
-
-        // Gọi hàm có sẵn trong Service của bạn
         List<SanPham> products = sanPhamService
                 .findWithFilters(keyword, categoryId, gioiTinh, brandId, null, null, status, null, pageable)
                 .getContent();
-
-        // Populate total stock for Each product & eagerly load variants
         if (!products.isEmpty()) {
             java.util.Map<Long, com.example.projectend.service.SanPhamService.PriceStockInfo> statsMap = sanPhamService
                     .buildPriceStockMap(products);
@@ -79,25 +69,19 @@ public class AdminSanPhamController {
                 if (statsMap.containsKey(p.getMaSP())) {
                     p.setTotalStock(statsMap.get(p.getMaSP()).getTotalStock());
                 }
-                // Chủ động load variants để tránh lazy loading issue
-                p.getVariants().size(); // Force initialize the lazy collection
+                p.getVariants().size();
             }
         }
-
         return products;
     }
 
-    @Autowired
-    private com.example.projectend.repository.SanPhamChiTietRepository sanPhamChiTietRepository;
-
     // =============================
-    // LẤY CHI TIẾT
+    // LAY CHI TIET
     // =============================
     @GetMapping("/{id}")
     public SanPham getProduct(@PathVariable Long id) {
         SanPham product = sanPhamService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
-        // Chủ động load variants từ DB để tránh lỗi lazy loading
+                .orElseThrow(() -> new RuntimeException("Khong tim thay san pham"));
         java.util.List<com.example.projectend.entity.SanPhamChiTiet> variants =
                 sanPhamChiTietRepository.findBySanPham_MaSP(id);
         product.setVariants(variants);
@@ -105,11 +89,11 @@ public class AdminSanPhamController {
     }
 
     // =============================
-    // THÊM / CẬP NHẬT
+    // THEM / CAP NHAT
     // =============================
     @PostMapping
+    @org.springframework.transaction.annotation.Transactional(readOnly = false)
     public SanPham saveProduct(@RequestBody SanPham product) {
-        // Logic xử lý ngày tạo và trạng thái
         if (product.getMaSP() == null) {
             product.setNgayTao(LocalDateTime.now());
             if (product.getTrangThaiSP() == null)
@@ -117,17 +101,36 @@ public class AdminSanPhamController {
         } else {
             product.setNgayCapNhat(LocalDateTime.now());
         }
-
-        // Service của bạn đã có hàm save
         return sanPhamService.save(product);
     }
 
     // =============================
-    // XÓA
+    // AN / HIEN SAN PHAM (AN TOAN - Endpoint rieng, chi can ID + trang thai)
+    // =============================
+    @PatchMapping("/{id}/status")
+    @org.springframework.transaction.annotation.Transactional(readOnly = false)
+    public SanPham toggleStatus(@PathVariable Long id, @RequestBody java.util.Map<String, Integer> body) {
+        SanPham product = sanPhamService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Khong tim thay san pham: " + id));
+        Integer newStatus = body.get("trangThaiSP");
+        if (newStatus != null) {
+            product.setTrangThaiSP(newStatus);
+            product.setNgayCapNhat(LocalDateTime.now());
+        }
+        return sanPhamService.save(product);
+    }
+
+    // =============================
+    // XOA AN TOAN (Xoa bien the truoc de tranh loi Foreign Key)
     // =============================
     @DeleteMapping("/{id}")
+    @org.springframework.transaction.annotation.Transactional(readOnly = false)
     public void deleteProduct(@PathVariable Long id) {
-        // Service của bạn đã có hàm deleteById
+        sanPhamService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Khong tim thay san pham: " + id));
+        // Xoa bien the truoc
+        sanPhamChiTietRepository.deleteBySanPham_MaSP(id);
+        // Sau do xoa san pham
         sanPhamService.deleteById(id);
     }
 }

@@ -44,6 +44,9 @@ public class AdminLoaiSanPhamController {
 
     @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable Long id) {
+        if (sanPhamRepository.existsByLoaiSanPham_MaLoai(id)) {
+            throw new RuntimeException("Không thể xóa danh mục này vì vẫn còn sản phẩm thuộc danh mục!");
+        }
         loaiSanPhamService.deleteById(id);
     }
 }

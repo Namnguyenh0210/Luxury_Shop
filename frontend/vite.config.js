@@ -59,7 +59,11 @@ export default defineConfig({
         }
       },
       
-      // ❌ REMOVED /admin proxy because it conflicts with Vue Router navigation (/admin/dashboard, etc.)
+      // ✅ Static assets from Backend (Uploads & Avatars ONLY)
+      '/uploads': { target: 'http://localhost:8080', changeOrigin: true },
+      '/avatars': { target: 'http://localhost:8080', changeOrigin: true },
+
+      // ❌ REMOVED /img and /images because they conflict with the frontend public folder assets.
       // Admin API calls already go through /api/admin/... via axios.defaults.baseURL = '/api'
 
       // ❌ KHÔNG proxy /checkout — Vue Router xử lý

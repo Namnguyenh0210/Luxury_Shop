@@ -74,11 +74,82 @@ public class DonHangController {
             if (tk == null || !order.getTaiKhoan().getMaTK().equals(tk.getMaTK())) {
                 return ResponseEntity.status(403).body("Forbidden");
             }
-            return ResponseEntity.ok(order);
+
+            // Tra ve DTO an toan, khong serialize entity nhu (tranh loi ByteBuddy Hibernate proxy)
+            java.util.Map<String, Object> dto = new java.util.HashMap<>();
+            dto.put("maDH", order.getMaDH());
+            dto.put("ngayDat", order.getNgayDat());
+            dto.put("tongTien", order.getTongTien());
+            dto.put("phiShip", order.getPhiShip());
+            dto.put("giamGia", order.getGiamGia());
+            dto.put("ghiChu", order.getGhiChu());
+            dto.put("trangThaiDH", order.getTrangThaiDH());
+            dto.put("trangThaiThanhToan", order.getTrangThaiThanhToan());
+
+            // TaiKhoan (safe)
+            if (order.getTaiKhoan() != null) {
+                java.util.Map<String, Object> tkDto = new java.util.HashMap<>();
+                tkDto.put("hoTen", order.getTaiKhoan().getHoTen());
+                tkDto.put("email", order.getTaiKhoan().getEmail());
+                tkDto.put("soDienThoai", order.getTaiKhoan().getSoDienThoai());
+                dto.put("taiKhoan", tkDto);
+            }
+
+            // DiaChiGiao (safe)
+            if (order.getDiaChiGiao() != null) {
+                java.util.Map<String, Object> dcDto = new java.util.HashMap<>();
+                dcDto.put("diaChiChiTiet", order.getDiaChiGiao().getDiaChiChiTiet());
+                dcDto.put("hoTenNguoiNhan", order.getDiaChiGiao().getHoTenNguoiNhan());
+                dcDto.put("soDienThoai", order.getDiaChiGiao().getSoDienThoai());
+                dto.put("diaChiGiao", dcDto);
+            }
+
+            // HinhThucThanhToan (EAGER, safe)
+            if (order.getHinhThucThanhToan() != null) {
+                java.util.Map<String, Object> ptDto = new java.util.HashMap<>();
+                ptDto.put("tenHinhThuc", order.getHinhThucThanhToan().getTenHinhThuc());
+                dto.put("hinhThucThanhToan", ptDto);
+            }
+
+            // Voucher (safe)
+            if (order.getVoucher() != null) {
+                try {
+                    java.util.Map<String, Object> vDto = new java.util.HashMap<>();
+                    vDto.put("code", order.getVoucher().getCode());
+                    vDto.put("giaTri", order.getVoucher().getGiaTri());
+                    vDto.put("loaiGiamGia", order.getVoucher().getLoaiGiamGia());
+                    dto.put("voucher", vDto);
+                } catch (Exception ignored) {}
+            }
+
+            // Chi tiet don hang (safe)
+            List<com.example.projectend.entity.DonHangChiTiet> chiTietList = donHangService.getOrderDetails(id);
+            java.util.List<java.util.Map<String, Object>> chiTietDtos = new java.util.ArrayList<>();
+            if (chiTietList != null) {
+                for (com.example.projectend.entity.DonHangChiTiet ct : chiTietList) {
+                    java.util.Map<String, Object> ctDto = new java.util.HashMap<>();
+                    ctDto.put("soLuong", ct.getSoLuong());
+                    ctDto.put("donGia", ct.getDonGia());
+                    com.example.projectend.entity.SanPhamChiTiet spct = ct.getSanPhamChiTiet();
+                    if (spct != null) {
+                        ctDto.put("tenSP", spct.getSanPham() != null ? spct.getSanPham().getTenSP() : "");
+                        ctDto.put("anh", spct.getSanPham() != null ? spct.getSanPham().getAnhChinh() : spct.getAnhBienThe());
+                        ctDto.put("size", spct.getSizeSP() != null ? spct.getSizeSP().getTenSize() : "");
+                        ctDto.put("mau", spct.getMauSacSP() != null ? spct.getMauSacSP().getTenMau() : "");
+                        ctDto.put("thuongHieu", spct.getSanPham() != null && spct.getSanPham().getThuongHieu() != null
+                                ? spct.getSanPham().getThuongHieu().getTenTH() : "");
+                    }
+                    chiTietDtos.add(ctDto);
+                }
+            }
+            dto.put("chiTiet", chiTietDtos);
+
+            return ResponseEntity.ok(dto);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
 
 
     @PutMapping("/update-status/{id}")

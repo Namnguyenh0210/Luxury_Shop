@@ -67,4 +67,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Long>, JpaSpec
     long countByThuongHieu_MaTHAndGioiTinh(Long maTH, Integer gioiTinh);
     long countByLoaiSanPham_MaLoai(Long maLoai);
     long countByThuongHieu_MaTH(Long maTH);
+
+    boolean existsByLoaiSanPham_MaLoai(Long maLoai);
+    boolean existsByThuongHieu_MaTH(Long maTH);
 }

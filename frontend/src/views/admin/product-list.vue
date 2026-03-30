@@ -964,12 +964,14 @@ export default {
     async toggleStatus(product) {
       const newStatus = product.trangThaiSP == 1 ? 0 : 1;
       try {
-        await axios.post('/admin/products', {
-          ...product,
-          trangThaiSP: newStatus
-        });
+        await axios.patch(`/admin/products/${product.maSP}/status`, { trangThaiSP: newStatus });
+        if (window.$toast) window.$toast.success(newStatus == 1 ? 'Đã hiện sản phẩm!' : 'Đã ẩn sản phẩm!')
         this.fetchProducts();
-      } catch (e) { alert('Lỗi khi thay đổi trạng thái sản phẩm'); }
+      } catch (e) {
+        const msg = e.response?.data?.message || 'Lỗi khi thay đổi trạng thái sản phẩm'
+        if (window.$toast) window.$toast.error(msg)
+        else alert(msg)
+      }
     },
 
     async openDetails(id) {
@@ -1045,13 +1047,15 @@ export default {
     },
 
     async deleteCategory(id) {
-      const ok = await window.$confirm('Xóa danh mục này có thể ảnh hưởng đến các sản phẩm thuộc danh mục. Bạn chắc chắn chứ?')
+      const ok = await window.$confirm('Xác nhận xóa danh mục này? Lưu ý: Bạn chỉ có thể xóa khi danh mục không chứa sản phẩm nào.')
       if (!ok) return
       try {
         await axios.delete(`/admin/categories/${id}`)
         this.fetchCategories()
+        if (window.$toast) window.$toast.success('Xóa danh mục thành công!')
       } catch(e) {
-        window.$alert('Không thể xóa danh mục này (có thể do đang chứa sản phẩm)', 'Lỗi')
+        const msg = e.response?.data?.message || 'Không thể xóa danh mục này (có thể do đang chứa sản phẩm)'
+        window.$alert(msg, 'Lỗi')
       }
     },
 
@@ -1088,13 +1092,15 @@ export default {
     },
 
     async deleteBrand(id) {
-      const ok = await window.$confirm('Xác nhận xóa thương hiệu này? Bạn chắc chắn chứ?')
+      const ok = await window.$confirm('Xác nhận xóa thương hiệu này? Lưu ý: Bạn chỉ có thể xóa khi thương hiệu không có sản phẩm nào.')
       if (!ok) return
       try {
         await axios.delete(`/admin/brands/${id}`)
         this.fetchBrands()
+        if (window.$toast) window.$toast.success('Xóa thương hiệu thành công!')
       } catch(e) {
-        window.$alert('Không thể xóa thương hiệu này (có thể do đang chứa sản phẩm)', 'Lỗi')
+        const msg = e.response?.data?.message || 'Không thể xóa thương hiệu này (có thể do đang chứa sản phẩm)'
+        window.$alert(msg, 'Lỗi')
       }
     },
 
