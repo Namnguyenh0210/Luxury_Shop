@@ -25,6 +25,9 @@ public class ThuongHieu {
     @Column(name = "TrangThai", nullable = false)
     private Integer trangThai = 1;
 
+    @Column(name = "Logo", length = 255)
+    private String logo;
+
     @Transient
     private Long countNam = 0L;
     @Transient
@@ -75,6 +78,14 @@ public class ThuongHieu {
         this.trangThai = trangThai;
     }
 
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
+    }
+
     public Long getCountNam() {
         return countNam;
     }
@@ -105,6 +116,7 @@ public class ThuongHieu {
                 "maTH=" + maTH +
                 ", tenTH='" + tenTH + '\'' +
                 ", moTa='" + moTa + '\'' +
+                ", logo='" + logo + '\'' +
                 '}';
     }
 }

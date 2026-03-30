@@ -13,6 +13,7 @@ import java.util.List;
 @RequestMapping("/api/admin/products")
 @PreAuthorize("hasAnyRole('ADMIN', 'NHANVIEN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 public class AdminSanPhamController {
 
     @Autowired
@@ -70,7 +71,7 @@ public class AdminSanPhamController {
                 .findWithFilters(keyword, categoryId, gioiTinh, brandId, null, null, status, null, pageable)
                 .getContent();
 
-        // Populate total stock for Each product
+        // Populate total stock for Each product & eagerly load variants
         if (!products.isEmpty()) {
             java.util.Map<Long, com.example.projectend.service.SanPhamService.PriceStockInfo> statsMap = sanPhamService
                     .buildPriceStockMap(products);
@@ -78,20 +79,29 @@ public class AdminSanPhamController {
                 if (statsMap.containsKey(p.getMaSP())) {
                     p.setTotalStock(statsMap.get(p.getMaSP()).getTotalStock());
                 }
+                // Chủ động load variants để tránh lazy loading issue
+                p.getVariants().size(); // Force initialize the lazy collection
             }
         }
 
         return products;
     }
 
+    @Autowired
+    private com.example.projectend.repository.SanPhamChiTietRepository sanPhamChiTietRepository;
+
     // =============================
     // LẤY CHI TIẾT
     // =============================
     @GetMapping("/{id}")
     public SanPham getProduct(@PathVariable Long id) {
-        // Service của bạn đã có hàm findById
-        return sanPhamService.findById(id)
+        SanPham product = sanPhamService.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+        // Chủ động load variants từ DB để tránh lỗi lazy loading
+        java.util.List<com.example.projectend.entity.SanPhamChiTiet> variants =
+                sanPhamChiTietRepository.findBySanPham_MaSP(id);
+        product.setVariants(variants);
+        return product;
     }
 
     // =============================

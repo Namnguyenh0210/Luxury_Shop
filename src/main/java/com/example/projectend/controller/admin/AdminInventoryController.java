@@ -83,10 +83,20 @@ public class AdminInventoryController {
         List<YeuCauNhapKho> requests = yeuCauNhapKhoRepository.findAll();
         requests.sort((a, b) -> b.getNgayYeuCau().compareTo(a.getNgayYeuCau()));
 
+        // Luôn trả về tất cả sản phẩm để có thể nhập hàng cho cả SP đang ẩn
+        List<SanPham> allProducts = sanPhamRepository.findAll();
+        // Sắp xếp theo tên để dễ tìm kiếm trong dropdown
+        allProducts.sort((a, b) -> a.getTenSP().compareToIgnoreCase(b.getTenSP()));
+        
+        // Eagerly load variants and total stock for search dropdown hints if needed
+        for (SanPham p : allProducts) {
+             p.getVariants().size(); // Force initialize lazy collection
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("phieuNhaps", phieuNhaps);
         result.put("suppliers", nhaCungCapRepository.findAll());
-        result.put("products", sanPhamRepository.findByTrangThaiSP(1));
+        result.put("products", allProducts);
         result.put("categories", loaiSanPhamRepository.findAll());
         result.put("sizes", sizeSPRepository.findAll());
         result.put("colors", mauSacSPRepository.findAll());
@@ -132,18 +142,23 @@ public class AdminInventoryController {
                 if ("existing".equals(itemType)) {
                     // Sản phẩm đã có (dùng maBienThe)
                     Long maBienThe = Long.parseLong(item.get("maBienThe").toString());
-                    existingItems.add(new PhieuNhapService.ExistingItem(maBienThe, qty, price));
+                    BigDecimal giaBan = item.get("giaBan") != null ? new BigDecimal(item.get("giaBan").toString()) : null;
+                    existingItems.add(new PhieuNhapService.ExistingItem(maBienThe, qty, price, giaBan));
                 } else {
                     // Sản phẩm mới
                     String tenSP = item.get("tenSP") != null ? item.get("tenSP").toString() : "";
                     String size = item.get("size") != null ? item.get("size").toString() : "";
                     String color = item.get("color") != null ? item.get("color").toString() : "";
+                    Integer qty = Integer.parseInt(item.get("qty").toString());
+                    BigDecimal price = new BigDecimal(item.get("price").toString());
                     Integer gender = item.get("gender") != null ? Integer.parseInt(item.get("gender").toString()) : 2;
                     Long categoryId = item.get("categoryId") != null ? Long.parseLong(item.get("categoryId").toString()) : null;
                     Long brandId = item.get("brandId") != null ? Long.parseLong(item.get("brandId").toString()) : null;
                     BigDecimal giaBan = item.get("giaBan") != null ? new BigDecimal(item.get("giaBan").toString()) : price;
                     String moTa = item.get("moTa") != null ? item.get("moTa").toString() : "";
-                    newItems.add(new PhieuNhapService.NewItem(tenSP, size, color, qty, price, giaBan, categoryId, brandId, gender, moTa));
+                    Long productId = item.get("productId") != null ? Long.parseLong(item.get("productId").toString()) : null;
+                    
+                    newItems.add(new PhieuNhapService.NewItem(productId, tenSP, size, color, qty, price, giaBan, categoryId, brandId, gender, moTa));
                 }
             }
 

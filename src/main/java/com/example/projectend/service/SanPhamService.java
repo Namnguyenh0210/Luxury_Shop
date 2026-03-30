@@ -34,11 +34,10 @@ public class SanPhamService {
     @Autowired
     private SanPhamChiTietRepository sanPhamChiTietRepository;
 
-    /**
-     * Lấy danh sách sản phẩm nổi bật cho trang chủ
-     */
     public List<SanPham> getFeaturedProducts(int limit) {
-        return sanPhamRepository.findTop8ByOrderByNgayTaoDesc();
+        // Use findWithFilters to ensure consistent filtering (stock, status, categories)
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit);
+        return findWithFilters(null, null, null, null, null, null, 1, "moi", pageable).getContent();
     }
 
     /**
@@ -107,11 +106,24 @@ public class SanPhamService {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("trangThaiSP"), status));
 
             // NEW: If showing active products (for customers), only show products
-            // from active categories (or products with no category)
+            // from active categories (or products with no category) AND have stock
             if (status == 1) {
                 spec = spec.and((root, query, cb) -> cb.or(
                         cb.isNull(root.get("loaiSanPham")),
                         cb.equal(root.get("loaiSanPham").get("trangThai"), 1)));
+
+                // ONLY SHOW PRODUCTS WITH AT LEAST ONE VARIANT HAVING STOCK > 0
+                spec = spec.and((root, query, cb) -> {
+                    var sub = query.subquery(Long.class);
+                    var vRoot = sub.from(com.example.projectend.entity.SanPhamChiTiet.class);
+                    sub.select(cb.literal(1L));
+                    var predicate = cb.and(
+                            cb.equal(vRoot.get("sanPham"), root),
+                            cb.greaterThan(vRoot.get("soLuongTon"), 0),
+                            cb.equal(vRoot.get("trangThai"), true));
+                    sub.where(predicate);
+                    return cb.exists(sub);
+                });
             }
         }
 
@@ -168,21 +180,22 @@ public class SanPhamService {
         }
     }
 
-    /**
-     * Lấy sản phẩm liên quan cùng danh mục
-     */
     public List<SanPham> findRelatedProducts(Long loaiId, Long excludeId, int limit) {
-        return sanPhamRepository.findByLoaiSanPham_MaLoaiAndMaSPNotOrderByNgayTaoDesc(loaiId, excludeId)
-                .stream()
+        // Use findWithFilters for consistent stock filtering
+        // We handle excludeId by creating a small custom spec or just filtering the list
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit + 5);
+        List<SanPham> related = findWithFilters(null, loaiId, null, null, null, null, 1, "moi", pageable).getContent();
+        
+        return related.stream()
+                .filter(p -> !p.getMaSP().equals(excludeId))
                 .limit(limit)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Tìm kiếm nhanh theo từ khóa (AJAX autocomplete)
-     */
     public List<SanPham> searchByKeyword(String keyword, int limit) {
-        return sanPhamRepository.findTop10ByTenSPContainingIgnoreCaseOrderByNgayTaoDesc(keyword);
+        // Use findWithFilters for consistent stock filtering
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, limit);
+        return findWithFilters(keyword, null, null, null, null, null, 1, "moi", pageable).getContent();
     }
 
     /**

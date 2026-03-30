@@ -35,19 +35,20 @@
         <!-- LIST VIEW -->
         <template v-if="!showDetailView">
           <!-- ACTION BAR -->
-            <div class="flex items-center gap-4 flex-wrap">
-              <!-- Tìm kiếm -->
-              <div class="relative">
-                <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                  <span class="material-symbols-outlined text-[20px]">search</span>
-                </span>
-                <input
-                  v-model="filters.keyword"
-                  @input="fetchProducts"
-                  placeholder="Tìm sản phẩm..."
-                  class="border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all w-64 shadow-sm"
-                />
-              </div>
+            <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+              <div class="flex items-center gap-4 flex-wrap">
+                <!-- Tìm kiếm -->
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                    <span class="material-symbols-outlined text-[20px]">search</span>
+                  </span>
+                  <input
+                    v-model="filters.keyword"
+                    @input="fetchProducts"
+                    placeholder="Tìm sản phẩm..."
+                    class="border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all w-64 shadow-sm"
+                  />
+                </div>
 
               <!-- Dropdowns (unchanged) -->
               <div class="relative min-w-[190px]">
@@ -131,6 +132,11 @@
                 class="flex items-center justify-center size-10 rounded-full border border-[#C8A97E]/30 bg-white text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all shadow-sm group"
                 title="Làm mới bộ lọc">
                 <span class="material-symbols-outlined text-[22px] group-hover:rotate-180 transition-transform duration-500">refresh</span>
+              </button>
+              </div>
+              <button @click="openProductModal()" class="flex items-center gap-2 px-6 py-2.5 bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold rounded-xl shadow-lg shadow-[#C8A97E]/20 transition-all">
+                <span class="material-symbols-outlined text-[20px]">add_circle</span>
+                Thêm sản phẩm
               </button>
             </div>
 
@@ -339,7 +345,7 @@
       <!-- CATEGORY TAB -->
       <div v-else-if="activeTab === 'categories'" class="space-y-6">
         <!-- ACTION BAR -->
-        <div class="flex justify-end hidden">
+        <div class="flex justify-end gap-2 mb-4">
           <button @click="openCategoryModal()" class="flex items-center gap-2 px-6 py-2.5 bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold rounded-xl shadow-lg shadow-[#C8A97E]/20 transition-all">
             <span class="material-symbols-outlined text-[20px]">add_circle</span>
             Thêm danh mục
@@ -405,7 +411,7 @@
       <!-- BRAND TAB -->
       <div v-else class="space-y-6">
         <!-- ACTION BAR -->
-        <div class="flex justify-end hidden">
+        <div class="flex justify-end gap-2 mb-4">
           <button @click="openBrandModal()" class="flex items-center gap-2 px-6 py-2.5 bg-[#C8A97E] hover:bg-[#B88A00] text-white font-bold rounded-xl shadow-lg shadow-[#C8A97E]/20 transition-all">
             <span class="material-symbols-outlined text-[20px]">add_circle</span>
             Thêm thương hiệu
@@ -432,9 +438,9 @@
                 <td class="px-2 py-5 font-mono text-[11px] text-gray-400 text-center">#{{ b.maTH }}</td>
                 <td class="px-4 py-5">
                   <div class="flex items-center gap-4">
-                    <div class="size-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center p-2 overflow-hidden shadow-sm group-hover:scale-110 transition-transform shrink-0">
+                    <div class="size-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center p-1.5 overflow-hidden shadow-sm group-hover:scale-110 transition-transform shrink-0">
                       <img 
-                        :src="getBrandLogo(b.tenTH)" 
+                        :src="getBrandLogo(b)" 
                         @error="(e) => e.target.src = '/img/placeholder.png'"
                         class="max-w-full max-h-full object-contain"
                         alt="Brand logo"
@@ -536,14 +542,13 @@
         </div>
 
         <div v-if="brandModal.form.tenTH" class="mt-6 flex justify-center">
-            <div class="size-28 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center p-6 overflow-hidden shadow-inner group">
-              <img 
-                :src="getBrandLogo(brandModal.form.tenTH)" 
-                @error="(e) => e.target.src = '/img/placeholder.png'"
-                class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-110"
-                alt="Brand logo"
-              />
-            </div>
+          <div class="h-10 w-10 flex-shrink-0 bg-white rounded-xl border border-gray-100 flex items-center justify-center p-1.5 shadow-sm">
+            <img :src="getBrandLogo(brandModal.form)" 
+                 @error="(e) => e.target.src = '/img/placeholder.png'"
+                 class="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                 alt="Brand logo"
+            />
+          </div>
         </div>
 
         <form @submit.prevent="saveBrand" class="p-6 space-y-5">
@@ -554,8 +559,23 @@
               type="text" 
               required
               placeholder="VD: Gucci, Chanel..."
-              class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-yellow-400 outline-none transition-all"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#C8A97E] outline-none transition-all"
             />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-bold text-gray-700">Link ảnh (Logo)</label>
+            <div class="flex gap-2">
+              <input 
+                v-model="brandModal.form.logo"
+                type="text" 
+                placeholder="https://... hoặc /uploads/..."
+                class="flex-1 w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#C8A97E] outline-none transition-all"
+              />
+              <input type="file" ref="brandModalFileInput" class="hidden" @change="uploadBrandImageModal" accept="image/*" />
+              <button type="button" @click="$refs.brandModalFileInput.click()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined">upload</span>
+              </button>
+            </div>
           </div>
           <div class="space-y-2">
             <label class="text-sm font-bold text-gray-700">Mô tả</label>
@@ -563,7 +583,7 @@
               v-model="brandModal.form.moTa"
               rows="3"
               placeholder="Nhập mô tả thương hiệu..."
-              class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-yellow-400 outline-none transition-all resize-none"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#C8A97E] outline-none transition-all resize-none"
             ></textarea>
           </div>
           <div class="flex items-center justify-end gap-3 pt-4">
@@ -573,6 +593,132 @@
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- PRODUCT MODAL (QUICK ADD) -->
+    <div v-if="productModal.show" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100 max-h-[90vh] flex flex-col">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <h3 class="text-lg font-bold text-gray-800">
+            Thêm sản phẩm
+          </h3>
+          <button @click="productModal.show = false" class="text-gray-400 hover:text-gray-600">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        
+        <div class="overflow-y-auto custom-scrollbar flex-1">
+          <form @submit.prevent="saveProduct" class="p-6 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-sm font-semibold text-gray-700">Tên sản phẩm</label>
+                <input v-model="productModal.form.tenSP" type="text" required placeholder="Nhập tên sản phẩm..."
+                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <label class="text-sm font-semibold text-gray-700">Danh mục</label>
+                  <button type="button" @click="productModal.isNewCategory = !productModal.isNewCategory" class="text-xs text-yellow-600 hover:underline">
+                    {{ productModal.isNewCategory ? 'Chọn có sẵn' : '+ Nhập mới' }}
+                  </button>
+                </div>
+                <select v-if="!productModal.isNewCategory" v-model="productModal.form.loaiSanPham.maLoai" :required="!productModal.isNewCategory"
+                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
+                  <option value="" disabled>Chọn danh mục</option>
+                  <option v-for="c in categories" :key="c.maLoai" :value="c.maLoai">{{ c.tenLoai }}</option>
+                </select>
+                <input v-else v-model="productModal.newCategoryName" type="text" :required="productModal.isNewCategory" placeholder="Nhập tên danh mục mới..."
+                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex justify-between items-center">
+                  <label class="text-sm font-semibold text-gray-700">Thương hiệu</label>
+                  <button type="button" @click="productModal.isNewBrand = !productModal.isNewBrand" class="text-xs text-yellow-600 hover:underline">
+                    {{ productModal.isNewBrand ? 'Chọn có sẵn' : '+ Nhập mới' }}
+                  </button>
+                </div>
+                <select v-if="!productModal.isNewBrand" v-model="productModal.form.thuongHieu.maTH" :required="!productModal.isNewBrand"
+                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
+                  <option value="" disabled>Chọn thương hiệu</option>
+                  <option v-for="b in brands" :key="b.maTH" :value="b.maTH">{{ b.tenTH }}</option>
+                </select>
+                <div v-else class="space-y-3">
+                  <input v-model="productModal.newBrandName" type="text" :required="productModal.isNewBrand" placeholder="Nhập tên thương hiệu mới..."
+                    class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+                  <label class="text-xs font-semibold text-gray-500 block">Logo thương hiệu (tùy chọn)</label>
+                  <div class="flex gap-2">
+                    <input v-model="productModal.newBrandImg" type="text" placeholder="https://..."
+                      class="flex-1 w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+                    <input type="file" ref="brandFileInput" class="hidden" @change="uploadBrandImage" accept="image/*" />
+                    <button type="button" @click="$refs.brandFileInput.click()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium transition-colors flex items-center justify-center min-w-[50px]">
+                      <span class="material-symbols-outlined text-[20px]">upload</span>
+                    </button>
+                  </div>
+                  <div v-if="productModal.uploadingBrandImg" class="text-[11px] text-[#C8A97E] font-bold flex items-center gap-1 mt-1">
+                    <span class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span> Đang tải lên...
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700">Giới tính</label>
+                <select v-model="productModal.form.gioiTinh" class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all bg-white">
+                  <option :value="0">Nam</option>
+                  <option :value="1">Nữ</option>
+                  <option :value="2">Unisex</option>
+                </select>
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-sm font-semibold text-gray-700">Trạng thái kinh doanh</label>
+                <div class="flex gap-4 p-1 bg-gray-100 rounded-xl w-fit">
+                  <button type="button" @click="productModal.form.trangThaiSP = 1"
+                    :class="productModal.form.trangThaiSP == 1 ? 'bg-white shadow-sm text-green-600' : 'text-gray-500'"
+                    class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all">Đang bán</button>
+                  <button type="button" @click="productModal.form.trangThaiSP = 0"
+                    :class="productModal.form.trangThaiSP == 0 ? 'bg-white shadow-sm text-red-600' : 'text-gray-500'"
+                    class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all">Ngừng bán</button>
+                </div>
+              </div>
+
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-sm font-semibold text-gray-700">URL Ảnh chính</label>
+                <div class="flex gap-2">
+                  <input v-model="productModal.form.anhChinh" type="text" placeholder="https://..."
+                    class="flex-1 w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all" />
+                  <input type="file" ref="fileInput" class="hidden" @change="uploadImage" accept="image/*" />
+                  <button type="button" @click="$refs.fileInput.click()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium transition-colors flex items-center justify-center min-w-[50px]">
+                    <span class="material-symbols-outlined text-[20px]">upload</span>
+                  </button>
+                </div>
+                <div v-if="productModal.uploadingImg" class="text-[11px] text-[#C8A97E] font-bold flex items-center gap-1 mt-1">
+                  <span class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span> Đang tải lên...
+                </div>
+              </div>
+
+              <div class="space-y-2 md:col-span-2">
+                <label class="text-sm font-semibold text-gray-700">Mô tả chi tiết</label>
+                <textarea v-model="productModal.form.moTa" rows="3" placeholder="Nhập mô tả sản phẩm..."
+                  class="w-full border border-[#C8A97E] rounded-2xl px-4 py-2.5 focus:ring-2 focus:ring-[#C8A97E]/30 outline-none transition-all resize-none"></textarea>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
+              <button type="button" @click="productModal.show = false"
+                class="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium transition-all">
+                Hủy bỏ
+              </button>
+              <button type="submit" :disabled="productModal.saving"
+                class="px-8 py-2.5 rounded-xl bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold shadow-lg shadow-yellow-200 transition-all disabled:opacity-50 flex items-center">
+                <span v-if="productModal.saving" class="material-symbols-outlined animate-spin mr-2 text-sm">progress_activity</span>
+                Thêm sản phẩm
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -605,7 +751,30 @@ export default {
       // Brand CRUD modal
       brandModal: {
         show: false,
-        form: { maTH: null, tenTH: '', moTa: '', trangThai: 1 }
+        form: { maTH: null, tenTH: '', moTa: '', logo: '', trangThai: 1 }
+      },
+
+      // Product Add modal
+      productModal: {
+        show: false,
+        saving: false,
+        uploadingImg: false,
+        isNewCategory: false,
+        newCategoryName: '',
+        isNewBrand: false,
+        newBrandName: '',
+        newBrandImg: '',
+        uploadingBrandImg: false,
+        form: {
+          maSP: null,
+          tenSP: '',
+          loaiSanPham: { maLoai: '' },
+          thuongHieu: { maTH: '' },
+          gioiTinh: 2,
+          moTa: '',
+          trangThaiSP: 1,
+          anhChinh: ''
+        }
       },
 
       // Dropdown UI state
@@ -646,7 +815,150 @@ export default {
         const res = await axios.get('/admin/products', { params: this.filters })
         // Sắp xếp theo ID tăng dần (1, 2, 3...)
         this.products = res.data.sort((a, b) => Number(a.maSP) - Number(b.maSP))
-      } catch (e) { console.error(e) }
+      } catch (e) {
+        console.error(e)
+        // Optionally handle reset error or something
+      }
+    },
+
+    openProductModal() {
+      this.productModal.isNewCategory = false
+      this.productModal.newCategoryName = ''
+      this.productModal.isNewBrand = false
+      this.productModal.newBrandName = ''
+      this.productModal.newBrandImg = ''
+      this.productModal.form = {
+        maSP: null,
+        tenSP: '',
+        loaiSanPham: { maLoai: '' },
+        thuongHieu: { maTH: '' },
+        gioiTinh: 2,
+        moTa: '',
+        trangThaiSP: 1,
+        anhChinh: ''
+      }
+      this.productModal.show = true
+    },
+
+    async saveProduct() {
+      this.productModal.saving = true;
+      try {
+        if (this.productModal.isNewCategory) {
+          if (!this.productModal.newCategoryName.trim()) throw new Error("Vui lòng nhập tên danh mục");
+          const catRes = await axios.post('/admin/categories', {
+             tenLoai: this.productModal.newCategoryName.trim(),
+             trangThai: 1
+          });
+          this.productModal.form.loaiSanPham = { maLoai: catRes.data.maLoai };
+          this.fetchCategories();
+        }
+
+        if (this.productModal.isNewBrand) {
+          if (!this.productModal.newBrandName.trim()) throw new Error("Vui lòng nhập tên thương hiệu");
+          const brandRes = await axios.post('/admin/brands', {
+             tenTH: this.productModal.newBrandName.trim(),
+             logo: this.productModal.newBrandImg,
+             trangThai: 1
+          });
+          this.productModal.form.thuongHieu = { maTH: brandRes.data.maTH };
+          this.fetchBrands();
+        }
+
+        const response = await axios.post('/admin/products', this.productModal.form);
+        if (response.data) {
+          if (window.$toast) window.$toast.success('Thêm sản phẩm thành công!')
+          else alert('Thêm sản phẩm thành công!')
+          this.productModal.show = false;
+          this.fetchProducts();
+        }
+      } catch (e) {
+        if (window.$toast) window.$toast.error('Lỗi: ' + (e.response?.data?.message || e.message || 'Không thể tạo sản phẩm'))
+        else alert('Lỗi: ' + (e.response?.data?.message || e.message || 'Không thể tạo sản phẩm'))
+      } finally {
+        this.productModal.saving = false;
+      }
+    },
+
+    async uploadImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this.productModal.uploadingImg = true;
+      try {
+        const res = await axios.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (res.data && res.data.success) {
+          this.productModal.form.anhChinh = res.data.url;
+          if (window.$toast) window.$toast.success('Tải ảnh lên thành công!');
+        } else {
+          throw new Error(res.data.message || 'Lỗi tải ảnh');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        if (window.$toast) window.$toast.error('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+        else alert('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+      } finally {
+        this.productModal.uploadingImg = false;
+        if (this.$refs.fileInput) this.$refs.fileInput.value = null;
+      }
+    },
+
+    async uploadBrandImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this.productModal.uploadingBrandImg = true;
+      try {
+        const res = await axios.post('/upload?type=logo', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (res.data && res.data.success) {
+          this.productModal.newBrandImg = res.data.url;
+          if (window.$toast) window.$toast.success('Tải ảnh thương hiệu thành công!');
+        } else {
+          throw new Error(res.data.message || 'Lỗi tải ảnh');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        if (window.$toast) window.$toast.error('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+        else alert('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+      } finally {
+        this.productModal.uploadingBrandImg = false;
+        if (this.$refs.brandFileInput) this.$refs.brandFileInput.value = null;
+      }
+    },
+
+    async uploadBrandImageModal(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await axios.post('/upload?type=logo', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (res.data && res.data.success) {
+          this.brandModal.form.logo = res.data.url;
+          if (window.$toast) window.$toast.success('Tải ảnh thương hiệu thành công!');
+        } else {
+          throw new Error(res.data.message || 'Lỗi tải ảnh');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        if (window.$toast) window.$toast.error('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+        else alert('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+      } finally {
+        if (this.$refs.brandModalFileInput) this.$refs.brandModalFileInput.value = null;
+      }
     },
 
     async toggleStatus(product) {
@@ -759,7 +1071,7 @@ export default {
       if (brand) {
         this.brandModal.form = { ...brand }
       } else {
-        this.brandModal.form = { maTH: null, tenTH: '', moTa: '', trangThai: 1 }
+        this.brandModal.form = { maTH: null, tenTH: '', moTa: '', logo: '', trangThai: 1 }
       }
       this.brandModal.show = true
     },
@@ -795,9 +1107,13 @@ export default {
       this.openDropdown = null
     },
 
-    getBrandLogo(name) {
-      if (!name) return '/img/placeholder.png'
-      const slug = name.toLowerCase().replace(/[\s-]+/g, '')
+    getBrandLogo(brand) {
+      if (!brand || !brand.tenTH) return '/img/placeholder.png'
+      if (brand.logo) return brand.logo;
+      if (brand.moTa && (brand.moTa.startsWith('http') || brand.moTa.startsWith('/uploads') || brand.moTa.startsWith('/images'))) {
+        return brand.moTa;
+      }
+      const slug = brand.tenTH.toLowerCase().replace(/[\s-]+/g, '')
       return `/images/brand/logo-${slug}.png`
     },
 

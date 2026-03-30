@@ -81,7 +81,18 @@ public class PhieuNhapService {
                     .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy biến thể: " + item.maBienThe()));
             variant.setSoLuongTon(variant.getSoLuongTon() + item.soLuong());
             variant.setGiaNhap(item.donGiaNhap());
+            if (item.giaBan() != null && item.giaBan().compareTo(BigDecimal.ZERO) > 0) {
+                variant.setGiaBan(item.giaBan());
+            }
+            variant.setTrangThai(true); // Đảm bảo biến thể ở trạng thái hoạt động khi nhập hàng
             sanPhamChiTietRepository.save(variant);
+
+            // Đảm bảo sản phẩm cha cũng ở trạng thái đang bán
+            SanPham sp = variant.getSanPham();
+            if (sp != null && (sp.getTrangThaiSP() == null || sp.getTrangThaiSP() == 0)) {
+                sp.setTrangThaiSP(1);
+                sanPhamRepository.save(sp);
+            }
 
             NhapKhoChiTiet ct = new NhapKhoChiTiet();
             ct.setPhieuNhap(phieuNhap);
@@ -101,23 +112,38 @@ public class PhieuNhapService {
             LoaiSanPham lsp = item.categoryId() != null ? loaiSanPhamRepository.findById(item.categoryId()).orElse(null) : null;
             ThuongHieu th = item.brandId() != null ? thuongHieuRepository.findById(item.brandId()).orElse(null) : null;
 
-            SanPham sp = sanPhamRepository.findByTenSP(item.tenSP())
-                    .orElseGet(() -> {
-                        SanPham newSp = new SanPham();
-                        newSp.setTenSP(item.tenSP());
-                        newSp.setLoaiSanPham(lsp);
-                        newSp.setThuongHieu(th);
-                        newSp.setTrangThaiSP(1); // Đang bán
-                        newSp.setNgayTao(LocalDateTime.now());
-                        if (item.gender() != null) {
-                            newSp.setGioiTinh(item.gender());
-                        }
-                        if (item.moTa() != null && !item.moTa().isEmpty()) {
-                            newSp.setMoTa(item.moTa());
-                        }
-                        // Ảnh chính có thể được cập nhật sau
-                        return sanPhamRepository.save(newSp);
-                    });
+            SanPham sp = null;
+            if (item.productId() != null) {
+                sp = sanPhamRepository.findById(item.productId()).orElse(null);
+            }
+            
+            if (sp == null) {
+                // Nếu chưa có productId hoặc tìm không thấy, tìm theo Tên (để tránh tạo trùng nếu cùng tên)
+                sp = sanPhamRepository.findByTenSP(item.tenSP()).orElse(null);
+            }
+
+            if (sp == null) {
+                // TẠO MỚI HOÀN TOÀN
+                sp = new SanPham();
+                sp.setTenSP(item.tenSP());
+                sp.setLoaiSanPham(lsp);
+                sp.setThuongHieu(th);
+                sp.setTrangThaiSP(1); // Đang bán
+                sp.setNgayTao(LocalDateTime.now());
+                if (item.gender() != null) {
+                    sp.setGioiTinh(item.gender());
+                }
+                if (item.moTa() != null && !item.moTa().isEmpty()) {
+                    sp.setMoTa(item.moTa());
+                }
+                // Ảnh chính có thể được cập nhật sau
+                sp = sanPhamRepository.save(sp);
+            } else {
+                // Nếu sản phẩm đã tồn tại nhưng đang bị ngừng bán, kích hoạt lại
+                if (sp.getTrangThaiSP() == null || sp.getTrangThaiSP() == 0) {
+                    sp.setTrangThaiSP(1);
+                }
+            }
 
             // Cập nhật ngày để biết sản phẩm vừa được thao tác
             sp.setNgayCapNhat(LocalDateTime.now());
@@ -151,6 +177,9 @@ public class PhieuNhapService {
                 variant.setMauSacSP(mau);
                 variant.setGiaBan(item.giaBan());
                 variant.setSoLuongDaBan(0); // Mặc định
+                variant.setTrangThai(true); // Biến thể mới mặc định hoạt động
+            } else {
+                variant.setTrangThai(true); // Nếu biến thể cũ bị ẩn, kích hoạt lại khi nhập hàng
             }
 
             // Cập nhật thông tin nhập kho
@@ -176,6 +205,6 @@ public class PhieuNhapService {
     }
 
     // Record types cho dữ liệu tạm
-    public record ExistingItem(Long maBienThe, Integer soLuong, BigDecimal donGiaNhap) {}
-    public record NewItem(String tenSP, String size, String color, Integer soLuong, BigDecimal donGiaNhap, BigDecimal giaBan, Long categoryId, Long brandId, Integer gender, String moTa) {}
+    public record ExistingItem(Long maBienThe, Integer soLuong, BigDecimal donGiaNhap, BigDecimal giaBan) {}
+    public record NewItem(Long productId, String tenSP, String size, String color, Integer soLuong, BigDecimal donGiaNhap, BigDecimal giaBan, Long categoryId, Long brandId, Integer gender, String moTa) {}
 }

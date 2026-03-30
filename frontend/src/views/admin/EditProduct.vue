@@ -107,8 +107,17 @@
                         </div>
                         <div class="space-y-3">
                             <label class="text-xs font-bold text-[#C8A97E] uppercase tracking-widest block text-center">Liên kết hình ảnh trực tiếp</label>
-                            <input v-model="form.anhChinh" placeholder="https://..." 
-                                class="w-full bg-transparent border border-[#C8A97E]/30 rounded-[1.2rem] px-5 py-3.5 text-sm font-bold text-gray-600 focus:border-[#C8A97E] transition-all outline-none" />
+                            <div class="flex gap-2">
+                                <input v-model="form.anhChinh" placeholder="https://..." 
+                                    class="flex-1 w-full bg-transparent border border-[#C8A97E]/30 rounded-[1.2rem] px-5 py-3.5 text-sm font-bold text-gray-600 focus:border-[#C8A97E] transition-all outline-none" />
+                                <input type="file" ref="fileInput" class="hidden" @change="uploadImage" accept="image/*" />
+                                <button type="button" @click="$refs.fileInput.click()" class="px-5 py-3.5 rounded-[1.2rem] bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold transition-all shadow-sm flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-[20px]">upload</span>
+                                </button>
+                            </div>
+                            <div v-if="uploadingImg" class="text-[11px] text-[#C8A97E] font-bold flex items-center justify-center gap-1 mt-1">
+                                <span class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span> Đang tải lên...
+                            </div>
                         </div>
                         
                     </div>
@@ -300,6 +309,7 @@ export default {
     return {
       loading: true,
       saving: false,
+      uploadingImg: false,
       originalProduct: null,
       form: {
         maSP: null,
@@ -427,6 +437,33 @@ export default {
 	    this.saving = false;
 	  }
 	},
+
+    async uploadImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      this.uploadingImg = true;
+      try {
+        const res = await axios.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (res.data && res.data.success) {
+          this.form.anhChinh = res.data.url;
+          window.$toast.success('Tải ảnh lên thành công!');
+        } else {
+          throw new Error(res.data.message || 'Lỗi tải ảnh');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        window.$toast.error('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+      } finally {
+        this.uploadingImg = false;
+        if (this.$refs.fileInput) this.$refs.fileInput.value = null;
+      }
+    },
 
 
     removeVariant(idx) {
