@@ -237,7 +237,7 @@ public class ChatService {
             // 1. Lọc bỏ các cuộc chat của Admin/Nhân viên (nếu có)
             if (c.getTaiKhoan() != null) {
                 boolean isStaff = c.getTaiKhoan().getVaiTros().stream()
-                    .anyMatch(v -> v.getTenVaiTro().equals("ROLE_ADMIN") || v.getTenVaiTro().equals("ROLE_NHANVIEN"));
+                    .anyMatch(v -> v.getTenVaiTro().equals("ADMIN") || v.getTenVaiTro().equals("NHANVIEN"));
                 if (isStaff) return false;
             }
             

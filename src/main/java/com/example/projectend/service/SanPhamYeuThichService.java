@@ -40,12 +40,10 @@ public class SanPhamYeuThichService {
      * Toggle yêu thích (thêm / xóa)
      */
     public boolean toggleFavorite(TaiKhoan tk, Long maSP) {
-
-        // ✅ FIX 1: check tk null
-        if (tk == null) {
-            throw new RuntimeException("User không tồn tại");
+        if (tk == null || maSP == null) {
+            throw new RuntimeException("Thông tin không đầy đủ");
         }
-
+        
         boolean exists = sanPhamYeuThichRepository
                 .existsByTaiKhoan_MaTKAndSanPham_MaSP(tk.getMaTK(), maSP);
 

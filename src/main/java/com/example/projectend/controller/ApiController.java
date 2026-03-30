@@ -144,9 +144,16 @@ public class ApiController {
             Page<SanPham> sanPhamPage = sanPhamService.findWithFilters(
                     search, loai, gioiTinh, thuongHieu, minPrice, maxPrice, 1, sort, pageable);
 
+            List<SanPham> productContent = sanPhamPage.getContent();
+            productContent.forEach(sp -> {
+                if (sp.getAnhChinh() != null && !sp.getAnhChinh().startsWith("http") && !sp.getAnhChinh().startsWith("/")) {
+                    sp.setAnhChinh("/uploads/products/" + sp.getAnhChinh());
+                }
+            });
+
             response.put("success", true);
-            response.put("content", sanPhamPage.getContent());
-            response.put("priceStockMap", sanPhamService.buildPriceStockMap(sanPhamPage.getContent()));
+            response.put("content", productContent);
+            response.put("priceStockMap", sanPhamService.buildPriceStockMap(productContent));
             response.put("totalElements", sanPhamPage.getTotalElements());
             response.put("totalPages", sanPhamPage.getTotalPages());
             response.put("currentPage", sanPhamPage.getNumber());

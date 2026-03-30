@@ -193,8 +193,12 @@ export default {
       return this.chiTiet.reduce((acc, item) => acc + (item.donGia || item.giaBan) * item.soLuong, 0);
     },
     discountAmount() {
-      if (!this.donHang || !this.donHang.tongTien) return 0;
-      // Nếu có phí vận chuyển, công thức tính giảm giá sẽ phải trừ đi, hiện tại free ship
+      if (!this.donHang) return 0;
+      // Lay giamGia tu DTO neu co, fallback tinh toan
+      if (this.donHang.giamGia && Number(this.donHang.giamGia) > 0) {
+        return Number(this.donHang.giamGia);
+      }
+      if (!this.donHang.tongTien) return 0;
       let giamGia = this.subTotal - this.donHang.tongTien;
       return giamGia > 0 ? giamGia : 0;
     }
@@ -205,8 +209,10 @@ export default {
     if (!orderId) { this.loading = false; return }
     try {
       const res = await axios.get(`/orders/${orderId}`, { withCredentials: true })
-      this.donHang = res.data.donHang || res.data
-      this.chiTiet = res.data.chiTiet || this.donHang?.chiTiet || this.donHang?.chiTietList || []
+      const data = res.data
+      this.donHang = data
+      // DTO moi: chiTiet la array truc tiep
+      this.chiTiet = data.chiTiet || data.chiTietList || []
     } catch (e) {
       console.error(e)
     } finally {
@@ -244,16 +250,16 @@ export default {
       return `/api/img/${url}`;
     },
     getBrand(item) {
-      return item.sanPhamChiTiet?.sanPham?.thuongHieu?.tenTH || item.thuongHieu || 'Luxury Brand';
+      return item.thuongHieu || item.sanPhamChiTiet?.sanPham?.thuongHieu?.tenTH || 'Luxury Brand';
     },
     getProductName(item) {
-      return item.sanPhamChiTiet?.sanPham?.tenSP || item.tenSP || 'Sản phẩm cao cấp';
+      return item.tenSP || item.sanPhamChiTiet?.sanPham?.tenSP || 'San pham cao cap';
     },
     getSize(item) {
-      return item.sanPhamChiTiet?.sizeSP?.tenSize || item.size;
+      return item.size || item.sanPhamChiTiet?.sizeSP?.tenSize;
     },
     getColor(item) {
-      return item.sanPhamChiTiet?.mauSacSP?.tenMau || item.mau;
+      return item.mau || item.sanPhamChiTiet?.mauSacSP?.tenMau;
     }
   }
 }

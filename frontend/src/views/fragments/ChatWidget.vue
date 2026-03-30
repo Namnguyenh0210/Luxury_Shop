@@ -52,7 +52,12 @@
               </div>
 
               <div class="message-bubble">
-                  {{ msg.noiDung }}
+                  <div v-for="(part, pIdx) in renderMessage(msg.noiDung)" :key="pIdx">
+                    <div v-if="part.type === 'text'" v-html="formatMarkdown(part.content)" class="msg-text"></div>
+                    <div v-else-if="part.type === 'image'" class="msg-image-container">
+                      <img :src="part.url" :alt="part.alt" class="msg-image" @error="handleImgError" @click="openImage(part.url)" />
+                    </div>
+                  </div>
               </div>
               <!-- Like/Heart icon like TGDĐ -->
               <div v-if="msg.loaiNguoiGui !== 'USER'" class="bubble-heart">
@@ -287,6 +292,31 @@ export default {
       if (!d) return '';
       return new Date(d).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
     },
+    renderMessage(text) {
+      if (!text) return [];
+      // Remove any markdown image syntax from the text before rendering
+      const cleanText = text.replace(/!\[(.*?)\]\((.*?)\)/g, '').trim();
+      return [{ type: 'text', content: cleanText }];
+    },
+    formatMarkdown(text) {
+      if (!text) return '';
+      let html = text;
+      // 1. Xử lý tiêu đề ### 
+      html = html.replace(/^### (.*$)/gim, '<h3 class="chat-h3">$1</h3>');
+      // 2. Xử lý in đậm **text**
+      html = html.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+      // 3. Xóa các ký tự thừa thãi mà AI có thể sinh ra như "- Ảnh:" nếu nó nằm ngoài regex image
+      html = html.replace(/- Ảnh: \S+/g, '');
+      
+      return html;
+    },
+    handleImgError(e) {
+      // Nếu link ảnh die (như Imgur lỗi), hiển thị placeholder sang trọng
+      e.target.src = 'https://placehold.co/400x400/f8f8f8/d4af37?text=Luxury+Fashion';
+    },
+    openImage(url) {
+      window.open(url, '_blank');
+    },
     scrollToBottom() {
       this.$nextTick(() => {
         if (this.$refs.messageContainer) {
@@ -468,16 +498,46 @@ export default {
 }
 
 .message-bubble {
-  padding: 12px 16px;
+  padding: 14px 18px;
   border-radius: 18px;
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .ai .message-bubble {
   background: #f1f1f1;
   color: #333;
   border-top-left-radius: 4px;
+}
+
+.chat-h3 {
+  margin: 10px 0 5px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #d4af37; /* Luxury Gold */
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
+}
+
+.msg-image-container {
+  margin: 10px 0;
+  max-width: 100%;
+}
+
+.msg-image {
+  max-width: 250px;
+  max-height: 250px;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+  display: block;
+}
+
+.msg-image:hover {
+  transform: scale(1.02);
 }
 
 .user .message-bubble {
@@ -534,11 +594,18 @@ export default {
 
 .tgdd-input {
   flex: 1;
-  border: none;
+  border: none !important;
   background: transparent;
   padding: 10px 0;
   font-size: 14px;
-  outline: none;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.tgdd-input:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .tgdd-send-btn {

@@ -81,6 +81,7 @@ public class DonHang {
     @Column(name = "MoTaChuaNhan", length = 1000)
     private String moTaChuaNhan;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaVoucher")
     private Voucher voucher;

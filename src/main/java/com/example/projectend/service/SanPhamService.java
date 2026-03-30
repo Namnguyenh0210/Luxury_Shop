@@ -268,7 +268,7 @@ public class SanPhamService {
                     new PriceStockInfo(
                             r.getMinPrice(),
                             r.getMaxPrice(),
-                            r.getTotalStock()));
+                            r.getTotalStock() != null ? r.getTotalStock().intValue() : 0));
         }
 
         for (Long id : ids) {

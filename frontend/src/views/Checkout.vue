@@ -29,9 +29,32 @@
 
           <!-- LEFT: Shipping & Payment -->
           <div class="lg:col-span-7 space-y-8">
+            
+            <!-- Marketing Shipping Banner (Sync with Cart) -->
+            <div v-if="totalQuantity < 2" class="bg-[#FDF6ED] border border-[#F5E6D3] rounded-2xl p-5 flex items-center gap-4 animate-fadeIn transition-all shadow-sm">
+                <div class="bg-[#C8A97E] text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <span class="material-symbols-outlined text-xl">local_shipping</span>
+                </div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-bold text-[#111111] uppercase tracking-[0.2em] mb-0.5">Luxury Gift: Miễn phí vận chuyển</p>
+                    <p class="text-[11px] text-gray-500 font-medium">Mua thêm <span class="font-bold text-[#C8A97E]">01 sản phẩm</span> nữa để nhận ưu đãi Giao hàng miễn phí!</p>
+                </div>
+                <a href="/sanpham" class="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-[#C8A97E] hover:underline">
+                    Xem thêm <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                </a>
+            </div>
+            <div v-else class="bg-[#EEF9F1] border border-[#D1EBD9] rounded-2xl p-5 flex items-center gap-4 animate-bounce-subtle shadow-sm">
+                <div class="bg-green-600 text-white w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <span class="material-symbols-outlined text-xl">check_circle</span>
+                </div>
+                <div class="flex-1">
+                    <p class="text-[10px] font-bold text-[#111111] uppercase tracking-[0.2em] mb-0.5">Bậc thầy mua sắm!</p>
+                    <p class="text-[11px] text-gray-500 font-medium italic">Đơn hàng của bạn đã được áp dụng <span class="font-bold text-green-700">Miễn phí vận chuyển toàn quốc</span>.</p>
+                </div>
+            </div>
 
             <!-- ĐỊA CHỈ GIAO HÀNG -->
-            <div class="bg-white border border-[#C8A97E]/30 shadow-sm rounded-2xl overflow-hidden">
+            <div class="bg-white border border-[#C8A97E]/30 shadow-sm rounded-2xl overflow-hidden mt-8">
               <div class="px-8 py-5 border-b border-[#F5F1ED] flex items-center justify-between" style="background:#FDFCFB;">
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-[#C8A97E] text-xl">location_on</span>
@@ -237,7 +260,8 @@
                 </div>
                 <div class="flex justify-between text-[10px]">
                   <span class="text-gray-400 uppercase tracking-[0.1em]">Phí vận chuyển:</span>
-                  <span class="text-green-600 font-bold uppercase tracking-widest">Miễn phí</span>
+                  <span v-if="shippingFee > 0" class="text-[#111111] font-bold">{{ formatPrice(shippingFee) }}</span>
+                  <span v-else class="text-green-600 font-bold uppercase tracking-widest">Miễn phí</span>
                 </div>
 
                 <!-- Total -->
@@ -318,8 +342,14 @@ export default {
     }
   },
   computed: {
+    totalQuantity() {
+      return this.cartItems.reduce((sum, item) => sum + item.soLuong, 0)
+    },
+    shippingFee() {
+      return this.totalQuantity >= 2 ? 0 : 30000
+    },
     finalTotal() {
-      return Math.max(0, (this.orderSubtotal || 0) - this.discountAmount)
+      return Math.max(0, (this.orderSubtotal || 0) - this.discountAmount + this.shippingFee)
     }
   },
   methods: {

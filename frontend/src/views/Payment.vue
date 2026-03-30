@@ -1,141 +1,189 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col">
-
+  <div class="min-h-screen flex flex-col" style="background:#FDFCFB;">
     <!-- Header -->
-    <header class="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
-      <div class="max-w-2xl mx-auto flex items-center justify-between">
-        <router-link to="/" class="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
-          <span class="material-symbols-outlined">arrow_back</span>
-          <span class="text-sm font-medium">Về trang chủ</span>
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 px-6 py-5 sticky top-0 z-30">
+      <div class="max-w-3xl mx-auto flex items-center justify-between">
+        <router-link to="/" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 hover:text-[#C8A97E] transition-all">
+          <span class="material-symbols-outlined text-sm">arrow_back</span>
+          Về trang chủ
         </router-link>
-        <h1 class="text-base font-bold text-gray-800">💳 Thanh toán PayOS</h1>
+        <div class="flex items-center gap-3">
+           <span class="text-[10px] font-bold text-gray-300 uppercase tracking-widest hidden sm:block">Secure Gateway</span>
+           <h1 class="text-xs font-black text-[#111111] uppercase tracking-[0.3em] flex items-center gap-2">
+             <span class="h-2 w-2 rounded-full bg-[#C8A97E]"></span>
+             Thanh toán PayOS
+           </h1>
+        </div>
       </div>
     </header>
 
-    <main class="flex-1 flex items-center justify-center py-10 px-4">
-      <div class="w-full max-w-2xl space-y-6">
+    <main class="flex-1 flex items-center justify-center py-12 px-4">
+      <div class="w-full max-w-3xl space-y-8">
 
         <!-- Loading -->
-        <div v-if="loading" class="flex justify-center py-16 text-gray-400">
-          <span class="material-symbols-outlined animate-spin text-5xl">progress_activity</span>
+        <div v-if="loading" class="flex flex-col items-center justify-center py-32 text-[#C8A97E]">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C8A97E] mb-6"></div>
+          <p class="text-[10px] font-bold uppercase tracking-[0.4em]">Đang thiết lập cổng thanh toán bảo mật...</p>
         </div>
 
         <template v-else>
           <!-- Header Card -->
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 text-center">
-            <h2 class="text-2xl font-bold text-gray-800 mb-1">Quét mã QR để thanh toán</h2>
-            <p class="text-gray-500 text-sm">Mở app ngân hàng và quét mã bên dưới</p>
+          <div class="text-center space-y-3 animate-fadeIn">
+            <p class="text-[10px] font-bold uppercase tracking-[0.5em] text-[#C8A97E]">Luxury Experience</p>
+            <h2 class="font-serif text-3xl md:text-4xl font-bold text-[#111111] tracking-tight uppercase">Quét mã QR để hoàn tất</h2>
+            <div class="w-16 h-px bg-[#C8A97E] mx-auto mt-4"></div>
           </div>
 
-          <!-- Order Info -->
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-            <h3 class="text-base font-bold text-gray-700 mb-4">Thông tin đơn hàng</h3>
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+            
+            <!-- LEFT: Order Info & Steps -->
+            <div class="lg:col-span-2 space-y-6 animate-slideInLeft">
+               <!-- Order Info Card -->
+               <div class="bg-white rounded-3xl border border-[#E5E7EB] shadow-xl p-8">
+                 <h3 class="text-[11px] font-black text-[#111111] uppercase tracking-[0.2em] mb-6 border-b border-gray-50 pb-4">Thông tin đơn hàng</h3>
+                 
+                 <div v-if="errorMsg" class="mb-5 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 text-[11px] font-bold italic line-clamp-3">
+                   "{{ errorMsg }}"
+                 </div>
 
-            <!-- Error Message -->
-            <div v-if="errorMsg" class="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-xl text-orange-700 text-sm">
-              ⚠️ {{ errorMsg }}
+                 <div class="space-y-6">
+                    <div class="flex justify-between items-center group">
+                       <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-[#C8A97E] transition-colors">Đơn hàng</span>
+                       <span class="text-sm font-black text-[#111111]">#{{ orderId || orderCode || '...' }}</span>
+                    </div>
+                    
+                    <div class="p-5 bg-[#111111] rounded-2xl text-white shadow-lg transform hover:-translate-y-1 transition-all duration-300">
+                       <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-[#C8A97E] mb-2">Số tiền quyết toán</p>
+                       <p class="text-2xl font-bold tracking-tighter">{{ fmtCurrency(amount) }}</p>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-[#FDFCFB] p-4 rounded-xl border border-gray-50">
+                       <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Trạng thái</span>
+                       <div class="flex items-center gap-2">
+                         <span class="h-1.5 w-1.5 rounded-full animate-pulse" :class="statusDot"></span>
+                         <span class="text-[10px] font-black uppercase tracking-widest" :class="statusClass">{{ statusText }}</span>
+                       </div>
+                    </div>
+                 </div>
+               </div>
+
+               <!-- Steps Card -->
+               <div class="bg-white rounded-3xl border border-[#E5E7EB] shadow-lg p-8">
+                  <h4 class="text-[11px] font-black text-[#111111] uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px] text-[#C8A97E]">verified_user</span>
+                    Quy trình bảo mật
+                  </h4>
+                  <div class="space-y-5">
+                    <div v-for="(step, i) in ['Mở ứng dụng ngân hàng/Ví điện tử', 'Chọn Quét mã QR / Chuyển khoản', 'Mã QR hiển thị bên phải', 'Kiểm tra thông tin & Xác nhận', 'Hệ thống tự động cập nhật ngay']" 
+                         :key="i" class="flex gap-4 items-center">
+                      <span class="text-[10px] font-black text-white bg-[#C8A97E] w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">{{ i+1 }}</span>
+                      <p class="text-xs text-gray-600 font-medium tracking-tight">{{ step }}</p>
+                    </div>
+                  </div>
+               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-              <div class="bg-gray-50 rounded-xl p-3">
-                <p class="text-xs text-gray-400 mb-1">Mã đơn hàng</p>
-                <p class="font-bold text-gray-800">#{{ orderId || orderCode || '...' }}</p>
-              </div>
-              <div class="bg-gray-50 rounded-xl p-3">
-                <p class="text-xs text-gray-400 mb-1">Số tiền</p>
-                <p class="font-bold text-red-600 text-lg">{{ fmtCurrency(amount) }}</p>
-              </div>
-              <div class="bg-gray-50 rounded-xl p-3">
-                <p class="text-xs text-gray-400 mb-1">Trạng thái</p>
-                <span class="inline-flex items-center gap-1.5 text-sm font-semibold" :class="statusClass">
-                  <span class="size-2 rounded-full" :class="statusDot"></span>
-                  {{ statusText }}
-                </span>
-              </div>
+            <!-- RIGHT: QR Code -->
+            <div class="lg:col-span-3 space-y-6 animate-slideInRight">
+               <div class="bg-white rounded-[2.5rem] border border-[#C8A97E]/30 shadow-2xl p-10 text-center relative overflow-hidden group">
+                 <!-- Decorative elements -->
+                 <div class="absolute top-0 right-0 w-32 h-32 bg-[#C8A97E]/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-150"></div>
+                 <div class="absolute bottom-0 left-0 w-24 h-24 bg-[#111111]/5 rounded-full -ml-12 -mb-12 transition-transform group-hover:scale-150"></div>
+                 
+                 <div v-if="qrCode" class="relative z-10">
+                    <div class="inline-block p-4 bg-white border-[6px] border-[#111111] rounded-[2rem] shadow-2xl transform transition-transform group-hover:rotate-1">
+                       <img :src="qrCode" alt="QR Code PayOS" class="w-72 h-72 object-contain" />
+                    </div>
+                    <p class="mt-8 text-[11px] font-black text-[#111111] uppercase tracking-[0.4em] animate-pulse">Đang chờ tín hiệu thanh toán...</p>
+                 </div>
+
+                 <div v-if="!qrCode && checkoutUrl" class="py-12 px-6">
+                    <span class="material-symbols-outlined text-6xl text-[#C8A97E]/30 mb-6">link</span>
+                    <p class="text-xs text-gray-500 mb-8 font-medium">Phiên thanh toán đã được chuẩn bị sẵn sàng</p>
+                    <a :href="checkoutUrl" target="_blank"
+                      class="inline-flex items-center gap-3 bg-[#111111] text-white px-10 py-4 rounded-full font-bold text-[11px] uppercase tracking-widest hover:bg-[#C8A97E] transition-all shadow-xl shadow-black/10">
+                      Mở trang thanh toán gốc
+                      <span class="material-symbols-outlined text-sm">open_in_new</span>
+                    </a>
+                 </div>
+
+                 <!-- Countdown Bar -->
+                 <div class="mt-10 flex flex-col items-center">
+                    <div class="flex items-center gap-3 bg-[#FDFCFB] border border-[#F5E6D3] text-[#C8A97E] px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-widest shadow-inner">
+                      <span class="material-symbols-outlined text-base">hourglass_top</span>
+                      Thời gian còn lại: <span class="text-[#111111] ml-1">{{ countdownDisplay }}</span>
+                    </div>
+                    <div class="w-1/2 h-1 bg-gray-100 rounded-full mt-4 overflow-hidden">
+                       <div class="h-full bg-[#C8A97E] transition-all duration-1000" :style="{width: (timeLeft/(15*60)*100)+'%'}"></div>
+                    </div>
+                 </div>
+               </div>
+
+               <!-- Bottom Actions -->
+               <div class="flex flex-col sm:flex-row gap-4">
+                  <button @click="manualCheck"
+                    class="flex-1 flex items-center justify-center gap-3 bg-[#111111] text-[#C8A97E] px-8 py-4 rounded-full font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-[#C8A97E] hover:text-white transition-all shadow-lg">
+                    <span class="material-symbols-outlined text-base">cached</span>
+                    Xác nhận thủ công
+                  </button>
+                  <router-link to="/profile"
+                    class="flex-1 flex items-center justify-center gap-3 border border-gray-200 text-gray-400 px-8 py-4 rounded-full font-bold text-[10px] uppercase tracking-[0.3em] hover:border-[#111111] hover:text-[#111111] transition-all">
+                    <span class="material-symbols-outlined text-base">list_alt</span>
+                    Trang đơn hàng
+                  </router-link>
+               </div>
             </div>
-          </div>
-
-          <!-- QR Code -->
-          <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 text-center">
-            <div v-if="qrCode" class="flex justify-center mb-4">
-              <img :src="qrCode" alt="QR Code PayOS" class="w-64 h-64 rounded-xl border border-gray-200 shadow-sm" />
-            </div>
-
-            <div v-if="!qrCode && checkoutUrl" class="mb-4">
-              <p class="text-gray-500 text-sm mb-4">Nhấn nút bên dưới để mở trang thanh toán PayOS</p>
-              <a :href="checkoutUrl" target="_blank"
-                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition-colors">
-                <span class="material-symbols-outlined text-[20px]">open_in_new</span>
-                Mở trang thanh toán
-              </a>
-            </div>
-
-            <!-- Countdown -->
-            <div class="mt-4 inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-xl text-sm font-medium">
-              <span class="material-symbols-outlined text-[18px]">timer</span>
-              Thời gian còn lại: <span class="font-bold">{{ countdownDisplay }}</span>
-            </div>
-          </div>
-
-          <!-- Steps -->
-          <div class="bg-blue-50 rounded-2xl border border-blue-100 p-6">
-            <h4 class="font-bold text-blue-800 mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-[20px]">help</span>
-              Hướng dẫn thanh toán
-            </h4>
-            <ol class="space-y-2 text-sm text-blue-700">
-              <li class="flex items-start gap-2"><span class="font-bold text-blue-500 mt-0.5">1.</span> Mở ứng dụng ngân hàng (Momo, ZaloPay, Banking app...)</li>
-              <li class="flex items-start gap-2"><span class="font-bold text-blue-500 mt-0.5">2.</span> Chọn chức năng "Quét mã QR" hoặc "Chuyển khoản"</li>
-              <li class="flex items-start gap-2"><span class="font-bold text-blue-500 mt-0.5">3.</span> Quét mã QR code hiển thị bên trên</li>
-              <li class="flex items-start gap-2"><span class="font-bold text-blue-500 mt-0.5">4.</span> Kiểm tra thông tin và xác nhận thanh toán</li>
-              <li class="flex items-start gap-2"><span class="font-bold text-blue-500 mt-0.5">5.</span> Hệ thống sẽ tự động cập nhật khi thành công</li>
-            </ol>
-          </div>
-
-          <!-- ✅ SUCCESS OVERLAY khi thanh toán thành công -->
-          <div v-if="isSuccess"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div class="bg-white rounded-3xl p-10 text-center shadow-2xl max-w-sm mx-4 animate-bounce-in">
-              <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span class="material-symbols-outlined text-green-600 text-6xl">check_circle</span>
-              </div>
-              <h2 class="text-2xl font-black text-gray-900 mb-2">Thanh toán thành công! 🎉</h2>
-              <p class="text-gray-500 mb-4">Đơn hàng của bạn đã được xác nhận.<br>Đang chuyển sang trang xác nhận...</p>
-              <div class="flex justify-center">
-                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex flex-wrap gap-3 justify-center">
-            <button @click="manualCheck"
-              class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold transition-colors">
-              <span class="material-symbols-outlined text-[18px]">refresh</span>
-              Kiểm tra thanh toán
-            </button>
-            <router-link to="/profile"
-              class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl font-bold transition-colors">
-              <span class="material-symbols-outlined text-[18px]">receipt_long</span>
-              Xem đơn hàng
-            </router-link>
           </div>
 
           <!-- Expired Message -->
-          <div v-if="isExpired" class="bg-red-50 border border-red-200 rounded-2xl p-6">
-            <h4 class="font-bold text-red-700 mb-2 flex items-center gap-2">
-              <span class="material-symbols-outlined">warning</span>
-              Hết thời gian thanh toán
-            </h4>
-            <p class="text-sm text-red-600 mb-4">Link thanh toán đã hết hạn. Vui lòng vào trang đơn hàng để tiếp tục.</p>
-            <router-link to="/profile" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors">
-              Xem đơn hàng của tôi
-            </router-link>
+          <div v-if="isExpired" class="fixed inset-0 z-50 flex items-center justify-center bg-[#111111]/95 backdrop-blur-md animate-fadeIn">
+            <div class="max-w-md w-full bg-white rounded-[3rem] p-12 text-center shadow-2xl mx-4">
+              <span class="material-symbols-outlined text-red-500 text-7xl mb-6">history_toggle_off</span>
+              <h4 class="font-serif text-2xl font-bold text-[#111111] mb-2 uppercase">Giao dịch đã đóng</h4>
+              <p class="text-sm text-gray-400 mb-8 font-medium">Hết thời gian thanh toán bảo mật. Vui lòng quay lại đơn hàng để thiết lập phiên mới.</p>
+              <router-link to="/profile" class="block bg-red-600 text-white px-10 py-4 rounded-full text-[11px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-red-200">
+                Về quản lý đơn hàng
+              </router-link>
+            </div>
+          </div>
+
+          <!-- SUCCESS OVERLAY (Premium Style) -->
+          <div v-if="isSuccess"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-[#FDFCFB]/95 backdrop-blur-xl animate-fadeIn">
+            <div class="text-center max-w-sm mx-4 animate-scaleUp">
+              <div class="w-32 h-32 bg-[#EEF9F1] rounded-full flex items-center justify-center mx-auto mb-10 shadow-inner">
+                <span class="material-symbols-outlined text-green-600 text-7xl animate-bounce-subtle">check_circle</span>
+              </div>
+              <p class="text-[11px] font-bold text-[#C8A97E] uppercase tracking-[0.5em] mb-4">Success</p>
+              <h2 class="font-serif text-3xl font-bold text-[#111111] mb-4 uppercase tracking-tight">Thanh toán hoàn tất</h2>
+              <p class="text-xs text-gray-500 mb-10 font-medium leading-relaxed uppercase tracking-widest">Tuyệt phẩm của bạn đang được chuẩn bị để khởi hành...</p>
+              <div class="flex flex-col items-center gap-2">
+                <div class="w-40 h-1 bg-gray-100 rounded-full overflow-hidden">
+                   <div class="h-full bg-green-500 animate-loading-bar"></div>
+                </div>
+                <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest">Đang chuyển hướng</span>
+              </div>
+            </div>
           </div>
         </template>
 
       </div>
     </main>
+
+    <!-- Footer Security Badges -->
+    <footer class="py-8 border-t border-gray-100 mt-12 bg-white">
+      <div class="max-w-3xl mx-auto flex flex-wrap justify-around gap-8 opacity-40 grayscale group-hover:grayscale-0 transition-all">
+         <div class="flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest">
+           <span class="material-symbols-outlined text-sm">shield_lock</span> PCI-DSS Compliant
+         </div>
+         <div class="flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest">
+           <span class="material-symbols-outlined text-sm">verified</span> SSL Encryption
+         </div>
+         <div class="flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest">
+           <span class="material-symbols-outlined text-sm">task_alt</span> Auto Confirmed
+         </div>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -297,3 +345,37 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes loading-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-fadeIn { animation: fadeIn 1s ease-out forwards; }
+.animate-slideInLeft { animation: slideInLeft 0.8s ease-out forwards; }
+.animate-slideInRight { animation: slideInRight 0.8s ease-out forwards; }
+.animate-scaleUp { animation: scaleUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
+.animate-loading-bar { animation: loading-bar 2s infinite ease-in-out; }
+</style>

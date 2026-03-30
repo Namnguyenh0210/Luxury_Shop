@@ -1,26 +1,27 @@
 <template>
   <div class="flex h-full overflow-hidden bg-white">
     <!-- LEFT PANEL: Conversation List -->
-    <div class="flex w-80 flex-col border-r border-gray-100 bg-gray-50/30">
-      <div class="p-4 bg-white border-b border-gray-100">
+    <div class="flex w-[22rem] flex-col border-r border-gray-100 bg-white">
+      <div class="p-6 border-b border-gray-50">
+        <h2 class="text-xs font-black uppercase tracking-[0.25em] text-gray-400 mb-6 px-1">Conversations</h2>
         <div class="relative group">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px] group-focus-within:text-gold transition-colors">search</span>
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-[20px] group-focus-within:text-[#C8A97E] transition-colors">search</span>
           <input 
             type="text" 
             v-model="searchKeyword" 
-            placeholder="Tìm khách hàng..." 
-            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-gold/20 transition-all font-medium" 
+            placeholder="Tìm theo tên hoặc email..." 
+            class="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-[13px] focus:ring-2 focus:ring-[#C8A97E]/20 focus:bg-white transition-all font-medium placeholder:text-gray-300" 
           />
         </div>
       </div>
       
-      <!-- Filter Tabs -->
-      <div class="p-3 bg-white">
-        <div class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit overflow-x-auto no-scrollbar">
+      <!-- Filter Tabs: Luxury Minimalist -->
+      <div class="px-6 py-4">
+        <div class="flex gap-2 p-1 bg-gray-100/50 rounded-2xl overflow-x-auto no-scrollbar">
           <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id"
-            class="px-5 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-300"
+            class="flex-1 px-3 py-2 rounded-[0.9rem] text-[10px] font-black uppercase tracking-wider whitespace-nowrap transition-all duration-400"
             :class="activeTab === tab.id ? 
-              'bg-white shadow-sm text-[#C8A97E]' : 
+              'bg-white shadow-md text-[#C8A97E]' : 
               'text-gray-400 hover:text-gray-600'">
             {{ tab.label }}
           </button>
@@ -28,225 +29,165 @@
       </div>
 
       <!-- Conversations Loop -->
-      <div class="flex-1 overflow-y-auto custom-scroll px-3 space-y-2 py-4 bg-gray-50/30">
-          <div v-if="filteredConversations.length === 0 && !isFetching" class="py-12 text-center">
-             <span class="material-symbols-outlined text-4xl text-gray-200 mb-2">inbox</span>
-             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Không có hội thoại</p>
+      <div class="flex-1 overflow-y-auto custom-scroll-minimal px-4 space-y-3 py-4">
+          <div v-if="filteredConversations.length === 0 && !isFetching" class="py-20 text-center flex flex-col items-center opacity-30">
+             <span class="material-symbols-outlined text-5xl font-extralight mb-4">chat_bubble_outline</span>
+             <p class="text-[10px] font-black uppercase tracking-widest text-slate-900">Không có hội thoại</p>
           </div>
           
-          <div v-if="isFetching" class="py-12 text-center space-y-3">
-             <div class="size-6 border-2 border-[#C8A97E]/20 border-t-[#C8A97E] rounded-full animate-spin mx-auto"></div>
-             <p class="text-[9px] font-black text-[#C8A97E] uppercase tracking-widest">Đang kết nối...</p>
-          </div>
-
           <div v-for="conv in filteredConversations" :key="conv.maCuocTroChuyen" @click="selectConversation(conv)"
-            class="group flex items-center gap-3 p-3.5 rounded-2xl cursor-pointer transition-all duration-500 relative border border-transparent"
+            class="group flex items-center gap-4 p-4 rounded-3xl cursor-pointer transition-all duration-700 relative border border-transparent"
             :class="selectedConv?.maCuocTroChuyen === conv.maCuocTroChuyen ? 
-              'bg-white border-[#C8A97E]/30 shadow-xl scale-[1.02] z-10 ring-1 ring-[#C8A97E]/10' : 
-              'hover:bg-white hover:border-gray-100 hover:shadow-md hover:scale-[1.01]'">
+              'bg-white border-[#C8A97E]/30 shadow-[0_20px_50px_rgba(0,0,0,0.06)] z-10' : 
+              'hover:bg-gray-50/50'">
           
-          <div class="relative flex-shrink-0">
-            <div class="size-11 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-bold text-sm shadow-sm overflow-hidden border-2 border-white">
-              <img v-if="conv.taiKhoan?.avatar" :src="conv.taiKhoan.avatar" class="size-full object-cover" />
-              <span v-else>{{ getInitials(conv.taiKhoan?.hoTen || 'K') }}</span>
-            </div>
-            <div class="absolute -bottom-1 -right-1 size-3.5 rounded-full border-2 border-white" 
-              :class="conv.trangThai === 'HUMAN' ? 'bg-orange-500' : (conv.trangThai === 'PENDING' ? 'bg-red-500 animate-pulse' : (conv.trangThai === 'CLOSED' ? 'bg-gray-400' : 'bg-blue-500'))"></div>
-          </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start mb-0.5">
-                <h4 class="text-sm font-bold text-gray-800 truncate">
-                  {{ conv.taiKhoan?.hoTen || conv.taiKhoan?.email || 'Khách hàng #' + conv.maCuocTroChuyen }}
-                </h4>
-                <span class="text-[10px] text-gray-400 font-medium tabular-nums">{{ formatTimeShort(conv.ngayCapNhat) }}</span>
+            <div class="relative flex-shrink-0">
+              <div class="size-12 rounded-[1.1rem] bg-slate-900 text-white flex items-center justify-center shadow-lg overflow-hidden border-2 border-white ring-1 ring-gray-100">
+                <img v-if="conv.taiKhoan?.avatar" :src="conv.taiKhoan.avatar" class="size-full object-cover" />
+                <span v-else class="font-serif text-sm text-[#C8A97E]">{{ getInitials(conv.taiKhoan?.hoTen || 'K') }}</span>
               </div>
-              <p class="text-xs text-gray-500 truncate" :class="{'text-gray-900 font-bold': (conv.trangThai === 'HUMAN' || conv.trangThai === 'PENDING') && selectedConv?.maCuocTroChuyen !== conv.maCuocTroChuyen}">
-                {{ conv.lastMessage || (conv.taiKhoan ? 'Bắt đầu trò chuyện...' : 'Phiên khách #' + conv.maCuocTroChuyen) }}
+              <div class="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-white shadow-sm" 
+                :class="conv.trangThai === 'HUMAN' ? 'bg-[#C8A97E]' : (conv.trangThai === 'PENDING' ? 'bg-red-500' : 'bg-blue-500')"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-baseline mb-1">
+                <h4 class="text-[13px] font-bold text-slate-800 truncate leading-none">
+                  {{ conv.taiKhoan?.hoTen || conv.taiKhoan?.email || 'Guest #' + conv.maCuocTroChuyen }}
+                </h4>
+                <span class="text-[9px] text-gray-300 font-bold tabular-nums uppercase">{{ formatTimeShort(conv.ngayCapNhat) }}</span>
+              </div>
+              <p class="text-[11px] text-gray-400 truncate font-medium leading-tight" :class="{'text-[#C8A97E] font-bold': (conv.trangThai === 'PENDING') && selectedConv?.maCuocTroChuyen !== conv.maCuocTroChuyen}">
+                {{ conv.lastMessage || 'Bắt đầu trò chuyện sang trọng...' }}
               </p>
             </div>
-
-          <div v-if="conv.trangThai === 'HUMAN' || conv.trangThai === 'PENDING'" class="absolute right-3 top-1/2 -translate-y-1/2 size-2 rounded-full bg-orange-500 shadow-sm animate-pulse"></div>
-        </div>
-
-        
+          </div>
       </div>
       
-      <!-- Last Sync Info -->
-      <div class="p-4 border-t border-gray-100 bg-white flex items-center justify-between">
-        <div class="flex items-center gap-2">
-           <span class="size-1.5 rounded-full bg-green-500"></span>
-           <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Live Sync</span>
-        </div>
-        <button @click="fetchConversations" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors group" :disabled="isFetching">
-           <span class="material-symbols-outlined text-[18px] text-gray-400 group-hover:rotate-180 transition-transform duration-500" :class="{'animate-spin': isFetching}">refresh</span>
+      <!-- Last Sync -->
+      <div class="p-6 border-t border-gray-50 flex items-center justify-between">
+        <span class="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em] flex items-center gap-2">
+           <span class="size-1 bg-[#C8A97E] rounded-full"></span>
+           Live Syncing
+        </span>
+        <button @click="fetchConversations" class="p-1 hover:text-[#C8A97E] transition-colors">
+           <span class="material-symbols-outlined text-[18px]" :class="{'animate-spin': isFetching}">refresh</span>
         </button>
       </div>
     </div>
 
     <!-- MIDDLE PANEL: Chat Window -->
-    <div class="flex-1 flex flex-col bg-white relative">
+    <div class="flex-1 flex flex-col bg-[#FDFDFD] relative">
       <template v-if="selectedConv">
-        <!-- Chat Header -->
-        <!-- Chat Header: Premium Glassmorphism -->
-        <div class="h-20 px-8 border-b border-gray-100 flex items-center justify-between bg-white/90 backdrop-blur-xl sticky top-0 z-20 shadow-[0_1px_10px_rgba(0,0,0,0.02)]">
-          <div class="flex items-center gap-5">
-            <div class="size-11 rounded-2xl bg-slate-900 text-[#C8A97E] flex items-center justify-center font-black text-sm shadow-2xl border-2 border-white ring-1 ring-[#C8A97E]/20 overflow-hidden group">
-               <img v-if="selectedConv.taiKhoan?.avatar" :src="selectedConv.taiKhoan.avatar" class="size-full object-cover group-hover:scale-110 transition-transform duration-500" />
-               <span v-else>{{ getInitials(selectedConv.taiKhoan?.hoTen) }}</span>
+        <!-- Chat Header: Premium Luxury Design -->
+        <div class="h-24 px-10 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-20">
+          <div class="flex items-center gap-6">
+            <div class="relative group">
+              <div class="size-14 rounded-2xl bg-slate-900 flex items-center justify-center shadow-2xl border-2 border-white ring-1 ring-[#C8A97E]/30 overflow-hidden">
+                 <img v-if="selectedConv.taiKhoan?.avatar" :src="selectedConv.taiKhoan.avatar" class="size-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                 <span v-else class="text-[#C8A97E] font-serif text-xl">{{ getInitials(selectedConv.taiKhoan?.hoTen) }}</span>
+              </div>
+              <div class="absolute -bottom-1 -right-1 size-4 rounded-full border-2 border-white" 
+                :class="selectedConv.trangThai === 'HUMAN' ? 'bg-[#C8A97E]' : 'bg-blue-500'"></div>
             </div>
             <div class="flex flex-col">
-              <div class="flex items-center gap-2">
-                <h3 class="text-[15px] font-black text-slate-800 tracking-tight leading-none">
-                  {{ selectedConv.taiKhoan?.hoTen || selectedConv.taiKhoan?.email || 'Khách vãng lai #' + selectedConv.maCuocTroChuyen }}
-                </h3>
-                <span v-if="selectedConv.taiKhoan" class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200">Customer</span>
-                <span v-else class="px-2 py-0.5 bg-orange-100 text-orange-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-orange-200">Guest Session</span>
-              </div>
-              <div class="flex items-center gap-2 mt-1.5">
-                <div v-if="selectedConv.trangThai === 'CLOSED'" class="px-2 py-0.5 rounded-full border bg-gray-50 border-gray-200 text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                  Đã kết thúc
-                </div>
-                <div v-else class="flex items-center gap-1.5 px-2 py-0.5 rounded-full border" 
-                  :class="selectedConv.trangThai === 'HUMAN' || selectedConv.trangThai === 'PENDING' ? 'bg-orange-50 border-orange-100' : 'bg-blue-50 border-blue-100'">
-                  <span class="size-1.5 rounded-full animate-pulse" :class="selectedConv.trangThai === 'HUMAN' || selectedConv.trangThai === 'PENDING' ? 'bg-orange-500' : 'bg-blue-500'"></span>
-                  <span class="text-[9px] font-black uppercase tracking-widest" :class="selectedConv.trangThai === 'HUMAN' || selectedConv.trangThai === 'PENDING' ? 'text-orange-600' : 'text-blue-600'">
-                    {{ selectedConv.trangThai === 'HUMAN' ? 'Nhân viên trực' : (selectedConv.trangThai === 'PENDING' ? 'Chờ hỗ trợ' : 'AI Assistant') }}
-                  </span>
-                </div>
-                <span class="text-gray-300 text-[10px] opacity-50">|</span>
-                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest tabular-nums">{{ selectedConv.taiKhoan?.email || 'Phiên #' + selectedConv.maCuocTroChuyen }}</span>
+              <h3 class="text-xl font-serif font-bold text-slate-800 leading-tight">
+                {{ selectedConv.taiKhoan?.hoTen || selectedConv.taiKhoan?.email || 'Khách vãng lai #' + selectedConv.maCuocTroChuyen }}
+              </h3>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-[#C8A97E]">
+                  {{ selectedConv.trangThai === 'HUMAN' ? 'Đang tư vấn trực tiếp' : 'AI Assistant Active' }}
+                </span>
+                <span class="size-1 rounded-full bg-gray-300"></span>
+                <span class="text-[10px] font-bold text-gray-400 tabular-nums">{{ selectedConv.taiKhoan?.email || 'Guest' }}</span>
               </div>
             </div>
           </div>
           <div class="flex items-center gap-3">
             <button @click="showRightPanel = !showRightPanel" 
-               class="flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-300 group relative overflow-hidden" 
-               :class="showRightPanel ? 'bg-slate-900 text-[#C8A97E] shadow-lg' : 'bg-gray-50 text-slate-500 hover:bg-gray-100 border border-gray-100'">
-               <span class="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">analytics</span>
-               <span class="text-[10px] font-black uppercase tracking-widest">Hồ sơ khách</span>
+               class="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 border border-[#C8A97E]/20 text-slate-600 hover:bg-[#C8A97E] hover:text-white hover:shadow-lg hover:shadow-[#C8A97E]/20">
+               <span class="material-symbols-outlined text-[20px]">person_outline</span>
+               <span class="text-[11px] font-black uppercase tracking-widest">Hồ sơ</span>
             </button>
-            <div class="w-px h-6 bg-gray-100 mx-1"></div>
-            <button v-if="selectedConv.trangThai === 'PENDING'" @click="acceptConv" 
-               class="flex items-center gap-2 px-5 py-2.5 bg-[#C8A97E] text-slate-900 hover:bg-slate-900 hover:text-[#C8A97E] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-lg border border-[#C8A97E] hover:shadow-[#C8A97E]/20 hover:-translate-y-0.5">
-               <span class="material-symbols-outlined text-[18px]">handshake</span>
-               Tiếp nhận ngay
-            </button>
+            <div class="w-px h-8 bg-gray-100 mx-2"></div>
             <button v-if="selectedConv.trangThai !== 'CLOSED'" @click="closeConv" 
-               class="flex items-center gap-2 px-5 py-2.5 bg-red-50 text-red-600 hover:bg-red-600 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-sm border border-red-100/50 hover:shadow-red-200 hover:-translate-y-0.5">
-               <span class="material-symbols-outlined text-[18px]">done_all</span>
+               class="px-6 py-2.5 bg-slate-900 text-[#C8A97E] rounded-full text-[11px] font-black uppercase tracking-widest transition-all hover:bg-black hover:-translate-y-0.5 shadow-xl">
                Kết thúc
             </button>
           </div>
         </div>
 
-        <!-- Messages Area -->
-        <div class="flex-1 overflow-y-auto p-8 space-y-8 bg-gray-50/20 custom-scroll" ref="historyContainer">
+        <!-- Messages: Elegant spacing -->
+        <div class="flex-1 overflow-y-auto p-10 space-y-10 custom-scroll" ref="historyContainer">
           <div v-for="(msg, idx) in currentMessages" :key="idx" 
-            class="flex flex-col group/msg" :class="msg.loaiNguoiGui === 'USER' ? 'items-start' : 'items-end'">
+            class="flex flex-col" :class="msg.loaiNguoiGui === 'USER' ? 'items-start' : 'items-end'">
             
-            <div v-if="isNewGroup(idx)" class="flex items-center gap-2 mb-3 px-1" :class="msg.loaiNguoiGui === 'USER' ? 'flex-row' : 'flex-row-reverse'">
-              <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                {{ msg.loaiNguoiGui === 'USER' ? (selectedConv.taiKhoan?.hoTen || selectedConv.taiKhoan?.email || 'Khách vãng lai #' + selectedConv.maCuocTroChuyen) : (msg.loaiNguoiGui === 'AI' ? '🤖 AI Trợ lý' : '👩💼 Nhân viên tư vấn') }}
-              </span>
-              <div class="h-px w-6 bg-gray-100"></div>
-            </div>
-
-            <div class="max-w-[75%] group relative">
-              <div class="px-6 py-4 rounded-3xl text-[13px] font-medium leading-relaxed shadow-sm transition-all duration-300 transform"
+            <div class="max-w-[70%]">
+              <div class="px-7 py-5 rounded-[2rem] text-[14px] leading-relaxed transition-all shadow-sm"
                 :class="msg.loaiNguoiGui === 'USER' ? 
-                  'bg-white text-gray-800 rounded-tl-none border border-gray-100 hover:shadow-md' : 
+                  'bg-white text-slate-800 rounded-tl-none border border-gray-100' : 
                   (msg.loaiNguoiGui === 'AI' ? 
-                    'bg-slate-50 text-slate-800 rounded-tr-none border border-slate-200 italic' : 
-                    'bg-slate-900 text-[#C8A97E] rounded-tr-none shadow-2xl shadow-slate-200 border border-slate-800 hover:shadow-[#C8A97E]/10')">
+                    'bg-[#F8F5F0] text-slate-700 rounded-tr-none border border-[#C8A97E]/10 italic' : 
+                    'bg-slate-900 text-[#C8A97E] rounded-tr-none shadow-2xl')">
                   {{ msg.noiDung }}
               </div>
-              <div class="flex items-center gap-2 mt-2" :class="msg.loaiNguoiGui === 'USER' ? 'justify-start' : 'justify-end'">
-                <span class="text-[9px] font-bold text-gray-300 tabular-nums uppercase">{{ formatDate(msg.ngayGui) }}</span>
-                <span v-if="msg.loaiNguoiGui !== 'USER'" class="material-symbols-outlined text-[12px] text-[#C8A97E]">done_all</span>
-              </div>
+              <p class="text-[9px] font-black text-gray-300 uppercase tracking-widest mt-2 px-2" :class="msg.loaiNguoiGui === 'USER' ? 'text-left' : 'text-right'">
+                {{ formatDate(msg.ngayGui) }} • {{ msg.loaiNguoiGui === 'USER' ? 'KHÁCH HÀNG' : 'TƯ VẤN VIÊN' }}
+              </p>
             </div>
-          </div>
-          
-          <!-- Loading State inside messages -->
-          <div v-if="loadingHistory" class="flex flex-col items-center justify-center py-10 gap-3">
-             <div class="size-6 border-2 border-[#C8A97E]/20 border-t-[#C8A97E] rounded-full animate-spin"></div>
-             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Đang tải lịch sử...</p>
           </div>
         </div>
 
-        <!-- Input Area -->
-        <div v-if="selectedConv.trangThai !== 'CLOSED'" class="p-6 bg-white border-t border-gray-100 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.05)] z-20">
-          <div class="flex flex-wrap gap-2 mb-4">
-             <button v-for="q in quickReplies" :key="q" @click="replyText = q" class="px-3.5 py-1.5 bg-gray-50 hover:bg-[#C8A97E] hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest text-gray-400 border border-gray-100 transition-all active:scale-95 shadow-sm">
-                {{ q }}
-             </button>
-             <button @click="autoComplete" class="ml-auto flex items-center gap-1 px-3 py-1.5 bg-slate-900 text-[#C8A97E] rounded-xl text-[9px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-lg active:scale-95 border border-[#C8A97E]/30">
-                <span class="material-symbols-outlined text-[14px]">auto_awesome</span>
-                AI Gợi ý
-             </button>
-          </div>
-          
-          <form @submit.prevent="sendReply" class="flex gap-3 items-end bg-gray-50 p-3 rounded-[24px] border border-gray-100 focus-within:border-gold/30 focus-within:bg-white focus-within:shadow-xl focus-within:shadow-gold/5 transition-all duration-500">
+        <!-- Input Area: Clean & Professional -->
+        <div v-if="selectedConv.trangThai !== 'CLOSED'" class="p-8 bg-white border-t border-gray-50 shadow-[0_-20px_50px_rgba(0,0,0,0.03)]">
+          <form @submit.prevent="sendReply" class="relative group">
              <textarea 
                v-model="replyText" 
-               placeholder="Nhập nội dung phản hồi khách hàng..." 
-               class="flex-1 bg-transparent border-none resize-none text-[13px] font-medium p-2 focus:ring-0 max-h-40 min-h-[44px] custom-scroll" 
+               placeholder="Viết lời hồi âm tinh tế tại đây..." 
+               class="w-full bg-gray-50 border-none rounded-[2rem] text-[14px] font-medium p-6 pr-20 focus:ring-2 focus:ring-[#C8A97E]/20 focus:bg-white focus:shadow-2xl transition-all duration-700 min-h-[70px] max-h-40 custom-scroll" 
                rows="1" 
                @keydown.enter.exact.prevent="sendReply"
              ></textarea>
              
              <button type="submit" :disabled="!replyText.trim() || replying" 
-                class="size-12 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-xl bg-[#C8A97E] text-white shadow-[#C8A97E]/20 hover:shadow-[#C8A97E]/40 hover:-translate-y-1 active:scale-90 disabled:opacity-30">
-                <span v-if="!replying" class="material-symbols-outlined text-2xl">arrow_upward</span>
-                <div v-else class="size-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                class="absolute right-3 bottom-3 size-12 rounded-full flex items-center justify-center bg-slate-900 text-[#C8A97E] shadow-xl hover:scale-105 transition-all disabled:opacity-20 active:scale-95">
+                <span v-if="!replying" class="material-symbols-outlined">send</span>
+                <div v-else class="size-4 border-2 border-[#C8A97E] border-t-transparent rounded-full animate-spin"></div>
              </button>
           </form>
         </div>
-        
-        <div v-else class="p-8 bg-gray-50 border-t border-gray-100 flex flex-col items-center justify-center gap-3">
-           <div class="flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-gray-100 shadow-sm">
-              <span class="material-symbols-outlined text-gray-400">lock</span>
-              <span class="text-xs font-black text-gray-500 uppercase tracking-widest">Cuộc hội thoại đã kết thúc</span>
-           </div>
-           <p class="text-[11px] text-gray-400 font-medium italic">Bạn không thể gửi thêm tin nhắn vào lúc này.</p>
-        </div>
       </template>
 
-      <!-- EMPTY STATE -->
-      <div v-else class="flex-1 flex flex-col items-center justify-center bg-gray-50/10 p-12 text-center">
-        <div class="relative mb-8">
-           <div class="size-32 rounded-[48px] bg-white shadow-2xl flex items-center justify-center text-slate-100 border border-[#C8A97E]/10">
-              <span class="material-symbols-outlined text-7xl">chat_bubble</span>
-           </div>
-           <div class="absolute -bottom-2 -right-2 size-10 rounded-2xl bg-[#C8A97E] text-white shadow-xl flex items-center justify-center animate-bounce border-2 border-white">
-              <span class="material-symbols-outlined">support_agent</span>
-           </div>
-        </div>
-         <h2 class="text-2xl font-serif font-bold text-slate-800 uppercase tracking-tight mb-2">Trung tâm điều hành Chat</h2>
-        <p class="text-sm font-medium text-gray-400 max-w-sm mb-8 leading-relaxed">Chọn một cuộc hội thoại từ danh sách bên trái để bắt đầu hỗ trợ khách hàng theo tiêu chuẩn Luxury.</p>
+      <!-- EMPTY STATE: LUXURY VERSION -->
+      <div v-else class="flex-1 flex flex-col items-center justify-center bg-white p-20 text-center relative overflow-hidden">
+        <div class="absolute inset-0 opacity-[0.02] pointer-events-none italic font-serif text-[20rem] flex items-center justify-center select-none text-slate-900">Luxury</div>
         
-        <div class="grid grid-cols-2 gap-6 w-full max-w-xl">
-           <div class="bg-white p-6 rounded-[32px] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-gray-100 text-left group hover:border-[#C8A97E]/30 transition-all duration-500 cursor-default relative overflow-hidden">
-              <div class="absolute top-0 right-0 size-24 bg-orange-50/30 rounded-full translate-x-12 -translate-y-12"></div>
-              <div class="size-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-4 group-hover:bg-orange-600 group-hover:text-white transition-all transform group-hover:rotate-12">
-                 <span class="material-symbols-outlined text-[22px]">priority_high</span>
-              </div>
-              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Cần hỗ trợ</p>
-              <div class="flex items-baseline gap-2">
-                 <p class="text-2xl font-serif font-bold text-slate-800 tabular-nums">{{ stats.pending + stats.human }}</p>
-                 <p class="text-xs font-bold text-gray-400">Khách chờ</p>
-              </div>
+        <div class="relative z-10 flex flex-col items-center max-w-2xl">
+           <div class="size-28 rounded-[40px] bg-slate-900 flex items-center justify-center mb-10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] relative group cursor-default">
+              <span class="material-symbols-outlined text-[#C8A97E] text-5xl">auto_fix_high</span>
+              <div class="absolute -inset-4 border border-[#C8A97E]/20 rounded-[50px] animate-pulse"></div>
            </div>
            
-           <div class="bg-white p-6 rounded-[32px] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-gray-100 text-left group hover:border-[#C8A97E]/30 transition-all duration-500 cursor-default relative overflow-hidden">
-              <div class="absolute top-0 right-0 size-24 bg-blue-50/30 rounded-full translate-x-12 -translate-y-12"></div>
-              <div class="size-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all transform group-hover:-rotate-12">
-                 <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+           <h2 class="text-4xl font-serif font-bold text-slate-800 tracking-tight mb-4">Command Center</h2>
+           <div class="h-px w-20 bg-[#C8A97E] mb-6"></div>
+           <p class="text-base text-gray-400 font-medium leading-relaxed mb-12">
+              Chào mừng bạn đến với hệ thống quản lý hội thoại thời gian thực. Hãy lựa chọn một khách hàng để bắt đầu mang lại trải nghiệm mua sắm đẳng cấp nhất.
+           </p>
+
+           <div class="grid grid-cols-2 gap-8 w-full max-w-lg">
+              <div class="p-8 bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col items-center group hover:border-[#C8A97E]/30 transition-all duration-700">
+                 <div class="size-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">notifications_active</span>
+                 </div>
+                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Cần hỗ trợ</p>
+                 <p class="text-3xl font-serif font-bold text-slate-900 tabular-nums">{{ stats.pending + stats.human }}</p>
               </div>
-              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">AI Đang trực</p>
-              <div class="flex items-baseline gap-2">
-                 <p class="text-2xl font-serif font-bold text-slate-800 tabular-nums">{{ stats.ai }}</p>
-                 <p class="text-xs font-bold text-gray-400">Đang chat</p>
+              
+              <div class="p-8 bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col items-center group hover:border-[#C8A97E]/30 transition-all duration-700">
+                 <div class="size-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined">psychology</span>
+                 </div>
+                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">AI Trợ lý</p>
+                 <p class="text-3xl font-serif font-bold text-slate-900 tabular-nums">{{ stats.ai }}</p>
               </div>
            </div>
         </div>
@@ -255,59 +196,62 @@
 
     <!-- RIGHT PANEL: Customer Info (Dynamic/Collapsible) -->
     <transition name="panel">
-      <div v-if="showRightPanel && selectedConv?.taiKhoan" class="w-80 border-l border-gray-100 bg-white flex flex-col shadow-2xl z-30 overflow-y-auto custom-scroll">
+      <div v-if="showRightPanel && selectedConv?.taiKhoan" class="w-[22rem] border-l border-gray-50 bg-white flex flex-col z-30 overflow-y-auto custom-scroll shadow-[-10px_0_30px_rgba(0,0,0,0.02)]">
         <!-- Close Button for Mobile/Drawer feel -->
-        <div class="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10">
-           <h4 class="text-[11px] font-black text-slate-800 uppercase tracking-widest">Thông tin khách hàng</h4>
-           <button @click="showRightPanel = false" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
-              <span class="material-symbols-outlined text-[20px] text-gray-400">close</span>
+        <div class="p-8 border-b border-gray-50 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10">
+           <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Hồ sơ khách hàng</h4>
+           <button @click="showRightPanel = false" class="size-8 flex items-center justify-center hover:bg-gray-50 rounded-full transition-colors">
+              <span class="material-symbols-outlined text-[18px] text-gray-300">close</span>
            </button>
         </div>
 
-        <div class="p-8 flex flex-col items-center text-center">
-           <div class="size-24 rounded-[36px] bg-slate-800 text-[#C8A97E] flex items-center justify-center text-3xl font-black shadow-2xl mb-6 relative group overflow-hidden border-4 border-white ring-2 ring-[#C8A97E]/20">
+        <div class="p-10 flex flex-col items-center text-center">
+           <div class="size-28 rounded-[2.5rem] bg-slate-900 text-[#C8A97E] flex items-center justify-center text-3xl font-black shadow-2xl mb-8 relative group overflow-hidden border-4 border-white ring-1 ring-gray-100">
               <img v-if="selectedConv.taiKhoan.avatar" :src="selectedConv.taiKhoan.avatar" class="size-full object-cover group-hover:scale-110 transition-transform duration-700" />
-              <span v-else>{{ getInitials(selectedConv.taiKhoan.hoTen) }}</span>
+              <span v-else class="font-serif text-3xl">{{ getInitials(selectedConv.taiKhoan.hoTen) }}</span>
            </div>
-           <h3 class="text-lg font-black text-gray-800 mb-1 leading-tight">{{ selectedConv.taiKhoan.hoTen }}</h3>
-            <span class="px-3 py-1 bg-[#C8A97E]/10 text-[#C8A97E] rounded-full text-[10px] font-black uppercase tracking-widest border border-[#C8A97E]/20">Luxury VIP Member</span>
+           <h3 class="text-2xl font-serif font-bold text-slate-800 mb-2 leading-tight">{{ selectedConv.taiKhoan.hoTen }}</h3>
+            <span class="px-4 py-1 bg-slate-900 text-[#C8A97E] rounded-full text-[9px] font-black uppercase tracking-[0.2em] shadow-lg">Luxury VIP Member</span>
         </div>
 
-        <div class="px-6 space-y-6 pb-12">
-           <div class="space-y-4">
-              <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100/50 group hover:bg-white hover:shadow-lg hover:border-gold/20 transition-all duration-300">
-                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Email liên hệ</label>
-                 <p class="text-xs font-bold text-gray-700 break-all">{{ selectedConv.taiKhoan.email }}</p>
+        <div class="px-8 space-y-8 pb-12">
+           <div class="space-y-5">
+              <div class="group">
+                 <label class="text-[9px] font-black text-gray-300 uppercase tracking-widest block mb-2 px-1">Email liên hệ</label>
+                 <div class="bg-gray-50 rounded-2xl p-4 border border-transparent group-hover:bg-white group-hover:border-[#C8A97E]/20 group-hover:shadow-xl transition-all duration-500">
+                    <p class="text-[13px] font-bold text-slate-700 break-all">{{ selectedConv.taiKhoan.email }}</p>
+                 </div>
               </div>
-              <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100/50 group hover:bg-white hover:shadow-lg hover:border-gold/20 transition-all duration-300">
-                 <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Số điện thoại</label>
-                 <p class="text-xs font-bold text-gray-700">{{ selectedConv.taiKhoan.soDienThoai || 'Chưa cập nhật' }}</p>
+              <div class="group">
+                 <label class="text-[9px] font-black text-gray-300 uppercase tracking-widest block mb-2 px-1">Số điện thoại</label>
+                 <div class="bg-gray-50 rounded-2xl p-4 border border-transparent group-hover:bg-white group-hover:border-[#C8A97E]/20 group-hover:shadow-xl transition-all duration-500">
+                    <p class="text-[13px] font-bold text-slate-700">{{ selectedConv.taiKhoan.soDienThoai || 'Chưa cập nhật' }}</p>
+                 </div>
               </div>
            </div>
 
-           <div class="pt-2">
-              <div class="flex items-center justify-between mb-4">
-                 <h5 class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Đơn hàng gần đây</h5>
-                 <span class="text-[10px] font-bold text-gray-400 tabular-nums">{{ customerOrders.length }} đơn</span>
+           <div class="pt-4">
+              <div class="flex items-center justify-between mb-6">
+                 <h5 class="text-[10px] font-black text-slate-800 uppercase tracking-widest">Giao dịch gần nhất</h5>
+                 <span class="px-2 py-1 bg-gray-100 rounded-lg text-[9px] font-bold text-gray-400 tabular-nums">{{ customerOrders.length }} đơn</span>
               </div>
               
-              <div v-if="customerOrders.length > 0" class="space-y-2">
-                 <div v-for="o in customerOrders" :key="o.maDH" class="group flex justify-between items-center p-3.5 bg-gray-50 rounded-2xl border border-gray-100/50 hover:bg-slate-900 transition-all duration-500">
+              <div v-if="customerOrders.length > 0" class="space-y-3">
+                 <div v-for="o in customerOrders" :key="o.maDH" class="group flex justify-between items-center p-4 bg-white border border-gray-50 rounded-[1.5rem] hover:bg-slate-900 hover:border-slate-900 transition-all duration-500 shadow-sm hover:shadow-2xl hover:-translate-y-1">
                     <div class="flex flex-col">
-                       <span class="text-[11px] font-black text-slate-800 group-hover:text-gold transition-colors italic">#{{ o.maDH }}</span>
+                       <span class="text-[12px] font-black text-slate-800 group-hover:text-[#C8A97E] transition-colors italic mb-0.5">#Order-{{ o.maDH }}</span>
                        <span class="text-[9px] font-bold text-gray-400 tabular-nums uppercase">{{ formatDate(o.ngayDat) }}</span>
                     </div>
-                    <span class="text-[11px] font-black text-slate-900 group-hover:text-white tabular-nums">{{ fmtCurrency(o.tongTien) }}</span>
+                    <span class="text-[12px] font-black text-slate-900 group-hover:text-white tabular-nums">{{ fmtCurrency(o.tongTien) }}</span>
                  </div>
               </div>
-              <div v-else class="py-8 flex flex-col items-center justify-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-                 <span class="material-symbols-outlined text-gray-200 text-3xl mb-1">shopping_bag</span>
-                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Chưa có giao dịch</p>
+              <div v-else class="py-12 flex flex-col items-center justify-center bg-gray-50/50 rounded-[2rem] border border-dashed border-gray-200">
+                 <span class="material-symbols-outlined text-gray-200 text-4xl mb-2 font-extralight">shopping_bag</span>
+                 <p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest">Chưa có giao dịch</p>
               </div>
            </div>
            
-           <button class="w-full py-4 bg-slate-900 text-gold rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-slate-200 hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined text-[18px]">open_in_new</span>
+           <button class="w-full py-5 bg-slate-900 text-[#C8A97E] rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.25em] shadow-2xl hover:bg-black hover:-translate-y-1 transition-all active:scale-95 flex items-center justify-center gap-2">
               Xem chi tiết hồ sơ
            </button>
         </div>
