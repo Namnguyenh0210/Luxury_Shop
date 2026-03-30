@@ -438,7 +438,7 @@
                 <td class="px-2 py-5 font-mono text-[11px] text-gray-400 text-center">#{{ b.maTH }}</td>
                 <td class="px-4 py-5">
                   <div class="flex items-center gap-4">
-                    <div class="size-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center p-2 overflow-hidden shadow-sm group-hover:scale-110 transition-transform shrink-0">
+                    <div class="size-12 rounded-xl bg-white border border-gray-100 flex items-center justify-center p-1.5 overflow-hidden shadow-sm group-hover:scale-110 transition-transform shrink-0">
                       <img 
                         :src="getBrandLogo(b)" 
                         @error="(e) => e.target.src = '/img/placeholder.png'"
@@ -559,8 +559,23 @@
               type="text" 
               required
               placeholder="VD: Gucci, Chanel..."
-              class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-yellow-400 outline-none transition-all"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#C8A97E] outline-none transition-all"
             />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-bold text-gray-700">Link ảnh (Logo)</label>
+            <div class="flex gap-2">
+              <input 
+                v-model="brandModal.form.logo"
+                type="text" 
+                placeholder="https://... hoặc /uploads/..."
+                class="flex-1 w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#C8A97E] outline-none transition-all"
+              />
+              <input type="file" ref="brandModalFileInput" class="hidden" @change="uploadBrandImageModal" accept="image/*" />
+              <button type="button" @click="$refs.brandModalFileInput.click()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-medium transition-colors flex items-center justify-center">
+                <span class="material-symbols-outlined">upload</span>
+              </button>
+            </div>
           </div>
           <div class="space-y-2">
             <label class="text-sm font-bold text-gray-700">Mô tả</label>
@@ -568,7 +583,7 @@
               v-model="brandModal.form.moTa"
               rows="3"
               placeholder="Nhập mô tả thương hiệu..."
-              class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-yellow-400 outline-none transition-all resize-none"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#C8A97E] outline-none transition-all resize-none"
             ></textarea>
           </div>
           <div class="flex items-center justify-end gap-3 pt-4">
@@ -736,7 +751,7 @@ export default {
       // Brand CRUD modal
       brandModal: {
         show: false,
-        form: { maTH: null, tenTH: '', moTa: '', trangThai: 1 }
+        form: { maTH: null, tenTH: '', moTa: '', logo: '', trangThai: 1 }
       },
 
       // Product Add modal
@@ -842,11 +857,9 @@ export default {
           if (!this.productModal.newBrandName.trim()) throw new Error("Vui lòng nhập tên thương hiệu");
           const brandRes = await axios.post('/admin/brands', {
              tenTH: this.productModal.newBrandName.trim(),
-             moTa: this.productModal.newBrandImg, // Storing logo URL in moTa tentatively, or there is no hinhAnh field?
+             logo: this.productModal.newBrandImg,
              trangThai: 1
           });
-          // Note: Wait, does ThuongHieu entity have an image field? AdminBrands shows we fetch images using getBrandLogo(tenTH) based on hardcoded paths if available?
-          // If we add 'newBrandImg', we can store it. But `logo-${slug}.png` is hardcoded. Let's just pass `newBrandImg` if possible, the backend might ignore if it doesn't have the column. Or wait, let's keep it simple.
           this.productModal.form.thuongHieu = { maTH: brandRes.data.maTH };
           this.fetchBrands();
         }
@@ -919,6 +932,32 @@ export default {
       } finally {
         this.productModal.uploadingBrandImg = false;
         if (this.$refs.brandFileInput) this.$refs.brandFileInput.value = null;
+      }
+    },
+
+    async uploadBrandImageModal(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await axios.post('/upload?type=logo', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (res.data && res.data.success) {
+          this.brandModal.form.logo = res.data.url;
+          if (window.$toast) window.$toast.success('Tải ảnh thương hiệu thành công!');
+        } else {
+          throw new Error(res.data.message || 'Lỗi tải ảnh');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        if (window.$toast) window.$toast.error('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+        else alert('Lỗi tải ảnh: ' + (error.response?.data?.message || error.message));
+      } finally {
+        if (this.$refs.brandModalFileInput) this.$refs.brandModalFileInput.value = null;
       }
     },
 
@@ -1032,7 +1071,7 @@ export default {
       if (brand) {
         this.brandModal.form = { ...brand }
       } else {
-        this.brandModal.form = { maTH: null, tenTH: '', moTa: '', trangThai: 1 }
+        this.brandModal.form = { maTH: null, tenTH: '', moTa: '', logo: '', trangThai: 1 }
       }
       this.brandModal.show = true
     },
@@ -1070,6 +1109,7 @@ export default {
 
     getBrandLogo(brand) {
       if (!brand || !brand.tenTH) return '/img/placeholder.png'
+      if (brand.logo) return brand.logo;
       if (brand.moTa && (brand.moTa.startsWith('http') || brand.moTa.startsWith('/uploads') || brand.moTa.startsWith('/images'))) {
         return brand.moTa;
       }

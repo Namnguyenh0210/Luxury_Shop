@@ -71,6 +71,11 @@
                 <span class="material-symbols-outlined text-[14px]">send</span>
                 Yêu cầu
               </button>
+              <button v-if="isAdmin" @click="prefillAndOpenModal(item)"
+                class="px-4 py-2 bg-[#C8A97E] hover:bg-[#B88A00] text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2">
+                <span class="material-symbols-outlined text-[14px]">add_shopping_cart</span>
+                Tạo phiếu
+              </button>
               <div :class="item.soLuongTon === 0 ? 'bg-red-50 text-red-600' : 'bg-[#C8A97E]/10 text-[#C8A97E]'"
                 class="px-3 py-1.5 rounded-xl text-xs font-black min-w-[60px] text-center border border-current/10">
                 {{ item.soLuongTon }} sp
@@ -417,9 +422,9 @@
                   @focus="showBrandDropdown = true"
                   @blur="hideBrandDropdown"
                   @input="filterBrandSearch"
-                  placeholder="Gõ tên hoặc chọn thương hiệu..."
+                  :placeholder="newItem.productId ? '(Tự động theo sản phẩm)' : 'Vui lòng chọn sản phẩm...'"
                   :disabled="!newItem.isNewProduct && newItem.productId"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50 disabled:text-gray-400"
                 />
                 <div v-if="showBrandDropdown" class="absolute z-[40] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
                   <div v-for="b in filteredBrandList" :key="b.maTH" @mousedown.prevent="selectBrand(b)"
@@ -439,9 +444,9 @@
                   @focus="showCategoryDropdown = true"
                   @blur="hideCategoryDropdown"
                   @input="filterCategorySearch"
-                  placeholder="Gõ tên hoặc chọn danh mục..."
+                  :placeholder="newItem.productId ? '(Tự động theo sản phẩm)' : 'Vui lòng chọn sản phẩm...'"
                   :disabled="!newItem.isNewProduct && newItem.productId"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50 disabled:text-gray-400"
                 />
                 <div v-if="showCategoryDropdown" class="absolute z-[40] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
                   <div v-for="c in filteredCategoryList" :key="c.maLoai" @mousedown.prevent="selectCategory(c)"
@@ -461,7 +466,7 @@
                   @focus="showProductDropdown = true"
                   @blur="hideProductDropdown"
                   @input="filterProducts"
-                  placeholder="Nhập tên SP mới hoặc chọn có sẵn..."
+                  placeholder="Tìm và chọn sản phẩm có sẵn..."
                   class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-semibold text-gray-800"
                 />
                 <div v-if="showProductDropdown" class="absolute z-[35] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
@@ -542,15 +547,15 @@
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">đ</span>
               </div>
             </div>
-            <div class="space-y-1.5" v-if="false">
-              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Giá Bán Lẻ <span v-if="newItem.isNewProduct" class="text-red-500">*</span></label>
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Giá Bán Lẻ <span class="text-red-500">*</span></label>
               <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-gray-400 text-sm">sell</span>
                 <input type="text"
                   :value="formatCurrency(newItem.giaBan)"
                   @input="e => newItem.giaBan = parseCurrency(e.target.value)"
                   @blur="e => e.target.value = formatCurrency(newItem.giaBan)"
-                  :disabled="!newItem.isNewProduct && newItem.productId"
-                  class="w-full border border-gray-200 rounded-xl pl-4 pr-8 py-2.5 text-sm bg-white focus:border-[#C8A97E] focus:outline-none transition-all font-bold text-yellow-800 disabled:bg-gray-50" />
+                  class="w-full border border-gray-200 rounded-xl pl-9 pr-8 py-2.5 text-sm bg-white focus:border-[#C8A97E] focus:outline-none transition-all font-bold text-yellow-800" />
                 <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 font-bold">đ</span>
               </div>
             </div>
@@ -1000,8 +1005,8 @@ export default {
       filter: { maNCC: '', maNV: '', timeRange: '' },
       form: { maNCC: '', ghiChu: '', items: [] },
       newItem: {
-		brandId: '', tenTH: '',
         productId: '', maBienThe: '',
+        brandId: '', tenTH: '',
         tenSP: '', categoryId: '', brandId: '', gender: 2, isNewProduct: false,
         sizeRows: [{ size: '', color: '', qty: 1, maBienThe: '', isExisting: false }],
         price: 0, giaBan: 0, moTa: ''
@@ -1349,23 +1354,36 @@ export default {
       if (!this.newItem.tenSP) {
         await this.showAppDialog({ isError: true, message: 'Vui lòng nhập tên sản phẩm.' }); return
       }
+      if (this.newItem.price <= 0) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập giá nhập (> 0).' }); return
+      }
+      if (this.newItem.giaBan <= 0) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập giá bán (> 0).' }); return
+      }
       const validRows = this.newItem.sizeRows.filter(r => r.size && r.color && r.qty >= 1)
       if (validRows.length === 0) {
         await this.showAppDialog({ isError: true, message: 'Vui lòng điền ít nhất một dòng size/màu/số lượng hợp lệ.' }); return
       }
 
-      if (!this.newItem.productId) {
-        await this.showAppDialog({ isError: true, message: 'Vui lòng chọn một sản phẩm có sẵn từ danh sách.' }); return
-      }
-
       for (const row of validRows) {
-        if (!row.isExisting || !row.maBienThe) {
-          await this.showAppDialog({ isError: true, message: `Biến thể Size ${row.size} / Màu ${row.color} chưa tồn tại cho sản phẩm này. Chỉ được phép nhập hàng cho biến thể đã có sẵn.` }); return
+        // Kiểm tra xem sản phẩm này (cùng biến thể) đã có trong danh sách bảng bên dưới chưa
+        const existingIdx = this.form.items.findIndex(it => 
+          (it.maBienThe && row.maBienThe && it.maBienThe === row.maBienThe) ||
+          (!it.maBienThe && it.tenSP === this.newItem.tenSP && it.size === row.size && it.color === row.color)
+        );
+
+        if (existingIdx !== -1) {
+          // Nếu đã có, cập nhật lại số lượng và giá thay vì thêm dòng mới
+          this.form.items[existingIdx].qty = row.qty;
+          this.form.items[existingIdx].price = this.newItem.price;
+          continue;
         }
-        
+
         if (row.isExisting && row.maBienThe) {
+          // Sản phẩm và biến thể đã có sẵn
           this.form.items.push({
             itemType: 'existing',
+            productId: this.newItem.productId,
             maBienThe: row.maBienThe,
             displayName: this.newItem.tenSP,
             categoryName: this.categorySearchText,
@@ -1375,7 +1393,28 @@ export default {
             color: row.color,
             qty: row.qty,
             price: this.newItem.price,
+            giaBan: this.newItem.giaBan,
             ghiChu: ''
+          })
+        } else {
+          // Sản phẩm đã có (có productId) nhưng Biến thể (Size/Màu) này là mới
+          this.form.items.push({
+            itemType: 'new', // Dùng itemType 'new' để backend tìm hoặc tạo sp/biến thể
+            productId: this.newItem.productId, // QUAN TRỌNG: Gửi ID để backend tìm đúng sp
+            maBienThe: null,
+            displayName: this.newItem.tenSP,
+            tenSP: this.newItem.tenSP,
+            categoryId: this.newItem.categoryId,
+            brandId: this.newItem.brandId,
+            categoryName: this.categorySearchText,
+            brandName: this.brandSearchText,
+            gender: this.newItem.gender,
+            size: row.size,
+            color: row.color,
+            qty: row.qty,
+            price: this.newItem.price,
+            moTa: this.newItem.moTa || '',
+            ghiChu: 'Tạo biến thể mới cho SP'
           })
         }
       }
@@ -1423,21 +1462,97 @@ export default {
         this.stockRequests = res.data.stockRequests || []
       } catch (e) { console.error(e) }
     },
+    prefillAndOpenModal(item) {
+        this.resetForm();
+        this.showModal = true;
+        
+        // Luôn điền thông tin cơ bản trước từ item (phòng khi không tìm thấy product trong danh sách)
+        this.newItem.tenSP = item.tenSP;
+        this.productSearchText = item.tenSP;
+        this.newItem.productId = item.maSP || '';
+
+        // Tìm sản phẩm gốc trong danh sách để lấy đầy đủ metadata (maLoai, maTH, gender...)
+        let p = null;
+        if (item.maSP) {
+            p = this.products.find(prod => prod.maSP === item.maSP);
+        }
+        if (!p && item.maBienThe) {
+            p = this.products.find(prod => prod.variants && prod.variants.some(v => v.maBienThe === item.maBienThe));
+        }
+        if (!p && item.tenSP) {
+            p = this.products.find(prod => prod.tenSP.toLowerCase() === item.tenSP.toLowerCase());
+        }
+
+        if (p) {
+            this.selectProduct(p);
+            // Sau khi selectProduct hoàn tất (bao gồm loadVariants)
+            this.$nextTick(() => {
+                const qty = 10;
+                // Ưu tiên giá nhập trong item, rồi tới variants của p, cuối cùng là giá nhập hiện có trong form
+                const price = item.giaNhap || p.variants?.find(v => v.maBienThe === item.maBienThe)?.giaNhap || this.newItem.price || 0;
+                
+                this.newItem.sizeRows = [{ 
+                    size: item.size, 
+                    color: item.mau, 
+                    qty: qty, 
+                    maBienThe: item.maBienThe, 
+                    isExisting: true 
+                }];
+                this.newItem.price = price;
+
+                // Thêm luôn vào danh sách phiếu nhập nếu đã đủ thông tin cần thiết
+                this.form.items.push({
+                    itemType: 'existing',
+                    productId: p.maSP,
+                    maBienThe: item.maBienThe,
+                    displayName: item.tenSP,
+                    categoryName: p.loaiSanPham?.tenLoai || this.categorySearchText || '',
+                    brandName: p.thuongHieu?.tenTH || this.brandSearchText || '',
+                    gender: p.gioiTinh ?? 2,
+                    size: item.size,
+                    color: item.mau,
+                    qty: qty,
+                    price: price,
+                    ghiChu: 'Nhập hàng từ danh sách tồn kho thấp'
+                });
+            });
+        }
+    },
     async processRequest(req) {
        this.resetForm()
        this.currentRequestId = req.maYeuCau
-       // Pre-fill the modal
-       this.form.items.push({
-          itemType: 'existing',
-          maBienThe: req.sanPhamChiTiet.maBienThe,
-          displayName: req.sanPhamChiTiet.sanPham.tenSP,
-          size: req.sanPhamChiTiet.sizeSP.tenSize,
-          color: req.sanPhamChiTiet.mauSacSP.tenMau,
-          qty: req.soLuongYeuCau,
-          price: req.sanPhamChiTiet.giaNhap || 0,
-          ghiChu: `Nhập hàng theo yêu cầu #${req.maYeuCau} của ${req.nhanVien?.hoTen}`
-       })
        this.showModal = true
+       
+       const p = req.sanPhamChiTiet?.sanPham;
+       if (p) {
+          this.selectProduct(p);
+          this.$nextTick(() => {
+            const price = req.sanPhamChiTiet.giaNhap || 0;
+            this.newItem.sizeRows = [{
+              size: req.sanPhamChiTiet.sizeSP?.tenSize,
+              color: req.sanPhamChiTiet.mauSacSP?.tenMau,
+              qty: req.soLuongYeuCau,
+              maBienThe: req.sanPhamChiTiet.maBienThe,
+              isExisting: true
+            }];
+            if (price) this.newItem.price = price;
+
+            // Thêm vào danh sách phiếu nhập luôn
+            this.form.items.push({
+                itemType: 'existing',
+                maBienThe: req.sanPhamChiTiet.maBienThe,
+                displayName: p.tenSP,
+                categoryName: p.loaiSanPham?.tenLoai || '',
+                brandName: p.thuongHieu?.tenTH || '',
+                gender: p.gioiTinh ?? 2,
+                size: req.sanPhamChiTiet.sizeSP?.tenSize,
+                color: req.sanPhamChiTiet.mauSacSP?.tenMau,
+                qty: req.soLuongYeuCau,
+                price: price,
+                ghiChu: `Nhập hàng theo yêu cầu #${req.maYeuCau}`
+            });
+          });
+       }
     },
     async rejectRequest(req) {
        const ok = await this.showAppDialog({ type: 'confirm', message: 'Bạn chắc chắn muốn từ chối yêu cầu nhập hàng này?' })
@@ -1457,6 +1572,7 @@ export default {
         await axios.post('/admin/inventory/import', payload, { withCredentials: true })
         await this.showAppDialog({ title: 'Thành công', message: 'Tạo phiếu thành công!' })
         const res = await axios.get('/admin/inventory', { withCredentials: true })
+        this.products      = res.data.products   || []
         this.danhSachPhieu = res.data.phieuNhaps || []
         this.lowStock      = res.data.lowStock   || []
         this.totalItems    = res.data.totalItems || 0
