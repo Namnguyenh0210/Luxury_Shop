@@ -20,9 +20,12 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminTaiKhoanController {
 
-    @Autowired private TaiKhoanService taiKhoanService;
-    @Autowired private VaiTroRepository vaiTroRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired
+    private TaiKhoanService taiKhoanService;
+    @Autowired
+    private VaiTroRepository vaiTroRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping
     public ResponseEntity<?> getAll() {
@@ -41,17 +44,18 @@ public class AdminTaiKhoanController {
                 account.setNgayTao(LocalDateTime.now());
                 account.setTrangThai(true);
                 account.setNguonTao("LOCAL");
-                String pass = (account.getMatKhauMoi() != null && !account.getMatKhauMoi().isEmpty()) 
-                              ? account.getMatKhauMoi() : "123456";
+                String pass = (account.getMatKhauMoi() != null && !account.getMatKhauMoi().isEmpty())
+                        ? account.getMatKhauMoi()
+                        : "123456";
                 account.setMatKhau(passwordEncoder.encode(pass));
-                
+
                 if (account.getVaiTros() == null || account.getVaiTros().isEmpty()) {
                     vaiTroRepository.findAll().stream()
-                        .filter(r -> r.getTenVaiTro().contains("USER")).findFirst()
-                        .ifPresent(r -> { 
-                            account.setVaiTros(new HashSet<>()); 
-                            account.addVaiTro(r); 
-                        });
+                            .filter(r -> r.getTenVaiTro().contains("USER")).findFirst()
+                            .ifPresent(r -> {
+                                account.setVaiTros(new HashSet<>());
+                                account.addVaiTro(r);
+                            });
                 }
             } else {
                 TaiKhoan old = taiKhoanService.findById(account.getMaTK()).orElseThrow();

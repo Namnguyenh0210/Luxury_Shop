@@ -19,7 +19,7 @@ import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/api/admin/reports")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'NHANVIEN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminThongKeController {
 

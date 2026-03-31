@@ -827,8 +827,9 @@ public class ApiController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            log.error("Lỗi khi đặt hàng: ", e);
             response.put("success", false);
-            response.put("message", "Có lỗi xảy ra: " + e.getMessage());
+            response.put("message", "Có lỗi xảy ra: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
             return ResponseEntity.status(500).body(response);
         }
     }
