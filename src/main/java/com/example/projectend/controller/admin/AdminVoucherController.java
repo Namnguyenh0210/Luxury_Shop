@@ -14,7 +14,7 @@ import com.example.projectend.repository.DonHangRepository;
 
 @RestController
 @RequestMapping("/api/admin/vouchers")
-@PreAuthorize("hasAnyRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'NHANVIEN')")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminVoucherController {
 

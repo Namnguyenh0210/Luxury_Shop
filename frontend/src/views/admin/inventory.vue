@@ -1376,18 +1376,45 @@ export default {
       if (v && v.giaNhap) this.newItem.price = parseFloat(v.giaNhap)
     },
     async addItem() {
-      if (!this.newItem.tenSP) {
-        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập tên sản phẩm.' }); return
+      // 1. Kiểm tra Nhà Cung Cấp (Bắt buộc cho cả phiếu)
+      if (!this.form.maNCC) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng chọn hoặc tạo Nhà cung cấp trước khi thêm sản phẩm!' });
+        return;
       }
+
+      // 2. Kiểm tra Tên sản phẩm
+      if (!this.newItem.tenSP || !this.productSearchText.trim()) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập hoặc chọn tên sản phẩm.' });
+        return;
+      }
+
+      // 3. Kiểm tra Thương hiệu
+      if (!this.newItem.brandId && !this.brandSearchText.trim()) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng chọn thương hiệu của sản phẩm.' });
+        return;
+      }
+
+      // 4. Kiểm tra Danh mục
+      if (!this.newItem.categoryId && !this.categorySearchText.trim()) {
+        await this.showAppDialog({ isError: true, message: 'Vui lòng chọn danh mục cho sản phẩm.' });
+        return;
+      }
+
+      // 5. Kiểm tra Giá nhập & Giá bán
       if (this.newItem.price <= 0) {
-        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập giá nhập (> 0).' }); return
+        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập giá nhập (> 0).' });
+        return;
       }
       if (this.newItem.giaBan <= 0) {
-        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập giá bán (> 0).' }); return
+        await this.showAppDialog({ isError: true, message: 'Vui lòng nhập giá bán (> 0).' });
+        return;
       }
+
+      // 6. Kiểm tra các dòng Biến thể (Size/Màu)
       const validRows = this.newItem.sizeRows.filter(r => r.size && r.color && r.qty >= 1)
       if (validRows.length === 0) {
-        await this.showAppDialog({ isError: true, message: 'Vui lòng điền ít nhất một dòng size/màu/số lượng hợp lệ.' }); return
+        await this.showAppDialog({ isError: true, message: 'Vui lòng điền đầy đủ thông tin Size, Màu sắc và Số lượng cho ít nhất một dòng.' });
+        return;
       }
 
       for (const row of validRows) {

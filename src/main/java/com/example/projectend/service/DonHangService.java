@@ -134,26 +134,28 @@ public class DonHangService {
                 if (voucher.getNgayKetThuc() != null && now.isAfter(voucher.getNgayKetThuc())) {
                     throw new RuntimeException("Voucher đã hết hạn");
                 }
-
+                
                 // 2. Kiểm tra số lượng
                 if (voucher.getSoLuong() != null && voucher.getDaSuDung() >= voucher.getSoLuong()) {
                     throw new RuntimeException("Voucher đã hết lượt sử dụng");
                 }
-
+                
                 // 3. Kiểm tra giá trị tối thiểu
-                if (tongTien.compareTo(voucher.getGiaTriToiThieu()) < 0) {
+                BigDecimal minVal = voucher.getGiaTriToiThieu() != null ? voucher.getGiaTriToiThieu() : BigDecimal.ZERO;
+                if (tongTien.compareTo(minVal) < 0) {
                     throw new RuntimeException("Đơn hàng chưa đạt giá trị tối thiểu để dùng voucher này");
                 }
-
+                
                 // 4. Kiểm tra điều kiện Thương hiệu / Danh mục (Nếu có)
                 boolean matchesCondition = true;
-                if (voucher.getMaLoaiApDung() != null || voucher.getMaTHApDung() != null) {
+                if ((voucher.getMaLoaiApDung() != null && !voucher.getMaLoaiApDung().isBlank()) || 
+                    (voucher.getMaTHApDung() != null && !voucher.getMaTHApDung().isBlank())) {
                     matchesCondition = false;
                     for (GioHangChiTiet item : gioHangItems) {
                         SanPham sp = item.getSanPhamChiTiet().getSanPham();
                         
                         // Kiểm tra danh mục
-                        if (voucher.getMaLoaiApDung() != null) {
+                        if (voucher.getMaLoaiApDung() != null && !voucher.getMaLoaiApDung().isBlank()) {
                             String[] allowedLoai = voucher.getMaLoaiApDung().split(",");
                             for (String idStr : allowedLoai) {
                                 if (sp.getLoaiSanPham() != null && sp.getLoaiSanPham().getMaLoai().toString().equals(idStr.trim())) {
@@ -163,7 +165,7 @@ public class DonHangService {
                         }
                         
                         // Kiểm tra thương hiệu
-                        if (voucher.getMaTHApDung() != null) {
+                        if (voucher.getMaTHApDung() != null && !voucher.getMaTHApDung().isBlank()) {
                             String[] allowedTH = voucher.getMaTHApDung().split(",");
                             for (String idStr : allowedTH) {
                                 if (sp.getThuongHieu() != null && sp.getThuongHieu().getMaTH().toString().equals(idStr.trim())) {
@@ -174,20 +176,21 @@ public class DonHangService {
                         if (matchesCondition) break;
                     }
                 }
-
+                
                 if (!matchesCondition) {
                     throw new RuntimeException("Voucher không áp dụng cho các sản phẩm trong giỏ hàng của bạn");
                 }
-
+                
                 // 5. Tính toán giảm giá
                 BigDecimal discount = BigDecimal.ZERO;
                 if (voucher.getLoaiGiamGia() == 0) { // Phần trăm
-                    discount = tongTien.multiply(voucher.getGiaTri()).divide(new BigDecimal(100));
+                    // Use scale 2 and HALF_UP to avoid ArithmeticException on non-terminating decimals
+                    discount = tongTien.multiply(voucher.getGiaTri()).divide(new BigDecimal(100), 2, java.math.RoundingMode.HALF_UP);
                     if (voucher.getGiaTriToiDa() != null && discount.compareTo(voucher.getGiaTriToiDa()) > 0) {
                         discount = voucher.getGiaTriToiDa();
                     }
                 } else { // Số tiền cố định
-                    discount = voucher.getGiaTri();
+                    discount = voucher.getGiaTri() != null ? voucher.getGiaTri() : BigDecimal.ZERO;
                 }
                 
                 if (discount.compareTo(tongTien) > 0) discount = tongTien;
@@ -198,7 +201,7 @@ public class DonHangService {
                 // Cập nhật lượt dùng
                 voucher.setDaSuDung(voucher.getDaSuDung() + 1);
                 voucherRepository.save(voucher);
-
+                
                 // TRỪ GIẢM GIÁ VÀO TỔNG TIỀN CUỐI CÙNG
                 donHang.setTongTien(tongTien.subtract(discount));
             }

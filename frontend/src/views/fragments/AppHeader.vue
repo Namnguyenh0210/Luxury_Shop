@@ -233,10 +233,12 @@ export default {
       return this.currentUser?.hoTen?.charAt(0).toUpperCase() || 'U'
     },
     isAdmin() {
-      return this.currentUser?.roles?.includes('ADMIN') || false
+      if (!this.currentUser || !this.currentUser.vaiTros) return false;
+      return this.currentUser.vaiTros.includes('ROLE_ADMIN') || this.currentUser.vaiTros.includes('ADMIN');
     },
     isStaff() {
-      return this.currentUser?.roles?.includes('NHANVIEN') || false
+      if (!this.currentUser || !this.currentUser.vaiTros) return false;
+      return this.currentUser.vaiTros.includes('ROLE_STAFF') || this.currentUser.vaiTros.includes('ROLE_NHANVIEN') || this.currentUser.vaiTros.includes('NHANVIEN');
     }
   },
   methods: {
@@ -287,6 +289,10 @@ export default {
           const data = await res.json()
           // Only set authenticated if server confirms authentication
           if (data.authenticated === true) {
+            // Chuẩn hóa roles: bỏ "ROLE_" nếu có và thay "NHANVIEN" bằng "STAFF" để tương quan code
+            const rawRoles = data.vaiTros || []
+            data.vaiTros = rawRoles.map(r => r.replace('ROLE_', ''))
+            
             this.currentUser = data
             this.isAuthenticated = true
           } else {

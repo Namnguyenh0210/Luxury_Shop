@@ -1168,7 +1168,7 @@ export default {
           formData.append('avatar', this.$refs.avatarInput.files[0])
         }
 
-        const response = await axios.post('/api/profile/update', formData, {
+        const response = await axios.post('/profile/update', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         })
 

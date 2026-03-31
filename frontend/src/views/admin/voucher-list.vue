@@ -196,20 +196,30 @@
 
               <div class="grid grid-cols-3 gap-4">
                 <div>
-                  <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Giá trị giảm</label>
-                  <input type="text"
-                    :value="formatCurrency(currentVoucher.giaTri)"
-                    @input="e => currentVoucher.giaTri = parseCurrency(e.target.value)"
-                    @blur="e => e.target.value = formatCurrency(currentVoucher.giaTri)"
-                    class="lux-input font-bold text-gray-900" required>
+                  <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Giá trị giảm ({{ currentVoucher.loaiGiamGia === 0 ? '%' : 'VND' }})</label>
+                  <div class="relative">
+                    <input type="text"
+                      :value="formatCurrency(currentVoucher.giaTri)"
+                      @input="e => currentVoucher.giaTri = parseCurrency(e.target.value)"
+                      @blur="e => e.target.value = formatCurrency(currentVoucher.giaTri)"
+                      class="lux-input font-bold text-gray-900 pr-8" required>
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400">
+                      {{ currentVoucher.loaiGiamGia === 0 ? '%' : 'đ' }}
+                    </span>
+                  </div>
                 </div>
-                <div>
+                <div :class="{'opacity-40 grayscale pointer-events-none transition-all': currentVoucher.loaiGiamGia === 1}">
                   <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Giảm tối đa</label>
-                  <input type="text"
-                    :value="formatCurrency(currentVoucher.giaTriToiDa)"
-                    @input="e => currentVoucher.giaTriToiDa = parseCurrency(e.target.value)"
-                    @blur="e => e.target.value = formatCurrency(currentVoucher.giaTriToiDa)"
-                    class="lux-input font-bold text-gray-900" placeholder="---">
+                  <div class="relative">
+                    <input type="text"
+                      :value="formatCurrency(currentVoucher.giaTriToiDa)"
+                      @input="e => currentVoucher.giaTriToiDa = parseCurrency(e.target.value)"
+                      @blur="e => e.target.value = formatCurrency(currentVoucher.giaTriToiDa)"
+                      class="lux-input font-bold text-gray-900" 
+                      :placeholder="currentVoucher.loaiGiamGia === 1 ? 'N/A' : '---'"
+                      :required="currentVoucher.loaiGiamGia === 0">
+                    <span v-if="currentVoucher.loaiGiamGia === 0" class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400">đ</span>
+                  </div>
                 </div>
                 <div>
                   <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Số lượt phát hành</label>
