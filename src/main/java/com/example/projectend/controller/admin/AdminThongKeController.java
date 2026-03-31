@@ -33,7 +33,9 @@ public class AdminThongKeController {
     private TaiKhoanRepository taiKhoanRepository;
 
     @GetMapping
-    public Map<String, Object> getDashboard() {
+    public Map<String, Object> getDashboard(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
 
         BigDecimal totalRevenue = donHangRepository.sumTotalRevenue();
         if (totalRevenue == null)
@@ -58,46 +60,76 @@ public class AdminThongKeController {
         Long todayNewCustomers = taiKhoanRepository.countByNgayTaoBetween(startOfDay, endOfDay);
         if (todayNewCustomers == null) todayNewCustomers = 0L;
 
-        // TODO: Sau này query thật theo ngày/tháng
-        LocalDate today = LocalDate.now();
-        LocalDate startWeek = today.minusDays(6);
+        LocalDateTime start;
+        LocalDateTime end;
+        LocalDate startLocalDate;
 
-        LocalDateTime start = startWeek.atStartOfDay();
-        LocalDateTime end = today.atTime(LocalTime.MAX);
+        if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+            startLocalDate = LocalDate.parse(startDate);
+            start = startLocalDate.atStartOfDay();
+            end = LocalDate.parse(endDate).atTime(LocalTime.MAX);
+        } else {
+            LocalDate today = LocalDate.now();
+            startLocalDate = today.minusDays(6);
+            start = startLocalDate.atStartOfDay();
+            end = today.atTime(LocalTime.MAX);
+        }
 
         List<DonHang> orders = donHangRepository.findByNgayDatBetween(start, end);
+        long totalDays = java.time.temporal.ChronoUnit.DAYS.between(startLocalDate, end.toLocalDate()) + 1;
 
-        // Map ngày -> doanh thu
-        Map<LocalDate, BigDecimal> revenueMap = new HashMap<>();
-
-        for (int i = 0; i < 7; i++) {
-            revenueMap.put(startWeek.plusDays(i), BigDecimal.ZERO);
-        }
-
-        // Cộng tiền theo ngày
-        for (DonHang dh : orders) {
-            LocalDate date = dh.getNgayDat().toLocalDate();
-            revenueMap.put(date,
-                revenueMap.get(date).add(dh.getTongTien()));
-        }
-
-        // Convert sang list
         List<String> chartLabels = new ArrayList<>();
         List<Double> chartData = new ArrayList<>();
 
-        for (int i = 0; i < 7; i++) {
-            LocalDate d = startWeek.plusDays(i);
-            chartLabels.add("T" + d.getDayOfWeek().getValue());
-            chartData.add(revenueMap.get(d).doubleValue());
+        if (totalDays <= 31) {
+            Map<LocalDate, BigDecimal> revenueMap = new HashMap<>();
+            LocalDate current = startLocalDate;
+            while (!current.isAfter(end.toLocalDate())) {
+                revenueMap.put(current, BigDecimal.ZERO);
+                current = current.plusDays(1);
+            }
+            for (DonHang dh : orders) {
+                LocalDate d = dh.getNgayDat().toLocalDate();
+                if (revenueMap.containsKey(d)) {
+                    revenueMap.put(d, revenueMap.get(d).add(dh.getTongTien() != null ? dh.getTongTien() : BigDecimal.ZERO));
+                }
+            }
+            current = startLocalDate;
+            while (!current.isAfter(end.toLocalDate())) {
+                chartLabels.add(current.getDayOfMonth() + "/" + current.getMonthValue());
+                chartData.add(revenueMap.get(current).doubleValue());
+                current = current.plusDays(1);
+            }
+        } else {
+            Map<String, BigDecimal> revenueMap = new HashMap<>();
+            LocalDate current = startLocalDate.withDayOfMonth(1);
+            while (!current.isBefore(startLocalDate.withDayOfMonth(1)) && !current.isAfter(end.toLocalDate())) {
+                String monthKey = current.getMonthValue() + "/" + current.getYear();
+                revenueMap.put(monthKey, BigDecimal.ZERO);
+                current = current.plusMonths(1);
+            }
+            for (DonHang dh : orders) {
+                LocalDate d = dh.getNgayDat().toLocalDate();
+                String monthKey = d.getMonthValue() + "/" + d.getYear();
+                if (revenueMap.containsKey(monthKey)) {
+                    revenueMap.put(monthKey, revenueMap.get(monthKey).add(dh.getTongTien() != null ? dh.getTongTien() : BigDecimal.ZERO));
+                }
+            }
+            current = startLocalDate.withDayOfMonth(1);
+            while (!current.isAfter(end.toLocalDate())) {
+                String monthKey = current.getMonthValue() + "/" + current.getYear();
+                chartLabels.add("T" + current.getMonthValue());
+                chartData.add(revenueMap.get(monthKey).doubleValue());
+                current = current.plusMonths(1);
+            }
         }
-        
 
         Map<String, Object> response = new HashMap<>();
         response.put("totalRevenue", totalRevenue);
         response.put("newOrders", newOrders);
         response.put("soldProducts", soldProducts);
         response.put("totalCustomers", totalCustomers);
-        
+
         response.put("todayRevenue", todayRevenue);
         response.put("todayOrders", todayOrders);
         response.put("todaySoldProducts", todaySoldProducts);
