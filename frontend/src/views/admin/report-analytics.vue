@@ -248,7 +248,9 @@ export default {
       this.updateMainChart()
     },
     timeRange() {
-      this.loadData() // re-fetch if needed, or just demo update
+      this.startDate = ''
+      this.endDate = ''
+      this.loadData()
     }
   },
 
@@ -266,31 +268,36 @@ export default {
     
     async filterByDate() {
       if (!this.startDate || !this.endDate) return
-      try {
-        const res = await axios.get('/admin/reports/by-date', {
-          params: { startDate: this.startDate, endDate: this.endDate },
-          withCredentials: true
-        })
-        const lbls = res.data.chartLabels || []
-        const cd = res.data.chartData || []
-        this.chartLabels = lbls.length ? lbls : ['K_DLD']
-        this.chartDataAll.revenue = cd.length ? cd : [0]
-        
-        // Sinh dữ liệu riêng biệt không trùng lặp hình dáng cho các chart còn lại
-        this.chartDataAll.orders = this.chartDataAll.revenue.map((v, i) => Math.floor(Math.abs(Math.sin(i+1))*15) + (v>0 ? 10 : 2))
-        this.chartDataAll.products = this.chartDataAll.orders.map((v, i) => v * (Math.floor(Math.abs(Math.cos(i))*3) + 2))
-        this.chartDataAll.customers = this.chartDataAll.revenue.map((v, i) => Math.floor(Math.abs(Math.sin(i+3))*8) + (v>0 ? 5 : 0))
-        
-        this.updateMainChart()
-      } catch (e) {
-        console.error("Lỗi lọc", e)
-      }
+      this.timeRange = '' // clear preset range
+      await this.loadData()
     },
     
     async loadData() {
+      let s = this.startDate
+      let e = this.endDate
+
+      if (!s || !e) {
+        const today = new Date()
+        if (this.timeRange === 'week') {
+          const lw = new Date()
+          lw.setDate(today.getDate() - 6)
+          s = lw.toISOString().split('T')[0]
+          e = today.toISOString().split('T')[0]
+        } else if (this.timeRange === 'month') {
+          s = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
+          e = today.toISOString().split('T')[0]
+        } else if (this.timeRange === 'year') {
+          s = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
+          e = today.toISOString().split('T')[0]
+        }
+      }
+
       try {
         const [repRes, catRes] = await Promise.all([
-          axios.get('/admin/reports', { withCredentials: true }),
+          axios.get('/admin/reports', { 
+            params: { startDate: s, endDate: e },
+            withCredentials: true 
+          }),
           axios.get('/admin/categories', { withCredentials: true }).catch(()=>({data:[]}))
         ]);
         

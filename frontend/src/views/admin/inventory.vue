@@ -84,6 +84,29 @@
           </div>
         </div>
 
+        <!-- NEW: NO VARIANTS PANEL -->
+        <div v-if="noVariantProducts.length > 0" class="bg-white rounded-[2rem] border border-amber-400/50 shadow-sm overflow-hidden animate-in fade-in slide-in-from-top duration-500">
+          <div class="bg-amber-50 px-6 py-4 flex items-center gap-3 border-b border-amber-100">
+             <span class="material-symbols-outlined text-amber-600 text-[24px]">new_releases</span>
+             <span class="text-sm font-black text-gray-800 uppercase tracking-widest">Sản phẩm mới chưa có biến thể</span>
+             <span class="ml-auto px-3 py-1 bg-amber-600 text-white text-[10px] font-black rounded-full shadow-sm">{{ noVariantProducts.length }}</span>
+          </div>
+          <div class="divide-y divide-gray-50 max-h-[300px] overflow-y-auto custom-scrollbar">
+             <div v-for="p in noVariantProducts" :key="p.maSP" class="flex items-center gap-4 px-6 py-4 hover:bg-amber-50/50 transition-colors group">
+                <div class="size-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 group-hover:bg-white transition-colors border border-transparent group-hover:border-amber-200 font-black">#</div>
+                <div class="flex-1">
+                   <p class="text-sm font-bold text-gray-800">{{ p.tenSP }}</p>
+                   <p class="text-[10px] text-gray-400 font-black uppercase tracking-wider">Mã SP: #{{ p.maSP }} &bull; Cần thiết lập size/màu</p>
+                </div>
+                <button v-if="isAdmin" @click="prefillNoVariantProduct(p)"
+                   class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2">
+                   <span class="material-symbols-outlined text-[14px]">add_box</span>
+                   Thiết lập ngay
+                </button>
+             </div>
+          </div>
+        </div>
+
         <!-- SECTION HEADER -->
         <div class="flex items-center justify-between">
           <h3 class="text-base font-black text-gray-800 uppercase tracking-widest flex items-center gap-2">
@@ -964,6 +987,7 @@ export default {
       nhanViens: [],
       danhSachPhieu: [],
       lowStock: [],
+      noVariantProducts: [],
       totalItems: 0,
       supplierCount: 0,
       activeProducts: 0,
@@ -1070,6 +1094,7 @@ export default {
       this.nhanViens       = res.data.nhanViens     || []
       this.danhSachPhieu   = res.data.phieuNhaps    || []
       this.lowStock        = res.data.lowStock      || []
+      this.noVariantProducts = res.data.noVariantProducts || []
       this.totalItems      = res.data.totalItems    || 0
       this.supplierCount   = res.data.supplierCount || 0
       this.activeProducts  = res.data.activeProducts|| 0
@@ -1518,6 +1543,14 @@ export default {
             });
         }
     },
+    prefillNoVariantProduct(p) {
+        this.resetForm();
+        this.showModal = true;
+        this.selectProduct(p);
+        this.$nextTick(() => {
+            if (this.newItem.sizeRows.length === 0) this.addSizeRow();
+        });
+    },
     async processRequest(req) {
        this.resetForm()
        this.currentRequestId = req.maYeuCau
@@ -1575,6 +1608,7 @@ export default {
         this.products      = res.data.products   || []
         this.danhSachPhieu = res.data.phieuNhaps || []
         this.lowStock      = res.data.lowStock   || []
+        this.noVariantProducts = res.data.noVariantProducts || []
         this.totalItems    = res.data.totalItems || 0
         this.stockRequests = res.data.stockRequests || []
         this.closeModal()

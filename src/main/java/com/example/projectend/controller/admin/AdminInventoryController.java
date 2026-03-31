@@ -88,9 +88,32 @@ public class AdminInventoryController {
         // Sắp xếp theo tên để dễ tìm kiếm trong dropdown
         allProducts.sort((a, b) -> a.getTenSP().compareToIgnoreCase(b.getTenSP()));
         
-        // Eagerly load variants and total stock for search dropdown hints if needed
+        List<Map<String, Object>> noVariantProducts = new ArrayList<>();
+        // Eagerly load variants and identify products without any variants
         for (SanPham p : allProducts) {
-             p.getVariants().size(); // Force initialize lazy collection
+             if (p.getVariants() == null || p.getVariants().isEmpty()) {
+                 Map<String, Object> item = new HashMap<>();
+                 item.put("maSP", p.getMaSP());
+                 item.put("tenSP", p.getTenSP());
+                 item.put("gioiTinh", p.getGioiTinh());
+                 item.put("moTa", p.getMoTa());
+                 
+                 if (p.getLoaiSanPham() != null) {
+                     Map<String, Object> lsp = new HashMap<>();
+                     lsp.put("maLoai", p.getLoaiSanPham().getMaLoai());
+                     lsp.put("tenLoai", p.getLoaiSanPham().getTenLoai());
+                     item.put("loaiSanPham", lsp);
+                 }
+                 
+                 if (p.getThuongHieu() != null) {
+                     Map<String, Object> th = new HashMap<>();
+                     th.put("maTH", p.getThuongHieu().getMaTH());
+                     th.put("tenTH", p.getThuongHieu().getTenTH());
+                     item.put("thuongHieu", th);
+                 }
+                 
+                 noVariantProducts.add(item);
+             }
         }
 
         Map<String, Object> result = new HashMap<>();
@@ -105,6 +128,7 @@ public class AdminInventoryController {
         result.put("supplierCount", nhaCungCapRepository.count());
         result.put("activeProducts", sanPhamRepository.countByTrangThaiSP(1));
         result.put("lowStock", lowStockList);
+        result.put("noVariantProducts", noVariantProducts);
         result.put("stockRequests", requests);
         result.put("brands", thuongHieuRepository.findAll());
         return result;
