@@ -14,10 +14,11 @@ export async function fetchCurrentUser() {
   try {
     const res = await axios.get('/auth/current-user', { withCredentials: true })
     if (res.data.authenticated) {
+      const normalizedRoles = (res.data.vaiTros || []).map(r => r.replace('ROLE_', ''))
       authState.user = {
         name: res.data.hoTen || res.data.email,
-        role: res.data.vaiTros?.join(', ') || '',
-        roles: res.data.vaiTros || []
+        role: normalizedRoles.join(', '),
+        roles: normalizedRoles
       }
     } else {
       authState.user = null

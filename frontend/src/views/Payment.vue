@@ -310,13 +310,17 @@ export default {
       if (!codeToCheck) return
 
       try {
-        // Dùng proxy /payment qua Vite để bảo mật và đồng nhất host
-        const res = await axios.get(`/payment/payos/check/${codeToCheck}`)
+        // Dùng fetch thay vì axios vì axios.defaults.baseURL = '/api' 
+        // sẽ biến đường dẫn thành /api/payment/payos/check/..., gây lỗi 404
+        const res = await fetch(`/payment/payos/check/${codeToCheck}`, {
+          credentials: 'include'
+        })
 
-        if (res.data.success) {
-          this.paymentStatus = res.data.status
+        if (res.ok) {
+          const data = await res.json()
+          this.paymentStatus = data.status
 
-          if (res.data.status === 'PAID') {
+          if (data.status === 'PAID') {
             // Thanh toán thành công!
             this.isSuccess = true
             clearInterval(this.checkTimer)
@@ -328,7 +332,7 @@ export default {
               this.$router.push(`/checkout-success?orderId=${targetId}`)
             }, 3000)
 
-          } else if (res.data.status === 'CANCELLED') {
+          } else if (data.status === 'CANCELLED') {
             clearInterval(this.checkTimer)
             clearInterval(this.countdownTimer)
           }

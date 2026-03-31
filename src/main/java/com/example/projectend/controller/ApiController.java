@@ -568,7 +568,7 @@ public class ApiController {
 
             // Xử lý upload avatar
             if (avatar != null && !avatar.isEmpty()) {
-                String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/avatars/";
+                String uploadDir = System.getProperty("user.dir") + "/uploads/avatar/";
                 java.io.File dir = new java.io.File(uploadDir);
                 if (!dir.exists())
                     dir.mkdirs();
@@ -582,7 +582,7 @@ public class ApiController {
                 java.nio.file.Path filePath = java.nio.file.Paths.get(uploadDir + fileName);
                 java.nio.file.Files.write(filePath, avatar.getBytes());
 
-                taiKhoan.setAvatar("/avatars/" + fileName);
+                taiKhoan.setAvatar("/uploads/avatar/" + fileName);
             }
 
             taiKhoanRepository.save(taiKhoan);
