@@ -131,20 +131,25 @@
         <div v-if="!loading && newArrivals.length === 0" class="text-center py-10 opacity-60">
             Không có sản phẩm nào mới.
         </div>
-      </div>
+      </div>ont
         <div class="bg-background-light dark:bg-background-dark py-16">
             <div class="w-full px-4 md:px-[2cm]">
                 <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
                     <div class="relative h-96 overflow-hidden rounded-lg lg:h-[32rem]">
-                        <img class="h-full w-full object-cover" data-alt="An artistic, black and white shot of a designer sketching in a studio." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXiuB0kQSHby6ccYOmju4ElSbioXSvBbWzop5Nikd3QRA0q-L1pPSFupZo2Yuj8BiG9Y-JEp82UEzpmKC8DGb1C16c8ojcksklRm0OAEsj1UgVusuRyQFtYYsfyWP9ozIEfI3TUhwkfY5Twyo1VNcT4XZpw8GVHVoaVRyBIUzwlVToC2P62iIVFc8R9ZLiabJFzQQqeVNt7auKaGA80baXKiDugJADmVBROykiw5KmidXMFWg4zhHMm7asCiw0bMKDQToMzXJMEP8">
+                      <img
+                          class="h-full w-full object-cover"
+                          data-alt="An artistic, black and white shot of a designer sketching in a studio."
+                          src="https://static.bbw.vn/img/bbw/gucci-he-lo-bo-suu-tap-moi-nhat-tai-milan-hinh-anh-monic-1050x700.webp"
+                          alt="Banner blog"
+                      />
                     </div>
                     <div class="text-center lg:text-left">
                         <h2 class="font-serif text-3xl font-bold tracking-tight md:text-4xl">Tin tức thời trang</h2>
                         <p class="mt-4 text-text-primary-light/80 dark:text-text-primary-dark/80">
                             Tin thời trang sản phẩm cập nhật mới nhất 24/24 luôn nắm bắt xu thế và dẫ đầu trong lĩnh vực thời trang
                         </p>
-                        <a class="mt-8 inline-block rounded-full bg-black px-10 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-[#C8A97E] hover:scale-105 shadow-xl" href="/gioithieu">
-                            Tìm hiểu thêm
+                        <a class="mt-8 inline-block rounded-full bg-black px-10 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-[#C8A97E] hover:scale-105 shadow-xl" href="/kienthuc?latest=true">
+                            Nhấn để xem bài viết mới nhất hiện tại
                         </a>
                     </div>
                 </div>
