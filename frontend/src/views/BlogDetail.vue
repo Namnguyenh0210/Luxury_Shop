@@ -1,5 +1,5 @@
 <template>
-  <div class="relative flex min-h-screen w-full flex-col group/design-root bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark font-display">
+  <div class="relative flex min-h-screen w-full flex-col bg-[#FDFCFB] text-[#111111] font-display">
     <AppHeader />
     <div class="flex-grow">
 
@@ -18,13 +18,13 @@
 
     <template v-else>
       <!-- BREADCRUMB -->
-      <div class="w-full px-4 md:px-[2cm] py-8 border-b border-gray-100 dark:border-gray-800">
-        <nav class="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-gray-400">
+      <div class="w-full px-4 md:px-[2cm] py-8 border-b border-gray-100">
+        <nav class="flex items-center gap-3 text-[10px] font-bold tracking-[0.3em] text-[#111111]/50 mb-8 uppercase">
           <router-link to="/" class="hover:text-[#C8A97E] transition-colors">TRANG CHỦ</router-link>
           <span class="material-symbols-outlined text-[12px]">chevron_right</span>
           <router-link to="/blog" class="hover:text-[#C8A97E] transition-colors">KIẾN THỨC</router-link>
           <span class="material-symbols-outlined text-[12px]">chevron_right</span>
-          <span class="text-gray-900 dark:text-gray-100 font-medium truncate max-w-[200px]">{{ baiViet.tieuDe }}</span>
+          <span class="text-[#111111] font-medium truncate max-w-[200px]">{{ baiViet.tieuDe }}</span>
         </nav>
       </div>
 
@@ -38,15 +38,15 @@
                 {{ baiViet.loaiBaiViet.tenLoaiBV }}
               </span>
             </div>
-            <h1 class="text-3xl md:text-5xl font-serif font-bold text-gray-900 dark:text-white leading-tight mb-8">
+            <h1 class="text-3xl md:text-5xl font-serif font-bold text-[#111111] leading-tight mb-8">
               {{ baiViet.tieuDe }}
             </h1>
-            <div class="flex items-center justify-center gap-6 text-[11px] uppercase tracking-widest text-gray-400 pb-12 border-b border-gray-100 dark:border-gray-800">
+            <div class="flex items-center justify-center gap-6 text-[11px] uppercase tracking-widest text-gray-400 pb-12 border-b border-gray-100">
               <div class="flex items-center gap-2">
                 <div class="w-6 h-6 rounded-full bg-[#C8A97E] text-black flex items-center justify-center font-bold text-[10px]">
                   {{ (baiViet.tacGia || 'L').charAt(0).toUpperCase() }}
                 </div>
-                <span class="font-bold text-gray-900 dark:text-white">{{ baiViet.tacGia || 'LUXURY EDITOR' }}</span>
+                <span class="font-bold text-[#111111]">{{ baiViet.tacGia || 'LUXURY EDITOR' }}</span>
               </div>
               <span class="w-[3px] h-[3px] bg-gray-300 rounded-full"></span>
               <span>{{ formatDate(baiViet.ngayDang) }}</span>
@@ -63,14 +63,46 @@
             <img :src="baiViet.hinhAnh" :alt="baiViet.tieuDe" class="w-full h-full object-cover transition-all duration-1000" />
           </div>
 
-          <!-- Thân bài viết -->
-          <div class="prose prose-stone dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 leading-[2] font-light text-lg mb-20"
-            style="white-space: pre-wrap;">
-            {{ baiViet.noiDung }}
+          <!-- Thân bài viết với tính năng Xem thêm (Chỉ hiện khi bài dài) -->
+          <div class="relative mb-20 group/content">
+            <div 
+              class="max-w-none text-[#111111] leading-[2.2] font-light text-lg transition-all duration-1000 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden relative"
+              :style="{ maxHeight: (baiViet.noiDung && baiViet.noiDung.length > 2000 && !isExpanded) ? '650px' : '20000px' }"
+              style="white-space: pre-wrap;"
+            >
+              {{ baiViet.noiDung }}
+              
+              <!-- Gradient mờ dần (Chỉ hiện khi chưa mở và bài dài) -->
+              <div v-if="baiViet.noiDung && baiViet.noiDung.length > 2000 && !isExpanded" 
+                class="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-[#FDFCFB] via-[#FDFCFB]/95 to-transparent z-10 transition-opacity duration-500">
+              </div>
+            </div>
+
+            <!-- Nút Xem thêm / Thu gọn (Chỉ hiện khi bài dài) -->
+            <div v-if="baiViet.noiDung && baiViet.noiDung.length > 2000" class="flex justify-center mt-12 relative z-20">
+              <button 
+                @click="isExpanded = !isExpanded"
+                class="group relative px-12 py-3.5 border border-[#C8A97E] overflow-hidden transition-all duration-500 hover:shadow-[0_10px_30px_rgba(200,169,126,0.2)]"
+              >
+                <!-- Hiệu ứng nền khi hover -->
+                <div class="absolute inset-0 bg-[#C8A97E] translate-y-full group-hover:translate-y-0 transition-transform duration-500"></div>
+                
+                <!-- Nội dung chữ -->
+                <div class="relative flex items-center gap-3">
+                  <span class="text-[11px] font-bold uppercase tracking-[0.4em] text-[#C8A97E] group-hover:text-white transition-colors duration-500">
+                    {{ isExpanded ? 'Thu gọn câu chuyện' : 'Xem toàn bộ bài viết' }}
+                  </span>
+                  <span class="material-symbols-outlined text-[18px] text-[#C8A97E] group-hover:text-white transition-all duration-500"
+                        :class="{ 'rotate-180': isExpanded }">
+                    expand_more
+                  </span>
+                </div>
+              </button>
+            </div>
           </div>
 
           <!-- CHIA SẺ -->
-          <div class="py-8 border-t border-b border-gray-100 dark:border-gray-800 mb-20">
+          <div class="py-8 border-t border-b border-gray-100 mb-20">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
               <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Share this story</span>
               <div class="flex items-center gap-4">
@@ -94,14 +126,14 @@
           <!-- BÀI VIẾT LIÊN QUAN -->
           <section v-if="lienQuan.length > 0" class="mb-24">
             <div class="flex flex-col items-center mb-12">
-              <h2 class="text-2xl font-serif font-bold text-gray-900 dark:text-white mb-2">Related Stories</h2>
+              <h2 class="text-2xl font-serif font-bold text-[#111111] mb-2">Related Stories</h2>
               <div class="w-12 h-[1px] bg-[#C8A97E]"></div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
               <router-link v-for="bv in lienQuan" :key="bv.maBV"
                 :to="`/blog/${bv.maBV}`"
                 class="group flex flex-col">
-                <div class="aspect-[4/5] overflow-hidden bg-stone-100 dark:bg-stone-900 mb-4">
+                <div class="aspect-[4/5] overflow-hidden bg-stone-100 mb-4">
                   <img v-if="bv.hinhAnh" :src="bv.hinhAnh" :alt="bv.tieuDe"
                     class="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 transition-all duration-700" />
                   <div v-else class="w-full h-full flex items-center justify-center">
@@ -109,7 +141,7 @@
                   </div>
                 </div>
                 <div>
-                  <p class="font-serif font-bold text-gray-900 dark:text-white text-base line-clamp-2 group-hover:text-[#C8A97E] transition-colors leading-snug">
+                  <p class="font-serif font-bold text-[#111111] text-base line-clamp-2 group-hover:text-[#C8A97E] transition-colors leading-snug">
                     {{ bv.tieuDe }}
                   </p>
                   <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-3">{{ formatDate(bv.ngayDang) }}</p>
@@ -193,7 +225,7 @@
                       <span class="comment-author">{{ bl.tenNguoiDung || 'Khách' }}</span>
                       <span class="comment-time">• {{ formatDateTime(bl.ngayBinhLuan) }}</span>
                     </div>
-                    <button v-if="daDangNhap" @click="baoCaoBinhLuan(bl.maBL)" title="Báo cáo vi phạm" class="btn-report-cmt text-gray-300 hover:text-red-500 transition-colors">
+                    <button v-if="daDangNhap" @click="baoCaoBinhLuan(bl.maBL)" title="Báo cáo vi phạm" class="btn-report-cmt text-gray-900 transition-colors">
                       <span class="material-symbols-outlined text-[16px]">flag</span>
                     </button>
                   </div>
@@ -264,7 +296,8 @@ export default {
       thongBao: '',
       loaiThongBao: 'ok',
       daDangNhap: false,
-      daSaoChepLink: false
+      daSaoChepLink: false,
+      isExpanded: false
     }
   },
 

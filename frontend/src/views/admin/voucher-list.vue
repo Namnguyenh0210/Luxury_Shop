@@ -156,7 +156,7 @@
 
     <!-- MODAL ĐA NĂNG -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
-      <div class="bg-white rounded-3xl w-full max-w-4xl my-auto shadow-2xl animate-modal-in flex flex-col max-h-[90vh] overflow-hidden border border-[#C8A97E]/20">
+      <div class="bg-white rounded-3xl w-full max-w-6xl my-auto shadow-2xl animate-modal-in flex flex-col max-h-[90vh] overflow-hidden border border-[#C8A97E]/20">
         
         <!-- Modal Header -->
         <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
@@ -171,145 +171,162 @@
         
         <!-- Modal Body -->
         <form @submit.prevent="saveVoucher" class="overflow-y-auto w-full">
-          <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="p-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
             
-            <!-- CẤU HÌNH CƠ BẢN -->
-            <div class="space-y-6">
-              <div class="flex items-center gap-3">
-                 <span class="material-symbols-outlined text-[#C8A97E]">settings</span>
+            <!-- CẤU HÌNH CƠ BẢN (Col-Left) -->
+            <div class="space-y-8">
+              <div class="flex items-center gap-3 pb-2 border-b border-gray-100">
+                 <div class="size-8 rounded-lg bg-[#C8A97E]/10 flex items-center justify-center">
+                   <span class="material-symbols-outlined text-[#C8A97E] text-xl">settings</span>
+                 </div>
                  <h3 class="text-sm font-bold text-gray-800 uppercase tracking-widest">1. Thông tin cơ bản</h3>
               </div>
               
-              <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-1">
-                  <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Mã Voucher</label>
+              <!-- Mã và Loại -->
+              <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Mã Voucher</label>
                   <input v-model="currentVoucher.code" type="text" class="lux-input text-[#111111] uppercase tracking-widest font-black" placeholder="WELCOME2024" required>
                 </div>
-                <div class="col-span-1">
-                  <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Loại giảm giá</label>
-                  <select v-model="currentVoucher.loaiGiamGia" class="lux-input">
+                <div class="space-y-2">
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Loại giảm giá</label>
+                  <select v-model="currentVoucher.loaiGiamGia" class="lux-input font-bold">
                     <option :value="0">Phần trăm (%)</option>
                     <option :value="1">Cố định (VND)</option>
                   </select>
                 </div>
               </div>
 
-              <div class="grid grid-cols-3 gap-4">
-                <div>
-                  <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Giá trị giảm ({{ currentVoucher.loaiGiamGia === 0 ? '%' : 'VND' }})</label>
-                  <div class="relative">
+              <!-- Giá trị và Tối đa -->
+              <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">
+                    Giá trị giảm ({{ currentVoucher.loaiGiamGia === 0 ? '%' : 'VND' }})
+                  </label>
+                  <div class="relative group">
                     <input type="text"
                       :value="formatCurrency(currentVoucher.giaTri)"
                       @input="e => currentVoucher.giaTri = parseCurrency(e.target.value)"
                       @blur="e => e.target.value = formatCurrency(currentVoucher.giaTri)"
-                      class="lux-input font-bold text-gray-900 pr-8" required>
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400">
-                      {{ currentVoucher.loaiGiamGia === 0 ? '%' : 'đ' }}
+                      class="lux-input font-black text-gray-900 pr-10" required>
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-black text-[#C8A97E]">
+                      {{ currentVoucher.loaiGiamGia === 0 ? '%' : '₫' }}
                     </span>
                   </div>
                 </div>
-                <div :class="{'opacity-40 grayscale pointer-events-none transition-all': currentVoucher.loaiGiamGia === 1}">
-                  <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Giảm tối đa</label>
+                <div class="space-y-2" :class="{'opacity-40 grayscale pointer-events-none': currentVoucher.loaiGiamGia === 1}">
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Giảm tối đa</label>
                   <div class="relative">
                     <input type="text"
                       :value="formatCurrency(currentVoucher.giaTriToiDa)"
                       @input="e => currentVoucher.giaTriToiDa = parseCurrency(e.target.value)"
                       @blur="e => e.target.value = formatCurrency(currentVoucher.giaTriToiDa)"
-                      class="lux-input font-bold text-gray-900" 
+                      class="lux-input font-bold text-gray-900 pr-10" 
                       :placeholder="currentVoucher.loaiGiamGia === 1 ? 'N/A' : '---'"
                       :required="currentVoucher.loaiGiamGia === 0">
-                    <span v-if="currentVoucher.loaiGiamGia === 0" class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-400">đ</span>
+                    <span v-if="currentVoucher.loaiGiamGia === 0" class="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-black text-[#C8A97E]">₫</span>
                   </div>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Số lượt phát hành</label>
-                  <input v-model="currentVoucher.soLuong" type="number" class="lux-input font-bold text-gray-900" required>
                 </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Đơn hàng tối thiểu</label>
+              <!-- Số lượng và Điều kiện -->
+              <div class="grid grid-cols-3 gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                <div class="space-y-2">
+                  <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Phát hành</label>
+                  <input v-model="currentVoucher.soLuong" type="number" class="lux-input bg-white h-10 px-3 text-xs" required>
+                </div>
+                <div class="space-y-2">
+                  <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Đơn tối thiểu</label>
                   <input type="text"
                     :value="formatCurrency(currentVoucher.giaTriToiThieu)"
                     @input="e => currentVoucher.giaTriToiThieu = parseCurrency(e.target.value)"
                     @blur="e => e.target.value = formatCurrency(currentVoucher.giaTriToiThieu)"
-                    class="lux-input" placeholder="0">
+                    class="lux-input bg-white h-10 px-3 text-xs" placeholder="0">
                 </div>
-                <div>
-                   <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Mỗi User dùng tối đa</label>
-                   <input v-model="currentVoucher.gioiHanUser" type="number" class="lux-input" placeholder="1">
+                <div class="space-y-2">
+                   <label class="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Hạn mức/User</label>
+                   <input v-model="currentVoucher.gioiHanUser" type="number" class="lux-input bg-white h-10 px-3 text-xs" placeholder="1">
                 </div>
               </div>
 
-              <div>
-                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Mô tả chương trình</label>
-                <textarea v-model="currentVoucher.moTa" class="lux-input h-24 p-4 text-sm italic" placeholder="Ưu đãi dành cho bạn..."></textarea>
+              <div class="space-y-2">
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Mô tả chương trình</label>
+                <textarea v-model="currentVoucher.moTa" class="lux-input h-28 p-4 text-sm italic resize-none leading-relaxed" placeholder="Ghi chú về chương trình ưu đãi này..."></textarea>
               </div>
             </div>
 
-            <!-- CẤU HÌNH NÂNG CAO -->
-            <div class="space-y-6">
-              <div class="flex items-center gap-3">
-                 <span class="material-symbols-outlined text-[#C8A97E]">verified_user</span>
-                 <h3 class="text-sm font-bold text-gray-800 uppercase tracking-widest">2. Phân quyền & Điều kiện</h3>
+            <!-- CẤU HÌNH NÂNG CAO (Col-Right) -->
+            <div class="space-y-8">
+              <div class="flex items-center gap-3 pb-2 border-b border-gray-100">
+                 <div class="size-8 rounded-lg bg-[#C8A97E]/10 flex items-center justify-center">
+                   <span class="material-symbols-outlined text-[#C8A97E] text-xl">verified_user</span>
+                 </div>
+                 <h3 class="text-sm font-bold text-gray-800 uppercase tracking-widest">2. Điều kiện & Thời gian</h3>
               </div>
               
-              <div>
-                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3">Đối tượng áp dụng</label>
-                <div class="grid grid-cols-2 gap-2">
+              <div class="space-y-4">
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Đối tượng áp dụng</label>
+                <div class="grid grid-cols-2 gap-3">
                   <button type="button" v-for="t in targets" :key="t.val" 
                     @click="currentVoucher.apDungCho = t.val"
-                    :class="['px-4 py-3 text-[11px] font-bold uppercase tracking-widest rounded-xl border transition-all', 
-                              currentVoucher.apDungCho === t.val ? 'bg-[#111111] text-white border-[#111111] shadow-lg' : 'bg-white border-gray-200 text-gray-500 hover:border-[#C8A97E] hover:text-[#C8A97E]']"
+                    :class="['px-3 py-3 text-[10px] font-extrabold uppercase tracking-widest rounded-xl border transition-all duration-300', 
+                              currentVoucher.apDungCho === t.val ? 'bg-[#111111] text-white border-[#111111] shadow-xl shadow-black/10 scale-[1.02]' : 'bg-white border-gray-100 text-gray-400 hover:border-[#C8A97E] hover:text-[#C8A97E]']"
                   >
                     {{ t.label }}
                   </button>
                 </div>
               </div>
 
-              <div v-if="currentVoucher.apDungCho === 'VIP'" class="bg-[#FDFCFB] p-5 rounded-2xl border border-[#C8A97E]/20 animate-fade-in">
-                <label class="block text-[11px] font-bold text-[#C8A97E] uppercase tracking-widest mb-2">Điều kiện VIP: Tổng KH chi tiêu ≥</label>
-                <input type="text"
-                    :value="formatCurrency(currentVoucher.minTotalSpendingVIP)"
-                    @input="e => currentVoucher.minTotalSpendingVIP = parseCurrency(e.target.value)"
-                    @blur="e => e.target.value = formatCurrency(currentVoucher.minTotalSpendingVIP)"
-                    class="lux-input bg-white font-bold" placeholder="50,000,000">
+              <div v-if="currentVoucher.apDungCho === 'VIP'" class="bg-[#C8A97E]/5 p-5 rounded-2xl border border-[#C8A97E]/20 animate-fade-in space-y-3">
+                <div class="flex items-center gap-2">
+                   <span class="material-symbols-outlined text-[#C8A97E] text-lg">star</span>
+                   <label class="text-[10px] font-black text-[#C8A97E] uppercase tracking-widest">Điều kiện chi tiêu VIP</label>
+                </div>
+                <div class="relative">
+                  <input type="text"
+                      :value="formatCurrency(currentVoucher.minTotalSpendingVIP)"
+                      @input="e => currentVoucher.minTotalSpendingVIP = parseCurrency(e.target.value)"
+                      @blur="e => e.target.value = formatCurrency(currentVoucher.minTotalSpendingVIP)"
+                      class="lux-input bg-white font-black text-[#111111] pr-10" placeholder="50,000,000">
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-black text-gray-400">₫</span>
+                </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                   <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Ngày bắt đầu</label>
-                   <input v-model="currentVoucher.ngayBatDau" type="datetime-local" class="lux-input text-[11px] font-bold">
-                </div>
-                <div>
-                   <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-2">Ngày kết thúc</label>
-                   <input v-model="currentVoucher.ngayKetThuc" type="datetime-local" class="lux-input text-[11px] font-bold">
+              <div class="grid grid-cols-1 gap-5">
+                <div class="space-y-2">
+                   <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest pl-1">Ngày kết lực (Từ - Đến)</label>
+                   <div class="flex items-center gap-2">
+                     <input v-model="currentVoucher.ngayBatDau" type="datetime-local" class="lux-input text-[11px] font-bold py-2.5">
+                     <span class="text-gray-300">
+                       <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                     </span>
+                     <input v-model="currentVoucher.ngayKetThuc" type="datetime-local" class="lux-input text-[11px] font-bold py-2.5">
+                   </div>
                 </div>
               </div>
 
               <div class="space-y-4 pt-6 border-t border-gray-100">
-                <label class="flex items-center gap-3 cursor-pointer group">
-                  <div class="relative flex items-center justify-center w-6 h-6 border border-gray-200 rounded-lg transition-all" 
+                <label class="flex items-center gap-4 cursor-pointer group p-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                  <div class="relative flex items-center justify-center w-6 h-6 border-2 border-gray-200 rounded-lg transition-all group-hover:border-[#C8A97E]" 
                        :class="{'bg-[#111111] border-[#111111]': currentVoucher.khongApDungSale}">
                     <input v-model="currentVoucher.khongApDungSale" type="checkbox" class="absolute opacity-0 cursor-pointer">
                     <span v-if="currentVoucher.khongApDungSale" class="material-symbols-outlined text-white text-base">check</span>
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-xs font-bold text-gray-800">Không áp dụng cho hàng Sale</span>
-                    <span class="text-[10px] text-gray-400 font-medium">Chỉ dành cho sản phẩm nguyên giá</span>
+                    <span class="text-xs font-bold text-gray-800">Loại bỏ hàng hóa đang Sale</span>
+                    <span class="text-[10px] text-gray-400 font-medium tracking-tight italic">Ưu đãi chỉ áp dụng cho sản phẩm nguyên giá</span>
                   </div>
                 </label>
 
-                <label class="flex items-center gap-3 cursor-pointer group">
-                  <div class="relative flex items-center justify-center w-6 h-6 border border-gray-200 rounded-lg transition-all" 
+                <label class="flex items-center gap-4 cursor-pointer group p-3 rounded-2xl hover:bg-[#C8A97E]/5 transition-colors">
+                  <div class="relative flex items-center justify-center w-6 h-6 border-2 border-gray-200 rounded-lg transition-all group-hover:border-[#C8A97E]" 
                        :class="{'bg-[#C8A97E] border-[#C8A97E]': currentVoucher.trangThai}">
                     <input v-model="currentVoucher.trangThai" type="checkbox" class="absolute opacity-0 cursor-pointer">
                     <span v-if="currentVoucher.trangThai" class="material-symbols-outlined text-white text-base">check</span>
                   </div>
                   <div class="flex flex-col">
                     <span class="text-xs font-bold text-gray-800 uppercase tracking-widest">Kích hoạt Voucher</span>
-                    <span class="text-[10px] text-gray-400 font-medium tracking-tight">Voucher sẽ xuất hiện cho khách sử dụng</span>
+                    <span class="text-[10px] text-gray-400 font-medium tracking-tight">Mã sẽ khả dụng ngay lập tức trên hệ thống</span>
                   </div>
                 </label>
               </div>
@@ -318,9 +335,9 @@
           </div>
           
           <!-- FOOTER -->
-          <div class="px-8 py-6 border-t border-gray-100 flex gap-4 bg-gray-50/50">
-            <button type="button" @click="showModal = false" class="flex-1 px-6 py-3 border border-gray-200 text-gray-500 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-white transition-all">Hủy bỏ</button>
-            <button type="submit" class="flex-[2] px-6 py-3 bg-[#111111] text-white rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-black transition-all shadow-lg active:scale-[0.98]">Xác nhận phát hành</button>
+          <div class="px-8 py-6 border-t border-gray-100 flex gap-4 bg-gray-100/30">
+            <button type="button" @click="showModal = false" class="flex-1 px-6 py-4 border border-gray-200 text-gray-500 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-white hover:text-red-500 transition-all">Hủy bỏ</button>
+            <button type="submit" class="flex-[2] px-6 py-4 bg-[#111111] text-white rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-black transition-all shadow-xl shadow-black/20 active:scale-[0.98]">Xác nhận phát hành Voucher</button>
           </div>
         </form>
       </div>
@@ -395,6 +412,37 @@ export default {
       this.showModal = true;
     },
     async saveVoucher() {
+      // VALIDATION
+      if (!this.currentVoucher.code || this.currentVoucher.code.trim().length === 0) {
+        if(window.$alert) window.$alert('Vui lòng nhập Mã Voucher (VD: WELCOME2024)', 'Thiếu thông tin');
+        return;
+      }
+      
+      if (!this.currentVoucher.giaTri || this.currentVoucher.giaTri <= 0) {
+        if(window.$alert) window.$alert('Giá trị giảm phải lớn hơn 0', 'Thông tin không hợp lệ');
+        return;
+      }
+
+      if (this.currentVoucher.loaiGiamGia === 0 && (!this.currentVoucher.giaTriToiDa || this.currentVoucher.giaTriToiDa <= 0)) {
+        if(window.$alert) window.$alert('Vui lòng nhập mức Giảm tối đa cho Voucher phần trăm', 'Thông tin không hợp lệ');
+        return;
+      }
+
+      if (!this.currentVoucher.soLuong || this.currentVoucher.soLuong <= 0) {
+        if(window.$alert) window.$alert('Số lượng phát hành phải lớn hơn 0', 'Thông tin không hợp lệ');
+        return;
+      }
+
+      if (!this.currentVoucher.gioiHanUser || this.currentVoucher.gioiHanUser <= 0) {
+        if(window.$alert) window.$alert('Hạn mức sử dụng mỗi User phải lớn hơn 0', 'Thông tin không hợp lệ');
+        return;
+      }
+
+      if (new Date(this.currentVoucher.ngayKetThuc) <= new Date(this.currentVoucher.ngayBatDau)) {
+        if(window.$alert) window.$alert('Ngày kết thúc phải sau ngày bắt đầu', 'Lỗi thời gian');
+        return;
+      }
+
       try {
         await axios.post('/admin/vouchers', this.currentVoucher);
         this.showModal = false;

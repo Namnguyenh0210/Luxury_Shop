@@ -171,15 +171,31 @@
             <!-- Subtotal / total -->
             <div class="px-8 py-6 bg-yellow-50/40 border-t border-gray-100 space-y-3">
               <div class="flex justify-between text-sm text-gray-500">
-                <span class="font-semibold">Tạm tính</span>
-                <span class="font-bold text-gray-700">{{ fmtCurrency(subTotal) }}</span>
+                <span class="font-semibold text-gray-600">Tạm tính</span>
+                <span class="font-bold text-gray-800">{{ fmtCurrency(subTotal) }}</span>
               </div>
+              
+              <!-- Voucher Discount -->
+              <div v-if="order.giamGia && order.giamGia > 0" class="flex justify-between text-sm text-red-600 animate-fade-in">
+                <div class="flex items-center gap-1.5 grayscale opacity-70">
+                   <span class="material-symbols-outlined text-sm">confirmation_number</span>
+                   <span class="font-semibold">Chiết khấu (Voucher)</span>
+                </div>
+                <span class="font-bold">-{{ fmtCurrency(order.giamGia) }}</span>
+              </div>
+
               <div class="flex justify-between text-sm text-gray-500">
-                <span class="font-semibold">Phí vận chuyển</span>
-                <span class="font-bold text-gray-700">{{ order.phiShip ? fmtCurrency(order.phiShip) : 'Miễn phí' }}</span>
+                <span class="font-semibold text-gray-600">Phí vận chuyển</span>
+                <span class="font-bold text-gray-800">{{ order.phiShip ? fmtCurrency(order.phiShip) : 'Miễn phí' }}</span>
               </div>
+              
               <div class="flex justify-between items-center pt-3 border-t border-yellow-200">
-                <span class="font-black text-gray-900 text-base">Tổng cộng</span>
+                <div class="flex flex-col">
+                  <span class="font-black text-gray-900 text-base">Tổng cộng</span>
+                  <span v-if="order.voucher" class="text-[9px] text-[#C8A97E] font-black uppercase tracking-widest">
+                    Đã áp dụng mã: {{ order.voucher.code }}
+                  </span>
+                </div>
                 <span class="font-black text-yellow-700 text-2xl tracking-tight">{{ fmtCurrency(order.tongTien) }}</span>
               </div>
             </div>
