@@ -461,15 +461,31 @@
                         </div>
                       </div>
 
-                      <!-- Order Time Info (New section) -->
-                      <div class="pt-4 border-t border-gray-200 px-2 mt-2 flex flex-wrap items-center gap-x-8 gap-y-2">
+                      <!-- Order Summary in Latest Card (New) -->
+                      <div class="pt-4 border-t border-gray-100 px-2 mt-4 space-y-2">
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                          <span class="font-bold">Tạm tính:</span>
+                          <span class="font-black text-black">{{ latestOrder.chiTietList.reduce((acc, i) => acc + i.donGia * i.soLuong, 0).toLocaleString() }}₫</span>
+                        </div>
+                        <div v-if="latestOrder.giamGia > 0" class="flex justify-between items-center text-xs text-red-500">
+                          <span class="font-bold font-black italic">Chiết khấu (Voucher):</span>
+                          <span class="font-black">-{{ latestOrder.giamGia.toLocaleString() }}₫</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-dashed border-gray-200">
+                          <span class="text-sm font-black text-black uppercase tracking-widest">Tổng thanh toán:</span>
+                          <span class="text-xl font-[1000] text-yellow-700 tracking-tighter">{{ latestOrder.tongTien?.toLocaleString() }}₫</span>
+                        </div>
+                      </div>
+
+                      <!-- Order Time Info -->
+                      <div class="pt-4 border-t border-gray-100 px-2 mt-2 flex flex-wrap items-center gap-x-8 gap-y-2 opacity-50">
                         <div class="flex items-center gap-2">
-                          <span class="text-[10px] font-black text-black uppercase tracking-widest">Ngày đặt:</span>
-                          <span class="text-xs font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleDateString('vi-VN') }}</span>
+                          <span class="text-[9px] font-black text-black uppercase tracking-widest">Ngày đặt:</span>
+                          <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleDateString('vi-VN') }}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                          <span class="text-[10px] font-black text-black uppercase tracking-widest">Giờ đặt:</span>
-                          <span class="text-xs font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }}</span>
+                          <span class="text-[9px] font-black text-black uppercase tracking-widest">Giờ đặt:</span>
+                          <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) }}</span>
                         </div>
                       </div>
                     </div>

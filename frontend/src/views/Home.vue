@@ -133,24 +133,38 @@
         </div>
       </div>ont
         <div class="bg-background-light dark:bg-background-dark py-16">
-            <div class="w-full px-4 md:px-[2cm]">
-                <div class="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
+            <div class="container mx-auto px-4 lg:px-[1cm] xl:px-[2cm]">
+                <div class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-32">
                     <div class="relative h-96 overflow-hidden rounded-lg lg:h-[32rem]">
                       <img
+                          v-if="latestBlog && latestBlog.hinhAnh"
+                          class="h-full w-full object-cover"
+                          :src="latestBlog.hinhAnh"
+                          :alt="latestBlog.tieuDe"
+                          @error="(e) => e.target.src = 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000'"
+                      />
+                      <img
+                          v-else
                           class="h-full w-full object-cover"
                           data-alt="An artistic, black and white shot of a designer sketching in a studio."
-                          src="https://static.bbw.vn/img/bbw/gucci-he-lo-bo-suu-tap-moi-nhat-tai-milan-hinh-anh-monic-1050x700.webp"
+                          src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000"
                           alt="Banner blog"
                       />
                     </div>
-                    <div class="text-center lg:text-left">
-                        <h2 class="font-serif text-3xl font-bold tracking-tight md:text-4xl">Tin tức thời trang</h2>
-                        <p class="mt-4 text-text-primary-light/80 dark:text-text-primary-dark/80">
-                            Tin thời trang sản phẩm cập nhật mới nhất 24/24 luôn nắm bắt xu thế và dẫ đầu trong lĩnh vực thời trang
+                    <div class="text-center lg:text-left lg:pl-16">
+                        <p v-if="latestBlog" class="text-[#C8A97E] text-[10px] uppercase tracking-[0.3em] font-bold mb-2">✦ Latest Story ✦</p>
+                        <h2 class="font-serif text-3xl font-bold tracking-tight md:text-4xl">
+                            {{ latestBlog ? latestBlog.tieuDe : 'Tin tức thời trang' }}
+                        </h2>
+                        <p class="mt-4 text-text-primary-light/80 dark:text-text-primary-dark/80 line-clamp-3">
+                            {{ latestBlog ? latestBlog.tomTat : 'Tin thời trang sản phẩm cập nhật mới nhất 24/24 luôn nắm bắt xu thế và dẫ đầu trong lĩnh vực thời trang' }}
                         </p>
-                        <a class="mt-8 inline-block rounded-full bg-black px-10 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-[#C8A97E] hover:scale-105 shadow-xl" href="/kienthuc?latest=true">
-                            Nhấn để xem bài viết mới nhất hiện tại
-                        </a>
+                        <router-link 
+                            class="mt-8 inline-block rounded-full bg-black px-10 py-4 text-sm font-bold uppercase tracking-widest text-white transition-all hover:bg-[#C8A97E] hover:scale-105 shadow-xl" 
+                            :to="latestBlog ? `/blog/${latestBlog.maBV}` : '/kienthuc'"
+                        >
+                            {{ latestBlog ? 'Đọc bài viết ngay' : 'Nhấn để xem bài viết mới nhất hiện tại' }}
+                        </router-link>
                     </div>
                 </div>
             </div>
@@ -211,17 +225,32 @@ export default {
     },
     goToDetail(id) {
         this.$router.push(`/sanpham/${id}`)
+    },
+    async fetchLatestBlog() {
+        try {
+            const res = await axios.get('/blog', {
+                params: { page: 0, size: 1 }
+            })
+            // API trả về danhSach là mảng các bài viết
+            if (res.data.thanhCong && res.data.danhSach && res.data.danhSach.length > 0) {
+                this.latestBlog = res.data.danhSach[0]
+            }
+        } catch (e) {
+            console.error('Error fetching latest blog:', e)
+        }
     }
   },
   data() {
     return {
         newArrivals: [],
         priceMap: {},
+        latestBlog: null,
         loading: true
     }
   },
   mounted() {
     this.fetchNewArrivals()
+    this.fetchLatestBlog()
   }
 }
 </script>

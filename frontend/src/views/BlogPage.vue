@@ -1,36 +1,32 @@
 <template>
-  <div class="relative flex min-h-screen w-full flex-col group/design-root bg-background-light dark:bg-background-dark text-text-primary-light dark:text-text-primary-dark font-display">
+  <div class="relative flex min-h-screen w-full flex-col bg-[#FDFCFB] text-[#111111] font-display">
     <AppHeader />
     <div class="flex-grow">
 
     <!-- HERO SECTION -->
-    <section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
+    <section class="relative min-h-[45vh] flex items-center justify-center overflow-hidden">
       <div class="absolute inset-0 bg-cover bg-center bg-fixed transition-transform duration-1000"
         style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDMTNoi4GK3bD9_L6V5FInuIltPBhQaSgp9c6pJSXVVUFUOGbaLX5qWkS6PapTywk-PdfIvXbWzRqUb3QneLD78UoPfJz5Dq8XeTi8kX8jZ53hkE4ZTXgUlj6xHyiDNLF9as7HR-iA1otrrbjasvZZgnXDANWvdgkKTRzSlTQVEmUyk-hQDsqmxL88bCEzONW515DyTOXaMbWXgDDbR2ABRhKE23E--uCxI0HH0_5PwvO_1vdM2ZDUKdW5lvRPEvLjVjY9ymCsxrPk');">
       </div>
-      <div class="absolute inset-0 bg-black/50 backdrop-blur-[2px]"></div>
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
       <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <p class="text-[#C8A97E] text-xs font-bold uppercase tracking-[0.3em] mb-4">✦ THE EDITORIAL ✦</p>
-        <h1 class="text-4xl md:text-6xl font-serif font-bold text-white mb-6 leading-tight">
-          Phong Cách & <br>
-          <span class="text-[#C8A97E] italic">Cảm Hứng</span>
+        <p class="text-[#C8A97E] text-[10px] font-bold uppercase tracking-[0.5em] mb-4">✦ The Editorial Journal ✦</p>
+        <h1 class="text-5xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight uppercase tracking-widest">
+          Kiến thức
         </h1>
-        <p class="text-white/70 text-base md:text-lg mb-8 max-w-2xl mx-auto font-light tracking-wide">
-          Nơi lưu giữ những câu chuyện về phong cách sống, xu hướng thời trang thượng lưu và tư duy thẩm mỹ hiện đại.
+        <div class="w-16 h-[1px] bg-[#C8A97E] mx-auto mb-8"></div>
+        <p class="text-white/80 text-sm md:text-base mb-8 max-w-2xl mx-auto font-light tracking-[0.2em] uppercase italic">
+          Style · Archives · Lifestyle
         </p>
-        <a href="#bai-viet" class="inline-flex items-center gap-3 border border-[#C8A97E] text-[#C8A97E] hover:bg-[#C8A97E] hover:text-black font-bold px-10 py-3 rounded-full transition-all duration-500 group">
-          KHÁM PHÁ
-          <span class="material-symbols-outlined transition-transform group-hover:translate-y-1">arrow_downward</span>
-        </a>
       </div>
     </section>
 
     <!-- BREADCRUMB -->
-    <div class="w-full px-4 md:px-[2cm] py-8 border-b border-gray-100 dark:border-gray-800">
-      <nav class="flex items-center gap-2 text-xs uppercase tracking-widest text-gray-400">
+    <div class="w-full px-4 md:px-[2cm] py-8 border-b border-gray-100">
+      <nav class="flex items-center gap-2 text-[10px] uppercase tracking-widest text-[#111111]/50 font-bold">
         <router-link to="/" class="hover:text-[#C8A97E] transition-colors">TRANG CHỦ</router-link>
         <span class="material-symbols-outlined text-[12px]">chevron_right</span>
-        <span class="text-gray-900 dark:text-gray-100">KIẾN THỨC</span>
+        <span class="text-[#111111]">KIẾN THỨC</span>
       </nav>
     </div>
 
@@ -48,13 +44,13 @@
         <!-- BÀI VIẾT NỔI BẬT -->
         <section v-if="noiBat.length > 0" class="mb-24">
           <div class="flex flex-col items-center mb-12">
-            <h2 class="text-3xl font-serif font-bold text-gray-900 dark:text-white mb-2 text-center">Featured Stories</h2>
+            <h2 class="text-3xl font-serif font-bold text-[#111111] mb-2 text-center">Featured Stories</h2>
             <div class="w-16 h-[2px] bg-[#C8A97E]"></div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
             <router-link v-for="bv in noiBat.slice(0,2)" :key="bv.maBV"
               :to="`/blog/${bv.maBV}`"
-              class="group relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900 block aspect-[16/10]">
+              class="group relative overflow-hidden rounded-lg bg-gray-100 block aspect-[16/10]">
               <img v-if="bv.hinhAnh" :src="bv.hinhAnh" :alt="bv.tieuDe"
                 class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" />
               <div v-else class="w-full h-full bg-stone-100 flex items-center justify-center">
@@ -65,7 +61,7 @@
                 <span v-if="bv.loaiBaiViet" class="inline-block border border-[#C8A97E] text-[#C8A97E] text-[10px] font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">
                   {{ bv.loaiBaiViet.tenLoaiBV }}
                 </span>
-                <h3 class="text-white font-serif font-bold text-2xl leading-tight mb-3 group-hover:text-[#C8A97E] transition-colors">
+                <h3 class="text-white font-serif font-bold text-2xl leading-tight mb-3 group-hover:text-[#C8A97E] transition-colors shadow-sm">
                   {{ bv.tieuDe }}
                 </h3>
                 <div class="flex items-center gap-4 text-white/50 text-[11px] uppercase tracking-widest">
@@ -79,14 +75,14 @@
         </section>
 
         <!-- TÌM KIẾM & LỌC -->
-        <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-16 pb-8 border-b border-gray-100 dark:border-gray-800">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-16 pb-8 border-b border-gray-100">
            <div class="flex items-center gap-8">
-              <h2 class="text-2xl font-serif font-bold text-gray-900 dark:text-white">The Collection</h2>
+              <h2 class="text-2xl font-serif font-bold text-[#111111]">The Collection</h2>
               <span class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ tongSo }} ARTICLES</span>
            </div>
           <div class="relative w-full md:w-80">
             <input v-model="tuKhoaTim" @input="timKiem" placeholder="Search the archives..."
-              class="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 pb-2 text-sm focus:outline-none focus:border-[#C8A97E] transition-colors placeholder:text-gray-400 uppercase tracking-widest" />
+              class="w-full bg-transparent border-b border-gray-100 pb-2 text-sm focus:outline-none focus:border-[#C8A97E] transition-colors placeholder:text-gray-400 uppercase tracking-widest text-[#111111]" />
             <span class="absolute right-0 bottom-2 text-gray-400">
               <span class="material-symbols-outlined text-[18px]">search</span>
             </span>
@@ -96,9 +92,9 @@
         <!-- DANH SÁCH BÀI VIẾT -->
         <section>
           <!-- Không có bài viết -->
-          <div v-if="danhSach.length === 0" class="flex flex-col items-center justify-center py-24 text-gray-400">
-            <span class="material-symbols-outlined text-4xl mb-4 font-light">article</span>
-            <p class="text-sm uppercase tracking-[0.2em]">No articles found in this collection</p>
+          <div v-if="danhSach.length === 0" class="flex flex-col items-center justify-center py-24 text-gray-400 font-light">
+            <span class="material-symbols-outlined text-5xl mb-6 opacity-30">article</span>
+            <p class="text-[10px] uppercase tracking-[0.3em]">No articles found in this collection</p>
           </div>
 
           <!-- Grid bài viết -->
@@ -108,14 +104,14 @@
               class="group flex flex-col bg-transparent">
 
               <!-- Ảnh bài viết -->
-              <div class="relative overflow-hidden aspect-[4/5] bg-stone-100 dark:bg-stone-900 rounded-sm mb-6">
+              <div class="relative overflow-hidden aspect-[4/5] bg-stone-100 rounded-sm mb-6">
                 <img v-if="bv.hinhAnh" :src="bv.hinhAnh" :alt="bv.tieuDe"
                   class="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-[1.03]" />
                 <div v-else class="w-full h-full flex items-center justify-center">
                   <span class="material-symbols-outlined text-4xl text-stone-200">article</span>
                 </div>
                 <div v-if="bv.loaiBaiViet" class="absolute top-4 left-4">
-                  <span class="bg-white/90 dark:bg-black/90 text-black dark:text-white text-[9px] font-bold px-3 py-1 uppercase tracking-widest shadow-sm">
+                  <span class="bg-white/90 text-black text-[9px] font-bold px-3 py-1 uppercase tracking-widest shadow-sm">
                     {{ bv.loaiBaiViet.tenLoaiBV }}
                   </span>
                 </div>
@@ -128,13 +124,13 @@
                   <span class="w-[2px] h-[2px] bg-gray-300 rounded-full"></span>
                   <span>{{ bv.loaiBaiViet ? bv.loaiBaiViet.tenLoaiBV : 'Edit' }}</span>
                 </div>
-                <h3 class="font-serif font-bold text-gray-900 dark:text-white text-lg mb-3 line-clamp-2 group-hover:text-[#C8A97E] transition-colors leading-snug">
+                <h3 class="font-serif font-bold text-[#111111] text-lg mb-3 line-clamp-2 group-hover:text-[#C8A97E] transition-colors leading-snug">
                   {{ bv.tieuDe }}
                 </h3>
-                <p class="text-gray-800 dark:text-gray-200 text-sm line-clamp-3 flex-1 mb-6 leading-relaxed font-light">
+                <p class="text-gray-700 text-sm line-clamp-3 flex-1 mb-6 leading-relaxed font-light">
                   {{ bv.tomTat || 'Discover the latest stories from our editors...' }}
                 </p>
-                <div class="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-400 py-4 border-t border-gray-100 dark:border-gray-800">
+                <div class="flex items-center justify-between text-[11px] text-gray-600 py-4 border-t border-gray-100">
                   <div class="flex items-center gap-2">
                     <span class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-800 flex items-center justify-center text-[10px] font-bold text-stone-600">
                       {{ (bv.tacGia || 'L').charAt(0).toUpperCase() }}

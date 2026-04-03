@@ -267,7 +267,11 @@ public class BlogApiController {
         Map<String, Object> dto = new HashMap<>();
         dto.put("maBV", bv.getMaBV());
         dto.put("tieuDe", bv.getTieuDe());
-        dto.put("hinhAnh", bv.getHinhAnh());
+        String hinhAnh = bv.getHinhAnh();
+        if (hinhAnh != null && !hinhAnh.startsWith("http") && !hinhAnh.startsWith("/")) {
+            hinhAnh = "/uploads/blogs/" + hinhAnh;
+        }
+        dto.put("hinhAnh", hinhAnh);
         dto.put("luotXem", bv.getLuotXem());
         dto.put("ngayDang", bv.getNgayDang());
         dto.put("slug", bv.getSlug());
