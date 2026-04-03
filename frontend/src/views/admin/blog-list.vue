@@ -21,6 +21,16 @@
         </button>
       </div>
 
+      <div class="flex items-center gap-2">
+        <input type="date" v-model="tuNgay"
+               class="border rounded-xl px-3 py-2 text-sm" />
+
+        <span>→</span>
+
+        <input type="date" v-model="denNgay"
+               class="border rounded-xl px-3 py-2 text-sm" />
+      </div>
+
       <!-- BẢNG DANH SÁCH -->
       <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
         <table class="w-full text-sm">
@@ -197,6 +207,9 @@ export default {
     return {
       danhSach: [],
       danhSachLoai: [],
+      locLoai: '',
+      tuNgay: '',
+      denNgay: '',
       tuKhoa: '',
       hienModal: false,
       hienModalLoai: false,
@@ -218,9 +231,30 @@ export default {
 
   computed: {
     danhSachLocByKeyword() {
-      if (!this.tuKhoa) return this.danhSach
-      const kw = this.tuKhoa.toLowerCase()
-      return this.danhSach.filter(b => (b.tieuDe || '').toLowerCase().includes(kw))
+      let ds = this.danhSach
+
+      // 🔍 search theo tiêu đề
+      if (this.tuKhoa) {
+        const kw = this.tuKhoa.toLowerCase()
+        ds = ds.filter(b => (b.tieuDe || '').toLowerCase().includes(kw))
+      }
+
+      // 📂 lọc theo loại
+      if (this.locLoai) {
+        ds = ds.filter(b => b.loaiBaiViet?.maLoaiBV == this.locLoai)
+      }
+
+      // 📅 từ ngày
+      if (this.tuNgay) {
+        ds = ds.filter(b => new Date(b.ngayDang) >= new Date(this.tuNgay))
+      }
+
+      // 📅 đến ngày
+      if (this.denNgay) {
+        ds = ds.filter(b => new Date(b.ngayDang) <= new Date(this.denNgay))
+      }
+
+      return ds
     }
   },
 

@@ -131,10 +131,10 @@
                 <h3 class="font-serif font-bold text-gray-900 dark:text-white text-lg mb-3 line-clamp-2 group-hover:text-[#C8A97E] transition-colors leading-snug">
                   {{ bv.tieuDe }}
                 </h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm line-clamp-3 flex-1 mb-6 leading-relaxed font-light">
+                <p class="text-gray-800 dark:text-gray-200 text-sm line-clamp-3 flex-1 mb-6 leading-relaxed font-light">
                   {{ bv.tomTat || 'Discover the latest stories from our editors...' }}
                 </p>
-                <div class="flex items-center justify-between text-[11px] text-gray-400 py-4 border-t border-gray-100 dark:border-gray-800">
+                <div class="flex items-center justify-between text-[11px] text-gray-600 dark:text-gray-400 py-4 border-t border-gray-100 dark:border-gray-800">
                   <div class="flex items-center gap-2">
                     <span class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-800 flex items-center justify-center text-[10px] font-bold text-stone-600">
                       {{ (bv.tacGia || 'L').charAt(0).toUpperCase() }}
@@ -211,6 +211,14 @@ export default {
 
   async mounted() {
     await this.taiDuLieu()
+
+    if (this.$route.query.latest && this.danhSach.length > 0) {
+      this.danhSach.sort((a, b) => new Date(b.ngayDang) - new Date(a.ngayDang))
+
+      const baiMoiNhat = this.danhSach[0]
+
+      this.$router.replace(`/blog/${baiMoiNhat.maBV}`)
+    }
   },
 
   methods: {

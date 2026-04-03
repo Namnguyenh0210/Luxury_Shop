@@ -46,51 +46,62 @@ const sendRequest = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="bg-white p-8 rounded-2xl shadow-lg w-[400px]">
+  <div class="min-h-screen flex items-center justify-center bg-[papayawhip]">
 
-      <h2 class="text-2xl font-bold mb-2 text-center text-gray-800">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-[400px] border border-[#F5F1ED]">
+
+      <!-- Title -->
+      <h2 class="text-2xl font-bold mb-2 text-center text-gray-900">
         Forgot Password
       </h2>
 
-      <p class="text-sm text-gray-500 text-center mb-6">
+      <p class="text-sm text-gray-600 text-center mb-6">
         Enter your email to receive a reset link
       </p>
 
+      <!-- Input -->
       <input
           v-model="email"
           type="email"
           placeholder="Enter your email"
-          class="w-full border border-gray-300 p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-black"
+          class="w-full border border-gray-300 p-3 rounded-lg mb-4
+               focus:outline-none
+               focus:ring-2 focus:ring-[#C8A97E]
+               focus:border-[#C8A97E]
+               transition"
       />
 
+      <!-- Button -->
       <button
           @click="sendRequest"
-          class="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
+          class="w-full bg-[#C8A97E] text-white py-2.5 rounded-lg
+         hover:bg-[#B8986E] transition"
       >
         Send Request
       </button>
 
-      <!-- messages -->
-      <p v-if="errorMessage" class="text-red-500 text-sm mt-2 text-center">
+      <!-- Messages -->
+      <p v-if="errorMessage" class="text-red-500 text-sm mt-3 text-center">
         {{ errorMessage }}
       </p>
-      <p v-if="successMessage" class="text-green-500 text-sm mt-2 text-center">
-        {{ successMessage }}.
-        <!-- link thủ công -->
+
+      <p v-if="successMessage" class="text-green-600 text-sm mt-3 text-center">
+        {{ successMessage }}
         <router-link
-            v-if="successMessage"
-            :to="{ path: '/verify-otp', query: { email: email.value } }"
-            class="text-black font-medium hover:underline ml-1"
+            :to="{ path: '/verify-otp', query: { email: email } }"
+            class="text-[#C8A97E] font-medium hover:underline ml-1"
         >
-          Nhấn vào đây để nhập OTP
+          Nhấn vào đây
         </router-link>
       </p>
 
-      <!-- back login -->
-      <p class="text-center text-sm mt-4 text-gray-500">
+      <!-- Back login -->
+      <p class="text-center text-sm mt-5 text-gray-600">
         Remember your password?
-        <router-link to="/login" class="text-black font-medium hover:underline">
+        <router-link
+            to="/login"
+            class="text-[#C8A97E] font-medium hover:underline"
+        >
           Login
         </router-link>
       </p>
