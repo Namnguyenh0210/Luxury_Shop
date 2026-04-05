@@ -17,16 +17,16 @@ public class PayOSItem {
     private Integer quantity;
 
     /**
-     * Đơn giá (VNĐ)
+     * Đơn giá (VNĐ) - Dùng Long để tránh tràn số cho sản phẩm giá trị cao
      */
-    private Integer price;
+    private Long price;
 
     // ========== CONSTRUCTORS ==========
 
     public PayOSItem() {
     }
 
-    public PayOSItem(String name, Integer quantity, Integer price) {
+    public PayOSItem(String name, Integer quantity, Long price) {
         this.name = name;
         this.quantity = quantity;
         this.price = price;
@@ -50,11 +50,11 @@ public class PayOSItem {
         this.quantity = quantity;
     }
 
-    public Integer getPrice() {
+    public Long getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(Long price) {
         this.price = price;
     }
 }

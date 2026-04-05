@@ -43,14 +43,14 @@ public class PayOSService {
      * @param donHang Đơn hàng cần thanh toán
      * @return PayOSResponse chứa checkout URL và QR code
      */
-    public PayOSResponse createPaymentLink(DonHang donHang) {
+    public PayOSResponse createPaymentLink(DonHang donHang, long orderCode) {
         try {
             logger.info("🔄 Bắt đầu tạo link thanh toán PayOS cho đơn hàng #{}", donHang.getMaDH());
 
             // Bước 1: Chuẩn bị dữ liệu request
             PayOSRequest request = new PayOSRequest();
-            request.setOrderCode(donHang.getMaDH()); // Mã đơn hàng (unique)
-            request.setAmount(donHang.getTongTien().intValue()); // Tổng tiền (VNĐ)
+            request.setOrderCode(orderCode); // Dùng code unique, không dùng MaDH cố định
+            request.setAmount(donHang.getTongTien().longValue()); // ✅ Dùng Long để tránh tràn số
             request.setDescription("Thanh toan don hang #" + donHang.getMaDH());
             request.setReturnUrl(payOSConfig.getReturnUrl());
             request.setCancelUrl(payOSConfig.getCancelUrl());
@@ -61,6 +61,10 @@ public class PayOSService {
                 request.setBuyerEmail(donHang.getTaiKhoan().getEmail());
                 request.setBuyerPhone(donHang.getTaiKhoan().getSoDienThoai());
             }
+            
+            // ✅ Set thời gian hết hạn là 5 phút (300 giây) từ lúc tạo
+            long expiredAt = (System.currentTimeMillis() / 1000) + 300;
+            request.setExpiredAt(expiredAt);
 
             // Bước 3: Thêm danh sách sản phẩm
             List<PayOSItem> items = new ArrayList<>();
@@ -84,7 +88,7 @@ public class PayOSService {
 
                     item.setName(tenSP);
                     item.setQuantity(ct.getSoLuong());
-                    item.setPrice(ct.getDonGia().intValue());
+                    item.setPrice(ct.getDonGia().longValue()); // ✅ Dùng Long
                     items.add(item);
                 }
             } else {
@@ -92,7 +96,7 @@ public class PayOSService {
                 PayOSItem item = new PayOSItem();
                 item.setName("Đơn hàng #" + donHang.getMaDH());
                 item.setQuantity(1);
-                item.setPrice(donHang.getTongTien().intValue());
+                item.setPrice(donHang.getTongTien().longValue()); // ✅ Dùng Long
                 items.add(item);
             }
             request.setItems(items);
@@ -108,6 +112,12 @@ public class PayOSService {
             requestBody.put("returnUrl", request.getReturnUrl());
             requestBody.put("cancelUrl", request.getCancelUrl());
             requestBody.put("items", request.getItems());
+            
+            requestBody.put("items", request.getItems());
+            
+            // ✅ Set thời gian hết hạn trong body từ request object
+            requestBody.put("expiredAt", request.getExpiredAt());
+            
             requestBody.put("signature", signature);
 
             // Thêm thông tin buyer nếu có
@@ -288,7 +298,8 @@ public class PayOSService {
      */
     private String generateSignature(PayOSRequest request) {
         try {
-            // Tạo chuỗi data theo format của PayOS
+            // Tạo chuỗi data theo format của PayOS (alphabetical order)
+            // LƯU Ý: Tuyệt đối chỉ dùng 5 trường này để ký, KHÔNG thêm expiredAt dù có gửi trong body
             String dataStr = String.format(
                 "amount=%d&cancelUrl=%s&description=%s&orderCode=%d&returnUrl=%s",
                 request.getAmount(),

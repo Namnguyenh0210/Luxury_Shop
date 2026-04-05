@@ -11,8 +11,13 @@
         
         <div v-if="order" class="flex items-center gap-4">
           <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Trạng thái xử lý:</span>
-          <div class="px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm border" :class="statusClass(order.trangThaiDH).class">
-            {{ statusClass(order.trangThaiDH).text }}
+          <div class="flex gap-2">
+            <div class="px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm border" :class="statusClass(order.trangThaiDH).class">
+              {{ statusClass(order.trangThaiDH).text }}
+            </div>
+            <div class="px-6 py-2 rounded-full text-[11px] font-black uppercase tracking-widest shadow-sm border" :class="payStatusClass(order.trangThaiThanhToan).class">
+              {{ payStatusClass(order.trangThaiThanhToan).text }}
+            </div>
           </div>
         </div>
       </div>
@@ -87,7 +92,8 @@
                 </div>
                 <div class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-gray-500">
                   <span>Phí vận chuyển</span>
-                  <span class="text-green-600">Miễn phí</span>
+                  <span v-if="order.phiShip > 0" class="text-[#111111]">{{ fmtCurrency(order.phiShip) }}</span>
+                  <span v-else class="text-green-600">Miễn phí</span>
                 </div>
                 <div class="pt-4 border-t border-[#E5E7EB] flex justify-between items-baseline">
                   <span class="text-xs font-black uppercase tracking-[0.2em] text-[#111111]">Tổng cộng</span>
@@ -119,6 +125,15 @@
               </button>
             </div>
             
+            <!-- Đơn PayOS đang chờ thanh toán (trạng thái 7) -->
+            <div v-if="order.trangThaiDH === 7" class="p-6 bg-cyan-50 border border-cyan-200 rounded-2xl flex items-center gap-4">
+              <span class="material-symbols-outlined text-cyan-500 text-2xl"> hourglass_top </span>
+              <div>
+                <p class="font-bold text-cyan-700 uppercase text-[11px] tracking-widest">Đang chờ khách thanh toán qua PayOS</p>
+                <p class="text-xs text-cyan-600 mt-1">Đơn hàng sẽ tự chuyển sang “Chờ xác nhận” sau khi khách thanh toán thành công.</p>
+              </div>
+            </div>
+
             <div v-if="order.trangThaiDH === 5" class="p-6 bg-gray-50 border border-gray-200 rounded-2xl flex items-center gap-4">
               <span class="material-symbols-outlined text-red-500">cancel</span>
               <div>
@@ -127,10 +142,29 @@
               </div>
             </div>
 
-            <div v-if="order.trangThaiDH < 4 && !order.khachBaoChuaNhan" class="flex flex-wrap gap-4">
-              <button v-if="order.trangThaiDH === 0" @click="updateStatus(1)" class="flex-1 min-w-[200px] bg-[#111111] text-white px-8 py-4 rounded-full font-bold text-[11px] uppercase tracking-widest hover:bg-[#C8A97E] transition shadow-xl">
-                Phê duyệt đơn hàng
-              </button>
+            <!-- Lỗi thanh toán (trạng thái 6) -->
+            <div v-if="order.trangThaiDH === 6" class="p-6 bg-orange-50 border border-orange-200 rounded-2xl flex items-center gap-4">
+              <span class="material-symbols-outlined text-orange-500 text-2xl">payment_alert</span>
+              <div>
+                <p class="font-bold text-orange-700 uppercase text-[11px] tracking-widest">Lỗi thanh toán PayOS</p>
+                <p class="text-xs text-orange-600 mt-1">Khách đã hủy hoặc thanh toán thất bại. Vui lòng liên hệ khách hàng.</p>
+              </div>
+            </div>
+
+            <div v-if="order.trangThaiDH < 4 && order.trangThaiDH !== 7 && order.trangThaiDH !== 6 && !order.khachBaoChuaNhan" class="flex flex-wrap gap-4">
+              <div class="flex-1 min-w-[200px]">
+                <button v-if="order.trangThaiDH === 0" 
+                  @click="updateStatus(1)" 
+                  :disabled="isPayOSButNotPaid"
+                  class="w-full text-white px-8 py-4 rounded-full font-bold text-[11px] uppercase tracking-widest transition shadow-xl"
+                  :class="isPayOSButNotPaid ? 'bg-gray-400 cursor-not-allowed grayscale' : 'bg-[#111111] hover:bg-[#C8A97E]'">
+                  Phê duyệt đơn hàng
+                </button>
+                <p v-if="isPayOSButNotPaid" class="text-[10px] text-red-500 font-bold mt-2 text-center flex items-center justify-center gap-2">
+                   <span class="material-symbols-outlined text-[14px]">info</span>
+                   Chờ khách thanh toán xong mới được phê duyệt
+                </p>
+              </div>
 
               <button v-if="order.trangThaiDH === 0 && !showCancelForm" @click="showCancelForm = true" class="flex-1 md:flex-none px-8 py-4 rounded-full border border-red-200 text-red-600 font-bold text-[11px] uppercase tracking-widest hover:bg-red-50 transition">
                 Từ chối đơn
@@ -158,7 +192,7 @@
               </button>
             </div>
             
-            <div v-else-if="order.trangThaiDH >= 4 && !order.khachBaoChuaNhan" class="text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <div v-else-if="order.trangThaiDH >= 4 && order.trangThaiDH !== 6 && order.trangThaiDH !== 7 && !order.khachBaoChuaNhan" class="text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
                  {{ order.trangThaiDH === 4 ? 'Hợp đồng này đã được thực hiện hoàn tất' : 'Hợp đồng này đã bị hủy bỏ' }}
                </p>
@@ -259,6 +293,11 @@ export default {
     orderItems() { return this.order?.chiTietList || [] },
     subTotal() {
       return this.orderItems.reduce((acc, item) => acc + (item.donGia * item.soLuong), 0)
+    },
+    isPayOSButNotPaid() {
+      // 0: Chờ xác nhận, 7: Chờ thanh toán, 4: COD
+      const isPayOS = this.order?.hinhThucThanhToan?.tenHinhThuc?.toLowerCase().includes('payos');
+      return isPayOS && this.order?.trangThaiThanhToan !== 1;
     }
   },
   methods: {
@@ -266,7 +305,6 @@ export default {
       this.loading = true
       try {
         const id = this.$route.params.id
-        // Su dung API admin de co quyen truy cap va DTO an toan
         const res = await axios.get(`/admin/orders/${id}`, { withCredentials: true })
         this.order = res.data
       } catch (e) {
@@ -296,7 +334,7 @@ export default {
       if (!ok) return
       try {
         const res = await axios.put(
-            `/admin/orders/${this.order.maDH}/status`,
+            `/api/admin/orders/${this.order.maDH}/status`,
             null,
             { params: { status: newStatus }, withCredentials: true }
         )
@@ -359,8 +397,19 @@ export default {
         2: { text: 'Đang giao', class: 'bg-purple-100 text-purple-700' },
         3: { text: 'Đã giao', class: 'bg-teal-100 text-teal-700' },
         4: { text: 'Hoàn tất', class: 'bg-green-100 text-green-700' },
-        5: { text: 'Đã hủy', class: 'bg-red-100   text-red-700' }
+        5: { text: 'Đã hủy', class: 'bg-red-100   text-red-700' },
+        6: { text: 'Lỗi thanh toán', class: 'bg-orange-100 text-orange-700' },
+        7: { text: 'Chờ thanh toán', class: 'bg-cyan-100 text-cyan-700' }
       }[s] ?? { text: 'Không xác định', class: 'bg-gray-100 text-gray-600' }
+    },
+    payStatusClass(s) {
+      return {
+        0: { text: 'Chờ thanh toán', class: 'bg-yellow-50 text-yellow-600 border-yellow-200' },
+        1: { text: 'Đã thanh toán', class: 'bg-green-100 text-green-700 border-green-200' },
+        2: { text: 'Thanh toán thất bại', class: 'bg-red-100 text-red-700 border-red-200' },
+        3: { text: 'Thanh toán hết hạn', class: 'bg-gray-100 text-gray-500 border-gray-200' },
+        4: { text: 'COD - Chưa thu', class: 'bg-blue-50 text-blue-600 border-blue-200' }
+      }[s] ?? { text: 'Chưa xác định', class: 'bg-gray-50 text-gray-400' }
     }
   },
   mounted() { this.fetchOrderDetail() }

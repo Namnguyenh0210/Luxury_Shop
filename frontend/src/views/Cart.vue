@@ -124,12 +124,27 @@
                             <span class="text-3xl font-bold text-[#C8A97E] tracking-tighter">{{ formatPrice(total) }}</span>
                         </div>
                     </div>
-                    <a 
-                        href="/checkout"
-                        class="w-full block text-center bg-[#111111] text-white font-bold py-5 rounded-full mt-10 hover:bg-[#C8A97E] transition-all shadow-xl uppercase text-[11px] tracking-widest"
+                    <!-- Hết hàng warning box -->
+                    <div v-if="hasOutOfStock" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
+                      <span class="material-symbols-outlined text-red-500 text-xl flex-shrink-0">error</span>
+                      <div>
+                        <p class="font-bold text-red-700 text-sm uppercase tracking-widest">Giỏ hàng có sản phẩm hết hàng</p>
+                        <p class="text-xs text-red-500 mt-1">Vui lòng xóa hoặc chọn màu/size khác còn hàng trước khi tiến hành đặt hàng.</p>
+                      </div>
+                    </div>
+
+                    <button
+                        @click="validateAndProceed"
+                        :disabled="hasOutOfStock"
+                        :class="[
+                          'w-full block text-center font-bold py-5 rounded-full mt-6 transition-all shadow-xl uppercase text-[11px] tracking-widest',
+                          hasOutOfStock
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-[#111111] text-white hover:bg-[#C8A97E]'
+                        ]"
                     >
                         Tiến hành đặt hàng
-                    </a>
+                    </button>
                     <a href="/sanpham" class="w-full block text-center text-[10px] font-bold uppercase tracking-widest text-gray-400 mt-6 hover:text-[#C8A97E] transition-colors">
                         Tiếp tục mua sắm
                     </a>
@@ -174,6 +189,13 @@ export default {
     },
     total() {
       return this.subtotal + this.shippingFee
+    },
+    // Kiểm tra có sản phẩm nào hết kho trong giỏ không
+    hasOutOfStock() {
+      return this.items.some(item => {
+        const stock = item.sanPhamChiTiet.soLuongTon || 0
+        return stock <= 0 || item.soLuong > stock
+      })
     }
   },
   methods: {
@@ -240,6 +262,28 @@ export default {
     formatPrice(price) {
       if (!price) return '₫0'
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)
+    },
+
+    // Kiểm tra tồn kho trước khi sang trang thanh toán
+    async validateAndProceed() {
+      // Reload giỏ hàng để lấy tồn kho mới nhất
+      await this.fetchCart()
+      
+      const outOfStockItems = this.items.filter(item => {
+        const stock = item.sanPhamChiTiet.soLuongTon || 0
+        return stock <= 0 || item.soLuong > stock
+      })
+
+      if (outOfStockItems.length > 0) {
+        const names = outOfStockItems
+          .map(i => `"${i.sanPhamChiTiet.sanPham.tenSP}" (Còn ${i.sanPhamChiTiet.soLuongTon || 0})`)
+          .join(', ')
+        window.$toast.error(`Sản phẩm hết hàng: ${names}. Vui lòng xóa hoặc chọn biến thể khác.`)
+        return
+      }
+
+      // Tất cả OK → chuyển trang
+      window.location.href = '/checkout'
     }
   },
   

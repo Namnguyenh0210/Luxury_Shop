@@ -114,7 +114,8 @@
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Khách Hàng</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ngày Đặt</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tổng Tiền</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng Thái Đơn</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Thanh Toán</th>
               <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Chi Tiết</th>
             </tr>
           </thead>
@@ -128,9 +129,15 @@
               <td class="px-6 py-4 text-gray-600">{{ formatDate(order.ngayDat) }}</td>
               <td class="px-6 py-4 font-bold text-gray-800">{{ fmtCurrency(order.tongTien) }}</td>
               <td class="px-6 py-4">
-                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full"
+                <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-bold rounded-full"
                   :class="statusClass(order.trangThaiDH)">
                   {{ statusText(order.trangThaiDH) }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-2.5 py-1 text-[11px] font-bold rounded-full shadow-sm border border-transparent"
+                  :class="payStatusClass(order.trangThaiThanhToan)">
+                  {{ payStatusText(order.trangThaiThanhToan) }}
                 </span>
               </td>
               <td class="px-6 py-4 text-right">
@@ -196,7 +203,9 @@ export default {
         { value: '2', label: 'Đang giao' },
         { value: '3', label: 'Đã giao' },
         { value: '4', label: 'Hoàn tất' },
-        { value: '5', label: 'Đã hủy' }
+        { value: '5', label: 'Đã hủy' },
+        { value: '6', label: 'Lỗi thanh toán' },
+        { value: '7', label: 'Chờ thanh toán' }
       ]
     }
   },
@@ -286,7 +295,9 @@ export default {
         2: 'Đang giao', 
         3: 'Đã giao', 
         4: 'Hoàn tất', 
-        5: 'Đã hủy' 
+        5: 'Đã hủy',
+        6: 'Lỗi thanh toán',
+        7: 'Chờ thanh toán'
       }[s] ?? 'Không xác định'
     },
 
@@ -297,8 +308,30 @@ export default {
         2: 'bg-indigo-100 text-indigo-700',
         3: 'bg-purple-100 text-purple-700',
         4: 'bg-green-100 text-green-700',
-        5: 'bg-red-100   text-red-700'
+        5: 'bg-red-100   text-red-700',
+        6: 'bg-orange-100 text-orange-700',
+        7: 'bg-cyan-100 text-cyan-700 font-black animate-pulse'
       }[s] ?? 'bg-gray-100 text-gray-600'
+    },
+
+    payStatusText(s) {
+      return {
+        0: 'Chờ thanh toán',
+        1: 'Đã thanh toán',
+        2: 'Thất bại',
+        3: 'Hết hạn',
+        4: 'COD - Chưa thu'
+      }[s] ?? 'Không xác định'
+    },
+
+    payStatusClass(s) {
+      return {
+        0: 'bg-yellow-50 text-yellow-600 border-yellow-200',
+        1: 'bg-green-100 text-green-700 border-green-200',
+        2: 'bg-red-100 text-red-700 border-red-200',
+        3: 'bg-gray-100 text-gray-500 border-gray-200',
+        4: 'bg-blue-50 text-blue-600 border-blue-200'
+      }[s] ?? 'bg-gray-50 text-gray-400'
     },
     
     getStatusLabel(val) {
