@@ -61,7 +61,7 @@ public class DonHang {
     private String maGiaoDich;
 
     @Column(name = "TrangThaiDH", nullable = false)
-    private Integer trangThaiDH = 0; // 0: Chờ xác nhận, 1: Đã xác nhận, 2: Đang giao, 3: Đã giao, 4: Hoàn tất, 5: Đã hủy
+    private Integer trangThaiDH = 0; // 0: Chờ xác nhận, 1: Đã xác nhận, 2: Đang giao, 3: Đã giao, 4: Hoàn tất, 5: Đã hủy, 6: Lỗi thanh toán, 7: Chờ thanh toán
 
     @Column(name = "TrangThaiThanhToan", nullable = false)
     private Integer trangThaiThanhToan = 0; // 0: Chờ thanh toán, 1: Đã thanh toán
@@ -253,6 +253,8 @@ public class DonHang {
             case 3: return "Đã giao";
             case 4: return "Hoàn tất";
             case 5: return "Đã hủy";
+            case 6: return "Lỗi thanh toán";
+            case 7: return "Chờ thanh toán";
             default: return "Không xác định";
         }
     }
@@ -287,8 +289,11 @@ public class DonHang {
 
     public String getTrangThaiThanhToanText() {
         switch (trangThaiThanhToan) {
-            case 0: return "Chờ thanh toán";
+            case 0: return "Chờ thanh toán"; // PayOS Pending
             case 1: return "Đã thanh toán";
+            case 2: return "Thanh toán thất bại";
+            case 3: return "Thanh toán hết hạn";
+            case 4: return "COD - Chưa thu tiền";
             default: return "Không xác định";
         }
     }

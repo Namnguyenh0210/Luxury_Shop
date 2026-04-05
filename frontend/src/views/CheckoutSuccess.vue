@@ -118,11 +118,14 @@
                     </tr>
                     <tr>
                       <td class="py-2.5 text-gray-500 font-semibold text-xs uppercase tracking-widest align-top">Vận chuyển</td>
-                      <td class="py-2.5 font-bold text-green-600 uppercase tracking-widest text-[10px] text-right align-top">Miễn phí</td>
+                      <td class="py-2.5 font-bold text-right align-top">
+                        <span v-if="donHang.phiShip > 0" class="text-[#111111]">{{ fmtCurrency(donHang.phiShip) }}</span>
+                        <span v-else class="text-green-600 uppercase tracking-widest text-[10px]">Miễn phí</span>
+                      </td>
                     </tr>
                     <tr>
                       <td class="py-2.5 text-gray-500 font-semibold text-xs uppercase tracking-widest align-top pr-4">Thanh toán</td>
-                      <td class="py-2.5 font-bold text-[#111111] uppercase whitespace-normal text-right align-top text-xs">{{ donHang.hinhThucThanhToan?.tenPhuongThuc || 'COD' }}</td>
+                      <td class="py-2.5 font-bold text-[#111111] uppercase whitespace-normal text-right align-top text-xs">{{ donHang.hinhThucThanhToan?.tenHinhThuc || 'COD' }}</td>
                     </tr>
                     <tr>
                       <td colspan="2" class="pt-4 border-b border-[#E5E7EB]"></td>
@@ -211,8 +214,12 @@ export default {
       const res = await axios.get(`/orders/${orderId}`, { withCredentials: true })
       const data = res.data
       this.donHang = data
-      // DTO moi: chiTiet la array truc tiep
       this.chiTiet = data.chiTiet || data.chiTietList || []
+      
+      // ➡️ Refresh cart count trong header sau khi thanh toán thành công
+      if (typeof window.refreshCartCount === 'function') {
+        window.refreshCartCount()
+      }
     } catch (e) {
       console.error(e)
     } finally {

@@ -17,9 +17,9 @@ public class PayOSRequest {
 
     /**
      * Số tiền thanh toán (đơn vị: VNĐ)
-     * PayOS yêu cầu amount là số nguyên
+     * PayOS yêu cầu amount là số nguyên dương (Long được serialize sang JSON)
      */
-    private Integer amount;
+    private Long amount;
 
     /**
      * Mô tả đơn hàng
@@ -61,12 +61,17 @@ public class PayOSRequest {
      */
     private String buyerAddress;
 
+    /**
+     * Thời gian hết hạn (Unix timestamp)
+     */
+    private Long expiredAt;
+
     // ========== CONSTRUCTORS ==========
 
     public PayOSRequest() {
     }
 
-    public PayOSRequest(Long orderCode, Integer amount, String description) {
+    public PayOSRequest(Long orderCode, Long amount, String description) {
         this.orderCode = orderCode;
         this.amount = amount;
         this.description = description;
@@ -82,11 +87,11 @@ public class PayOSRequest {
         this.orderCode = orderCode;
     }
 
-    public Integer getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(Integer amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 
@@ -152,6 +157,14 @@ public class PayOSRequest {
 
     public void setBuyerAddress(String buyerAddress) {
         this.buyerAddress = buyerAddress;
+    }
+
+    public Long getExpiredAt() {
+        return expiredAt;
+    }
+
+    public void setExpiredAt(Long expiredAt) {
+        this.expiredAt = expiredAt;
     }
 }
 

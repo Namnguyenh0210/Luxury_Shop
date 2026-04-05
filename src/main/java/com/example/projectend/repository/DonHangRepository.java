@@ -91,4 +91,10 @@ public interface DonHangRepository extends JpaRepository<DonHang, Long> {
 
     List<DonHang> findByNgayDatBetween(LocalDateTime start, LocalDateTime end);
     
+    // Tìm đơn hàng theo trạng thái và thời gian đặt (Dùng cho auto-cancel)
+    List<DonHang> findByTrangThaiDHAndNgayDatBefore(Integer trangThai, LocalDateTime threshold);
+
+    // Tìm đơn hàng theo mã giao dịch PayOS (PAYOS_CODE_xxxx)
+    Optional<DonHang> findByMaGiaoDich(String maGiaoDich);
+    
 }

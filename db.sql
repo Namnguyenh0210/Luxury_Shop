@@ -1208,7 +1208,9 @@ INSERT INTO TrangThaiDonHang (MaTTDH, TenTTDH) VALUES
     (2, N'Đang giao'),
     (3, N'Đã giao'),
     (4, N'Hoàn tất'),
-    (5, N'Đã hủy');
+    (5, N'Đã hủy'),
+    (6, N'Lỗi thanh toán'),
+    (7, N'Chờ thanh toán');
 GO
 
 -- 4.3.5. Đơn hàng cũ (ĐÃ GIAO) của khách

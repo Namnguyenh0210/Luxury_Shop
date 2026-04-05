@@ -114,7 +114,7 @@
                       Thời gian còn lại: <span class="text-[#111111] ml-1">{{ countdownDisplay }}</span>
                     </div>
                     <div class="w-1/2 h-1 bg-gray-100 rounded-full mt-4 overflow-hidden">
-                       <div class="h-full bg-[#C8A97E] transition-all duration-1000" :style="{width: (timeLeft/(15*60)*100)+'%'}"></div>
+                       <div class="h-full bg-[#C8A97E] transition-all duration-1000" :style="{width: (timeLeft/(5*60)*100)+'%'}"></div>
                     </div>
                  </div>
                </div>
@@ -202,7 +202,7 @@ export default {
       qrCode: null,
       checkoutUrl: null,
       paymentStatus: 'PENDING', // PENDING | PAID | CANCELLED
-      timeLeft: 15 * 60,        // 15 phút
+      timeLeft: 5 * 60,         // 5 phút
       isExpired: false,
       isSuccess: false,         // animation sau khi PAID
       checkTimer: null,
