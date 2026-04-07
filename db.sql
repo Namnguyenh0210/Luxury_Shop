@@ -17,12 +17,21 @@ BEGIN
 END
 GO
 
+
+USE master;
+GO
+IF DB_ID('LuxuryFashion_2026') IS NOT NULL
+BEGIN
+    ALTER DATABASE LuxuryFashion_2026 SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE LuxuryFashion_2026;
+END
+GO
 -- Tạo database mới
-CREATE DATABASE LuxuryFashion_2025;
+CREATE DATABASE LuxuryFashion_2026;
 GO
 
 -- Sử dụng database mới
-USE LuxuryFashion_2025;
+USE LuxuryFashion_2026;
 GO
 PRINT N'PHẦN 0: TẠO VÀ SỬ DỤNG DATABASE LuxuryFashion_2025 THÀNH CÔNG!';
 GO
@@ -538,7 +547,7 @@ GO
  Chèn theo thứ tự logic để đảm bảo khóa ngoại hợp lệ.
 ================================================================================
 */
-USE LuxuryFashion_2025;
+USE LuxuryFashion_2026;
 GO
 
 -- 1. Chèn các bảng Danh Mục (Không phụ thuộc)
@@ -557,13 +566,17 @@ SET IDENTITY_INSERT dbo.TaiKhoan ON;
 INSERT INTO TaiKhoan
 (MaTK, HoTen, Email, MatKhau, SoDienThoai, DiaChi, TrangThai)
 VALUES
-    (1, N'Admin', 'admin@luxury.com', '123', '0900000001', N'123 Đường Admin, Q1, TP.HCM', 1),
-    -- Mật khẩu: 123 (plain text)
-    (2, N'Nguyễn Thị Bán Hàng', 'nhanvien@luxury.com', '123', '0900000002', N'456 Đường Nhân Viên, Q3, TP.HCM', 1),
-    -- Mật khẩu: 123 (plain text)
-    (3, N'Lê Văn Khách', 'khachhang@luxury.com', '123', '0900000003', N'789 Đường Khách Hàng, Q.Tân Bình, TP.HCM', 1),
+    (1, N'Nhật Phong', 'admin@luxury.com', '123', '0967328210', N'139 Đường Lê Thái Tông, Q.1, TP.HCM', 1),
 
-    (4, N'Lê Bá Tuấn Vỹ', 'vyle1828@gmail.com', '123', '0900000003', N'789 Đường Khách Hàng, Q.Tân Bình, TP.HCM', 1);
+    (2, N'Liễu Như Yên', 'nhuyen@luxury.com', '123', '0985278367', N'456 Đường Trường Chinh, Q.Tân Phú, TP.HCM', 1),
+
+	(3, N'Nguyễn Hải Nam', 'namnguyen@luxury.com', '123', '0937567328', N'456 Đường Trường Chinh, Q.Tân Phú, TP.HCM', 1),
+
+    (4, N'Nguyễn Đình Triệu', 'trieunguyen@gmail.com', '123', '0399777450', N'750 Đường TTH 21, Q.12, TP.HCM', 1),
+
+	(5, N'Vũ Minh Thuận', 'vuminhthuan@gmail.com', '123', '0984164050', N'750 Đường TTH 21, Q.12, TP.HCM', 1),
+
+    (6, N'Lê Bá Tuấn Vỹ', 'vyle1828@gmail.com', '123', '090245924', N'789 Đường Quang Trung, Q.12, TP.HCM', 1);
 
 -- Mật khẩu: 123 (plain text)
 SET IDENTITY_INSERT dbo.TaiKhoan OFF;
@@ -573,12 +586,13 @@ INSERT INTO TaiKhoan_VaiTro
     (MaTK, MaVaiTro)
 VALUES
     (1, 1),
-    -- Admin Luxury là ADMIN
+
     (2, 2),
-    -- Nguyễn Thị Bán Hàng là NHANVIEN
-    (3, 3),
-    -- Lê Văn Khách là KHACHHANG
-    (4, 3);
+ 
+    (3, 2),
+	(4, 3),
+	(5, 3),
+    (6, 3);
 
 SET IDENTITY_INSERT dbo.ThuongHieu ON;
 INSERT INTO ThuongHieu
@@ -643,7 +657,9 @@ SET IDENTITY_INSERT dbo.NhaCungCap ON;
 INSERT INTO NhaCungCap
 (MaNCC, TenNCC, SoDienThoai, DiaChi)
 VALUES
-    (1, N'Nhà phân phối Gucci VN', '02811112222', N'10 Nguyễn Trãi, Q1, TP.HCM');
+    (1, N'Nhà phân phối Gucci VN', '0281841634', N'10 Nguyễn Trãi, Q1, TP.HCM'),
+	(2, N'Nhà phân phối chanel VN', '0813285368', N'10 Nguyễn Trãi, Q1, TP.HCM'),
+	(3, N'Nhà phân phối MBL VN', '0936142056', N'10 Nguyễn Trãi, Q1, TP.HCM');
 SET IDENTITY_INSERT dbo.NhaCungCap OFF;
 GO
 
@@ -1141,34 +1157,59 @@ SET IDENTITY_INSERT dbo.BaiViet OFF;
 GO
 
 -- 4.2. NHÂN VIÊN (MaTK=2) nhập kho
-SET IDENTITY_INSERT dbo.PhieuNhap ON;
-INSERT INTO PhieuNhap
-(MaPN, MaNV, MaNCC, TongTien, GhiChu)
+INSERT INTO PhieuNhap (MaNV, MaNCC, TongTien, GhiChu, NgayNhap)
 VALUES
-    (1, 2, 1, 80000000.00, N'Nhập 10 áo Polo Gucci Cotton size M, màu trắng');
-SET IDENTITY_INSERT dbo.PhieuNhap OFF;
-GO
+(1, 1, 0, N'Nhập kho đợt 1', '2026-03-01'),
+(1, 1, 0, N'Nhập kho đợt 2', '2026-03-05'),
+(1, 1, 0, N'Nhập kho đợt 3', '2026-03-10');
 
-INSERT INTO NhapKhoChiTiet
-    (MaPN, MaBienThe, SoLuong, DonGiaNhap, ThanhTien)
-VALUES
-    (1, 3, 10, 8000000.00, 80000000.00); -- Nhập 10 áo Polo Gucci Cotton M Trắng (MaBienThe=3)
-GO
+-- Phiếu 1
+-- Phiếu 1
+INSERT INTO NhapKhoChiTiet (MaPN, MaBienThe, SoLuong, DonGiaNhap, ThanhTien)
+SELECT 
+    1,
+    sp.MaBienThe,
+    10,
+    sp.GiaNhap,
+    10 * sp.GiaNhap
+FROM SanPhamChiTiet sp;
+
+-- Phiếu 2
+INSERT INTO NhapKhoChiTiet (MaPN, MaBienThe, SoLuong, DonGiaNhap, ThanhTien)
+SELECT 
+    2,
+    sp.MaBienThe,
+    15,
+    sp.GiaNhap,
+    15 * sp.GiaNhap
+FROM SanPhamChiTiet sp;
+
+-- Phiếu 3
+INSERT INTO NhapKhoChiTiet (MaPN, MaBienThe, SoLuong, DonGiaNhap, ThanhTien)
+SELECT 
+    3,
+    sp.MaBienThe,
+    8,
+    sp.GiaNhap,
+    8 * sp.GiaNhap
+FROM SanPhamChiTiet sp;
 
 -- GHI CHÚ QUAN TRỌNG: Logic cập nhật SoLuongTon và GiaNhap trong SanPhamChiTiet
 -- sẽ được xử lý trong Spring Boot Service, KHÔNG dùng Trigger.
 -- Câu lệnh UPDATE dưới đây chỉ để GIẢ LẬP logic đó cho dữ liệu mẫu:
-UPDATE SanPhamChiTiet
-SET SoLuongTon = SoLuongTon + 10
-WHERE MaBienThe = 3;
-GO
+UPDATE pn
+SET TongTien = (
+    SELECT SUM(ct.ThanhTien)
+    FROM NhapKhoChiTiet ct
+    WHERE ct.MaPN = pn.MaPN
+)
+FROM PhieuNhap pn;
 
--- GIẢ LẬP CẬP NHẬT SỐ LƯỢNG ĐÃ BÁN
-UPDATE SanPhamChiTiet
-SET SoLuongDaBan = SoLuongDaBan + 1
-WHERE MaBienThe = 13;
-GO
-
+UPDATE sp
+SET SoLuongTon = sp.SoLuongTon + ct.SoLuong
+FROM SanPhamChiTiet sp
+JOIN NhapKhoChiTiet ct 
+    ON sp.MaBienThe = ct.MaBienThe;
 
 -- 4.3. KHÁCH HÀNG (MaTK=3)
 -- 4.3.1. Địa chỉ của khách
@@ -1176,9 +1217,9 @@ SET IDENTITY_INSERT dbo.SoDiaChi ON;
 INSERT INTO SoDiaChi
 (MaDiaChi, MaTK, HoTenNguoiNhan, SoDienThoai, DiaChiChiTiet, GhiChu, LaMacDinh)
 VALUES
-    (1, 3, N'Lê Văn Khách', '0900000003', N'789 Đường Khách Hàng, P.1, Q.Tân Bình, TP.HCM', N'Nhà riêng', 1),
+    (1, 3, N'Nguyễn Đình Triệu', '0399777450', N'750 Đường TTH 21, Q.12, TP.HCM', N'Nhà riêng', 1),
     (2, 3, N'Trần Thị Vợ Khách', '0900000004', N'456 Đường Hậu Giang, Q6, TP.HCM', N'Cổng sau, lầu 2', 0),
-    (3, 1, N'Admin', '0900000001', N'123 Đường Admin, Q1, TP.HCM', N'Văn phòng công ty', 1);
+    (3, 1, N'Nhật Phong', '0967328210', N'123 Đường Lê Thái Tông, Q.1, TP.HCM', N'Văn phòng công ty', 1);
 SET IDENTITY_INSERT dbo.SoDiaChi OFF;
 GO
 
@@ -1223,6 +1264,33 @@ VALUES
      1, -- TrangThaiThanhToan = 1 (Đã thanh toán)
      GETDATE() - 6, -- NgayThanhToan
      GETDATE() - 6);
+	 -- 1. Đơn hàng Chờ xác nhận (Trạng thái 0)
+INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
+VALUES (2, 4, GETDATE(), 15000000.00, 30000.00, 1, 1, 0, 0, GETDATE());
+
+-- 2. Đơn hàng Đã xác nhận (Trạng thái 1)
+INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
+VALUES (3, 4, GETDATE() - 1, 2500000.00, 20000.00, 1, 1, 1, 0, GETDATE());
+
+-- 3. Đơn hàng Đang giao (Trạng thái 2)
+INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
+VALUES (4, 5, GETDATE() - 2, 5400000.00, 40000.00, 1, 1, 2, 0, GETDATE());
+
+-- 4. Đơn hàng Đã giao (Trạng thái 3)
+INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
+VALUES (5, 6, GETDATE() - 5, 1200000.00, 15000.00, 1, 1, 3, 1, GETDATE() - 4);
+
+-- 5. Đơn hàng Đã hủy (Trạng thái 5)
+INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
+VALUES (6, 5, GETDATE() - 10, 800000.00, 20000.00, 1, 1, 5, 0, GETDATE() - 10);
+
+-- 6. Đơn hàng Lỗi thanh toán (Trạng thái 6)
+INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
+VALUES (7, 2, GETDATE(), 20000000.00, 0.00, 1, 2, 6, 0, GETDATE());
+
+-- 7. Đơn hàng Chờ thanh toán (Trạng thái 7)
+INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
+VALUES (8, 2, GETDATE(), 3200000.00, 30000.00, 1, 2, 7, 0, GETDATE());
 SET IDENTITY_INSERT dbo.DonHang OFF;
 GO
 
@@ -1231,8 +1299,15 @@ SET IDENTITY_INSERT dbo.DonHangCT ON;
 INSERT INTO DonHangCT
 (MaCT, MaDH, MaBienThe, SoLuong, DonGia)
 VALUES
-    (1, 1, 13, 1, 35000000.00);
+    (1, 1, 13, 1, 35000000.00),
 -- Đã mua 1 Áo Khoác Gucci GG (MaBienThe=13)
+	(2, 2, 10, 1, 15000000.00), -- Cho DH 2
+	(3, 3, 11, 2, 1250000.00),  -- Cho DH 3
+	(4, 4, 12, 1, 5400000.00),  -- Cho DH 4
+	(5, 5, 13, 1, 1200000.00),  -- Cho DH 5
+	(6, 6, 10, 1, 800000.00),   -- Cho DH 6
+	(7, 7, 11, 1, 20000000.00), -- Cho DH 7
+	(8, 8, 12, 1, 3200000.00);  -- Cho DH 8
 SET IDENTITY_INSERT dbo.DonHangCT OFF;
 GO
 
@@ -1243,6 +1318,19 @@ VALUES
     (1, 0, 1, N'Nhân viên xác nhận đơn', N'Nguyễn Thị Bán Hàng'),
     (1, 1, 2, N'Đang chuẩn bị hàng', N'Nguyễn Thị Bán Hàng'),
     (1, 2, 3, N'Bàn giao cho đơn vị vận chuyển', N'Hệ thống'),
+	-- Đơn 3: Đã xác nhận
+    (3, 0, 1, N'Hệ thống xác nhận thanh toán', N'Hệ thống'),
+    -- Đơn 4: Đang giao
+    (4, 0, 1, N'Nhân viên xác nhận', N'Nguyễn Thị Bán Hàng'),
+    (4, 1, 2, N'Đã giao cho bưu tá', N'Kho vận'),
+    -- Đơn 5: Đã giao
+    (5, 0, 1, N'Xác nhận đơn hàng', N'Nguyễn Thị Bán Hàng'),
+    (5, 1, 2, N'Đang vận chuyển', N'Hệ thống'),
+    (5, 2, 3, N'Khách đã nhận hàng', N'Shipper'),
+    -- Đơn 6: Đã hủy
+    (6, 0, 5, N'Khách hàng đổi ý', N'Khách hàng'),
+    -- Đơn 7: Lỗi thanh toán
+    (7, 7, 6, N'Thanh toán qua thẻ thất bại', N'Cổng thanh toán'),
     (1, 3, 4, N'Giao hàng thành công', N'Hệ thống');
 GO
 
@@ -1656,7 +1744,7 @@ Thêm cột Provider vào bảng TaiKhoan để phân biệt LOCAL và GOOGLE
 ================================================================================
 */
 
-USE LuxuryFashion_2025;
+USE LuxuryFashion_2026;
 GO
 
 -- Thêm cột Provider vào bảng TaiKhoan
