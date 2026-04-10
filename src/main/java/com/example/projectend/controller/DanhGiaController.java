@@ -25,6 +25,9 @@ public class DanhGiaController {
     private DanhGiaService danhGiaService;
 
     @Autowired
+    private com.example.projectend.service.DonHangService donHangService;
+
+    @Autowired
     private DonHangChiTietRepository donHangChiTietRepository;
 
     @Autowired
@@ -148,14 +151,17 @@ public class DanhGiaController {
                 res.put("thongBao", "Bạn không có quyền đánh giá đơn hàng này");
                 return ResponseEntity.ok(res);
             }
-            if (donHang.getTrangThaiDH() != 3) {
+            if (donHang.getTrangThaiDH() != 3 && donHang.getTrangThaiDH() != 4 && donHang.getTrangThaiDH() != 6) {
                 res.put("thanhCong", false);
-                res.put("thongBao", "Chỉ có thể đánh giá sau khi đơn hàng đã được giao");
+                res.put("thongBao", "Chỉ có thể đánh giá sau khi đơn hàng đã được giao hoặc hoàn tất");
                 return ResponseEntity.ok(res);
             }
 
             // Tạo đánh giá
             DanhGia danhGia = danhGiaService.createReview(donHangCT, tk, diem, noiDung);
+
+            // Kiểm tra và cập nhật trạng thái đơn hàng sang 6 (Đã đánh giá)
+            donHangService.checkAndUpdateOrderStatusAfterReview(donHang.getMaDH());
 
             Map<String, Object> dto = new HashMap<>();
             dto.put("maDG", danhGia.getMaDG());
@@ -178,6 +184,70 @@ public class DanhGiaController {
             res.put("thanhCong", false);
             res.put("thongBao", e.getMessage());
             return ResponseEntity.ok(res);
+        } catch (Exception e) {
+            res.put("thanhCong", false);
+            res.put("thongBao", "Có lỗi xảy ra: " + e.getMessage());
+            return ResponseEntity.ok(res);
+        }
+    }
+
+    // =========================================================
+    // PUT /api/san-pham/danh-gia/{maDG}
+    // Chỉnh sửa đánh giá (chỉ người tạo mới được sửa)
+    // =========================================================
+    @PutMapping("/san-pham/danh-gia/{maDG}")
+    public ResponseEntity<Map<String, Object>> suaDanhGia(
+            @PathVariable Long maDG,
+            @RequestBody Map<String, Object> body) {
+        Map<String, Object> res = new HashMap<>();
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                res.put("thanhCong", false);
+                res.put("thongBao", "Vui lòng đăng nhập để thao tác");
+                return ResponseEntity.status(401).body(res);
+            }
+
+            TaiKhoan tk = userDetailsService.getTaiKhoanByEmail(auth.getName());
+            DanhGia dg = danhGiaService.findById(maDG).orElse(null);
+
+            if (dg == null) {
+                res.put("thanhCong", false);
+                res.put("thongBao", "Không tìm thấy đánh giá");
+                return ResponseEntity.ok(res);
+            }
+            if (!dg.getTaiKhoan().getMaTK().equals(tk.getMaTK())) {
+                res.put("thanhCong", false);
+                res.put("thongBao", "Bạn không có quyền chỉnh sửa đánh giá này");
+                return ResponseEntity.ok(res);
+            }
+
+            Integer diem = (Integer) body.get("diem");
+            String noiDung = (String) body.get("noiDung");
+
+            if (diem != null && diem >= 1 && diem <= 5) {
+                dg.setDiem(diem);
+            }
+            if (noiDung != null) {
+                dg.setNoiDung(noiDung);
+            }
+
+            danhGiaService.save(dg);
+
+            Map<String, Object> danhGiaObj = new HashMap<>();
+            danhGiaObj.put("maDG", dg.getMaDG());
+            danhGiaObj.put("diem", dg.getDiem());
+            danhGiaObj.put("noiDung", dg.getNoiDung());
+
+            res.put("thanhCong", true);
+            res.put("thongBao", "Đã cập nhật đánh giá thành công!");
+            res.put("danhGia", danhGiaObj);
+            
+            // Nếu cần cập nhật giao diện ngay lập tức
+            res.put("diemTrungBinhMoi", danhGiaService.getAverageRating(dg.getDonHangChiTiet().getSanPhamChiTiet().getSanPham().getMaSP()));
+
+            return ResponseEntity.ok(res);
+
         } catch (Exception e) {
             res.put("thanhCong", false);
             res.put("thongBao", "Có lỗi xảy ra: " + e.getMessage());
@@ -210,6 +280,39 @@ public class DanhGiaController {
             res.put("thongBao", "Lỗi gửi báo cáo");
             return ResponseEntity.ok(res);
         }
+    }
+
+    // =========================================================
+    // GET /api/danh-gia/check?maCT={maCT}
+    // Kiểm tra 1 DonHangChiTiet đã được đánh giá chưa
+    // =========================================================
+    @GetMapping("/danh-gia/check")
+    public ResponseEntity<Map<String, Object>> checkDaReview(@RequestParam Long maCT) {
+        Map<String, Object> res = new HashMap<>();
+        try {
+            DonHangChiTiet ct = donHangChiTietRepository.findById(maCT).orElse(null);
+            if (ct == null) {
+                res.put("daDanhGia", false);
+                return ResponseEntity.ok(res);
+            }
+            java.util.Optional<DanhGia> dgOpt = danhGiaService.getDanhGiaByDonHangChiTiet(ct);
+            if (dgOpt.isPresent()) {
+                DanhGia dg = dgOpt.get();
+                res.put("daDanhGia", true);
+                res.put("diem", dg.getDiem());
+                res.put("noiDung", dg.getNoiDung());
+                Map<String, Object> danhGiaObj = new HashMap<>();
+                danhGiaObj.put("maDG", dg.getMaDG());
+                danhGiaObj.put("diem", dg.getDiem());
+                danhGiaObj.put("noiDung", dg.getNoiDung());
+                res.put("danhGia", danhGiaObj);
+            } else {
+                res.put("daDanhGia", false);
+            }
+        } catch (Exception e) {
+            res.put("daDanhGia", false);
+        }
+        return ResponseEntity.ok(res);
     }
 
     // =========================================================

@@ -54,24 +54,26 @@ public class GioHangService {
      * Thêm sản phẩm vào giỏ hàng
      */
     public void addToCart(TaiKhoan taiKhoan, Long maBienThe, int soLuong) {
+        // Để đảm bảo tìm đúng dữ liệu mới nhất trong DB (tránh cache của Hibernate)
+        entityManager.flush();
+        entityManager.clear();
+
         GioHang gioHang = getOrCreateGioHang(taiKhoan);
 
-        // Khóa đọc bi quan để đảm bảo không đọc giá trị "bị ghi đè" giữa chừng (tùy DB có hỗ trợ)
+        // Khóa đọc bi quan để đảm bảo không đọc giá trị "bị ghi đè" giữa chừng
         SanPhamChiTiet spct = sanPhamChiTietRepository.findLockedById(maBienThe)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
 
         if (soLuong <= 0) throw new RuntimeException("Số lượng không hợp lệ");
 
+        // Tìm item đã có trong giỏ hàng
         Optional<GioHangChiTiet> existingItem = gioHangChiTietRepository
                 .findByGioHang_MaGioHangAndSanPhamChiTiet_MaBienThe(gioHang.getMaGioHang(), maBienThe);
 
-        // Đọc tồn kho mới nhất bằng native (tránh persistence context giữ giá trị cũ)
+        // Đọc tồn kho mới nhất bằng native
         Integer currentStockNative = sanPhamChiTietRepository.findCurrentStockNative(maBienThe);
         int currentStock = currentStockNative != null ? currentStockNative : (spct.getSoLuongTon() != null ? spct.getSoLuongTon() : 0);
         if (currentStock < 0) currentStock = 0;
-
-        log.debug("AddToCart START => maBienThe={}, soLuongYeuCau={}, tonKhoNative={}, tonKhoEntity={}, tonKhoSuDung={}, daCoTrongGio={}",
-                maBienThe, soLuong, currentStockNative, spct.getSoLuongTon(), currentStock, existingItem.isPresent());
 
         if (existingItem.isPresent()) {
             GioHangChiTiet item = existingItem.get();
@@ -79,19 +81,19 @@ public class GioHangService {
             int newQty = existingQty + soLuong;
             if (newQty > currentStock) {
                 int remainingCanAdd = Math.max(currentStock - existingQty, 0);
-                log.debug("OUT_OF_STOCK_UPDATE => existingQty={}, reqAdd={}, newQty={}, stock={}, remainingCanAdd={}", existingQty, soLuong, newQty, currentStock, remainingCanAdd);
                 throw new RuntimeException("Hết hàng: tồn kho còn " + currentStock + ", bạn đang có " + existingQty + ", chỉ có thể thêm tối đa " + remainingCanAdd);
             }
             item.setSoLuong(newQty);
             gioHangChiTietRepository.save(item);
+            entityManager.flush(); // Đẩy xuống DB ngay lập tức
             log.debug("UPDATE_CART_ITEM_OK => maGHCT={}, oldQty={}, added={}, newQty={}", item.getMaGHCT(), existingQty, soLuong, newQty);
         } else {
             if (soLuong > currentStock) {
-                log.debug("OUT_OF_STOCK_NEW => reqAdd={}, stock={}", soLuong, currentStock);
                 throw new RuntimeException("Hết hàng: tồn kho còn " + currentStock);
             }
             GioHangChiTiet newItem = new GioHangChiTiet(gioHang, spct, soLuong);
             gioHangChiTietRepository.save(newItem);
+            entityManager.flush(); // Đẩy xuống DB ngay lập tức
             log.debug("CREATE_CART_ITEM_OK => maGHCT={}, soLuong={}, stockSauKhiThem={}", newItem.getMaGHCT(), soLuong, currentStock);
         }
     }

@@ -74,9 +74,8 @@
               :class="filterStatus === '' ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
               Tất cả trạng thái
             </div>
-            <div @click="filterStatus = 0; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 0 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">⏳ Chờ duyệt</div>
-            <div @click="filterStatus = 1; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 1 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Đã hiển thị</div>
-            <div @click="filterStatus = 2; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 2 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">🚫 Đã ẩn</div>
+            <div @click="filterStatus = 1; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 1 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Đang hiển thị</div>
+            <div @click="filterStatus = 2; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 2 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">🚫 Đã bị ẩn</div>
           </div>
         </div>
 
@@ -133,13 +132,10 @@
               </td>
 
               <td class="px-5 py-4 text-center">
-                <span v-if="rv.trangThai === 0" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
-                  Chờ duyệt
+                <span v-if="rv.trangThai !== 2" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                  Hiển thị
                 </span>
-                <span v-else-if="rv.trangThai === 1" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                  Đã hiện
-                </span>
-                <span v-else-if="rv.trangThai === 2" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+                <span v-else class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
                   Đã ẩn
                 </span>
               </td>
@@ -147,11 +143,11 @@
               <td class="px-5 py-4 text-center">
                 <div class="flex flex-col items-center gap-2">
                   <div class="flex gap-2">
-                    <button v-if="rv.trangThai !== 1" @click="updateStatus(rv.maDG, 1)" title="Duyệt (Hiển thị)"
+                    <button v-if="rv.trangThai === 2" @click="updateStatus(rv.maDG, 1)" title="Bỏ ẩn (Hiển thị lại)"
                       class="flex items-center justify-center size-7 rounded bg-green-50 text-green-600 hover:bg-green-100 transition-colors">
                       <span class="material-symbols-outlined text-[16px]">visibility</span>
                     </button>
-                    <button v-if="rv.trangThai !== 2" @click="updateStatus(rv.maDG, 2)" title="Ẩn"
+                    <button v-if="rv.trangThai !== 2" @click="updateStatus(rv.maDG, 2)" title="Ẩn đánh giá (Vi phạm)"
                       class="flex items-center justify-center size-7 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
                       <span class="material-symbols-outlined text-[16px]">visibility_off</span>
                     </button>
@@ -271,9 +267,8 @@ export default {
 
     getStatusLabel(val) {
       if (val === '') return ''
-      if (val === 0) return '⏳ Chờ duyệt'
-      if (val === 1) return '✅ Đã hiển thị'
-      if (val === 2) return '🚫 Đã ẩn'
+      if (val === 1) return '✅ Đang hiển thị'
+      if (val === 2) return '🚫 Đã bị ẩn'
       return ''
     },
 

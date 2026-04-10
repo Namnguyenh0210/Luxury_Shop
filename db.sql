@@ -1296,8 +1296,9 @@
 		(3, N'Đã giao'),
 		(4, N'Hoàn tất'),
 		(5, N'Đã hủy'),
-		(6, N'Lỗi thanh toán'),
-		(7, N'Chờ thanh toán');
+		(6, N'Đã đánh giá'),
+		(7, N'Chờ thanh toán'),
+		(8, N'Lỗi thanh toán');
 	GO
 
 	-- 4.3.5. Đơn hàng cũ (ĐÃ GIAO) của khách

@@ -183,6 +183,7 @@ public class DanhGiaService {
         danhGia.setTaiKhoan(taiKhoan);
         danhGia.setDiem(diem);
         danhGia.setNoiDung(noiDung);
+        danhGia.setTrangThai(1); // Mặc định là 1 (Đã hiện) để hiển thị ngay lập tức
 
         return save(danhGia);
     }

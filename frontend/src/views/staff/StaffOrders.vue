@@ -22,8 +22,12 @@
           <option value="0">Chờ xác nhận</option>
           <option value="1">Đã xác nhận</option>
           <option value="2">Đang giao</option>
-          <option value="3">Hoàn tất</option>
-          <option value="4">Đã hủy</option>
+          <option value="3">Đã giao</option>
+          <option value="4">Hoàn tất</option>
+          <option value="6">Đã đánh giá</option>
+          <option value="5">Đã hủy</option>
+          <option value="7">Chờ thanh toán</option>
+          <option value="8">Lỗi thanh toán</option>
         </select>
       </div>
 
@@ -131,7 +135,17 @@ export default {
     fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v || 0) + ' đ' },
 
     statusText(s) {
-      return { 0: 'Chờ xác nhận', 1: 'Đã xác nhận', 2: 'Đang giao', 3: 'Hoàn tất', 4: 'Đã hủy' }[s] ?? 'Không xác định'
+      return { 
+        0: 'Chờ xác nhận', 
+        1: 'Đã xác nhận', 
+        2: 'Đang giao', 
+        3: 'Đã giao', 
+        4: 'Hoàn tất', 
+        5: 'Đã hủy',
+        6: 'Đã đánh giá',
+        7: 'Chờ thanh toán',
+        8: 'Lỗi thanh toán'
+      }[s] ?? 'Không xác định'
     },
 
     statusClass(s) {
@@ -139,8 +153,12 @@ export default {
         0: 'bg-yellow-100 text-yellow-700',
         1: 'bg-blue-100  text-blue-700',
         2: 'bg-purple-100 text-purple-700',
-        3: 'bg-green-100 text-green-700',
-        4: 'bg-red-100   text-red-700'
+        3: 'bg-indigo-100 text-indigo-700',
+        4: 'bg-green-100 text-green-700',
+        5: 'bg-red-100   text-red-700',
+        6: 'bg-orange-100 text-orange-700',
+        7: 'bg-cyan-100 text-cyan-700',
+        8: 'bg-gray-100 text-gray-700'
       }[s] ?? 'bg-gray-100 text-gray-600'
     }
   },

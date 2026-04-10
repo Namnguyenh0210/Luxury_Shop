@@ -146,7 +146,8 @@ public class ApiController {
 
             List<SanPham> productContent = sanPhamPage.getContent();
             productContent.forEach(sp -> {
-                if (sp.getAnhChinh() != null && !sp.getAnhChinh().startsWith("http") && !sp.getAnhChinh().startsWith("/")) {
+                if (sp.getAnhChinh() != null && !sp.getAnhChinh().startsWith("http")
+                        && !sp.getAnhChinh().startsWith("/")) {
                     sp.setAnhChinh("/uploads/products/" + sp.getAnhChinh());
                 }
             });
@@ -482,7 +483,7 @@ public class ApiController {
     /**
      * API đăng xuất
      */
-    @RequestMapping(value = "/auth/logout", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/auth/logout", method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseEntity<Map<String, Object>> logout(
             jakarta.servlet.http.HttpServletRequest request,
             jakarta.servlet.http.HttpServletResponse response) {
@@ -702,14 +703,14 @@ public class ApiController {
                 if (anh == null || anh.isEmpty()) {
                     anh = spct.getAnhBienThe();
                 }
-                
+
                 // Fallback again if the link is a known dead link and main image is available
                 if (spct.getAnhBienThe() != null && spct.getAnhBienThe().contains("media.gucci.com")) {
-                     if (spct.getSanPham().getAnhChinh() != null && !spct.getSanPham().getAnhChinh().isEmpty()) {
-                         anh = spct.getSanPham().getAnhChinh();
-                     } else {
-                         anh = "placeholder.png";
-                     }
+                    if (spct.getSanPham().getAnhChinh() != null && !spct.getSanPham().getAnhChinh().isEmpty()) {
+                        anh = spct.getSanPham().getAnhChinh();
+                    } else {
+                        anh = "placeholder.png";
+                    }
                 }
 
                 if (anh == null || anh.isEmpty()) {
@@ -829,7 +830,8 @@ public class ApiController {
         } catch (Exception e) {
             log.error("Lỗi khi đặt hàng: ", e);
             response.put("success", false);
-            response.put("message", "Có lỗi xảy ra: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+            response.put("message",
+                    "Có lỗi xảy ra: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
             return ResponseEntity.status(500).body(response);
         }
     }
@@ -935,8 +937,8 @@ public class ApiController {
             Optional<DiaChi> dcOpt = diaChiRepository.findById(id);
             if (dcOpt.isPresent()) {
                 DiaChi dc = dcOpt.get();
-                if (dc.getTaiKhoan() != null && dc.getTaiKhoan().getMaTK() != null && tk.getMaTK() != null && 
-                    dc.getTaiKhoan().getMaTK().equals(tk.getMaTK())) {
+                if (dc.getTaiKhoan() != null && dc.getTaiKhoan().getMaTK() != null && tk.getMaTK() != null &&
+                        dc.getTaiKhoan().getMaTK().equals(tk.getMaTK())) {
                     diaChiRepository.delete(dc);
                     return ResponseEntity.ok("OK");
                 }
@@ -953,10 +955,11 @@ public class ApiController {
     public ResponseEntity<Map<String, Object>> uploadImage(
             @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
             @RequestParam(value = "type", defaultValue = "products") String type) {
-        
+
         Map<String, Object> response = new HashMap<>();
         try {
-            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                    .getContext().getAuthentication();
             if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
                 response.put("success", false);
                 response.put("message", "Từ chối truy cập");
@@ -966,10 +969,13 @@ public class ApiController {
             if (file != null && !file.isEmpty()) {
                 String uploadDir = System.getProperty("user.dir") + "/uploads/" + type + "/";
                 java.io.File dir = new java.io.File(uploadDir);
-                if (!dir.exists()) dir.mkdirs();
+                if (!dir.exists())
+                    dir.mkdirs();
 
                 String originalName = file.getOriginalFilename();
-                String ext = originalName != null && originalName.contains(".") ? originalName.substring(originalName.lastIndexOf(".")) : ".jpg";
+                String ext = originalName != null && originalName.contains(".")
+                        ? originalName.substring(originalName.lastIndexOf("."))
+                        : ".jpg";
                 String fileName = "up_" + System.currentTimeMillis() + ext;
 
                 java.nio.file.Path filePath = java.nio.file.Paths.get(uploadDir + fileName);

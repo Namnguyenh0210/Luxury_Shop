@@ -197,16 +197,4 @@ public class ChatController {
         return ResponseEntity.ok("Đã tiếp nhận cuộc trò chuyện");
     }
 
-    private boolean hasRoles(TaiKhoan user, String... rolesAllowed) {
-        if (user == null || user.getVaiTros() == null)
-            return false;
-        return user.getVaiTros().stream()
-                .anyMatch(r -> {
-                    for (String allowed : rolesAllowed) {
-                        if (r.getTenVaiTro().equals("ROLE_" + allowed) || r.getTenVaiTro().equals(allowed))
-                            return true;
-                    }
-                    return false;
-                });
-    }
 }
