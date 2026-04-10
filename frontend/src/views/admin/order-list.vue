@@ -203,9 +203,10 @@ export default {
         { value: '2', label: 'Đang giao' },
         { value: '3', label: 'Đã giao' },
         { value: '4', label: 'Hoàn tất' },
+        { value: '6', label: 'Đã đánh giá' },
         { value: '5', label: 'Đã hủy' },
-        { value: '6', label: 'Lỗi thanh toán' },
-        { value: '7', label: 'Chờ thanh toán' }
+        { value: '7', label: 'Chờ thanh toán' },
+        { value: '8', label: 'Lỗi thanh toán' }
       ]
     }
   },
@@ -296,8 +297,9 @@ export default {
         3: 'Đã giao', 
         4: 'Hoàn tất', 
         5: 'Đã hủy',
-        6: 'Lỗi thanh toán',
-        7: 'Chờ thanh toán'
+        6: 'Đã đánh giá',
+        7: 'Chờ thanh toán',
+        8: 'Lỗi thanh toán'
       }[s] ?? 'Không xác định'
     },
 
@@ -310,7 +312,8 @@ export default {
         4: 'bg-green-100 text-green-700',
         5: 'bg-red-100   text-red-700',
         6: 'bg-orange-100 text-orange-700',
-        7: 'bg-cyan-100 text-cyan-700 font-black animate-pulse'
+        7: 'bg-cyan-100 text-cyan-700 font-black animate-pulse',
+        8: 'bg-gray-100 text-gray-700 font-medium'
       }[s] ?? 'bg-gray-100 text-gray-600'
     },
 

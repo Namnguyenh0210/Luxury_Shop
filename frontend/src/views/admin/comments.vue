@@ -58,8 +58,8 @@
               :class="filterStatus === '' ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
               Tất cả trạng thái
             </div>
-            <div @click="filterStatus = false; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === false ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">⏳ Chờ duyệt</div>
-            <div @click="filterStatus = true; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === true ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Đã hiển thị</div>
+            <div @click="filterStatus = true; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === true ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Giao diện hiển thị</div>
+            <div @click="filterStatus = false; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === false ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">🚫 Đã ẩn vi phạm</div>
           </div>
         </div>
 
@@ -113,22 +113,22 @@
               </td>
 
               <td class="px-5 py-4 text-center">
-                <span v-if="bl.trangThai === false" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
-                  Chờ duyệt
+                <span v-if="bl.trangThai === false" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+                  Đã bị ẩn
                 </span>
                 <span v-else-if="bl.trangThai === true" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                  Đã hiện
+                  Đang hiển thị
                 </span>
               </td>
 
               <td class="px-5 py-4 text-center">
                 <div class="flex flex-col items-center gap-2">
                   <div class="flex gap-2">
-                    <button v-if="bl.trangThai === false" @click="updateStatus(bl.maBL, true)" title="Duyệt (Hiển thị)"
+                    <button v-if="bl.trangThai === false" @click="updateStatus(bl.maBL, true)" title="Bỏ ẩn (Hiển thị lại)"
                       class="flex items-center justify-center size-7 rounded bg-green-50 text-green-600 hover:bg-green-100 transition-colors">
                       <span class="material-symbols-outlined text-[16px]">visibility</span>
                     </button>
-                    <button v-if="bl.trangThai === true" @click="updateStatus(bl.maBL, false)" title="Bỏ duyệt (Ẩn)"
+                    <button v-if="bl.trangThai === true" @click="updateStatus(bl.maBL, false)" title="Ẩn (Vi phạm)"
                       class="flex items-center justify-center size-7 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
                       <span class="material-symbols-outlined text-[16px]">visibility_off</span>
                     </button>
@@ -251,8 +251,8 @@ export default {
 
     getStatusLabel(val) {
       if (val === '') return ''
-      if (val === false) return '⏳ Chờ duyệt'
-      if (val === true) return '✅ Đã hiển thị'
+      if (val === false) return '🚫 Đã bị ẩn'
+      if (val === true) return '✅ Đang hiển thị'
       return ''
     },
 
@@ -325,7 +325,7 @@ export default {
       })
     },
     async updateStatus(id, newStatus) {
-      const txt = newStatus ? 'DUYỆT (Hiển thị)' : 'BỎ DUYỆT (Ẩn)';
+      const txt = newStatus ? 'BỎ ẨN (Hiển thị lại)' : 'ẨN';
       const ok = await window.$confirm(`Xác nhận ${txt} bình luận này?`)
       if(!ok) return
       try {

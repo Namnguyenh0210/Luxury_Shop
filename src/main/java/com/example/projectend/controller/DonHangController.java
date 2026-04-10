@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,12 +127,20 @@ public class DonHangController {
             if (chiTietList != null) {
                 for (com.example.projectend.entity.DonHangChiTiet ct : chiTietList) {
                     java.util.Map<String, Object> ctDto = new java.util.HashMap<>();
+                    ctDto.put("maCT", ct.getMaCT());
                     ctDto.put("soLuong", ct.getSoLuong());
                     ctDto.put("donGia", ct.getDonGia());
                     com.example.projectend.entity.SanPhamChiTiet spct = ct.getSanPhamChiTiet();
                     if (spct != null) {
+                        ctDto.put("maSP", spct.getSanPham() != null ? spct.getSanPham().getMaSP() : null);
                         ctDto.put("tenSP", spct.getSanPham() != null ? spct.getSanPham().getTenSP() : "");
-                        ctDto.put("anh", spct.getSanPham() != null ? spct.getSanPham().getAnhChinh() : spct.getAnhBienThe());
+                        String anhChinh = spct.getSanPham() != null ? spct.getSanPham().getAnhChinh() : null;
+                        String anhBienThe = spct.getAnhBienThe();
+                        String anh = (anhChinh != null && !anhChinh.isEmpty()) ? anhChinh : anhBienThe;
+                        if (anh != null && !anh.startsWith("http") && !anh.startsWith("/")) {
+                            anh = "/uploads/products/" + anh;
+                        }
+                        ctDto.put("anh", anh != null ? anh : "/img/placeholder.png");
                         ctDto.put("size", spct.getSizeSP() != null ? spct.getSizeSP().getTenSize() : "");
                         ctDto.put("mau", spct.getMauSacSP() != null ? spct.getMauSacSP().getTenMau() : "");
                         ctDto.put("thuongHieu", spct.getSanPham() != null && spct.getSanPham().getThuongHieu() != null
@@ -174,13 +181,7 @@ public class DonHangController {
     @PutMapping("/complete/{id}")
     public ResponseEntity<?> completeOrder(@PathVariable Long id) {
 
-        DonHang donHang = donHangRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
-
-        donHang.setTrangThaiDH(4); // 4 = Hoàn tất
-        donHang.setNgayCapNhat(LocalDateTime.now());
-
-        donHangRepository.save(donHang);
+        donHangService.capNhatTrangThai(id, 4, "Khách hàng", "Khách hàng xác nhận đã nhận hàng");
 
         return ResponseEntity.ok("Đơn hàng đã hoàn tất");
     }

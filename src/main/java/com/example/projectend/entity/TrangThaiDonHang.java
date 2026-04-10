@@ -24,11 +24,12 @@ public class TrangThaiDonHang {
     public static final int CHO_XAC_NHAN = 0;   // Đơn mới, chờ admin duyệt
     public static final int DA_XAC_NHAN = 1;    // Admin đã duyệt
     public static final int DANG_GIAO = 2;       // Shipper đang đi giao
-    public static final int HOAN_THANH = 3;      // Giao thành công
-    public static final int TRA_HANG = 4;        // Khách trả hàng
-    public static final int DA_HUY = 5;          // Admin/Khách hủy đơn
-    public static final int LOI_THANH_TOAN = 6;  // Thanh toán PayOS thất bại
+    public static final int DA_GIAO = 3;         // Đã giao hàng
+    public static final int HOAN_TAT = 4;        // Đã hoàn tất (Thanh toán xong)
+    public static final int DA_HUY = 5;          // Đơn hàng đã bị hủy
+    public static final int DA_DANH_GIA = 6;    // Đã đánh giá đơn hàng
     public static final int CHO_THANH_TOAN = 7; // Đang chờ khách quét mã QR
+    public static final int LOI_THANH_TOAN = 8;  // Thanh toán PayOS thất bại
 
     public TrangThaiDonHang() {
     }

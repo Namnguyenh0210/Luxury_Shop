@@ -29,6 +29,9 @@ public class DonHangService {
     private DonHangRepository donHangRepository;
 
     @Autowired
+    private DanhGiaRepository danhGiaRepository;
+
+    @Autowired
     private DonHangChiTietRepository donHangChiTietRepository;
 
     @Autowired
@@ -266,6 +269,7 @@ public class DonHangService {
      */
     @Transactional
     public void confirmPaymentAndDeductStock(Long orderId) {
+        if (orderId == null) return;
         DonHang dh = donHangRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng #" + orderId));
 
@@ -313,6 +317,34 @@ public class DonHangService {
         capNhatTrangThai(orderId, dh.getTrangThaiDH(), "PayOS System", "Đã nhận thanh toán từ PayOS");
     }
 
+    @Transactional
+    public void handlePaymentExpired(Long orderId) {
+        if (orderId == null) return;
+        DonHang dh = donHangRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng #" + orderId));
+
+        // 1. Kiểm tra trạng thái thanh toán trước khi xử lý (Phòng ngừa race condition
+        // / double callback)
+        if (dh.getTrangThaiThanhToan() == 1) { // 1 = PAID
+            log.info("⚠️ Đơn hàng #{} đã được xác nhận thanh toán trước đó, bỏ qua.", orderId);
+            return;
+        }
+
+        // 2. Cập nhật trạng thái thanh toán
+        dh.setTrangThaiThanhToan(2); // EXPIRED (2)
+
+        // 3. Cập nhật trạng thái đơn hàng (Chờ thanh toán 7 -> Lỗi thanh toán 8)
+        if (dh.getTrangThaiDH() == TrangThaiDonHang.CHO_THANH_TOAN) {
+            dh.setTrangThaiDH(TrangThaiDonHang.LOI_THANH_TOAN);
+        }
+
+        dh.setNgayCapNhat(LocalDateTime.now());
+        donHangRepository.save(dh);
+
+        // 5. Ghi lịch sử đơn hàng
+        capNhatTrangThai(orderId, dh.getTrangThaiDH(), "PayOS System", "Đơn hàng hết hạn thanh toán");
+    }
+
     public List<DonHang> findAll() {
         return donHangRepository.findAllByOrderByNgayDatDesc();
     }
@@ -325,8 +357,8 @@ public class DonHangService {
 
         Integer currentStatus = dh.getTrangThaiDH();
 
-        // Cho phép 6 (Lỗi) -> 4 (Hoàn tất)
-        if (currentStatus == 6 && status == 4) {
+        // Cho phép 8 (Lỗi) -> 4 (Hoàn tất)
+        if (currentStatus == 8 && status == 4) {
             // Hợp lệ
         } else if (status < currentStatus) {
             throw new RuntimeException("Không thể quay lại trạng thái cũ");
@@ -356,17 +388,18 @@ public class DonHangService {
      * KHÁCH BÁO CHƯA NHẬN ĐƯỢC HÀNG
      */
     @Transactional
-    public void reportOrderNotReceived(Long id, String lyDo, String moTa) {
-        DonHang dh = donHangRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+    public void reportOrderNotReceived(Long id, String reason, String description) {
+        if (id == null) return;
+        DonHang dh = donHangRepository.findById(id).orElse(null);
+        if (dh == null) return;
 
         if (dh.getTrangThaiDH() != 3) {
             throw new RuntimeException("Chỉ có thể báo lỗi khi đơn hàng đang ở trạng thái Đã giao");
         }
 
         dh.setKhachBaoChuaNhan(true);
-        dh.setLyDoChuaNhan(lyDo);
-        dh.setMoTaChuaNhan(moTa);
+        dh.setLyDoChuaNhan(reason);
+        dh.setMoTaChuaNhan(description);
         dh.setNgayCapNhat(LocalDateTime.now());
         donHangRepository.save(dh);
 
@@ -376,7 +409,7 @@ public class DonHangService {
         history.setTrangThaiCu(3);
         history.setTrangThaiMoi(3);
         history.setNguoiCapNhat("KHACHHANG");
-        history.setGhiChu("Khách báo chưa nhận được hàng: " + lyDo);
+        history.setGhiChu("Khách báo chưa nhận được hàng: " + reason);
         history.setThoiGian(LocalDateTime.now());
         lichSuDonHangRepository.save(history);
     }
@@ -405,13 +438,16 @@ public class DonHangService {
         Integer trangThaiCu = donHang.getTrangThaiDH();
 
         // Kiểm tra: chỉ cho phép tiến lên, không được lùi lại
-        // NGOẠI LỆ: Cho phép từ 7 (Chờ thanh toán) sang các trạng thái khác (0, 6, 5)
-        if (trangThaiCu != 7 && trangThaiMoi <= trangThaiCu && trangThaiCu != 0) {
+        // NGOẠI LỆ: Cho phép từ 7 (Chờ thanh toán) sang các trạng thái khác (0, 8, 5)
+        if (trangThaiCu == 7 && (trangThaiMoi == 0 || trangThaiMoi == 8 || trangThaiMoi == 5)) {
+            // Hợp lệ
+        } else if (trangThaiCu != 7 && trangThaiMoi <= trangThaiCu && trangThaiCu != 0) {
             throw new RuntimeException("Không thể quay lại trạng thái trước đó!");
         }
 
-        // Không cho phép cập nhật nếu đã kết thúc (4, 5)
-        if (trangThaiCu == 4 || trangThaiCu == 5) {
+        // Không cho phép cập nhật nếu đã kết thúc (5: Hủy, 6: Đã đánh giá)
+        // NGOẠI LỆ: Cho phép từ 4 (Hoàn tất) sang 6 (Đã đánh giá)
+        if (trangThaiCu == 5 || trangThaiCu == 6 || (trangThaiCu == 4 && trangThaiMoi != 6)) {
             throw new RuntimeException("Đơn hàng đã kết thúc, không thể cập nhật!");
         }
 
@@ -437,8 +473,10 @@ public class DonHangService {
         // LOGIC HOÀN KHO KHI HỦY ĐƠN:
         // 1. Trạng thái mới là Đã hủy (5)
         // 2. Trạng thái cũ < 5 (0, 1, 2, 3) => Chắc chắn đã trừ tồn kho
-        // 3. Trạng thái cũ 6, 7 (PayOS lỗi/chờ) => Chưa trừ tồn kho
-        if (trangThaiMoi == TrangThaiDonHang.DA_HUY && trangThaiCu < TrangThaiDonHang.DA_HUY) {
+        // 3. Trạng thái cũ 8, 7 (PayOS lỗi/chờ) => Chưa trừ tồn kho
+        if (trangThaiCu == 8 || trangThaiCu == 7) {
+            // Không hoàn kho vì chưa trừ
+        } else if (trangThaiCu < 5 && trangThaiMoi == TrangThaiDonHang.DA_HUY) {
             for (DonHangChiTiet ct : donHang.getChiTietList()) {
                 SanPhamChiTiet spct = ct.getSanPhamChiTiet();
                 spct.setSoLuongTon(spct.getSoLuongTon() + ct.getSoLuong());
@@ -466,6 +504,40 @@ public class DonHangService {
      * CẬP NHẬT TRẠNG THÁI (OVERLOAD - TỰ ĐỘNG LẤY NGƯỜI CẬP NHẬT)
      */
     @Transactional
+    /**
+     * Kiểm tra và cập nhật trạng thái đơn hàng sang "Đã đánh giá" (6)
+     * nếu tất cả các sản phẩm trong đơn hàng đã được đánh giá.
+     */
+    public void checkAndUpdateOrderStatusAfterReview(Long maDH) {
+        if (maDH == null) return;
+        DonHang donHang = donHangRepository.findById(maDH).orElse(null);
+        if (donHang == null) return;
+
+        // Nếu trạng thái hiện tại không phải là Hoàn tất (4) hoặc Đã giao (3) thì không
+        // làm gì
+        // Thường khách sẽ đánh giá ở trạng thái 4
+        if (donHang.getTrangThaiDH() != 4 && donHang.getTrangThaiDH() != 3) {
+            return;
+        }
+
+        boolean allReviewed = true;
+        List<DonHangChiTiet> chiTietList = donHang.getChiTietList();
+
+        for (DonHangChiTiet ct : chiTietList) {
+            // Kiểm tra xem chi tiết này đã có đánh giá chưa
+            // Cần DanhGiaRepository hoặc kiểm tra thông qua chi tiết
+            // Giả sử có DanhGiaRepository được @Autowired
+            if (!danhGiaRepository.findByDonHangChiTiet(ct).isPresent()) {
+                allReviewed = false;
+                break;
+            }
+        }
+
+        if (allReviewed) {
+            capNhatTrangThai(maDH, 6, "Hệ thống", "Hệ thống tự động chuyển sang Đã đánh giá");
+        }
+    }
+
     public boolean capNhatTrangThai(Long maDH, Integer trangThaiMoi) {
         return capNhatTrangThai(maDH, trangThaiMoi, "Hệ thống", null);
     }

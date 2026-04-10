@@ -412,14 +412,16 @@
                     <!-- Progress Stepper -->
                     <div v-if="latestOrder.trangThaiDH !== 5" class="relative py-4">
                       <div class="flex items-center justify-between w-full relative z-10 px-4">
-                        <div v-for="(step, index) in ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Đã giao', 'Hoàn thành']" :key="index" class="flex flex-col items-center">
+                        <div v-for="(step, index) in ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Đã giao', 'Hoàn tất', 'Đã đánh giá']" :key="index" class="flex flex-col items-center">
                           <div :class="['w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-700', 
-                                        latestOrder.trangThaiDH >= index ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' : 'bg-white border-gray-100 text-gray-300']">
-                            <span v-if="latestOrder.trangThaiDH > index" class="material-symbols-outlined text-xl font-bold">check</span>
+                                        latestOrder.trangThaiDH >= index ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' : 
+                                        (latestOrder.trangThaiDH === 6 && index === 5) ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' :
+                                        'bg-white border-gray-100 text-gray-300']">
+                            <span v-if="latestOrder.trangThaiDH > index || (latestOrder.trangThaiDH === 6 && index < 5)" class="material-symbols-outlined text-xl font-bold">check</span>
                             <span v-else class="text-xs font-bold">{{ index + 1 }}</span>
                           </div>
                           <span :class="['mt-3 text-[9px] font-bold uppercase tracking-wider text-center w-20 transition-colors duration-500', 
-                                        latestOrder.trangThaiDH >= index ? 'text-yellow-600' : 'text-gray-400']">
+                                        (latestOrder.trangThaiDH >= index || (latestOrder.trangThaiDH === 6 && index === 5)) ? 'text-yellow-600' : 'text-gray-400']">
                             {{ step }}
                           </span>
                         </div>
@@ -427,7 +429,7 @@
                       <div class="absolute top-9 left-0 w-full px-20 -z-0">
                         <div class="w-full h-1 bg-gray-50 rounded-full overflow-hidden">
                           <div class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 transition-all duration-1000 ease-out rounded-full" 
-                               :style="{ width: (latestOrder.trangThaiDH * 25) + '%' }"></div>
+                               :style="{ width: (latestOrder.trangThaiDH === 6 ? 100 : Math.min(latestOrder.trangThaiDH * 20, 100)) + '%' }"></div>
                         </div>
                       </div>
                     </div>
@@ -477,16 +479,24 @@
                         </div>
                       </div>
 
-                      <!-- Order Time Info -->
-                      <div class="pt-4 border-t border-gray-100 px-2 mt-2 flex flex-wrap items-center gap-x-8 gap-y-2 opacity-50">
-                        <div class="flex items-center gap-2">
-                          <span class="text-[9px] font-black text-black uppercase tracking-widest">Ngày đặt:</span>
-                          <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleDateString('vi-VN') }}</span>
+                      <!-- Order Time Info and Repurchase Action -->
+                      <div class="pt-4 border-t border-gray-100 px-2 mt-2 flex flex-wrap items-center justify-between gap-y-4">
+                        <div class="flex flex-wrap items-center gap-x-8 gap-y-2 opacity-50">
+                          <div class="flex items-center gap-2">
+                            <span class="text-[9px] font-black text-black uppercase tracking-widest">Ngày đặt:</span>
+                            <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleDateString('vi-VN') }}</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <span class="text-[9px] font-black text-black uppercase tracking-widest">Giờ đặt:</span>
+                            <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) }}</span>
+                          </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                          <span class="text-[9px] font-black text-black uppercase tracking-widest">Giờ đặt:</span>
-                          <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) }}</span>
-                        </div>
+                        
+                        <!-- Nút Mua Lại (Chỉ khi 4 hoặc 6) -->
+                        <button v-if="latestOrder.trangThaiDH === 4 || latestOrder.trangThaiDH === 6" @click="muaLai(latestOrder)" 
+                                class="px-5 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all transform active:scale-95 flex items-center gap-2 ml-auto shadow-sm">
+                          <span class="material-symbols-outlined text-sm font-bold">shopping_cart</span> Mua lại
+                        </button>
                       </div>
                     </div>
 
@@ -497,6 +507,8 @@
                               class="px-5 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all transform active:scale-95 flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm font-bold">cancel</span> Hủy đơn
                       </button>
+
+
 
                       <!-- Nút Đã nhận (Chỉ khi 3 - Đã giao) -->
                       <button v-if="!latestOrder.khachBaoChuaNhan && latestOrder.trangThaiDH === 3" @click="updateOrderStatus(latestOrder.maDH, 4)" 
@@ -542,6 +554,7 @@
                           <option value="2">Đang giao</option>
                           <option value="3">Đã giao</option>
                           <option value="4">Hoàn tất</option>
+                          <option value="6">Đã đánh giá</option>
                           <option value="5">Đã hủy</option>
                         </select>
                         <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
@@ -587,7 +600,14 @@
                                           order.trangThaiDH === 5 ? 'bg-red-50 text-red-600 border-red-100' : 
                                           order.trangThaiDH === 4 ? 'bg-green-50 text-green-600 border-green-100' : 
                                           order.trangThaiDH === 0 ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-blue-50 text-blue-600 border-blue-100']">
-                              {{ order.trangThaiDH === 5 ? 'Đã hủy' : (order.trangThaiDH === 4 ? 'Hoàn tất' : (order.trangThaiDH === 0 ? 'Chờ xác nhận' : (order.trangThaiDH === 3 ? 'Đã giao' : (order.trangThaiDH === 1 ? 'Đã duyệt' : 'Đang giao')))) }}
+                              {{ 
+                                order.trangThaiDH === 6 ? 'Đã đánh giá' : 
+                                (order.trangThaiDH === 5 ? 'Đã hủy' : 
+                                (order.trangThaiDH === 4 ? 'Hoàn tất' : 
+                                (order.trangThaiDH === 0 ? 'Chờ xác nhận' : 
+                                (order.trangThaiDH === 3 ? 'Đã giao' : 
+                                (order.trangThaiDH === 1 ? 'Đã duyệt' : 'Đang giao'))))) 
+                              }}
                             </span>
                             <span class="text-xs font-black text-black">{{ new Date(order.ngayDat).toLocaleDateString('vi-VN') }}</span>
                           </div>
@@ -600,9 +620,12 @@
                       </div>
 
                       <!-- Row Action -->
-                      <div class="shrink-0 flex items-center">
+                      <div class="shrink-0 flex items-center gap-2">
+                        <button v-if="order.trangThaiDH === 4 || order.trangThaiDH === 6" @click="muaLai(order)" class="whitespace-nowrap px-6 py-3 bg-red-50 border border-red-100 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm">
+                          Mua lại
+                        </button>
                         <button @click="$router.push(`/profile/orders/${order.maDH}`)" class="whitespace-nowrap px-6 py-3 bg-white border border-gray-200 text-black hover:bg-black hover:text-white hover:border-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm">
-                          Xem đơn hàng
+                          Xem chi tiết
                         </button>
                       </div>
                     </div>
@@ -1357,6 +1380,47 @@ export default {
         this.fetchOrders()
       } catch (err) {
         console.error("Cancel order error", err)
+      }
+    },
+
+    async muaLai(order) {
+      if (!order.chiTietList || order.chiTietList.length === 0) return;
+      
+      try {
+        let addedCount = 0;
+        let failCount = 0;
+        
+        for (const item of order.chiTietList) {
+          const params = {
+             productId: item.sanPhamChiTiet.sanPham.maSP,
+             quantity: item.soLuong,
+             variantId: item.sanPhamChiTiet.maBienThe
+          };
+          try {
+            const res = await axios.post('/cart/add-product', null, { params });
+            if(res.data.success) {
+              addedCount++;
+            } else {
+               failCount++;
+            }
+          } catch(e) {
+             failCount++;
+          }
+        }
+        
+        if (addedCount > 0) {
+           window.$toast.success(`Đã thêm lại ${addedCount} sản phẩm vào giỏ hàng!`);
+           if (window.refreshCartCount) window.refreshCartCount();
+           setTimeout(() => {
+             this.$router.push('/cart');
+           }, 500);
+        }
+        if (failCount > 0) {
+           window.$toast.warning(`Không thể thêm ${failCount} sản phẩm (có thể đã hết hàng).`);
+        }
+      } catch (err) {
+         console.error('Error repurchasing', err);
+         window.$toast.error('Có lỗi xảy ra khi thêm lại giỏ hàng');
       }
     },
 

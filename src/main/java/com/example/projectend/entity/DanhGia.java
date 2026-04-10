@@ -98,7 +98,7 @@ public class DanhGia {
 
     // ===== New Fields for Moderation =====
     @Column(name = "TrangThai")
-    private Integer trangThai = 0; // 0 = Pending, 1 = Approved, 2 = Hidden
+    private Integer trangThai = 1; // 1 = Approved, 0 = Pending, 2 = Hidden
 
     @Column(name = "PhanHoi", length = 1000)
     private String phanHoi;

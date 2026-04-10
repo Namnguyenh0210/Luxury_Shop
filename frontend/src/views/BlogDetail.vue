@@ -131,14 +131,117 @@
                 </div>
               </div>
             </div>
+
+            <!-- Bình luận -->
+            <section id="binh-luan" class="w-full pt-10 pb-8">
+              <div class="comment-section-header border-t border-gray-100 pt-10">
+                <div class="comment-accent-bar"></div>
+                <h2 class="comment-section-title">
+                  Bình Luận
+                  <span class="comment-count-badge">{{ soLuongBinhLuan }}</span>
+                </h2>
+              </div>
+
+              <!-- Form bình luận -->
+              <div class="comment-form-card shadow-sm border border-[#F0E6C8]">
+                <div v-if="daDangNhap" class="comment-form-inner">
+                  <div class="form-user-avatar shadow-sm">
+                    <span>B</span>
+                  </div>
+                  <div class="comment-input-wrap">
+                    <textarea
+                      v-model="noiDungBinhLuan"
+                      rows="4"
+                      maxlength="500"
+                      placeholder="Chia sẻ suy nghĩ của bạn về bài viết này..."
+                      class="comment-textarea border-gray-200 focus:border-[#C8A97E]"
+                    ></textarea>
+                    <div class="comment-form-footer">
+                      <span class="comment-char-count font-bold">{{ noiDungBinhLuan.length }}/500</span>
+                      <button
+                        @click="dangBinhLuan"
+                        :disabled="dangGui || !noiDungBinhLuan.trim()"
+                        class="comment-submit-btn bg-[#111111]"
+                      >
+                        <span v-if="dangGui" class="comment-spinner"></span>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                         {{ dangGui ? 'Đang gửi...' : 'Đăng bình luận' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="comment-login-prompt">
+                  <span class="material-symbols-outlined prompt-icon">lock</span>
+                  <p>Đăng nhập để tham gia thảo luận về bài viết này</p>
+                  <router-link to="/login" class="comment-login-btn">Đăng nhập ngay</router-link>
+                </div>
+              </div>
+
+              <!-- Danh sách bình luận -->
+              <div v-if="danhSachBinhLuan.length === 0" class="comment-empty bg-stone-50/50">
+                <span class="material-symbols-outlined prompt-icon" style="color: #9CA3AF; background: #fff;">chat_bubble</span>
+                <p>Chưa có bình luận nào. Hãy là người đầu tiên!</p>
+              </div>
+
+              <TransitionGroup name="comment-item" tag="div" class="comment-list">
+                <div v-for="bl in danhSachBinhLuan" :key="bl.maBL" class="comment-card shadow-sm border-gray-100">
+                  <div class="comment-avatar shadow-sm">
+                    {{ (bl.tenNguoiDung || 'K').charAt(0).toUpperCase() }}
+                  </div>
+                  <div class="comment-body">
+                    <div class="comment-meta flex justify-between items-start">
+                      <div>
+                        <span class="comment-author font-bold">{{ bl.tenNguoiDung || 'Khách' }}</span>
+                        <span class="comment-time">• {{ formatDateTime(bl.ngayBinhLuan) }}</span>
+                      </div>
+                    </div>
+                    <div v-if="maBLDangSua === bl.maBL" class="mt-2 mb-4">
+                      <textarea v-model="noiDungSua" rows="3" class="w-full border border-[#C8A97E] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-[#C8A97E] resize-none"></textarea>
+                      <div class="flex gap-2 justify-end mt-2">
+                        <button @click="huySua" class="px-4 py-1.5 rounded-lg text-xs font-bold text-gray-500 hover:bg-gray-100 transition-colors">Hủy</button>
+                        <button @click="luuSua(bl)" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-[#111111] text-white hover:bg-[#C8A97E] transition-colors">Lưu thay đổi</button>
+                      </div>
+                    </div>
+                    <p v-else class="comment-text text-gray-700 font-serif leading-relaxed">{{ bl.noiDung }}</p>
+
+                    <div v-if="bl.phanHoiAdmin" class="admin-reply-box mt-4 bg-stone-50 p-4 rounded-xl border border-gray-100">
+                      <div class="flex items-center gap-1.5 text-[#C8A97E] font-bold text-xs mb-2">
+                         <span class="material-symbols-outlined text-[16px]">verified</span> 
+                         PHẢN HỒI TỪ LUXURY SHOP 
+                         <span class="text-gray-400 font-normal ml-auto">{{ formatDateTime(bl.ngayPhanHoiAdmin) }}</span>
+                      </div>
+                      <p class="text-[14px] text-gray-700 leading-relaxed italic">{{ bl.phanHoiAdmin }}</p>
+                    </div>
+
+                    <div class="comment-actions mt-4 flex justify-between items-center w-full">
+                      <button @click="likeBinhLuan(bl)" class="comment-like-btn" :class="{ liked: bl.liked }">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" :fill="bl.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        <span class="font-bold">{{ bl.soLuongLike || 0 }} thích</span>
+                      </button>
+                      
+                      <button v-if="currentUserEmail && bl.email === currentUserEmail && maBLDangSua !== bl.maBL" @click="batDauSua(bl)" class="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 hover:text-[#C8A97E] transition-colors">
+                        <span class="material-symbols-outlined text-[14px]">edit</span> Sửa
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </TransitionGroup>
+            </section>
+
           </div>
         </div>
 
-        <!-- Bên dưới Grid: Bài viết liên quan và Bình luận -->
+        <!-- Bên dưới Grid: Bài viết liên quan -->
         <div class="max-w-[1240px] mx-auto mt-32">
+
+
           <!-- Bài viết liên quan -->
-          <section v-if="lienQuan.length > 0" class="mb-32">
-            <div class="flex flex-col items-center mb-16">
+          <section v-if="lienQuan.length > 0" class="pb-20">
+            <div class="flex flex-col items-center mb-16 pt-16 border-t border-gray-100">
               <h2 class="text-3xl font-serif font-bold text-[#111111] mb-2 tracking-tight">Bài viết liên quan</h2>
               <div class="w-16 h-[2px] bg-[#C8A97E]"></div>
             </div>
@@ -161,95 +264,6 @@
                 </div>
               </router-link>
             </div>
-          </section>
-
-          <!-- Bình luận -->
-          <section id="binh-luan" class="max-w-[900px] mx-auto pb-20">
-            <div class="comment-section-header border-t border-gray-100 pt-20">
-              <div class="comment-accent-bar"></div>
-              <h2 class="comment-section-title">
-                Bình Luận
-                <span class="comment-count-badge">{{ soLuongBinhLuan }}</span>
-              </h2>
-            </div>
-
-            <!-- Form bình luận -->
-            <div class="comment-form-card shadow-sm border border-[#F0E6C8]">
-              <div v-if="daDangNhap" class="comment-form-inner">
-                <div class="form-user-avatar shadow-sm">
-                  <span>B</span>
-                </div>
-                <div class="comment-input-wrap">
-                  <textarea
-                    v-model="noiDungBinhLuan"
-                    rows="4"
-                    maxlength="500"
-                    placeholder="Chia sẻ suy nghĩ của bạn về bài viết này..."
-                    class="comment-textarea border-gray-200 focus:border-[#C8A97E]"
-                  ></textarea>
-                  <div class="comment-form-footer">
-                    <span class="comment-char-count font-bold">{{ noiDungBinhLuan.length }}/500</span>
-                    <button
-                      @click="dangBinhLuan"
-                      :disabled="dangGui || !noiDungBinhLuan.trim()"
-                      class="comment-submit-btn bg-[#111111]"
-                    >
-                      <span v-if="dangGui" class="comment-spinner"></span>
-                      <svg v-else xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                      </svg>
-                       {{ dangGui ? 'Đang gửi...' : 'Đăng bình luận' }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="comment-login-prompt">
-                <span class="material-symbols-outlined prompt-icon">lock</span>
-                <p>Đăng nhập để tham gia thảo luận về bài viết này</p>
-                <router-link to="/login" class="comment-login-btn">Đăng nhập ngay</router-link>
-              </div>
-            </div>
-
-            <!-- Danh sách bình luận -->
-            <div v-if="danhSachBinhLuan.length === 0" class="comment-empty bg-stone-50/50">
-              <span class="material-symbols-outlined prompt-icon" style="color: #9CA3AF; background: #fff;">chat_bubble</span>
-              <p>Chưa có bình luận nào. Hãy là người đầu tiên!</p>
-            </div>
-
-            <TransitionGroup name="comment-item" tag="div" class="comment-list">
-              <div v-for="bl in danhSachBinhLuan" :key="bl.maBL" class="comment-card shadow-sm border-gray-100">
-                <div class="comment-avatar shadow-sm">
-                  {{ (bl.tenNguoiDung || 'K').charAt(0).toUpperCase() }}
-                </div>
-                <div class="comment-body">
-                  <div class="comment-meta flex justify-between items-start">
-                    <div>
-                      <span class="comment-author font-bold">{{ bl.tenNguoiDung || 'Khách' }}</span>
-                      <span class="comment-time">• {{ formatDateTime(bl.ngayBinhLuan) }}</span>
-                    </div>
-                  </div>
-                  <p class="comment-text text-gray-700 font-serif leading-relaxed">{{ bl.noiDung }}</p>
-
-                  <div v-if="bl.phanHoiAdmin" class="admin-reply-box mt-4 bg-stone-50 p-4 rounded-xl border border-gray-100">
-                    <div class="flex items-center gap-1.5 text-[#C8A97E] font-bold text-xs mb-2">
-                       <span class="material-symbols-outlined text-[16px]">verified</span> 
-                       PHẢN HỒI TỪ LUXURY SHOP 
-                       <span class="text-gray-400 font-normal ml-auto">{{ formatDateTime(bl.ngayPhanHoiAdmin) }}</span>
-                    </div>
-                    <p class="text-[14px] text-gray-700 leading-relaxed italic">{{ bl.phanHoiAdmin }}</p>
-                  </div>
-
-                  <div class="comment-actions mt-4">
-                    <button @click="likeBinhLuan(bl)" class="comment-like-btn" :class="{ liked: bl.liked }">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" :fill="bl.liked ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                      </svg>
-                      <span class="font-bold">{{ bl.soLuongLike || 0 }} thích</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </TransitionGroup>
           </section>
 
           <!-- Back button -->
@@ -292,6 +306,9 @@ export default {
       thongBao: '',
       loaiThongBao: 'ok',
       daDangNhap: false,
+      currentUserEmail: null,
+      maBLDangSua: null,
+      noiDungSua: '',
       daSaoChepLink: false,
       isExpanded: false
     }
@@ -312,9 +329,16 @@ export default {
     async kiemTraDangNhap() {
       try {
         const res = await axios.get('/auth/current-user')
-        this.daDangNhap = res.data.authenticated === true
+        if (res.data.authenticated) {
+          this.daDangNhap = true
+          this.currentUserEmail = res.data.email
+        } else {
+          this.daDangNhap = false
+          this.currentUserEmail = null
+        }
       } catch {
         this.daDangNhap = false
+        this.currentUserEmail = null
       }
     },
 
@@ -376,6 +400,38 @@ export default {
         }
       } catch (e) {
         console.error('Lỗi like:', e)
+      }
+    },
+
+    batDauSua(bl) {
+      this.maBLDangSua = bl.maBL
+      this.noiDungSua = bl.noiDung
+    },
+
+    huySua() {
+      this.maBLDangSua = null
+      this.noiDungSua = ''
+    },
+
+    async luuSua(bl) {
+      if (!this.noiDungSua.trim() || this.noiDungSua.trim() === bl.noiDung) {
+        this.huySua()
+        return
+      }
+      try {
+        const res = await axios.put(`/blog/binh-luan/${bl.maBL}`, {
+          noiDung: this.noiDungSua.trim()
+        })
+        if (res.data.thanhCong) {
+          bl.noiDung = this.noiDungSua.trim()
+          window.$toast?.success('Đã cập nhật bình luận!')
+        } else {
+          window.$toast?.error(res.data.thongBao || 'Lỗi cập nhật bình luận')
+        }
+      } catch (e) {
+        window.$toast?.error('Lỗi kết nối khi sửa bình luận')
+      } finally {
+        this.huySua()
       }
     },
 
