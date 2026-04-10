@@ -30,7 +30,7 @@
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hình Ảnh</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tiêu Đề</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Loại</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tác Giả</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Người Đăng</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ngày Đăng</th>
               <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Hành Động</th>
@@ -53,7 +53,7 @@
                   {{ bv.loaiBaiViet?.tenLoaiBV || 'Chưa phân loại' }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-gray-600">{{ bv.tacGia || '---' }}</td>
+              <td class="px-6 py-4 text-gray-600">{{ bv.nguoiDang || '---' }}</td>
               <td class="px-6 py-4">
                 <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full"
                   :class="bv.trangThai ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'">

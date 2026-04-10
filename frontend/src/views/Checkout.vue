@@ -7,7 +7,7 @@
 
         <!-- Page Title — Luxury serif style khớp Home.vue -->
         <div class="mb-12">
-          <p class="text-[11px] font-bold uppercase tracking-[0.4em] text-[#C8A97E] mb-3">Luxury Experience</p>
+          <p class="text-[11px] font-bold uppercase tracking-[0.4em] text-[#C8A97E] mb-3">Trải Nghiệm Đẳng Cấp</p>
           <h1 class="font-serif text-4xl md:text-5xl font-bold text-[#111111] tracking-tight uppercase">Thanh toán</h1>
           <div class="w-20 h-[3px] mt-5 bg-[#C8A97E]"></div>
           <p class="mt-5 text-[13px] text-gray-400 uppercase tracking-[0.1em] font-medium">Hoàn tất đơn hàng kiệt tác của bạn</p>
@@ -222,7 +222,7 @@
                   <input
                     v-model="voucherCode"
                     type="text"
-                    placeholder="ENTER CODE"
+                    placeholder="NHẬP MÃ"
                     :disabled="!!appliedVoucher"
                     class="flex-1 px-5 py-3.5 border border-[#E5E7EB] text-xs uppercase font-bold tracking-[0.2em] outline-none focus:border-[#C8A97E] bg-white transition-all shadow-sm rounded-sm"
                   />
@@ -256,7 +256,7 @@
                 </div>
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-400 uppercase tracking-[0.2em] text-[10px] font-bold">Vận chuyển:</span>
-                  <span class="font-bold text-[#C8A97E] text-[11px] tracking-widest uppercase">Premium Delivery Service</span>
+                  <span class="font-bold text-[#C8A97E] text-[11px] tracking-widest uppercase">Giao hàng cao cấp</span>
                 </div>
                 <div class="flex justify-between text-[10px]">
                   <span class="text-gray-400 uppercase tracking-[0.1em]">Phí vận chuyển:</span>
@@ -294,7 +294,7 @@
                 </div>
                 <div class="flex flex-col items-center gap-1 p-4 text-center">
                   <span class="material-symbols-outlined text-xl text-[#C8A97E]">local_shipping</span>
-                  <p class="text-[9px] font-bold uppercase tracking-widest text-gray-500">Giao hàng Premium</p>
+                  <p class="text-[9px] font-bold uppercase tracking-widest text-gray-500">Giao hàng cao cấp</p>
                 </div>
               </div>
 

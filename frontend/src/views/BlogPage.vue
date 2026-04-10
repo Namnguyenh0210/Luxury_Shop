@@ -10,13 +10,13 @@
       </div>
       <div class="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
       <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <p class="text-[#C8A97E] text-[10px] font-bold uppercase tracking-[0.5em] mb-4">✦ The Editorial Journal ✦</p>
+        <p class="text-[#C8A97E] text-[10px] font-bold uppercase tracking-[0.5em] mb-4">✦ Nhật ký thời trang ✦</p>
         <h1 class="text-5xl md:text-7xl font-serif font-bold text-white mb-6 leading-tight uppercase tracking-widest">
           Kiến thức
         </h1>
         <div class="w-16 h-[1px] bg-[#C8A97E] mx-auto mb-8"></div>
         <p class="text-white/80 text-sm md:text-base mb-8 max-w-2xl mx-auto font-light tracking-[0.2em] uppercase italic">
-          Style · Archives · Lifestyle
+          Phong cách · Lưu trữ · Lối sống
         </p>
       </div>
     </section>
@@ -44,7 +44,7 @@
         <!-- BÀI VIẾT NỔI BẬT -->
         <section v-if="noiBat.length > 0" class="mb-24">
           <div class="flex flex-col items-center mb-12">
-            <h2 class="text-3xl font-serif font-bold text-[#111111] mb-2 text-center">Featured Stories</h2>
+            <h2 class="text-3xl font-serif font-bold text-[#111111] mb-2 text-center">Tin Tức Nổi Bật</h2>
             <div class="w-16 h-[2px] bg-[#C8A97E]"></div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -65,7 +65,7 @@
                   {{ bv.tieuDe }}
                 </h3>
                 <div class="flex items-center gap-4 text-white/50 text-[11px] uppercase tracking-widest">
-                  <span>{{ bv.tacGia || 'Luxury Editor' }}</span>
+                  <span>{{ bv.nguoiDang || 'Luxury Editor' }}</span>
                   <span class="w-1 h-1 bg-white/30 rounded-full"></span>
                   <span>{{ formatDate(bv.ngayDang) }}</span>
                 </div>
@@ -77,11 +77,11 @@
         <!-- TÌM KIẾM & LỌC -->
         <div class="flex flex-col md:flex-row items-center justify-between gap-6 mb-16 pb-8 border-b border-gray-100">
            <div class="flex items-center gap-8">
-              <h2 class="text-2xl font-serif font-bold text-[#111111]">The Collection</h2>
-              <span class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ tongSo }} ARTICLES</span>
+              <h2 class="text-2xl font-serif font-bold text-[#111111]">Bộ Sưu Tập</h2>
+              <span class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ tongSo }} BÀI VIẾT</span>
            </div>
           <div class="relative w-full md:w-80">
-            <input v-model="tuKhoaTim" @input="timKiem" placeholder="Search the archives..."
+            <input v-model="tuKhoaTim" @input="timKiem" placeholder="Tìm kiếm bài viết..."
               class="w-full bg-transparent border-b border-gray-100 pb-2 text-sm focus:outline-none focus:border-[#C8A97E] transition-colors placeholder:text-gray-400 uppercase tracking-widest text-[#111111]" />
             <span class="absolute right-0 bottom-2 text-gray-400">
               <span class="material-symbols-outlined text-[18px]">search</span>
@@ -94,7 +94,7 @@
           <!-- Không có bài viết -->
           <div v-if="danhSach.length === 0" class="flex flex-col items-center justify-center py-24 text-gray-400 font-light">
             <span class="material-symbols-outlined text-5xl mb-6 opacity-30">article</span>
-            <p class="text-[10px] uppercase tracking-[0.3em]">No articles found in this collection</p>
+            <p class="text-[10px] uppercase tracking-[0.3em]">Không tìm thấy bài viết nào trong bộ sản phẩm này</p>
           </div>
 
           <!-- Grid bài viết -->
@@ -124,18 +124,18 @@
                   <span class="w-[2px] h-[2px] bg-gray-300 rounded-full"></span>
                   <span>{{ bv.loaiBaiViet ? bv.loaiBaiViet.tenLoaiBV : 'Edit' }}</span>
                 </div>
-                <h3 class="font-serif font-bold text-[#111111] text-lg mb-3 line-clamp-2 group-hover:text-[#C8A97E] transition-colors leading-snug">
+                <h3 class="font-serif font-bold text-[#111111] text-lg mb-3 line-clamp-2 group-hover:text-[#C8A97E] transition-colors leading-snug text-center">
                   {{ bv.tieuDe }}
                 </h3>
-                <p class="text-gray-700 text-sm line-clamp-3 flex-1 mb-6 leading-relaxed font-light">
-                  {{ bv.tomTat || 'Discover the latest stories from our editors...' }}
+                <p class="text-gray-700 text-sm line-clamp-3 flex-1 mb-6 leading-relaxed font-light text-justify">
+                  {{ bv.tomTat || 'Khám phá những câu chuyện mới nhất từ biên tập viên của chúng tôi...' }}
                 </p>
                 <div class="flex items-center justify-between text-[11px] text-gray-600 py-4 border-t border-gray-100">
                   <div class="flex items-center gap-2">
                     <span class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-800 flex items-center justify-center text-[10px] font-bold text-stone-600">
-                      {{ (bv.tacGia || 'L').charAt(0).toUpperCase() }}
+                      {{ (bv.nguoiDang || 'L').charAt(0).toUpperCase() }}
                     </span>
-                    <span class="font-medium uppercase tracking-tight">{{ bv.tacGia || 'Luxury Fashion' }}</span>
+                    <span class="font-medium uppercase tracking-tight">{{ bv.nguoiDang || 'Luxury Fashion' }}</span>
                   </div>
                   <div class="flex items-center gap-3">
                     <span class="flex items-center gap-1">
@@ -156,7 +156,7 @@
           <div v-if="tongTrang > 1" class="flex justify-center items-center gap-8 mt-24">
             <button @click="doiTrang(trangHienTai - 1)" :disabled="trangHienTai === 0"
               class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-[#C8A97E] disabled:opacity-20 transition-colors">
-              <span class="material-symbols-outlined text-[18px]">west</span> Previous
+              <span class="material-symbols-outlined text-[18px]">west</span> Trước
             </button>
             <div class="flex gap-4">
               <button v-for="t in tongTrang" :key="t"
@@ -170,7 +170,7 @@
             </div>
             <button @click="doiTrang(trangHienTai + 1)" :disabled="trangHienTai >= tongTrang - 1"
               class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-[#C8A97E] disabled:opacity-20 transition-colors">
-              Next <span class="material-symbols-outlined text-[18px]">east</span>
+              Kế tiếp <span class="material-symbols-outlined text-[18px]">east</span>
             </button>
           </div>
         </section>

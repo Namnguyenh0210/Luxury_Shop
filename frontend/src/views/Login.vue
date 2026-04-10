@@ -94,7 +94,7 @@
                             <span class="text-sm text-gray-600 group-hover:text-[#D5BFA3] transition-colors">Ghi nhớ đăng nhập</span>
                         </label>
                         <a class="text-sm text-[#8B5E3C] hover:text-[#5D3E28] font-medium hover:underline transition-colors" href="/forgot-password">
-                          Forgot Password?
+                          Quên mật khẩu?
                         </a>
                     </div>
 

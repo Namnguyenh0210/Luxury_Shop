@@ -20,7 +20,7 @@
                     <p><span class="font-bold mr-1">Email:</span> luxury@fashion.vn</p>
                 </div>
                 
-                <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-4 border-l-2 border-gray-900 pl-2">Hỗ trợ hình thức thanh toán</h3>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-text-primary-light dark:text-text-primary-dark mb-4 border-l-2 border-gray-900 pl-2">Hỗ trợ hình thức<br/>thanh toán</h3>
                 <div class="flex gap-2 items-center">
                     <span class="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-black text-gray-800 shadow-sm flex items-center justify-center">COD</span>
                     <span class="px-3 py-1.5 bg-gradient-to-r from-blue-700 to-blue-500 border border-transparent rounded-lg text-xs font-black text-white shadow-sm flex items-center justify-center italic tracking-wider">PayOS</span>

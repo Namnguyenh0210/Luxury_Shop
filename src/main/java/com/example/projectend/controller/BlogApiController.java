@@ -280,9 +280,9 @@ public class BlogApiController {
                 "tenLoaiBV", bv.getLoaiBaiViet().getTenLoaiBV()) : null);
 
         if (bv.getTaiKhoan() != null) {
-            dto.put("tacGia", bv.getTaiKhoan().getHoTen());
+            dto.put("nguoiDang", bv.getTaiKhoan().getHoTen());
         } else {
-            dto.put("tacGia", "Luxury Fashion");
+            dto.put("nguoiDang", "Luxury Fashion");
         }
 
         if (includeFullContent) {

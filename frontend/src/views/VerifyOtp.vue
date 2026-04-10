@@ -51,7 +51,7 @@ async function verifyOtp() {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
     <div class="bg-white p-8 rounded-2xl shadow-lg w-[400px]">
-      <h2 class="text-2xl font-bold mb-4 text-center">Verify OTP</h2>
+      <h2 class="text-2xl font-bold mb-4 text-center">Xác thực OTP</h2>
 
       <input
           v-model="email"
@@ -63,7 +63,7 @@ async function verifyOtp() {
       <input
           v-model="otp"
           type="text"
-          placeholder="OTP"
+          placeholder="Nhập mã OTP"
           class="w-full mb-2 p-2 border rounded"
       />
 
@@ -73,7 +73,7 @@ async function verifyOtp() {
           @click="verifyOtp"
           class="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
       >
-        Verify OTP
+        Xác nhận OTP
       </button>
     </div>
   </div>
