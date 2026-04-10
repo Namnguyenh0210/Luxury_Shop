@@ -61,7 +61,7 @@
                     <div class="flex-grow flex flex-col">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[9px] font-bold text-[#C8A97E] uppercase tracking-widest mb-1">{{ item.sanPhamChiTiet.sanPham.thuongHieu?.tenTH || 'Luxury Brand' }}</p>
+                                <p class="text-[9px] font-bold text-[#C8A97E] uppercase tracking-widest mb-1">{{ item.sanPhamChiTiet.sanPham.thuongHieu?.tenTH || 'Thương hiệu' }}</p>
                                 <a :href="`/sanpham/${item.sanPhamChiTiet.sanPham.maSP}`" class="text-lg font-serif font-bold text-[#111111] hover:text-[#C8A97E] transition-colors uppercase leading-tight">
                                     {{ item.sanPhamChiTiet.sanPham.tenSP }}
                                 </a>

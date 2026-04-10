@@ -60,7 +60,7 @@ public class AdminBaiVietController {
                 dto.put("ngayTao", bv.getNgayDang());
                 dto.put("slug", bv.getSlug());
                 dto.put("tomTat", bv.getTomTat());
-                dto.put("tacGia", bv.getTaiKhoan() != null ? bv.getTaiKhoan().getHoTen() : "Admin");
+                dto.put("nguoiDang", bv.getTaiKhoan() != null ? bv.getTaiKhoan().getHoTen() : "Admin");
                 dto.put("loaiBaiViet",
                         bv.getLoaiBaiViet() != null ? Map.of("maLoaiBV", bv.getLoaiBaiViet().getMaLoaiBV(),
                                 "tenLoaiBV", bv.getLoaiBaiViet().getTenLoaiBV(),

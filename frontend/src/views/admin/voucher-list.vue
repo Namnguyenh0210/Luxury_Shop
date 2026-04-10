@@ -42,7 +42,7 @@
             <span class="material-symbols-outlined text-[22px]">savings</span>
           </div>
         </div>
-        <p class="text-2xl font-extrabold text-gray-900">Tính toán...</p>
+        <p class="text-2xl font-extrabold text-gray-900">{{ formatPrice(totalSavings) }}</p>
         <p class="text-xs font-medium text-blue-600">Tổng giá trị giảm giá</p>
       </div>
     </div>
@@ -122,16 +122,10 @@
               </td>
               <td class="px-6 py-5 text-center">
                 <span 
-                  v-if="!v.isDeleted && v.trangThai && isVoucherActive(v)" 
-                  class="inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-[10px] font-black text-green-600 uppercase tracking-wider"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
+                  :class="getVoucherStatus(v).class"
                 >
-                  Hoạt động
-                </span>
-                <span 
-                  v-else 
-                  class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider"
-                >
-                  {{ v.isDeleted ? 'Đã Xóa' : (!v.trangThai ? 'Vô Hiệu' : 'Hết Hạn') }}
+                  {{ getVoucherStatus(v).text }}
                 </span>
               </td>
               <td class="px-6 py-5 text-right">
@@ -383,6 +377,18 @@ export default {
       }
     };
   },
+  computed: {
+    totalSavings() {
+      return this.vouchers.reduce((acc, v) => {
+        if (v.loaiGiamGia === 1) { // Fixed VND
+          return acc + (v.giaTri * (v.daSuDung || 0));
+        } else { // Percentage %
+          // Ước tính dựa trên giá trị tối thiểu của đơn hàng
+          return acc + ((v.giaTriToiThieu * v.giaTri / 100) * (v.daSuDung || 0));
+        }
+      }, 0);
+    }
+  },
   methods: {
     async fetchVouchers() {
       try {
@@ -497,10 +503,26 @@ export default {
     getTargetText(target) {
       switch(target) {
         case 'NEW': return 'Khách mới';
-        case 'VIP': return 'Thanh viên VIP';
+        case 'VIP': return 'Thành viên VIP';
         case 'PRIVATE': return 'Đặc quyền';
         default: return 'Tất cả khách';
       }
+    },
+    getVoucherStatus(v) {
+      if (v.isDeleted) return { text: 'Đã Xóa', class: 'bg-gray-100 text-gray-400' };
+      if (!v.trangThai) return { text: 'Vô Hiệu', class: 'bg-gray-100 text-gray-400' };
+      
+      // Ưu tiên hiển thị Hết lượt nếu đã dùng hết
+      if (v.daSuDung >= v.soLuong) return { text: 'Hết Lượt', class: 'bg-orange-50 text-orange-600' };
+      
+      const now = new Date();
+      const start = new Date(v.ngayBatDau);
+      const end = new Date(v.ngayKetThuc);
+      
+      if (now < start) return { text: 'Sắp Diễn Ra', class: 'bg-blue-50 text-blue-600' };
+      if (now > end) return { text: 'Hết Hạn', class: 'bg-red-50 text-red-600' };
+      
+      return { text: 'Hoạt Động', class: 'bg-green-50 text-green-600' };
     }
   },
   mounted() {

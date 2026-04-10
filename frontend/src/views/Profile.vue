@@ -576,7 +576,7 @@
 
                         <!-- Order ID Badge -->
                         <div class="w-16 h-16 bg-gray-900 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-lg">
-                          <p class="text-[8px] font-black text-gray-400 uppercase leading-none mb-1">Order</p>
+                          <p class="text-[8px] font-black text-gray-400 uppercase leading-none mb-1">Đơn hàng</p>
                           <p class="text-xl font-black text-white leading-none">#{{ order.maDH }}</p>
                         </div>
 

@@ -17,7 +17,7 @@
         </div>
       <div class="container mx-auto px-4 lg:px-[1cm] xl:px-[2cm] py-16">
         <h2 class="text-center font-serif text-3xl font-bold tracking-tight md:text-4xl">
-          Featured Brands
+          Thương Hiệu Nổi Bật
         </h2>
 
         <div class="mt-8 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(250px,1fr))]">
@@ -69,7 +69,7 @@
         </div>
         </div>
       <div class="container mx-auto px-4 lg:px-[1cm] xl:px-[2cm] py-16 border-t border-gray-100">
-        <h2 class="text-center font-serif text-3xl font-bold tracking-tight md:text-4xl">New Arrivals</h2>
+        <h2 class="text-center font-serif text-3xl font-bold tracking-tight md:text-4xl">Sản Phẩm Mới</h2>
         
         <!-- Loading Skeleton / Placeholder if needed -->
         <div v-if="loading" class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-2 md:grid-cols-4 lg:gap-x-6">
@@ -95,7 +95,7 @@
               <!-- Brand and Title -->
               <div class="mb-2 w-full">
                 <p class="text-[12px] text-gray-400 uppercase tracking-widest font-bold mb-1">
-                  {{ product.thuongHieu?.tenTH || 'Brand' }}
+                  {{ product.thuongHieu?.tenTH || 'Thương hiệu' }}
                 </p>
                 <h4 class="text-gray-900 text-[16px] md:text-[17px] font-semibold leading-snug truncate w-full" :title="product.tenSP">
                   <a :href="`/sanpham/${product.maSP}`">
@@ -152,7 +152,7 @@
                       />
                     </div>
                     <div class="text-center lg:text-left lg:pl-16">
-                        <p v-if="latestBlog" class="text-[#C8A97E] text-[10px] uppercase tracking-[0.3em] font-bold mb-2">✦ Latest Story ✦</p>
+                        <p v-if="latestBlog" class="text-[#C8A97E] text-[10px] uppercase tracking-[0.3em] font-bold mb-2">✦ Tin Tức Mới Nhất ✦</p>
                         <h2 class="font-serif text-3xl font-bold tracking-tight md:text-4xl">
                             {{ latestBlog ? latestBlog.tieuDe : 'Tin tức thời trang' }}
                         </h2>

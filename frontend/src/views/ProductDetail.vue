@@ -219,7 +219,7 @@
                         <!-- Product Info -->
                         <div class="p-5 flex flex-col flex-1">
                             <p class="text-[11px] text-[#A0A0A0] uppercase tracking-[0.15em] font-bold mb-1.5">
-                                {{ item.thuongHieu?.tenTH || 'Brand' }}
+                                {{ item.thuongHieu?.tenTH || 'Thương hiệu' }}
                             </p>
                             <h4 @click="goToDetail(item.maSP)" class="font-bold text-[16px] text-gray-900 mb-4 line-clamp-1 cursor-pointer hover:text-accent transition-colors">
                                 {{ item.tenSP }}
