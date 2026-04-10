@@ -503,7 +503,7 @@ export default {
     getTargetText(target) {
       switch(target) {
         case 'NEW': return 'Khách mới';
-        case 'VIP': return 'Thanh viên VIP';
+        case 'VIP': return 'Thành viên VIP';
         case 'PRIVATE': return 'Đặc quyền';
         default: return 'Tất cả khách';
       }
