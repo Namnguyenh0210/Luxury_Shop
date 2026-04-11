@@ -63,4 +63,20 @@ public class AdminVoucherController {
                     return map;
                 }).collect(Collectors.toList());
     }
+
+    @GetMapping("/stats")
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+        List<Voucher> all = voucherService.findAll();
+        stats.put("totalVouchers", all.size());
+        stats.put("activeVouchers", all.stream().filter(v -> v.getTrangThai() != null && v.getTrangThai() && (v.getIsDeleted() == null || !v.getIsDeleted())).count());
+        
+        // Lấy số liệu thực tế từ bảng Đơn Hàng (Bao gồm cả các đơn từ trước nay)
+        stats.put("totalUsage", donHangRepository.countAllVoucherUsages());
+        
+        java.math.BigDecimal savings = donHangRepository.sumVoucherSavings();
+        stats.put("totalSavings", savings != null ? savings : java.math.BigDecimal.ZERO);
+        
+        return stats;
+    }
 }

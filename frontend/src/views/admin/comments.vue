@@ -72,15 +72,15 @@
       </div>
 
       <!-- BẢNG DANH SÁCH -->
-      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
+      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden text-left">
         <table class="w-full text-sm">
           <thead class="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-1/4">Bài Viết & User</th>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-2/5">Nội Dung Bình Luận</th>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs">Phản Hồi (Admin)</th>
-              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs">Trạng Thái</th>
-              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs">Hành Động</th>
+              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-[20%]">Bài Viết & User</th>
+              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-[25%]">Nội Dung Bình Luận</th>
+              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-[25%]">Phản Hồi (Admin)</th>
+              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs w-[15%]">Trạng Thái</th>
+              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs w-[15%]">Hành Động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -102,47 +102,48 @@
 
               <td class="px-5 py-4">
                 <div v-if="bl.phanHoiAdmin" class="text-sm text-gray-600 bg-purple-50/50 p-2.5 rounded-lg border border-purple-100">
-                  <div class="font-semibold text-purple-700 text-xs mb-1 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">admin_panel_settings</span> Admin ({{ bl.ngayPhanHoiAdmin }})
+                  <div class="font-semibold text-purple-700 text-[10px] mb-1 flex items-center gap-1 uppercase tracking-wider text-left">
+                    <span class="material-symbols-outlined text-[12px]">admin_panel_settings</span> Admin ({{ bl.ngayPhanHoiAdmin }})
                   </div>
-                  {{ bl.phanHoiAdmin }}
+                  <div class="text-left">{{ bl.phanHoiAdmin }}</div>
                 </div>
-                <button v-else @click="moModalPhanHoi(bl)" class="text-xs font-medium text-purple-600 hover:text-purple-800 transition-colors">
-                  + Thêm phản hồi
+                <button v-else @click="moModalPhanHoi(bl)" class="text-xs font-medium text-purple-400 hover:text-purple-600 transition-colors flex items-center gap-1 italic">
+                  <span class="material-symbols-outlined text-[14px]">add_comment</span> Chờ phản hồi...
                 </button>
               </td>
 
               <td class="px-5 py-4 text-center">
-                <span v-if="bl.trangThai === false" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
-                  Đã bị ẩn
+                <span v-if="bl.trangThai === false" class="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full bg-gray-100 text-gray-500 uppercase tracking-wider">
+                  Đã ẩn
                 </span>
-                <span v-else-if="bl.trangThai === true" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                  Đang hiển thị
+                <span v-else-if="bl.trangThai === true" class="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-600 uppercase tracking-wider">
+                  Hiển thị
                 </span>
               </td>
 
-              <td class="px-5 py-4 text-center">
-                <div class="flex flex-col items-center gap-2">
-                  <div class="flex gap-2">
-                    <button v-if="bl.trangThai === false" @click="updateStatus(bl.maBL, true)" title="Bỏ ẩn (Hiển thị lại)"
-                      class="flex items-center justify-center size-7 rounded bg-green-50 text-green-600 hover:bg-green-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">visibility</span>
-                    </button>
-                    <button v-if="bl.trangThai === true" @click="updateStatus(bl.maBL, false)" title="Ẩn (Vi phạm)"
-                      class="flex items-center justify-center size-7 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">visibility_off</span>
-                    </button>
-                  </div>
-                  <div class="flex gap-2">
-                    <button @click="moModalPhanHoi(bl)" title="Trả lời"
-                      class="flex items-center justify-center size-7 rounded bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">reply</span>
-                    </button>
-                    <button @click="xoaBinhLuan(bl.maBL)" title="Xoá vĩnh viễn"
-                      class="flex items-center justify-center size-7 rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">delete</span>
-                    </button>
-                  </div>
+              <td class="px-5 py-4">
+                <div class="flex items-center justify-center gap-4">
+                  <!-- Eye Icon (Show/Hide) -->
+                  <button v-if="bl.trangThai === true" @click="updateStatus(bl.maBL, false)" title="Ẩn vi phạm"
+                    class="text-gray-400 hover:text-slate-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">visibility</span>
+                  </button>
+                  <button v-else @click="updateStatus(bl.maBL, true)" title="Hiển thị lại"
+                    class="text-green-400 hover:text-green-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">visibility_off</span>
+                  </button>
+
+                  <!-- Edit/Reply Icon -->
+                  <button @click="moModalPhanHoi(bl)" title="Phản hồi"
+                    class="text-blue-400 hover:text-blue-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">edit_note</span>
+                  </button>
+
+                  <!-- Delete Icon -->
+                  <button @click="xoaBinhLuan(bl.maBL)" title="Xoá vĩnh viễn"
+                    class="text-red-400 hover:text-red-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">delete</span>
+                  </button>
                 </div>
               </td>
             </tr>

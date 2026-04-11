@@ -1,22 +1,5 @@
 <template>
   <div class="min-h-screen bg-slate-50 pb-12 w-full">
-    <!-- HEADER -->
-    <header class="h-[60px] bg-white border-b border-gray-100 flex items-center px-10 justify-between sticky top-0 z-20">
-      <h1 class="text-xl font-serif font-black text-slate-800 tracking-tight">Thống Kê</h1>
-      <div class="flex items-center gap-5">
-        <button class="size-8 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:text-[#C8A97E] hover:border-[#C8A97E]/30 transition-all relative group">
-          <span class="material-symbols-outlined text-[20px] group-hover:animate-swing">notifications</span>
-          <span class="absolute top-1.5 right-1.5 size-1.5 bg-red-500 rounded-full"></span>
-        </button>
-        <div class="h-8 pl-3 pr-1 py-1 rounded-full border border-gray-100 flex items-center gap-3 bg-gray-50 hover:bg-white hover:border-[#C8A97E]/30 transition-all cursor-pointer">
-           <span class="text-[11px] font-bold text-slate-700">Admin</span>
-           <div class="size-6 rounded-full bg-slate-200 overflow-hidden shadow-sm">
-             <img src="https://ui-avatars.com/api/?name=Admin&background=C8A97E&color=fff&font-size=0.4" class="size-full object-cover"/>
-           </div>
-        </div>
-      </div>
-    </header>
-
     <div class="p-8 space-y-6 max-w-[1600px] mx-auto">
       
       <!-- KPI CARDS -->

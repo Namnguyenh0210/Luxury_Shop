@@ -83,11 +83,70 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <button class="flex h-9 w-9 items-center justify-center rounded-xl hover:bg-gray-100 text-gray-500 transition-colors relative">
-              <span class="material-symbols-outlined text-[20px]">notifications</span>
-              <span class="absolute top-1.5 right-1.5 size-2 rounded-full bg-[#C8A97E] shadow-sm"></span>
-            </button>
-            <div class="size-9 rounded-full bg-slate-200 overflow-hidden border-2 border-[#C8A97E] cursor-pointer shadow-sm">
+            <!-- NOTIFICATION CENTER -->
+            <div class="relative">
+              <button 
+                @click.stop="showNoti = !showNoti"
+                class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-50 hover:bg-[#C8A97E]/10 text-gray-400 hover:text-[#C8A97E] transition-all relative group"
+              >
+                <span class="material-symbols-outlined text-[22px] group-hover:rotate-12 transition-transform">notifications</span>
+                <span v-if="unreadCount > 0" class="absolute top-2 right-2 flex size-3 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-[0_0_10px_rgba(239,68,68,0.5)] border border-white animate-pulse-lux">
+                </span>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <transition name="dropdown">
+                <div v-if="showNoti" @click.stop class="absolute right-0 mt-4 w-80 bg-white/95 backdrop-blur-md rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/20 overflow-hidden z-[100] origin-top-right">
+                  <div class="p-5 bg-gradient-to-r from-[#C8A97E]/10 to-transparent border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="font-extrabold text-gray-900 text-sm flex items-center gap-2.5">
+                      <span class="material-symbols-outlined text-base text-[#C8A97E]">notifications_active</span>
+                      THÔNG BÁO MỚI
+                    </h3>
+                    <span class="text-[9px] bg-[#C8A97E] text-white px-2 py-1 rounded-lg font-black uppercase tracking-widest shadow-sm">{{ unreadCount }} CẦN XỬ LÝ</span>
+                  </div>
+
+                  <div class="max-h-[380px] overflow-y-auto custom-scrollbar bg-white/50">
+                    <div v-if="notifications.length === 0" class="py-14 text-center text-gray-400">
+                      <div class="size-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                        <span class="material-symbols-outlined text-3xl opacity-20 text-gray-900">notifications_none</span>
+                      </div>
+                      <p class="text-[11px] font-bold uppercase tracking-widest opacity-40">Mọi thứ đã gọn gàng</p>
+                    </div>
+                    
+                    <template v-else>
+                      <div 
+                        v-for="(noti, idx) in notifications" :key="idx"
+                        @click="goToNotiLink(noti)"
+                        class="p-5 hover:bg-[#C8A97E]/5 cursor-pointer border-b border-gray-50 last:border-0 transition-all flex gap-4 group/item"
+                      >
+                        <div class="size-11 rounded-2xl flex items-center justify-center shrink-0 shadow-sm group-hover/item:scale-110 transition-transform duration-300" :class="noti.bg">
+                          <span class="material-symbols-outlined text-[20px]" :class="noti.color">{{ noti.icon }}</span>
+                        </div>
+                        <div class="space-y-1.5 overflow-hidden">
+                          <p class="text-xs font-black text-gray-900 leading-tight group-hover/item:text-[#C8A97E] transition-colors uppercase tracking-tight">{{ noti.title }}</p>
+                          <p class="text-[11px] text-gray-500 line-clamp-2 leading-relaxed font-medium">{{ noti.desc }}</p>
+                          <div class="flex items-center gap-2 mt-2">
+                             <span class="size-1 rounded-full bg-[#C8A97E]"></span>
+                             <p class="text-[9px] text-[#C8A97E] font-black uppercase tracking-wider italic">{{ noti.time }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+
+                  <div class="py-6 text-center">
+                    <span 
+                      @click="showNoti = false" 
+                      class="text-[10px] font-black text-gray-500 hover:text-[#C8A97E] uppercase tracking-[0.4em] transition-all cursor-pointer select-none hover:tracking-[0.5em] duration-300"
+                    >
+                      — ĐÓNG THÔNG BÁO —
+                    </span>
+                  </div>
+                </div>
+              </transition>
+            </div>
+
+            <div class="size-10 rounded-full bg-slate-200 overflow-hidden border-2 border-[#C8A97E] cursor-pointer shadow-sm hover:scale-105 transition-transform">
               <img
                 :src="`https://ui-avatars.com/api/?name=${encodeURIComponent(adminUser.name || 'Admin')}&background=78350f&color=fff`"
                 :alt="adminUser.name || 'Admin'"
@@ -114,6 +173,7 @@
 
 <script>
 import { authState, fetchCurrentUser } from '@/utils/auth'
+import axios from 'axios'
 
 export default {
   name: 'AdminLayout',
@@ -121,6 +181,9 @@ export default {
 
   data() {
     return {
+      showNoti: false,
+      unreadCount: 0,
+      notifications: [],
       allNavItems: [
         { isHeader: true, label: 'Tổng Quan' },
         { to: '/admin/dashboard', icon: 'dashboard',    label: 'Bảng Điều Khiển'  },
@@ -167,9 +230,81 @@ export default {
     if (!authState.user && authState.fetched) {
       window.location.href = '/login'
     }
+    this.fetchNotifications()
+    // Tự động cập nhật mỗi 2 phút
+    this.notiInterval = setInterval(this.fetchNotifications, 120000)
+    window.addEventListener('click', () => { this.showNoti = false })
+  },
+
+  beforeUnmount() {
+    clearInterval(this.notiInterval)
   },
 
   methods: {
+    async fetchNotifications() {
+      try {
+        // Gọi API thống kê để lấy các con số tổng quát
+        const res = await axios.get('/admin/reports', { withCredentials: true })
+        const stats = res.data
+        const newNotis = []
+
+        // 1. Kiểm tra đơn hàng mới (Chờ xác nhận) - Dữ liệu từ Backend
+        if (stats.pendingConfirmCount > 0) {
+           newNotis.push({
+             title: 'ĐƠN HÀNG MỚI',
+             desc: `Bạn có ${stats.pendingConfirmCount} đơn hàng mới đang chờ xác nhận từ khách hàng.`,
+             icon: 'shopping_cart_checkout',
+             bg: 'bg-green-50',
+             color: 'text-green-600',
+             time: 'CẦN XỬ LÝ',
+             link: '/admin/orders'
+           })
+        }
+
+        // 2. Kiểm tra hoàn tiền (PayOS Cancelled but Paid) - Dữ liệu từ Backend
+        if (stats.refundPendingCount > 0) {
+            newNotis.push({
+              title: 'YÊU CẦU HOÀN TIỀN',
+              desc: `Có ${stats.refundPendingCount} đơn hàng PayOS đã hủy nhưng cần bạn hoàn tiền thủ công.`,
+              icon: 'account_balance_wallet',
+              bg: 'bg-red-50',
+              color: 'text-red-500',
+              time: 'GẤP',
+              link: '/admin/orders?payStatus=5'
+            })
+        }
+
+        // 3. Kiểm tra sản phẩm sắp hết hàng (Dưới 10 món)
+        // Query đơn giản đến API sản phẩm để lấy thông tin kho
+        const productRes = await axios.get('/admin/products', { params: { pageSize: 100 }, withCredentials: true })
+        if (productRes.data && (productRes.data.content || productRes.data.danhSach)) {
+           const list = productRes.data.content || productRes.data.danhSach
+           const lowStockItems = list.filter(p => p.totalStock !== undefined && p.totalStock < 10)
+           if (lowStockItems.length > 0) {
+              newNotis.push({
+                 title: 'KHO HÀNG SẮP HẾT',
+                 desc: `Có ${lowStockItems.length} sản phẩm trong kho còn dưới 10 món. Hãy kiểm tra lại!`,
+                 icon: 'inventory_2',
+                 bg: 'bg-orange-50',
+                 color: 'text-orange-500',
+                 time: 'KIỂM KHO',
+                 link: '/admin/products'
+              })
+           }
+        }
+
+        this.notifications = newNotis
+        this.unreadCount = newNotis.length
+      } catch (e) {
+        console.error('Lỗi fetch notifications:', e)
+      }
+    },
+
+    goToNotiLink(noti) {
+      this.showNoti = false
+      this.$router.push(noti.link)
+    },
+
     logout() {
       window.location.href = '/logout'
     }
@@ -206,6 +341,30 @@ export default {
 .page-fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+@keyframes pulse-lux {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { transform: scale(1.2); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+.animate-pulse-lux {
+  animation: pulse-lux 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Dropdown Animation */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dropdown-enter-from {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.95);
+  filter: blur(10px);
+}
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
 }
 </style>
 

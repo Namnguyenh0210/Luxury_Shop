@@ -295,6 +295,8 @@ public class DonHang {
             case 2: return "Thanh toán thất bại";
             case 3: return "Thanh toán hết hạn";
             case 4: return "COD - Chưa thu tiền";
+            case 5: return "Chờ hoàn tiền"; // Đã hủy nhưng đã trả tiền
+            case 6: return "Đã hoàn tiền";  // Admin đã ck trả khách
             default: return "Không xác định";
         }
     }

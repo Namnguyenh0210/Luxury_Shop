@@ -23,9 +23,9 @@ public interface DonHangChiTietRepository extends JpaRepository<DonHangChiTiet, 
     List<DonHangChiTiet> findByDonHang_TaiKhoan_MaTKAndDonHang_TrangThaiDHAndSanPhamChiTiet_SanPham_MaSP(
             Long maTK, Integer trangThaiDH, Long maSP);
 
-    @Query("SELECT COALESCE(SUM(d.soLuong), 0) FROM DonHangChiTiet d")
+    @Query("SELECT COALESCE(SUM(d.soLuong), 0) FROM DonHangChiTiet d WHERE d.donHang.trangThaiDH IN (4, 6)")
     Long countTotalSold();
 
-    @Query("SELECT COALESCE(SUM(d.soLuong), 0) FROM DonHangChiTiet d WHERE d.donHang.ngayDat >= :startDate AND d.donHang.ngayDat <= :endDate")
+    @Query("SELECT COALESCE(SUM(d.soLuong), 0) FROM DonHangChiTiet d WHERE d.donHang.trangThaiDH IN (4, 6) AND d.donHang.ngayDat >= :startDate AND d.donHang.ngayDat <= :endDate")
     Long countTotalSoldBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

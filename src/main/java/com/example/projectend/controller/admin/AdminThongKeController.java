@@ -41,9 +41,9 @@ public class AdminThongKeController {
         if (totalRevenue == null)
             totalRevenue = BigDecimal.ZERO;
 
-        long newOrders = donHangRepository.countByTrangThaiDH(0);
+        long newOrders = donHangRepository.count(); // Tổng số đơn từ trước đến nay
         long soldProducts = donHangChiTietRepository.countTotalSold();
-        long totalCustomers = taiKhoanRepository.count();
+        long totalCustomers = taiKhoanRepository.countUsersOnly(); // Chỉ đếm khách hàng thực (ROLE_USER)
 
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
@@ -51,13 +51,16 @@ public class AdminThongKeController {
         BigDecimal todayRevenue = donHangRepository.sumTotalRevenueBetween(startOfDay, endOfDay);
         if (todayRevenue == null) todayRevenue = BigDecimal.ZERO;
 
-        Long todayOrders = donHangRepository.countByTrangThaiDHAndNgayDatBetween(0, startOfDay, endOfDay);
+        // Đơn hàng mới trong ngày hôm nay (Tất cả trạng thái ngoại trừ Hủy và Lỗi)
+        Long todayOrders = (long) donHangRepository.findByNgayDatBetween(startOfDay, endOfDay).stream()
+                .filter(dh -> dh.getTrangThaiDH() != 5 && dh.getTrangThaiDH() != 8)
+                .toList().size();
         if (todayOrders == null) todayOrders = 0L;
 
         Long todaySoldProducts = donHangChiTietRepository.countTotalSoldBetween(startOfDay, endOfDay);
         if (todaySoldProducts == null) todaySoldProducts = 0L;
 
-        Long todayNewCustomers = taiKhoanRepository.countByNgayTaoBetween(startOfDay, endOfDay);
+        Long todayNewCustomers = taiKhoanRepository.countUsersByNgayTaoBetween(startOfDay, endOfDay);
         if (todayNewCustomers == null) todayNewCustomers = 0L;
 
         LocalDateTime start;
@@ -89,6 +92,10 @@ public class AdminThongKeController {
                 current = current.plusDays(1);
             }
             for (DonHang dh : orders) {
+                // CHỈ TÍNH DOANH THU CHO ĐƠN HOÀN TẤT (4) HOẶC ĐÃ ĐÁNH GIÁ (6)
+                if (dh.getTrangThaiDH() != 4 && dh.getTrangThaiDH() != 6) {
+                    continue;
+                }
                 LocalDate d = dh.getNgayDat().toLocalDate();
                 if (revenueMap.containsKey(d)) {
                     revenueMap.put(d, revenueMap.get(d).add(dh.getTongTien() != null ? dh.getTongTien() : BigDecimal.ZERO));
@@ -109,6 +116,10 @@ public class AdminThongKeController {
                 current = current.plusMonths(1);
             }
             for (DonHang dh : orders) {
+                // CHỈ TÍNH DOANH THU CHO ĐƠN HOÀN TẤT (4) HOẶC ĐÃ ĐÁNH GIÁ (6)
+                if (dh.getTrangThaiDH() != 4 && dh.getTrangThaiDH() != 6) {
+                    continue;
+                }
                 LocalDate d = dh.getNgayDat().toLocalDate();
                 String monthKey = d.getMonthValue() + "/" + d.getYear();
                 if (revenueMap.containsKey(monthKey)) {
@@ -137,6 +148,19 @@ public class AdminThongKeController {
 
         response.put("chartData", chartData);
         response.put("chartLabels", chartLabels);
+
+        // Thống kê cho biểu đồ tròn trạng thái (Pie/Donut Chart)
+        long delivered = donHangRepository.countByTrangThaiDH(4) + donHangRepository.countByTrangThaiDH(6);
+        long cancelled = donHangRepository.countByTrangThaiDH(5) + donHangRepository.countByTrangThaiDH(8);
+        long processing = donHangRepository.count() - delivered - cancelled;
+
+        response.put("orderDelivered", delivered);
+        response.put("orderCancelled", cancelled);
+        response.put("orderProcessing", processing);
+
+        // Bổ sung cho thông báo
+        response.put("pendingConfirmCount", donHangRepository.countByTrangThaiDH(0));
+        response.put("refundPendingCount", donHangRepository.countByTrangThaiThanhToan(5));
 
         return response;
     }

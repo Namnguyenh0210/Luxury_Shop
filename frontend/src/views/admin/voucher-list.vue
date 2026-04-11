@@ -9,7 +9,7 @@
             <span class="material-symbols-outlined text-[22px]">confirmation_number</span>
           </div>
         </div>
-        <p class="text-2xl font-extrabold text-gray-900">{{ vouchers.length }}</p>
+        <p class="text-2xl font-extrabold text-gray-900">{{ stats.totalVouchers }}</p>
         <p class="text-xs font-medium text-gray-400">Trong hệ thống</p>
       </div>
 
@@ -20,7 +20,7 @@
             <span class="material-symbols-outlined text-[22px]">check_circle</span>
           </div>
         </div>
-        <p class="text-2xl font-extrabold text-gray-900">{{ vouchers.filter(v => v.trangThai && !v.isDeleted).length }}</p>
+        <p class="text-2xl font-extrabold text-gray-900">{{ stats.activeVouchers }}</p>
         <p class="text-xs font-medium text-green-600">Sẵn sàng sử dụng</p>
       </div>
 
@@ -31,7 +31,7 @@
             <span class="material-symbols-outlined text-[22px]">group</span>
           </div>
         </div>
-        <p class="text-2xl font-extrabold text-gray-900">{{ vouchers.reduce((acc, v) => acc + (v.daSuDung || 0), 0) }}</p>
+        <p class="text-2xl font-extrabold text-gray-900">{{ stats.totalUsage }}</p>
         <p class="text-xs font-medium text-orange-600">Lượt khách đã áp dụng</p>
       </div>
 
@@ -42,7 +42,7 @@
             <span class="material-symbols-outlined text-[22px]">savings</span>
           </div>
         </div>
-        <p class="text-2xl font-extrabold text-gray-900">{{ formatPrice(totalSavings) }}</p>
+        <p class="text-2xl font-extrabold text-gray-900">{{ formatPrice(stats.totalSavings) }}</p>
         <p class="text-xs font-medium text-blue-600">Tổng giá trị giảm giá</p>
       </div>
     </div>
@@ -128,8 +128,11 @@
                   {{ getVoucherStatus(v).text }}
                 </span>
               </td>
-              <td class="px-6 py-5 text-right">
+               <td class="px-6 py-5 text-right">
                 <div class="flex items-center justify-end gap-1">
+                  <button @click="toggleVisibility(v)" class="size-9 rounded-xl hover:bg-white hover:shadow-md transition-all flex items-center justify-center" :class="v.hienThi ? 'text-gray-400 hover:text-green-500' : 'text-orange-400 hover:text-orange-600'">
+                    <span class="material-symbols-outlined text-[20px]">{{ v.hienThi ? 'visibility' : 'visibility_off' }}</span>
+                  </button>
                   <button @click="editVoucher(v)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-gray-400 hover:text-blue-500 transition-all flex items-center justify-center">
                     <span class="material-symbols-outlined text-[20px]">edit</span>
                   </button>
@@ -216,8 +219,7 @@
                       @input="e => currentVoucher.giaTriToiDa = parseCurrency(e.target.value)"
                       @blur="e => e.target.value = formatCurrency(currentVoucher.giaTriToiDa)"
                       class="lux-input font-bold text-gray-900 pr-10" 
-                      :placeholder="currentVoucher.loaiGiamGia === 1 ? 'N/A' : '---'"
-                      :required="currentVoucher.loaiGiamGia === 0">
+                      :placeholder="currentVoucher.loaiGiamGia === 1 ? 'N/A' : 'Không giới hạn'">
                     <span v-if="currentVoucher.loaiGiamGia === 0" class="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-black text-[#C8A97E]">₫</span>
                   </div>
                 </div>
@@ -323,6 +325,19 @@
                     <span class="text-[10px] text-gray-400 font-medium tracking-tight">Mã sẽ khả dụng ngay lập tức trên hệ thống</span>
                   </div>
                 </label>
+
+                <label class="flex items-center gap-4 cursor-pointer group p-3 rounded-2xl hover:bg-blue-50 transition-colors">
+                  <div class="relative flex items-center justify-center w-6 h-6 border-2 border-gray-200 rounded-lg transition-all group-hover:border-blue-400" 
+                       :class="{'bg-blue-600 border-blue-600': currentVoucher.hienThi}">
+                    <input v-model="currentVoucher.hienThi" type="checkbox" class="absolute opacity-0 cursor-pointer">
+                    <span v-if="currentVoucher.hienThi" class="material-symbols-outlined text-white text-base">visibility</span>
+                    <span v-else class="material-symbols-outlined text-gray-400 text-base">visibility_off</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-xs font-bold text-gray-800 uppercase tracking-widest">Hiển thị công khai</span>
+                    <span class="text-[10px] text-gray-400 font-medium tracking-tight">Tắt nếu bạn muốn mã này chỉ dành cho khách nội bộ</span>
+                  </div>
+                </label>
               </div>
 
             </div>
@@ -373,29 +388,35 @@ export default {
         ngayBatDau: this.formatDateForInput(new Date()),
         ngayKetThuc: this.formatDateForInput(new Date(Date.now() + 30*24*60*60*1000)),
         trangThai: true,
+        hienThi: true,
         isDeleted: false
+      },
+      stats: {
+        totalVouchers: 0,
+        activeVouchers: 0,
+        totalUsage: 0,
+        totalSavings: 0
       }
     };
-  },
-  computed: {
-    totalSavings() {
-      return this.vouchers.reduce((acc, v) => {
-        if (v.loaiGiamGia === 1) { // Fixed VND
-          return acc + (v.giaTri * (v.daSuDung || 0));
-        } else { // Percentage %
-          // Ước tính dựa trên giá trị tối thiểu của đơn hàng
-          return acc + ((v.giaTriToiThieu * v.giaTri / 100) * (v.daSuDung || 0));
-        }
-      }, 0);
-    }
   },
   methods: {
     async fetchVouchers() {
       try {
         const res = await axios.get('/admin/vouchers');
         this.vouchers = res.data;
+        const statsRes = await axios.get('/admin/vouchers/stats');
+        this.stats = statsRes.data;
       } catch (err) {
-        console.error('Fetch vouchers failed', err);
+        console.error('Fetch data failed', err);
+      }
+    },
+    async toggleVisibility(v) {
+      try {
+        v.hienThi = !v.hienThi;
+        await axios.post('/admin/vouchers', v);
+        this.fetchVouchers();
+      } catch (err) {
+        console.error('Toggle visibility failed', err);
       }
     },
     openAddModal() {
@@ -405,7 +426,7 @@ export default {
         minTotalSpendingVIP: 0, maLoaiApDung: '', maTHApDung: '', khongApDungSale: false,
         ngayBatDau: this.formatDateForInput(new Date()),
         ngayKetThuc: this.formatDateForInput(new Date(Date.now() + 30*24*60*60*1000)),
-        trangThai: true, isDeleted: false
+        trangThai: true, hienThi: true, isDeleted: false
       };
       this.showModal = true;
     },
@@ -429,10 +450,7 @@ export default {
         return;
       }
 
-      if (this.currentVoucher.loaiGiamGia === 0 && (!this.currentVoucher.giaTriToiDa || this.currentVoucher.giaTriToiDa <= 0)) {
-        if(window.$alert) window.$alert('Vui lòng nhập mức Giảm tối đa cho Voucher phần trăm', 'Thông tin không hợp lệ');
-        return;
-      }
+
 
       if (!this.currentVoucher.soLuong || this.currentVoucher.soLuong <= 0) {
         if(window.$alert) window.$alert('Số lượng phát hành phải lớn hơn 0', 'Thông tin không hợp lệ');
@@ -511,6 +529,7 @@ export default {
     getVoucherStatus(v) {
       if (v.isDeleted) return { text: 'Đã Xóa', class: 'bg-gray-100 text-gray-400' };
       if (!v.trangThai) return { text: 'Vô Hiệu', class: 'bg-gray-100 text-gray-400' };
+      if (!v.hienThi) return { text: 'Đã Ẩn', class: 'bg-orange-50 text-orange-600' };
       
       // Ưu tiên hiển thị Hết lượt nếu đã dùng hết
       if (v.daSuDung >= v.soLuong) return { text: 'Hết Lượt', class: 'bg-orange-50 text-orange-600' };

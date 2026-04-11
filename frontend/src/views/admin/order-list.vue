@@ -323,7 +323,9 @@ export default {
         1: 'Đã thanh toán',
         2: 'Thất bại',
         3: 'Hết hạn',
-        4: 'COD - Chưa thu'
+        4: 'COD - Chưa thu',
+        5: 'Chờ hoàn tiền',
+        6: 'Đã hoàn tiền'
       }[s] ?? 'Không xác định'
     },
 
@@ -333,7 +335,9 @@ export default {
         1: 'bg-green-100 text-green-700 border-green-200',
         2: 'bg-red-100 text-red-700 border-red-200',
         3: 'bg-gray-100 text-gray-500 border-gray-200',
-        4: 'bg-blue-50 text-blue-600 border-blue-200'
+        4: 'bg-blue-50 text-blue-600 border-blue-200',
+        5: 'bg-orange-100 text-orange-700 border-orange-200',
+        6: 'bg-blue-100 text-blue-700 border-blue-200'
       }[s] ?? 'bg-gray-50 text-gray-400'
     },
     
