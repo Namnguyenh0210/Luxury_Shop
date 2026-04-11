@@ -336,6 +336,7 @@ public class DonHangService {
         // 3. Cập nhật trạng thái đơn hàng (Chờ thanh toán 7 -> Lỗi thanh toán 8)
         if (dh.getTrangThaiDH() == TrangThaiDonHang.CHO_THANH_TOAN) {
             dh.setTrangThaiDH(TrangThaiDonHang.LOI_THANH_TOAN);
+            dh.setLyDoHuy("Thanh toán PayOS đã hết hạn hoặc bị hủy");
         }
 
         dh.setNgayCapNhat(LocalDateTime.now());
@@ -350,7 +351,7 @@ public class DonHangService {
     }
 
     @SuppressWarnings("null")
-    public void updateStatus(Long id, Integer status) {
+    public void updateStatus(Long id, Integer status, String reason) {
 
         DonHang dh = donHangRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn"));
@@ -378,6 +379,10 @@ public class DonHangService {
             tt.setGateway(dh.getHinhThucThanhToan() != null ? dh.getHinhThucThanhToan().getTenHinhThuc() : "COD");
             tt.setNgayTao(LocalDateTime.now());
             thanhToanRepository.save(tt);
+        }
+
+        if (status == 5 || status == 8) {
+            dh.setLyDoHuy(reason);
         }
 
         donHangRepository.save(dh);
@@ -453,6 +458,16 @@ public class DonHangService {
 
         // Cập nhật trạng thái
         donHang.setTrangThaiDH(trangThaiMoi);
+        
+        // LOGIC HOÀN TIỀN: Nếu đơn hàng đã THANH TOÁN (1) mà bị HỦY (5)
+        if (trangThaiMoi == 5 && donHang.getTrangThaiThanhToan() == 1) {
+            donHang.setTrangThaiThanhToan(5); // Chờ hoàn tiền
+            log.info("⚠️ Đơn hàng #{} đã thanh toán bị hủy, chuyển sang trạng thái CHỜ HOÀN TIỀN", maDH);
+        }
+
+        if (trangThaiMoi == 5 || trangThaiMoi == 8) {
+            donHang.setLyDoHuy(ghiChu);
+        }
         donHang.setNgayCapNhat(LocalDateTime.now());
 
         // Nếu đã giao hàng (Hoàn tất) thì đánh dấu đã thanh toán
@@ -793,6 +808,7 @@ public class DonHangService {
         for (DonHang dh : ordersToCancel) {
             dh.setTrangThaiDH(TrangThaiDonHang.DA_HUY); // Chuyển sang Đã hủy
             dh.setTrangThaiThanhToan(3); // EXPIRED (3)
+            dh.setLyDoHuy("Quá thời gian thanh toán (Hệ thống tự động hủy sau 5 phút)");
             dh.setNgayCapNhat(LocalDateTime.now());
 
             // ✅ ĐỒNG BỘ: Không hoàn kho vì PayOS chưa từng trừ kho
@@ -809,4 +825,31 @@ public class DonHangService {
         }
     }
 
+    /**
+     * Xác nhận đã hoàn tiền thủ công cho khách hàng
+     */
+    @Transactional
+    public void xacNhanDaHoanTien(Long maDH, String ghiChuAdmin) {
+        DonHang dh = donHangRepository.findById(maDH)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng #" + maDH));
+
+        if (dh.getTrangThaiThanhToan() != 5) {
+            throw new RuntimeException("Đơn hàng này không ở trong trạng thái chờ hoàn tiền!");
+        }
+
+        dh.setTrangThaiThanhToan(6); // Đã hoàn tiền
+        dh.setNgayCapNhat(LocalDateTime.now());
+        donHangRepository.save(dh);
+
+        // Ghi lịch sử
+        LichSuDonHang history = new LichSuDonHang(
+                dh,
+                dh.getTrangThaiDH(),
+                dh.getTrangThaiDH(),
+                "ADMIN",
+                "Xác nhận đã hoàn tiền thành công: " + (ghiChuAdmin != null ? ghiChuAdmin : "N/A"));
+        lichSuDonHangRepository.save(history);
+        
+        log.info("✅ Admin đã xác nhận hoàn tiền cho đơn hàng #{}", maDH);
+    }
 }

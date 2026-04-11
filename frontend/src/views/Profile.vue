@@ -410,29 +410,57 @@
 
                   <div class="p-8 space-y-8">
                     <!-- Progress Stepper -->
-                    <div v-if="latestOrder.trangThaiDH !== 5" class="relative py-4">
-                      <div class="flex items-center justify-between w-full relative z-10 px-4">
-                        <div v-for="(step, index) in ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Đã giao', 'Hoàn tất', 'Đã đánh giá']" :key="index" class="flex flex-col items-center">
-                          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-700', 
-                                        latestOrder.trangThaiDH >= index ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' : 
-                                        (latestOrder.trangThaiDH === 6 && index === 5) ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' :
-                                        'bg-white border-gray-100 text-gray-300']">
-                            <span v-if="latestOrder.trangThaiDH > index || (latestOrder.trangThaiDH === 6 && index < 5)" class="material-symbols-outlined text-xl font-bold">check</span>
-                            <span v-else class="text-xs font-bold">{{ index + 1 }}</span>
+                      <div v-if="latestOrder.trangThaiDH !== 5 && latestOrder.trangThaiDH !== 7 && latestOrder.trangThaiDH !== 8" class="relative py-4">
+                        <div class="flex items-center justify-between w-full relative z-10 px-4">
+                          <div v-for="(step, index) in ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Đã giao', 'Hoàn tất', 'Đã đánh giá']" :key="index" class="flex flex-col items-center">
+                            <div :class="['w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-700', 
+                                          latestOrder.trangThaiDH >= index ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' : 
+                                          (latestOrder.trangThaiDH === 6 && index === 5) ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' :
+                                          'bg-white border-gray-100 text-gray-300']">
+                              <span v-if="latestOrder.trangThaiDH > index || (latestOrder.trangThaiDH === 6 && index < 5)" class="material-symbols-outlined text-xl font-bold">check</span>
+                              <span v-else class="text-xs font-bold">{{ index + 1 }}</span>
+                            </div>
+                            <span :class="['mt-3 text-[9px] font-bold uppercase tracking-wider text-center w-20 transition-colors duration-500', 
+                                          (latestOrder.trangThaiDH >= index || (latestOrder.trangThaiDH === 6 && index === 5)) ? 'text-yellow-600' : 'text-gray-400']">
+                              {{ step }}
+                            </span>
                           </div>
-                          <span :class="['mt-3 text-[9px] font-bold uppercase tracking-wider text-center w-20 transition-colors duration-500', 
-                                        (latestOrder.trangThaiDH >= index || (latestOrder.trangThaiDH === 6 && index === 5)) ? 'text-yellow-600' : 'text-gray-400']">
-                            {{ step }}
-                          </span>
+                        </div>
+                        <div class="absolute top-9 left-0 w-full px-20 -z-0">
+                          <div class="w-full h-1 bg-gray-50 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 transition-all duration-1000 ease-out rounded-full" 
+                                 :style="{ width: (latestOrder.trangThaiDH === 6 ? 100 : Math.min(latestOrder.trangThaiDH * 20, 100)) + '%' }"></div>
+                          </div>
                         </div>
                       </div>
-                      <div class="absolute top-9 left-0 w-full px-20 -z-0">
-                        <div class="w-full h-1 bg-gray-50 rounded-full overflow-hidden">
-                          <div class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 transition-all duration-1000 ease-out rounded-full" 
-                               :style="{ width: (latestOrder.trangThaiDH === 6 ? 100 : Math.min(latestOrder.trangThaiDH * 20, 100)) + '%' }"></div>
+
+                      <!-- Special Banner for CHO_THANH_TOAN (7) or LOI_THANH_TOAN (8) -->
+                      <div v-else-if="latestOrder.trangThaiDH === 7 || latestOrder.trangThaiDH === 8" class="relative py-2">
+                        <div :class="['rounded-3xl p-6 border flex items-center justify-between gap-6 transition-all shadow-sm',
+                                      latestOrder.trangThaiDH === 7 ? 'bg-cyan-50 border-cyan-100' : 'bg-orange-50 border-orange-100']">
+                          <div class="flex items-center gap-5">
+                            <div :class="['w-14 h-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg animate-pulse',
+                                          latestOrder.trangThaiDH === 7 ? 'bg-cyan-500' : 'bg-orange-500']">
+                              <span class="material-symbols-outlined text-3xl font-bold">{{ latestOrder.trangThaiDH === 7 ? 'pending' : 'error' }}</span>
+                            </div>
+                            <div>
+                              <p :class="['font-black uppercase tracking-widest text-sm mb-1',
+                                          latestOrder.trangThaiDH === 7 ? 'text-cyan-700' : 'text-orange-700']">
+                                {{ latestOrder.trangThaiDH === 7 ? 'Đang chờ thanh toán qua PayOS' : 'Thanh toán không thành công' }}
+                              </p>
+                              <p :class="['text-xs font-medium italic opacity-70',
+                                          latestOrder.trangThaiDH === 7 ? 'text-cyan-600' : 'text-orange-600']">
+                                {{ latestOrder.trangThaiDH === 7 ? 'Đơn hàng sẽ tự động hủy nếu không hoàn tất thanh toán trong 5 phút.' : (latestOrder.lyDoHuy || 'Đã có lỗi xảy ra trong quá trình xử lý giao dịch của bạn.') }}
+                              </p>
+                            </div>
+                          </div>
+                          <a :href="'http://localhost:8080/payment/payos/create?orderId=' + latestOrder.maDH" 
+                             class="px-8 py-3.5 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-yellow-600 transition-all shadow-xl active:scale-95 flex items-center gap-2 shrink-0">
+                            <span class="material-symbols-outlined text-sm font-bold">qr_code_2</span>
+                            Thanh toán ngay
+                          </a>
                         </div>
                       </div>
-                    </div>
 
                     <!-- Detailed Order Content (New List View) -->
                     <div class="bg-gray-50/50 rounded-3xl p-6 border border-gray-100 space-y-4 mx-1">
@@ -472,6 +500,12 @@
                         <div v-if="latestOrder.giamGia > 0" class="flex justify-between items-center text-xs text-red-500">
                           <span class="font-bold font-black italic">Chiết khấu (Voucher):</span>
                           <span class="font-black">-{{ latestOrder.giamGia.toLocaleString() }}₫</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                          <span class="font-bold">Phí vận chuyển:</span>
+                          <span class="font-black" :class="latestOrder.phiShip > 0 ? 'text-black' : 'text-green-600'">
+                            {{ latestOrder.phiShip > 0 ? (latestOrder.phiShip.toLocaleString() + '₫') : 'Free' }}
+                          </span>
                         </div>
                         <div class="flex justify-between items-center pt-2 border-t border-dashed border-gray-200">
                           <span class="text-sm font-black text-black uppercase tracking-widest">Tổng thanh toán:</span>
@@ -598,15 +632,19 @@
                           <div class="flex items-center gap-3">
                             <span :class="['px-3 py-1 rounded-lg text-[9px] font-black uppercase border', 
                                           order.trangThaiDH === 5 ? 'bg-red-50 text-red-600 border-red-100' : 
+                                          order.trangThaiDH === 8 ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                                          order.trangThaiDH === 7 ? 'bg-cyan-50 text-cyan-600 border-cyan-100' : 
                                           order.trangThaiDH === 4 ? 'bg-green-50 text-green-600 border-green-100' : 
                                           order.trangThaiDH === 0 ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-blue-50 text-blue-600 border-blue-100']">
                               {{ 
                                 order.trangThaiDH === 6 ? 'Đã đánh giá' : 
                                 (order.trangThaiDH === 5 ? 'Đã hủy' : 
+                                (order.trangThaiDH === 8 ? 'Lỗi thanh toán' : 
+                                (order.trangThaiDH === 7 ? 'Chờ thanh toán' : 
                                 (order.trangThaiDH === 4 ? 'Hoàn tất' : 
                                 (order.trangThaiDH === 0 ? 'Chờ xác nhận' : 
                                 (order.trangThaiDH === 3 ? 'Đã giao' : 
-                                (order.trangThaiDH === 1 ? 'Đã duyệt' : 'Đang giao'))))) 
+                                (order.trangThaiDH === 1 ? 'Đã nhận' : 'Đang giao'))))))) 
                               }}
                             </span>
                             <span class="text-xs font-black text-black">{{ new Date(order.ngayDat).toLocaleDateString('vi-VN') }}</span>
@@ -1373,7 +1411,7 @@ export default {
             `/orders/update-status/${orderId}`,
             null,
             {
-              params: { status: 5 },
+              params: { status: 5, reason: "Khách hàng hủy đơn" },
               withCredentials: true
             }
         )

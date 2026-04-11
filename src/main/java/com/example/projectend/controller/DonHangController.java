@@ -84,6 +84,7 @@ public class DonHangController {
             dto.put("ghiChu", order.getGhiChu());
             dto.put("trangThaiDH", order.getTrangThaiDH());
             dto.put("trangThaiThanhToan", order.getTrangThaiThanhToan());
+            dto.put("lyDoHuy", order.getLyDoHuy());
 
             // TaiKhoan (safe)
             if (order.getTaiKhoan() != null) {
@@ -162,9 +163,10 @@ public class DonHangController {
     @PutMapping("/update-status/{id}")
     public ResponseEntity<?> updateStatus(
             @PathVariable Long id,
-            @RequestParam Integer status){
+            @RequestParam Integer status,
+            @RequestParam(required = false) String reason){
 
-        donHangService.updateStatus(id, status);
+        donHangService.updateStatus(id, status, reason);
 
         return ResponseEntity.ok("Updated");
     }
@@ -184,5 +186,18 @@ public class DonHangController {
         donHangService.capNhatTrangThai(id, 4, "Khách hàng", "Khách hàng xác nhận đã nhận hàng");
 
         return ResponseEntity.ok("Đơn hàng đã hoàn tất");
+    }
+    /**
+     * Admin xác nhận đã hoàn tiền thủ công cho đơn hàng
+     */
+    @PostMapping("/{id}/confirm-refund")
+    public ResponseEntity<?> confirmRefund(@PathVariable Long id, @RequestBody java.util.Map<String, String> body) {
+        try {
+            String ghiChu = body.get("ghiChu");
+            donHangService.xacNhanDaHoanTien(id, ghiChu);
+            return ResponseEntity.ok(java.util.Map.of("success", true, "message", "Đã xác nhận hoàn tiền thành công"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(java.util.Map.of("success", false, "message", e.getMessage()));
+        }
     }
 }

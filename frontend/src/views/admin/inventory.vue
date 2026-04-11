@@ -401,12 +401,11 @@
           <div class="flex items-center gap-3">
             <div class="relative flex-1">
               <input
-                v-model="supplierSearchText"
-                @focus="showSupplierDropdown = true"
-                @blur="hideSupplierDropdown"
-                @input="filterSupplierSearch"
-                placeholder="Tìm hoặc nhập tên nhà cung cấp..."
-                class="w-full border border-[#C8A97E]/30 rounded-2xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all shadow-sm font-medium"
+                :value="supplierSearchText"
+                readonly
+                @click="showSupplierDropdown = !showSupplierDropdown"
+                placeholder="Chọn nhà cung cấp từ danh sách..."
+                class="w-full border border-[#C8A97E]/30 rounded-2xl px-4 py-3 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all shadow-sm font-medium cursor-pointer"
               />
               <div v-if="showSupplierDropdown && filteredSupplierList.length > 0"
                 class="absolute z-[50] w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
@@ -436,26 +435,26 @@
 
           <!-- ROW 1: Thương hiệu + Danh mục + Tên SP + Giới tính -->
           <div class="grid grid-cols-2 gap-4">
-            <!-- Nhà cung cấp -->
+            <!-- Tên sản phẩm -->
             <div class="space-y-1.5 relative">
-              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Thương Hiệu <span class="text-red-500">*</span></label>
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tên Sản Phẩm <span class="text-red-500">*</span></label>
               <div class="relative">
                 <input
-                  v-model="brandSearchText"
-                  @focus="showBrandDropdown = true"
-                  @blur="hideBrandDropdown"
-                  @input="filterBrandSearch"
-                  :placeholder="newItem.productId ? '(Tự động theo sản phẩm)' : 'Vui lòng chọn sản phẩm...'"
-                  :disabled="!newItem.isNewProduct && newItem.productId"
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50 disabled:text-gray-400"
+                  v-model="productSearchText"
+                  @focus="showProductDropdown = true"
+                  @blur="hideProductDropdown"
+                  @input="filterProducts"
+                  placeholder="Tìm và chọn sản phẩm có sẵn..."
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-semibold text-gray-800"
                 />
-                <div v-if="showBrandDropdown" class="absolute z-[40] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
-                  <div v-for="b in filteredBrandList" :key="b.maTH" @mousedown.prevent="selectBrand(b)"
-                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
-                    {{ b.tenTH }}
+                <div v-if="showProductDropdown" class="absolute z-[35] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
+                  <div v-for="p in filteredProductsList" :key="p.maSP" @mousedown.prevent="selectProduct(p)"
+                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-semibold">
+                    {{ p.tenSP }}
                   </div>
                 </div>
               </div>
+              <p v-if="productSearchText && !newItem.productId" class="text-[10px] text-red-500 font-semibold mt-0.5">✦ Vui lòng chọn sản phẩm có sẵn</p>
             </div>
 
             <!-- Danh mục -->
@@ -480,26 +479,26 @@
               </div>
             </div>
 
-            <!-- Tên sản phẩm -->
+            <!-- Thương hiệu -->
             <div class="space-y-1.5 relative">
-              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tên Sản Phẩm <span class="text-red-500">*</span></label>
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Thương Hiệu <span class="text-red-500">*</span></label>
               <div class="relative">
                 <input
-                  v-model="productSearchText"
-                  @focus="showProductDropdown = true"
-                  @blur="hideProductDropdown"
-                  @input="filterProducts"
-                  placeholder="Tìm và chọn sản phẩm có sẵn..."
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-semibold text-gray-800"
+                  v-model="brandSearchText"
+                  @focus="showBrandDropdown = true"
+                  @blur="hideBrandDropdown"
+                  @input="filterBrandSearch"
+                  :placeholder="newItem.productId ? '(Tự động theo sản phẩm)' : 'Vui lòng chọn sản phẩm...'"
+                  :disabled="!newItem.isNewProduct && newItem.productId"
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-medium disabled:bg-gray-50 disabled:text-gray-400"
                 />
-                <div v-if="showProductDropdown" class="absolute z-[35] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
-                  <div v-for="p in filteredProductsList" :key="p.maSP" @mousedown.prevent="selectProduct(p)"
-                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-semibold">
-                    {{ p.tenSP }}
+                <div v-if="showBrandDropdown" class="absolute z-[40] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
+                  <div v-for="b in filteredBrandList" :key="b.maTH" @mousedown.prevent="selectBrand(b)"
+                    class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer text-gray-700 border-b border-gray-50 last:border-0 font-medium">
+                    {{ b.tenTH }}
                   </div>
                 </div>
               </div>
-              <p v-if="productSearchText && !newItem.productId" class="text-[10px] text-red-500 font-semibold mt-0.5">✦ Vui lòng chọn sản phẩm có sẵn</p>
             </div>
 
             <!-- Giới tính -->
@@ -1465,6 +1464,7 @@ export default {
             color: row.color,
             qty: row.qty,
             price: this.newItem.price,
+            giaBan: this.newItem.giaBan,
             moTa: this.newItem.moTa || '',
             ghiChu: 'Tạo biến thể mới cho SP'
           })

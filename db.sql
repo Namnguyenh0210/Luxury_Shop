@@ -2032,3 +2032,20 @@
 
 	GO
 	-- ✅ KẾT THÚC SCRIPT (TOÀN BỘ LOGIC VOUCHER CHUYÊN NGHIỆP ĐÃ ĐƯỢC ĐƯA LÊN PHẦN ĐẦU)
+
+
+
+-- 1. Thêm cột trước
+ALTER TABLE Voucher ADD HienThi BIT DEFAULT 1;
+GO
+
+-- 2. Cập nhật dữ liệu sau khi cột đã được tạo
+UPDATE Voucher SET HienThi = 1;
+GO
+
+
+-- Đảm bảo bảng DonHang có cột GiamGia để tính toán thống kê
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('DonHang') AND name = 'GiamGia')
+BEGIN
+    ALTER TABLE DonHang ADD GiamGia DECIMAL(18, 2) DEFAULT 0;
+END

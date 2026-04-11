@@ -39,7 +39,7 @@
         </div>
 
         <!-- Progress Stepper -->
-        <div v-if="order.trangThaiDH !== 5 && order.trangThaiDH !== 7 && order.trangThaiDH !== 8" class="flex-1 max-w-lg">
+        <div class="flex-1 max-w-lg">
           <div class="relative flex items-start justify-between">
             <div class="absolute left-0 right-0 h-[2px] bg-gray-100 rounded-full" style="top: 18px; margin-left: 18px; margin-right: 18px;">
               <div class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full transition-all duration-700"
@@ -58,14 +58,6 @@
           </div>
         </div>
 
-        <!-- Cancelled / Error State -->
-        <div v-else-if="order.trangThaiDH === 5" class="flex items-center gap-3 bg-red-50 border border-red-100 rounded-2xl px-5 py-4">
-          <span class="material-symbols-outlined text-red-500 text-2xl">cancel</span>
-          <div>
-            <p class="text-sm font-black text-red-600">Đơn hàng đã bị hủy</p>
-            <p v-if="order.lyDoHuy" class="text-xs text-red-400 mt-0.5">{{ order.lyDoHuy }}</p>
-          </div>
-        </div>
       </div>
 
       <!-- Main Grid -->
@@ -195,7 +187,7 @@
               </div>
               <div class="flex justify-between text-sm text-gray-500">
                 <span class="font-semibold text-gray-600">Phí vận chuyển</span>
-                <span class="font-bold text-gray-800">{{ order.phiShip ? fmtCurrency(order.phiShip) : 'Miễn phí' }}</span>
+                <span class="font-bold text-gray-800">{{ order.phiShip > 0 ? fmtCurrency(order.phiShip) : 'Free' }}</span>
               </div>
               <div class="flex justify-between items-center pt-3 border-t border-yellow-200">
                 <div class="flex flex-col">
@@ -207,11 +199,25 @@
                 <span class="font-black text-yellow-700 text-2xl tracking-tight">{{ fmtCurrency(order.tongTien) }}</span>
               </div>
             </div>
+
+            <!-- Cancellation Reason (If Cancelled or Error) -->
+            <div v-if="order.trangThaiDH === 5 || order.trangThaiDH === 8" class="px-8 py-5 bg-red-50/30 border-t border-red-100 flex items-start gap-4">
+              <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center text-white shrink-0">
+                 <span class="material-symbols-outlined text-xl">info</span>
+              </div>
+              <div>
+                <p class="text-[10px] font-black text-red-700 uppercase tracking-widest mb-0.5">
+                  {{ order.trangThaiDH === 5 ? 'Lý do hủy đơn' : 'Lý do lỗi thanh toán' }}
+                </p>
+                <p class="text-xs text-red-600 font-bold italic italic leading-relaxed">
+                  {{ order.lyDoHuy || 'Chưa cập nhật lý do cụ thể hoặc do lỗi hệ thống thanh toán.' }}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div v-if="order.trangThaiDH !== 5 && order.trangThaiDH !== 7 && order.trangThaiDH !== 8"
-               class="bg-white rounded-3xl border border-gray-100 shadow-sm px-8 py-6 flex flex-wrap items-center gap-3">
+          <!-- Action Buttons Area -->
+          <div v-if="order.trangThaiDH !== 5" class="bg-white rounded-3xl border border-gray-100 shadow-sm px-8 py-6 flex flex-wrap items-center gap-3">
             <h3 class="w-full text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Hành động đơn hàng</h3>
 
             <button v-if="order.trangThaiDH === 0 && !showCancelForm" @click="showCancelForm = true"
@@ -219,6 +225,25 @@
               <span class="material-symbols-outlined text-sm">cancel</span>
               Hủy đơn hàng
             </button>
+
+            <!-- Pay Now for Status 7 & 8 -->
+            <div v-if="order.trangThaiDH === 7 || order.trangThaiDH === 8" 
+                 :class="['w-full flex flex-col sm:flex-row items-center justify-between gap-4 p-5 border rounded-2xl', 
+                          order.trangThaiDH === 7 ? 'bg-cyan-50 border-cyan-100' : 'bg-orange-50 border-orange-100']">
+              <div class="flex items-center gap-4">
+                <span :class="['material-symbols-outlined text-2xl animate-pulse', order.trangThaiDH === 7 ? 'text-cyan-500' : 'text-orange-500']">
+                   {{ order.trangThaiDH === 7 ? 'hourglass_empty' : 'warning' }}
+                </span>
+                <p :class="['text-[10px] font-black uppercase tracking-widest', order.trangThaiDH === 7 ? 'text-cyan-700' : 'text-orange-700']">
+                   {{ order.trangThaiDH === 7 ? 'Đang chờ thanh toán qua PayOS' : 'Thanh toán PayOS bị gián đoạn' }}
+                </p>
+              </div>
+              <a :href="'http://localhost:8080/payment/payos/create?orderId=' + order.maDH" 
+                 class="w-full sm:w-auto px-8 py-2.5 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#C8A97E] transition-all shadow-md active:scale-95 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-xs">qr_code_2</span>
+                Thanh toán ngay
+              </a>
+            </div>
 
             <div v-if="showCancelForm" class="w-full mt-4 p-6 bg-red-50/50 border border-red-100 rounded-3xl space-y-4">
               <p class="text-[10px] font-black text-red-700 uppercase tracking-widest">Vui lòng cung cấp lý do hủy đơn:</p>
@@ -313,10 +338,37 @@
               </div>
               <div class="flex justify-between items-center pt-1">
                 <span class="text-xs font-semibold text-gray-500">Trạng thái</span>
-                <span :class="order.trangThaiThanhToan === 1 ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-600 border border-red-200'"
+                <span :class="order.trangThaiThanhToan === 1 ? 'bg-green-100 text-green-700 border border-green-200' : 
+                              (order.trangThaiThanhToan === 5 ? 'bg-orange-100 text-orange-600 border border-orange-200' :
+                               (order.trangThaiThanhToan === 6 ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                                (order.trangThaiThanhToan === 0 ? 'bg-cyan-100 text-cyan-700 border border-cyan-200' : 
+                                 (order.trangThaiThanhToan === 4 ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' : 'bg-red-100 text-red-600 border border-red-200'))))"
                       class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest">
-                  {{ order.trangThaiThanhToan === 1 ? 'Đã thanh toán' : 'Chưa thanh toán' }}
+                  {{ order.trangThaiThanhToan === 1 ? 'Đã thanh toán' : 
+                     (order.trangThaiThanhToan === 5 ? 'Chờ hoàn tiền' :
+                      (order.trangThaiThanhToan === 6 ? 'Đã hoàn tiền' :
+                       (order.trangThaiThanhToan === 0 ? 'Chờ thanh toán' : 
+                        (order.trangThaiThanhToan === 4 ? 'Chưa thanh toán' : 'Thanh toán lỗi')))) }}
                 </span>
+              </div>
+
+              <!-- Refund Note -->
+              <div v-if="order.trangThaiThanhToan === 5" class="mt-4 p-4 bg-orange-50 border border-orange-100 rounded-2xl">
+                <div class="flex gap-2">
+                  <span class="material-symbols-outlined text-orange-600 text-sm">info</span>
+                  <p class="text-[10px] font-bold text-orange-800 leading-relaxed uppercase tracking-wider">
+                    Đơn hàng đã hủy. Cửa hàng đang tiến hành xử lý hoàn trả tiền cho khách hàng. Vui lòng giữ liên lạc.
+                  </p>
+                </div>
+              </div>
+
+              <div v-if="order.trangThaiThanhToan === 6" class="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl">
+                <div class="flex gap-2">
+                  <span class="material-symbols-outlined text-blue-600 text-sm">verified</span>
+                  <p class="text-[10px] font-bold text-blue-800 leading-relaxed uppercase tracking-wider">
+                    Cửa hàng đã hoàn tất quá trình trả lại tiền cho quý khách. Xin lỗi bạn vì sự bất tiện này.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -511,6 +563,7 @@ export default {
     stepperWidth() {
       const s = this.order?.trangThaiDH
       if (s === 6) return 100
+      if (s === 7 || s === 8 || s === 5) return 0
       if (s >= 4) return 80
       if (s === 3) return 60
       if (s === 2) return 40
@@ -523,6 +576,7 @@ export default {
     isStepDone(i) {
       const s = this.order?.trangThaiDH
       if (s === 6) return true
+      if (s === 7 || s === 8 || s === 5) return false
       return s >= i
     },
     isStepActive(i) {

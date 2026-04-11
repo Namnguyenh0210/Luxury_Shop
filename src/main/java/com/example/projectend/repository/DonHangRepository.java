@@ -74,10 +74,10 @@ public interface DonHangRepository extends JpaRepository<DonHang, Long> {
            "ORDER BY d.ngayDat DESC")
     Page<DonHang> searchAdvanced(String keyword, Integer trangThai, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     // Tính tổng doanh thu (Chỉ tính các đơn Hoàn tất = 4)
-    @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH = 4")
+    @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH IN (4, 6)")
     BigDecimal sumTotalRevenue();
 
-    @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH = 4 AND d.ngayDat >= :startDate AND d.ngayDat <= :endDate")
+    @Query("SELECT SUM(d.tongTien) FROM DonHang d WHERE d.trangThaiDH IN (4, 6) AND d.ngayDat >= :startDate AND d.ngayDat <= :endDate")
     BigDecimal sumTotalRevenueBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     Long countByTrangThaiDHAndNgayDatBetween(Integer trangThai, LocalDateTime startDate, LocalDateTime endDate);
@@ -90,11 +90,20 @@ public interface DonHangRepository extends JpaRepository<DonHang, Long> {
                                  @Param("end") LocalDateTime end);
 
     List<DonHang> findByNgayDatBetween(LocalDateTime start, LocalDateTime end);
-    
     // Tìm đơn hàng theo trạng thái và thời gian đặt (Dùng cho auto-cancel)
     List<DonHang> findByTrangThaiDHAndNgayDatBefore(Integer trangThai, LocalDateTime threshold);
 
     // Tìm đơn hàng theo mã giao dịch PayOS (PAYOS_CODE_xxxx)
     Optional<DonHang> findByMaGiaoDich(String maGiaoDich);
-    
+
+    // Đếm đơn hàng theo trạng thái thanh toán (Dùng cho thông báo hoàn tiền)
+    long countByTrangThaiThanhToan(Integer trangThaiThanhToan);
+
+    // Tính tổng số tiền đã giảm giá cho khách qua Voucher (Chỉ tính đơn không bị hủy)
+    @Query("SELECT SUM(d.giamGia) FROM DonHang d WHERE d.trangThaiDH NOT IN (5, 8) AND d.voucher IS NOT NULL")
+    java.math.BigDecimal sumVoucherSavings();
+
+    // Đếm tổng số lượt đã dùng Voucher thực tế từ bảng Đơn Hàng (Chỉ tính đơn không bị hủy)
+    @Query("SELECT COUNT(d) FROM DonHang d WHERE d.trangThaiDH NOT IN (5, 8) AND d.voucher IS NOT NULL")
+    long countAllVoucherUsages();
 }
