@@ -122,17 +122,37 @@
 
         <!-- BỘ LỌC -->
         <div class="flex flex-wrap items-center gap-3">
-          <select v-model="filter.maNCC"
-            class="border border-[#C8A97E]/30 rounded-2xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm min-w-[180px] font-medium text-gray-700">
-            <option value="">Tất cả NCC</option>
-            <option v-for="ncc in suppliers" :key="ncc.maNCC" :value="ncc.maNCC">{{ ncc.tenNCC }}</option>
-          </select>
-          <div class="flex items-center bg-gray-100 p-1 rounded-2xl shadow-inner">
-            <button v-for="r in timeRanges" :key="r.value" @click="filter.timeRange = r.value"
-              class="px-4 py-2 text-xs font-black rounded-xl transition-all whitespace-nowrap uppercase tracking-widest"
-              :class="filter.timeRange === r.value ? 'bg-white text-[#C8A97E] shadow-sm' : 'text-gray-400 hover:text-gray-600'">
-              {{ r.label }}
+          <!-- Custom NCC Dropdown -->
+          <div class="relative min-w-[220px]">
+            <button @click.stop="openNCCDropdown = !openNCCDropdown"
+              class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-2.5 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
+              <span class="truncate font-black text-gray-700 uppercase tracking-widest text-[11px]">
+                {{ suppliers.find(n => n.maNCC == filter.maNCC)?.tenNCC || 'Tất cả NCC' }}
+              </span>
+              <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
             </button>
+            <div v-if="openNCCDropdown" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+              <div @click="filter.maNCC = ''; openNCCDropdown = false" 
+                class="px-5 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer transition-colors border-b border-gray-50 hover:bg-[#C8A97E]/10" 
+                :class="!filter.maNCC ? 'text-[#C8A97E] bg-[#C8A97E]/5' : 'text-gray-500'">
+                Tất cả NCC
+              </div>
+              <div class="max-h-60 overflow-y-auto custom-scrollbar">
+                <div v-for="ncc in suppliers" :key="ncc.maNCC" @click="filter.maNCC = ncc.maNCC; openNCCDropdown = false" 
+                  class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" 
+                  :class="filter.maNCC == ncc.maNCC ? 'bg-[#C8A97E]/10 text-[#C8A97E]' : ''">
+                  {{ ncc.tenNCC }}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Date Range Filter -->
+          <div class="flex items-center gap-2 bg-white rounded-2xl p-1.5 border border-[#C8A97E]/30 shadow-sm shadow-[#C8A97E]/5">
+            <input type="date" v-model="filter.startDate"
+              class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[112px] cursor-pointer">
+            <span class="text-[#C8A97E] px-0.5 font-bold">→</span>
+            <input type="date" v-model="filter.endDate"
+              class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[112px] cursor-pointer">
           </div>
           <button @click="resetFilter"
             class="flex items-center justify-center size-10 rounded-2xl border border-[#C8A97E]/30 bg-white text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all shadow-sm group"
@@ -240,16 +260,16 @@
         <div v-if="filteredRequests.length > 0" class="bg-white rounded-[2rem] border border-[#C8A97E]/20 shadow-xl shadow-[#C8A97E]/5 overflow-hidden">
           <table class="w-full text-sm">
             <thead>
-              <tr class="bg-gray-50 border-b border-gray-100">
-                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Mã YC</th>
-                <th v-if="isAdmin" class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Nhân Viên</th>
-                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Sản Phẩm</th>
-                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Biến thể</th>
-                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Tồn Kho</th>
-                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest font-serif italic">Qty</th>
-                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Ngày Gửi</th>
-                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Trạng Thái</th>
-                <th v-if="isAdmin" class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">Hành Động</th>
+              <tr class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
+                <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Mã YC</th>
+                <th v-if="isAdmin" class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Nhân Viên</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Sản Phẩm</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Biến thể</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Tồn Kho</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest font-serif italic">Qty</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Ngày Gửi</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Trạng Thái</th>
+                <th v-if="isAdmin" class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Hành Động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -292,18 +312,20 @@
                     {{ req.trangThai === 0 ? 'Chờ duyệt' : req.trangThai === 1 ? 'Đã duyệt' : 'Từ chối' }}
                   </span>
                 </td>
-                <td v-if="isAdmin" class="px-5 py-4">
-                  <div v-if="req.trangThai === 0" class="flex items-center justify-center gap-2">
+                <td v-if="isAdmin" class="px-5 py-4 text-center">
+                  <div v-if="req.trangThai === 0" class="flex items-center justify-center gap-4">
                     <button @click="processRequest(req)"
-                      class="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-[11px] font-bold rounded-lg transition-colors">
-                      <span class="material-symbols-outlined text-[13px]">check</span> Duyệt
+                      class="text-green-500 hover:text-green-700 transition-colors"
+                      title="Duyệt yêu cầu">
+                      <span class="material-symbols-outlined text-[24px]">check_circle</span>
                     </button>
                     <button @click="rejectRequest(req)"
-                      class="flex items-center gap-1 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-[11px] font-bold rounded-lg transition-colors">
-                      <span class="material-symbols-outlined text-[13px]">close</span> Từ chối
+                      class="text-red-400 hover:text-red-600 transition-colors"
+                      title="Từ chối yêu cầu">
+                      <span class="material-symbols-outlined text-[24px]">cancel</span>
                     </button>
                   </div>
-                  <span v-else class="text-xs text-gray-400 italic">Đã xử lý</span>
+                  <span v-else class="text-[10px] font-black uppercase tracking-widest text-gray-400 italic">Đã xử lý</span>
                 </td>
               </tr>
             </tbody>
@@ -337,12 +359,12 @@
         <div v-if="suppliers.length > 0" class="bg-white rounded-[2rem] border border-[#C8A97E]/20 shadow-xl shadow-[#C8A97E]/5 overflow-hidden">
           <table class="w-full text-sm">
             <thead>
-              <tr class="bg-gray-50 border-b border-gray-100">
-                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest w-[10%]">ID</th>
-                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Tên Nhà Cung Cấp</th>
-                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Liên Hệ</th>
-                <th class="px-6 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Địa chỉ</th>
-                <th class="px-6 py-5 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest w-[15%]">Hành động</th>
+              <tr class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
+                <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest w-[10%]">ID</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Tên Nhà Cung Cấp</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Liên Hệ</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Địa chỉ</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest w-[15%]">Hành động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -352,12 +374,12 @@
                 <td class="px-5 py-4 text-gray-600">{{ ncc.soDienThoai || '—' }}</td>               
                 <td class="px-5 py-4 text-gray-600">{{ ncc.diaChi || '—' }}</td>
                 <td class="px-5 py-4">
-                  <div class="flex items-center justify-center gap-1">
-                    <button @click="openNccModal(ncc)" class="text-[#C8A97E] hover:text-yellow-800 p-1.5 rounded-lg hover:bg-[#C8A97E]/5 transition-all" title="Sửa">
-                      <span class="material-symbols-outlined text-[18px]">edit</span>
+                  <div class="flex items-center justify-center gap-4">
+                    <button @click="openNccModal(ncc)" class="text-blue-400 hover:text-blue-600 transition-colors" title="Sửa">
+                      <span class="material-symbols-outlined text-[22px]">edit_note</span>
                     </button>
-                    <button @click="deleteNcc(ncc)" class="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-all" title="Xóa">
-                      <span class="material-symbols-outlined text-[18px]">delete</span>
+                    <button @click="deleteNcc(ncc)" class="text-red-400 hover:text-red-600 transition-colors" title="Xóa">
+                      <span class="material-symbols-outlined text-[22px]">delete</span>
                     </button>
                   </div>
                 </td>
@@ -436,16 +458,19 @@
           <!-- ROW 1: Thương hiệu + Danh mục + Tên SP + Giới tính -->
           <div class="grid grid-cols-2 gap-4">
             <!-- Tên sản phẩm -->
-            <div class="space-y-1.5 relative">
+            <div class="space-y-1.5 relative group">
               <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Tên Sản Phẩm <span class="text-red-500">*</span></label>
               <div class="relative">
+                <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
+                  <span class="material-symbols-outlined text-[20px]">search</span>
+                </span>
                 <input
                   v-model="productSearchText"
                   @focus="showProductDropdown = true"
                   @blur="hideProductDropdown"
                   @input="filterProducts"
-                  placeholder="Tìm và chọn sản phẩm có sẵn..."
-                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-semibold text-gray-800"
+                  placeholder="Tìm và chọn sản phẩm..."
+                  class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all font-bold text-gray-700 placeholder:text-gray-400"
                 />
                 <div v-if="showProductDropdown" class="absolute z-[35] w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-2xl max-h-48 overflow-y-auto animate-[pop_0.2s_ease-out]">
                   <div v-for="p in filteredProductsList" :key="p.maSP" @mousedown.prevent="selectProduct(p)"
@@ -1003,13 +1028,7 @@ export default {
       showBrandDropdown: false,
       filteredBrandList: [],
       isExistingVariant: false,
-      timeRanges: [
-        { label: 'Tất cả', value: '' },
-        { label: 'Hôm nay', value: 'today' },
-        { label: 'Tuần này', value: 'week' },
-        { label: 'Tháng này', value: 'month' },
-        { label: 'Năm nay', value: 'year' },
-      ],
+
       stockRequests: [],
       currentRequestId: null,
       requestFilterTab: 'all',
@@ -1025,7 +1044,8 @@ export default {
       reqFilteredProducts: [],
       showReqProductDrop: false,
       dialog: { show: false, type: 'alert', title: '', message: '', input: '', isError: false, resolve: null },
-      filter: { maNCC: '', maNV: '', timeRange: '' },
+      openNCCDropdown: false,
+      filter: { maNCC: '', maNV: '', startDate: '', endDate: '' },
       form: { maNCC: '', ghiChu: '', items: [] },
       newItem: {
         productId: '', maBienThe: '',
@@ -1061,16 +1081,15 @@ export default {
       let list = [...this.danhSachPhieu]
       if (this.filter.maNCC) list = list.filter(p => p.nhaCungCap?.maNCC == this.filter.maNCC)
       if (this.filter.maNV)  list = list.filter(p => p.nhanVien?.maTK == this.filter.maNV)
-      if (this.filter.timeRange) {
-        const now = new Date()
-        list = list.filter(p => {
-          const d = new Date(p.ngayNhap)
-          if (this.filter.timeRange === 'today')  return d.toDateString() === now.toDateString()
-          if (this.filter.timeRange === 'week')   { const s = new Date(now); s.setDate(now.getDate() - now.getDay()); return d >= s }
-          if (this.filter.timeRange === 'month')  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-          if (this.filter.timeRange === 'year')   return d.getFullYear() === now.getFullYear()
-          return true
-        })
+      if (this.filter.startDate) {
+        const start = new Date(this.filter.startDate)
+        start.setHours(0, 0, 0, 0)
+        list = list.filter(p => new Date(p.ngayNhap) >= start)
+      }
+      if (this.filter.endDate) {
+        const end = new Date(this.filter.endDate)
+        end.setHours(23, 59, 59, 999)
+        list = list.filter(p => new Date(p.ngayNhap) <= end)
       }
       return list
     }

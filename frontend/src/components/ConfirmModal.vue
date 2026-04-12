@@ -21,11 +21,19 @@
           <div class="text-center space-y-3 mb-10">
             <h3 class="text-2xl font-black text-gray-900 leading-tight uppercase tracking-wider">{{ state.title }}</h3>
             <p class="text-gray-500 font-medium text-sm leading-relaxed px-2">{{ state.message }}</p>
+            
+            <!-- Prompt Input -->
+            <div v-if="state.type === 'prompt'" class="pt-4 px-2">
+              <input v-model="state.promptText" 
+                     :placeholder="state.promptPlaceholder" 
+                     @keyup.enter="handleConfirm"
+                     class="w-full text-center px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#C8A97E]/50 focus:border-[#C8A97E]/30 outline-none text-sm transition-all shadow-inner" />
+            </div>
           </div>
           
           <!-- Buttons -->
           <div class="flex gap-4">
-            <button v-if="state.type === 'confirm'"
+            <button v-if="state.type === 'confirm' || state.type === 'prompt'"
                     @click="handleCancel"
                     class="flex-1 py-4 px-6 bg-gray-50 text-gray-400 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-gray-100 hover:text-gray-600 transition-all active:scale-95 border border-gray-200/50">
               {{ state.cancelText }}

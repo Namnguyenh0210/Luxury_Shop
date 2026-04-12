@@ -269,7 +269,7 @@ export default {
       }
     },
     async resetConversation() {
-       if (confirm('Làm mới cuộc hội thoại này?')) {
+       if (await window.$confirm('Làm mới cuộc hội thoại này?')) {
           try {
              await axios.post('/chat/reset');
              this.messages = [

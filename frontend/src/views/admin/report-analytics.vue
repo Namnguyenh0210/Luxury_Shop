@@ -80,17 +80,15 @@
           
           <div class="flex items-center gap-4">
             <!-- Filter Date Right -->
-            <div class="flex items-center gap-2 bg-slate-50 rounded-xl p-1 border border-gray-100">
-              <input type="date" v-model="startDate" class="bg-transparent border-none text-[11px] font-bold text-slate-600 focus:ring-0 w-[105px] text-center">
-              <span class="text-gray-300 px-1">-</span>
-              <input type="date" v-model="endDate" class="bg-transparent border-none text-[11px] font-bold text-slate-600 focus:ring-0 w-[105px] text-center">
-              <button @click="filterByDate" class="px-4 py-1.5 bg-[#C8A97E] text-white rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-yellow-700 transition-colors shadow-sm">Lọc</button>
+            <div class="flex items-center gap-2 bg-white rounded-2xl p-1.5 border border-[#C8A97E]/30 shadow-sm shadow-[#C8A97E]/5">
+              <input type="date" v-model="startDate" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
+              <span class="text-[#C8A97E] px-1 font-bold">→</span>
+              <input type="date" v-model="endDate" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
+              <button @click="filterByDate" class="px-5 py-2 bg-[#C8A97E] text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-[#B88A00] transition-all shadow-md shadow-[#C8A97E]/20 active:scale-95">
+                Lọc dữ liệu
+              </button>
             </div>
             <div class="h-6 w-px bg-gray-200"></div>
-            <!-- Range Select -->
-            <div class="flex bg-slate-50 p-1 rounded-xl border border-gray-100">
-              <button v-for="(label, key) in timeRangeLabels" :key="key" @click="timeRange = key" class="px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all" :class="timeRange === key ? 'bg-white text-slate-800 shadow-sm' : 'text-gray-500 hover:text-slate-700'">{{ label }}</button>
-            </div>
           </div>
         </div>
 
@@ -193,12 +191,6 @@ export default {
       startDate: '',
       endDate: '',
       activeStat: 'revenue',
-      timeRange: 'week',
-      timeRangeLabels: {
-        week: 'Tuần này',
-        month: 'Tháng này',
-        year: 'Năm nay'
-      },
       
       chartLabels: [],
       chartDataAll: {
@@ -230,11 +222,7 @@ export default {
     activeStat() {
       this.updateMainChart()
     },
-    timeRange() {
-      this.startDate = ''
-      this.endDate = ''
-      this.loadData()
-    }
+
   },
 
   methods: {
@@ -251,7 +239,6 @@ export default {
     
     async filterByDate() {
       if (!this.startDate || !this.endDate) return
-      this.timeRange = '' // clear preset range
       await this.loadData()
     },
     
@@ -261,18 +248,10 @@ export default {
 
       if (!s || !e) {
         const today = new Date()
-        if (this.timeRange === 'week') {
-          const lw = new Date()
-          lw.setDate(today.getDate() - 6)
-          s = lw.toISOString().split('T')[0]
-          e = today.toISOString().split('T')[0]
-        } else if (this.timeRange === 'month') {
-          s = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0]
-          e = today.toISOString().split('T')[0]
-        } else if (this.timeRange === 'year') {
-          s = new Date(today.getFullYear(), 0, 1).toISOString().split('T')[0]
-          e = today.toISOString().split('T')[0]
-        }
+        const lw = new Date()
+        lw.setDate(today.getDate() - 6)
+        s = lw.toISOString().split('T')[0]
+        e = today.toISOString().split('T')[0]
       }
 
       try {

@@ -34,12 +34,13 @@ public class AdminDonHangController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) String timeRange) {
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
 
         Pageable pageable = PageRequest.of(page, size);
         String statusStr = (status != null) ? status.toString() : null;
 
-        return donHangService.searchAdmin(keyword, statusStr, timeRange, pageable);
+        return donHangService.searchAdmin(keyword, statusStr, startDate, endDate, pageable);
     }
 
     // ==========================================

@@ -297,7 +297,7 @@ export default {
     },
     
     async cancelReportedOrder() {
-      const reason = prompt("Nhập lý do hủy đơn (Vd: Khách báo chưa nhận hàng, đã hoàn tiền):", "Khách báo chưa nhận được hàng: " + this.order.lyDoChuaNhan)
+      const reason = await window.$prompt("Nhập lý do hủy đơn (Vd: Khách báo chưa nhận hàng, đã hoàn tiền):", { defaultValue: "Khách báo chưa nhận được hàng: " + this.order.lyDoChuaNhan })
       if (reason === null) return
       
       try {

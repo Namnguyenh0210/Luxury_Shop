@@ -33,25 +33,25 @@
 
       <!-- BỘ LỌC -->
       <div class="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-[#C8A97E] shadow-sm">
-        <div class="relative w-72">
-          <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+        <div class="relative group">
+          <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
             <span class="material-symbols-outlined text-[20px]">search</span>
           </span>
           <input
             v-model="filterKeyword"
             @keyup.enter="fetchComments"
-            placeholder="Tìm theo bài viết, khách hàng..."
-            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
+            placeholder="Tìm bài viết, khách hàng..."
+            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all shadow-sm font-bold text-gray-700 placeholder:text-gray-400"
           />
         </div>
 
         <!-- Custom Status Dropdown -->
         <div class="relative min-w-[200px]">
-          <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
-            class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-2.5 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
-            <span class="truncate font-medium text-gray-700">{{ getStatusLabel(filterStatus) || 'Tất cả trạng thái' }}</span>
-            <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
-          </button>
+            <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
+              class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-3 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
+              <span class="truncate font-black text-gray-700 uppercase tracking-widest text-[11px]">{{ getStatusLabel(filterStatus) || 'Tất cả trạng thái' }}</span>
+              <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+            </button>
           <div v-if="openDropdown === 'status'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div @click="filterStatus = ''; fetchComments(); openDropdown = null" 
               class="px-5 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
@@ -61,6 +61,12 @@
             <div @click="filterStatus = true; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === true ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Giao diện hiển thị</div>
             <div @click="filterStatus = false; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === false ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">🚫 Đã ẩn vi phạm</div>
           </div>
+        </div>
+        <!-- Date Filters -->
+        <div class="flex items-center gap-2 bg-white rounded-2xl p-1.5 border border-[#C8A97E]/30 shadow-sm shadow-[#C8A97E]/5">
+          <input type="date" v-model="filterStartDate" @change="fetchComments" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
+          <span class="text-[#C8A97E] px-1 font-bold">→</span>
+          <input type="date" v-model="filterEndDate" @change="fetchComments" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
         </div>
 
         <!-- Nút Làm mới -->
@@ -74,13 +80,13 @@
       <!-- BẢNG DANH SÁCH -->
       <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden text-left">
         <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
             <tr>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-[20%]">Bài Viết & User</th>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-[25%]">Nội Dung Bình Luận</th>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-[25%]">Phản Hồi (Admin)</th>
-              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs w-[15%]">Trạng Thái</th>
-              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs w-[15%]">Hành Động</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs w-[20%]">Bài Viết & User</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs w-[25%]">Nội Dung Bình Luận</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs w-[25%]">Phản Hồi (Admin)</th>
+              <th class="px-5 py-3 text-center font-black text-black uppercase tracking-wider text-xs w-[15%]">Trạng Thái</th>
+              <th class="px-5 py-3 text-center font-black text-black uppercase tracking-wider text-xs w-[15%]">Hành Động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -158,11 +164,17 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="px-5 py-4 border-t border-gray-200 flex justify-end gap-2 text-sm">
-          <button v-for="p in totalPages" :key="p" @click="currentPage = p-1; fetchComments()"
-            class="size-8 flex items-center justify-center rounded-lg border font-medium transition-colors"
-            :class="currentPage === p-1 ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'">
-            {{ p }}
+        <div v-if="totalPages > 1" class="px-5 py-4 border-t border-gray-200 flex justify-end items-center gap-2">
+          <button v-if="currentPage > 0" @click="currentPage = currentPage - 1; fetchComments()"
+            class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium transition-colors">
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            Trước
+          </button>
+          <span class="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-bold">{{ currentPage + 1 }}</span>
+          <button v-if="currentPage < totalPages - 1" @click="currentPage = currentPage + 1; fetchComments()"
+            class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium transition-colors">
+            Sau
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
           </button>
         </div>
       </div>
@@ -208,6 +220,8 @@ export default {
       stats: { topBlogs: [] },
       filterKeyword: '',
       filterStatus: '',
+      filterStartDate: '',
+      filterEndDate: '',
       currentPage: 0,
       totalPages: 0,
       loading: false,
@@ -234,7 +248,13 @@ export default {
       this.loading = true
       try {
         const res = await axios.get('/admin/binh-luan', {
-          params: { keyword: this.filterKeyword, trangThai: this.filterStatus, page: this.currentPage },
+          params: { 
+            keyword: this.filterKeyword, 
+            trangThai: this.filterStatus, 
+            startDate: this.filterStartDate, 
+            endDate: this.filterEndDate, 
+            page: this.currentPage 
+          },
           withCredentials: true
         })
         if (res.data.thanhCong) {
@@ -249,6 +269,15 @@ export default {
     },
 
 
+
+    resetFilters() {
+      this.filterKeyword = ''
+      this.filterStatus = ''
+      this.filterStartDate = ''
+      this.filterEndDate = ''
+      this.currentPage = 0
+      this.fetchComments()
+    },
 
     getStatusLabel(val) {
       if (val === '') return ''

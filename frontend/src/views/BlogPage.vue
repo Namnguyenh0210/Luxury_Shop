@@ -80,12 +80,12 @@
               <h2 class="text-2xl font-serif font-bold text-[#111111]">Bộ Sưu Tập</h2>
               <span class="text-xs text-gray-400 uppercase tracking-widest font-medium">{{ tongSo }} BÀI VIẾT</span>
            </div>
-          <div class="relative w-full md:w-80">
-            <input v-model="tuKhoaTim" @input="timKiem" placeholder="Tìm kiếm bài viết..."
-              class="w-full bg-transparent border-b border-gray-100 pb-2 text-sm focus:outline-none focus:border-[#C8A97E] transition-colors placeholder:text-gray-400 uppercase tracking-widest text-[#111111]" />
-            <span class="absolute right-0 bottom-2 text-gray-400">
-              <span class="material-symbols-outlined text-[18px]">search</span>
+          <div class="relative w-full md:w-80 group">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-[#C8A97E] group-focus-within:text-black transition-colors">
+              <span class="material-symbols-outlined text-[20px]">search</span>
             </span>
+            <input v-model="tuKhoaTim" @input="timKiem" placeholder="Tìm kiếm bài viết..."
+              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all shadow-sm font-bold text-gray-700 placeholder:text-gray-400 uppercase tracking-widest" />
           </div>
         </div>
 
