@@ -108,14 +108,15 @@ public class AdminDonHangController {
             com.example.projectend.entity.SanPhamChiTiet spct = ct.getSanPhamChiTiet();
             if (spct != null) {
                 ctDto.put("tenSP", spct.getSanPham().getTenSP());
-                
+
                 String imgUrl = spct.getSanPham().getAnhChinh();
-                if (imgUrl == null) imgUrl = spct.getAnhBienThe();
+                if (imgUrl == null)
+                    imgUrl = spct.getAnhBienThe();
                 if (imgUrl != null && !imgUrl.startsWith("http") && !imgUrl.startsWith("/")) {
                     imgUrl = "/uploads/products/" + imgUrl;
                 }
                 ctDto.put("anh", imgUrl != null ? imgUrl : "/img/placeholder.png");
-                
+
                 ctDto.put("size", spct.getSizeSP().getTenSize());
                 ctDto.put("mau", spct.getMauSacSP().getTenMau());
                 ctDto.put("thuongHieu", spct.getSanPham().getThuongHieu().getTenTH());

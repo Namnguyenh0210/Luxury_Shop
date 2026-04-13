@@ -55,7 +55,7 @@ public class ChatController {
             Long conversationId = (Long) session.getAttribute("current_conversation_id");
             if (conversationId != null) {
                 conv = cuocTroChuyenRepository.findById(conversationId).orElse(null);
-                
+
                 // Nếu không tìm thấy hoặc đã đóng, tạo mới
                 if (conv == null || "CLOSED".equals(conv.getTrangThai())) {
                     conv = createAndSaveSessionConv(session, null);

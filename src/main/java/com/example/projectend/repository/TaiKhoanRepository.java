@@ -34,10 +34,10 @@ public interface TaiKhoanRepository extends JpaRepository<TaiKhoan, Long> {
 
     Long countByNgayTaoBetween(LocalDateTime startDate, LocalDateTime endDate);
 
-    @Query("SELECT COUNT(t) FROM TaiKhoan t JOIN t.vaiTros r WHERE r.tenVaiTro LIKE '%USER%'")
+    @Query("SELECT COUNT(t) FROM TaiKhoan t JOIN t.vaiTros r WHERE r.tenVaiTro LIKE '%USER%' OR r.tenVaiTro LIKE '%KHACH%'")
     long countUsersOnly();
 
-    @Query("SELECT COUNT(t) FROM TaiKhoan t JOIN t.vaiTros r WHERE r.tenVaiTro LIKE '%USER%' AND t.ngayTao >= :startDate AND t.ngayTao <= :endDate")
+    @Query("SELECT COUNT(t) FROM TaiKhoan t JOIN t.vaiTros r WHERE (r.tenVaiTro LIKE '%USER%' OR r.tenVaiTro LIKE '%KHACH%') AND t.ngayTao >= :startDate AND t.ngayTao <= :endDate")
     long countUsersByNgayTaoBetween(@Param("startDate") java.time.LocalDateTime startDate,
             @Param("endDate") java.time.LocalDateTime endDate);
 }

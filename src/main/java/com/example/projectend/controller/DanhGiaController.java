@@ -242,9 +242,10 @@ public class DanhGiaController {
             res.put("thanhCong", true);
             res.put("thongBao", "Đã cập nhật đánh giá thành công!");
             res.put("danhGia", danhGiaObj);
-            
+
             // Nếu cần cập nhật giao diện ngay lập tức
-            res.put("diemTrungBinhMoi", danhGiaService.getAverageRating(dg.getDonHangChiTiet().getSanPhamChiTiet().getSanPham().getMaSP()));
+            res.put("diemTrungBinhMoi",
+                    danhGiaService.getAverageRating(dg.getDonHangChiTiet().getSanPhamChiTiet().getSanPham().getMaSP()));
 
             return ResponseEntity.ok(res);
 
@@ -271,7 +272,7 @@ public class DanhGiaController {
             }
             dg.incrementReport();
             danhGiaService.save(dg);
-            
+
             res.put("thanhCong", true);
             res.put("thongBao", "Đã báo cáo đánh giá này cho Quản trị viên.");
             return ResponseEntity.ok(res);
@@ -316,7 +317,8 @@ public class DanhGiaController {
     }
 
     // =========================================================
-    // Helper: lấy danh sách DonHangChiTiet chưa được review của user cho sản phẩm maSP
+    // Helper: lấy danh sách DonHangChiTiet chưa được review của user cho sản phẩm
+    // maSP
     // =========================================================
     private List<Map<String, Object>> getCoTheReview(TaiKhoan tk, Long maSP) {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -341,11 +343,14 @@ public class DanhGiaController {
     }
 
     private String buildVariantName(SanPhamChiTiet spct) {
-        if (spct == null) return "";
+        if (spct == null)
+            return "";
         StringBuilder sb = new StringBuilder();
-        if (spct.getSizeSP() != null) sb.append("Size ").append(spct.getSizeSP().getTenSize());
+        if (spct.getSizeSP() != null)
+            sb.append("Size ").append(spct.getSizeSP().getTenSize());
         if (spct.getMauSacSP() != null) {
-            if (sb.length() > 0) sb.append(" - ");
+            if (sb.length() > 0)
+                sb.append(" - ");
             sb.append("Màu ").append(spct.getMauSacSP().getTenMau());
         }
         return sb.toString();

@@ -74,7 +74,8 @@ public class DonHangController {
                 return ResponseEntity.status(403).body("Forbidden");
             }
 
-            // Tra ve DTO an toan, khong serialize entity nhu (tranh loi ByteBuddy Hibernate proxy)
+            // Tra ve DTO an toan, khong serialize entity nhu (tranh loi ByteBuddy Hibernate
+            // proxy)
             java.util.Map<String, Object> dto = new java.util.HashMap<>();
             dto.put("maDH", order.getMaDH());
             dto.put("ngayDat", order.getNgayDat());
@@ -119,7 +120,8 @@ public class DonHangController {
                     vDto.put("giaTri", order.getVoucher().getGiaTri());
                     vDto.put("loaiGiamGia", order.getVoucher().getLoaiGiamGia());
                     dto.put("voucher", vDto);
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }
 
             // Chi tiet don hang (safe)
@@ -145,7 +147,8 @@ public class DonHangController {
                         ctDto.put("size", spct.getSizeSP() != null ? spct.getSizeSP().getTenSize() : "");
                         ctDto.put("mau", spct.getMauSacSP() != null ? spct.getMauSacSP().getTenMau() : "");
                         ctDto.put("thuongHieu", spct.getSanPham() != null && spct.getSanPham().getThuongHieu() != null
-                                ? spct.getSanPham().getThuongHieu().getTenTH() : "");
+                                ? spct.getSanPham().getThuongHieu().getTenTH()
+                                : "");
                     }
                     chiTietDtos.add(ctDto);
                 }
@@ -158,13 +161,11 @@ public class DonHangController {
         }
     }
 
-
-
     @PutMapping("/update-status/{id}")
     public ResponseEntity<?> updateStatus(
             @PathVariable Long id,
             @RequestParam Integer status,
-            @RequestParam(required = false) String reason){
+            @RequestParam(required = false) String reason) {
 
         donHangService.updateStatus(id, status, reason);
 
@@ -187,6 +188,7 @@ public class DonHangController {
 
         return ResponseEntity.ok("Đơn hàng đã hoàn tất");
     }
+
     /**
      * Admin xác nhận đã hoàn tiền thủ công cho đơn hàng
      */

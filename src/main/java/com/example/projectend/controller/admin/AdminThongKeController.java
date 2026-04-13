@@ -41,9 +41,9 @@ public class AdminThongKeController {
         if (totalRevenue == null)
             totalRevenue = BigDecimal.ZERO;
         
-        long newOrders = donHangRepository.count(); // Tổng số đơn từ trước đến nay
+        long newOrders = donHangRepository.countByTrangThaiDH(0); // 0: Chờ xác nhận (Pending)
         long soldProducts = donHangChiTietRepository.countTotalSold();
-        long totalCustomers = taiKhoanRepository.countUsersOnly(); // Chỉ đếm khách hàng thực (ROLE_USER)
+        long totalCustomers = taiKhoanRepository.count(); // Tổng tất cả tài khoản trên hệ thống
 
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
