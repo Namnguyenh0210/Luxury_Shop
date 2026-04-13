@@ -1306,62 +1306,62 @@
 	INSERT INTO DonHang
 	(MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayThanhToan, NgayCapNhat)
 	VALUES
-		(1, 3, GETDATE() - 7, 35030000.00, 30000.00, 1, 1, -- MaDiaChiGiao=1, MaHinhThucTT=1 (COD)
+		(1, 3, GETDATE() - 28, 35030000.00, 30000.00, 1, 1, -- MaDiaChiGiao=1, MaHinhThucTT=1 (COD)
 		 4, -- TrangThaiDH = 4 (Đã giao)
 		 1, -- TrangThaiThanhToan = 1 (Đã thanh toán)
-		 GETDATE() - 6, -- NgayThanhToan
-		 GETDATE() - 6);
+		 GETDATE() - 27, -- NgayThanhToan
+		 GETDATE() - 27);
 		 -- 1. Đơn hàng Chờ xác nhận (Trạng thái 0)
 	INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
-	VALUES (2, 4, GETDATE(), 15000000.00, 30000.00, 1, 1, 0, 0, GETDATE());
+	VALUES (2, 4, GETDATE()-27, 15000000.00, 30000.00, 1, 1, 0, 0, GETDATE()-27);
 
 	-- 2. Đơn hàng Đã xác nhận (Trạng thái 1)
 	INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
-	VALUES (3, 4, GETDATE() - 1, 2500000.00, 20000.00, 1, 1, 1, 0, GETDATE());
+	VALUES (3, 4, GETDATE() - 26, 2500000.00, 20000.00, 1, 1, 1, 0, GETDATE()-26);
 
 	-- 3. Đơn hàng Đang giao (Trạng thái 2)
 	INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
-	VALUES (4, 5, GETDATE() - 2, 5400000.00, 40000.00, 1, 1, 2, 0, GETDATE());
+	VALUES (4, 5, GETDATE() - 25, 5400000.00, 40000.00, 1, 1, 2, 0, GETDATE()-25);
 
 	-- 4. Đơn hàng Đã giao (Trạng thái 3)
 	INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
-	VALUES (5, 6, GETDATE() - 5, 1200000.00, 15000.00, 1, 1, 3, 1, GETDATE() - 4);
+	VALUES (5, 6, GETDATE() - 24, 1200000.00, 15000.00, 1, 1, 3, 1, GETDATE() - 24);
 
 	-- 5. Đơn hàng Đã hủy (Trạng thái 5)
 	INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
-	VALUES (6, 5, GETDATE() - 10, 800000.00, 20000.00, 1, 1, 5, 0, GETDATE() - 10);
+	VALUES (6, 5, GETDATE() - 23, 800000.00, 20000.00, 1, 1, 5, 0, GETDATE() - 23);
 
 	-- 6. Đơn hàng Lỗi thanh toán (Trạng thái 6)
 	INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
-	VALUES (7, 2, GETDATE(), 20000000.00, 0.00, 1, 2, 6, 0, GETDATE());
+	VALUES (7, 2, GETDATE() -22, 20000000.00, 0.00, 1, 2, 6, 0, GETDATE()-22);
 
 	-- 7. Đơn hàng Chờ thanh toán (Trạng thái 7)
 	INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
-	VALUES (8, 2, GETDATE(), 3200000.00, 30000.00, 1, 2, 7, 0, GETDATE());
+	VALUES (8, 2, GETDATE()-21, 3200000.00, 30000.00, 1, 2, 7, 0, GETDATE()-21);
 
 	-- Chèn thêm 20 đơn hàng mới để tăng tính sinh động (MaDH 9 -> 28)
 	INSERT INTO DonHang (MaDH, MaTK, NgayDat, TongTien, PhiShip, MaDiaChiGiao, MaHinhThucTT, TrangThaiDH, TrangThaiThanhToan, NgayCapNhat)
 	VALUES 
-	(9, 3, GETDATE()-1, 15000000.00, 30000, 1, 1, 4, 1, GETDATE()),
-	(10, 4, GETDATE()-2, 12000000.00, 0, 1, 2, 4, 1, GETDATE()),
-	(11, 5, GETDATE()-3, 8500000.00, 20000, 1, 1, 4, 1, GETDATE()),
-	(12, 6, GETDATE()-4, 21000000.00, 30000, 1, 1, 3, 1, GETDATE()),
-	(13, 3, GETDATE()-5, 5500000.00, 20000, 1, 2, 3, 1, GETDATE()),
-	(14, 4, GETDATE()-6, 3000000.00, 15000, 1, 1, 4, 1, GETDATE()),
-	(15, 5, GETDATE()-7, 42000000.00, 0, 1, 2, 4, 1, GETDATE()),
-	(16, 6, GETDATE()-8, 18000000.00, 30000, 1, 1, 3, 1, GETDATE()),
-	(17, 3, GETDATE()-9, 12500000.00, 20000, 1, 1, 4, 1, GETDATE()),
-	(18, 4, GETDATE()-10, 9000000.00, 0, 1, 2, 4, 1, GETDATE()),
+	(9, 3, GETDATE()-20, 15000000.00, 30000, 1, 1, 4, 1, GETDATE()),
+	(10, 4, GETDATE()-19, 12000000.00, 0, 1, 2, 4, 1, GETDATE()),
+	(11, 5, GETDATE()-18, 8500000.00, 20000, 1, 1, 4, 1, GETDATE()),
+	(12, 6, GETDATE()-17, 21000000.00, 30000, 1, 1, 3, 1, GETDATE()),
+	(13, 3, GETDATE()-16, 5500000.00, 20000, 1, 2, 3, 1, GETDATE()),
+	(14, 4, GETDATE()-15, 3000000.00, 15000, 1, 1, 4, 1, GETDATE()),
+	(15, 5, GETDATE()-14, 42000000.00, 0, 1, 2, 4, 1, GETDATE()),
+	(16, 6, GETDATE()-13, 18000000.00, 30000, 1, 1, 3, 1, GETDATE()),
+	(17, 3, GETDATE()-12, 12500000.00, 20000, 1, 1, 4, 1, GETDATE()),
+	(18, 4, GETDATE()-11, 9000000.00, 0, 1, 2, 4, 1, GETDATE()),
 	(19, 5, GETDATE()-11, 3500000.00, 15000, 1, 1, 1, 0, GETDATE()),
-	(20, 6, GETDATE()-12, 16000000.00, 30000, 1, 2, 2, 0, GETDATE()),
-	(21, 3, GETDATE()-13, 24000000.00, 0, 1, 1, 5, 0, GETDATE()),
-	(22, 4, GETDATE()-14, 7800000.00, 20000, 1, 1, 4, 1, GETDATE()),
-	(23, 5, GETDATE()-15, 11000000.00, 30000, 1, 1, 4, 1, GETDATE()),
-	(24, 6, GETDATE()-16, 29000000.00, 0, 1, 2, 4, 1, GETDATE()),
-	(25, 3, GETDATE()-17, 14500000.00, 20000, 1, 1, 4, 1, GETDATE()),
-	(26, 4, GETDATE()-18, 52000000.00, 0, 1, 2, 4, 1, GETDATE()),
-	(27, 5, GETDATE()-19, 13000000.00, 30000, 1, 1, 4, 1, GETDATE()),
-	(28, 6, GETDATE()-20, 8900000.00, 20000, 1, 1, 4, 1, GETDATE());
+	(20, 6, GETDATE()-9, 16000000.00, 30000, 1, 2, 2, 0, GETDATE()),
+	(21, 3, GETDATE()-8, 24000000.00, 0, 1, 1, 5, 0, GETDATE()),
+	(22, 4, GETDATE()-6, 7800000.00, 20000, 1, 1, 4, 1, GETDATE()),
+	(23, 5, GETDATE()-5, 11000000.00, 30000, 1, 1, 4, 1, GETDATE()),
+	(24, 6, GETDATE()-4, 29000000.00, 0, 1, 2, 4, 1, GETDATE()),
+	(25, 3, GETDATE()-3, 14500000.00, 20000, 1, 1, 4, 1, GETDATE()),
+	(26, 4, GETDATE()-2, 52000000.00, 0, 1, 2, 4, 1, GETDATE()),
+	(27, 5, GETDATE()-1, 13000000.00, 30000, 1, 1, 4, 1, GETDATE()),
+	(28, 6, GETDATE(), 8900000.00, 20000, 1, 1, 4, 1, GETDATE());
 
 	SET IDENTITY_INSERT dbo.DonHang OFF;
 	GO
@@ -1436,7 +1436,14 @@
 
 	SET IDENTITY_INSERT dbo.DonHangCT OFF;
 	GO
-
+UPDATE dh
+SET TongTien = ct.TongTienThuc + dh.PhiShip
+FROM DonHang dh
+JOIN (
+    SELECT MaDH, SUM(SoLuong * DonGia) AS TongTienThuc
+    FROM DonHangCT
+    GROUP BY MaDH
+) ct ON dh.MaDH = ct.MaDH;
 	-- 4.3.7. Lịch sử đơn hàng cũ
 	INSERT INTO LichSuDonHang
 		(MaDH, TrangThaiCu, TrangThaiMoi, GhiChu, NguoiCapNhat)
