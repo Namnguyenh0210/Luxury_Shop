@@ -30,10 +30,10 @@ async function resetPassword() {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
     <div class="bg-white p-8 rounded-2xl shadow-lg w-[400px]">
-      <h2 class="text-2xl font-bold mb-4 text-center">Reset Password</h2>
-      <input v-model="newPassword" type="password" placeholder="New Password" class="w-full mb-4 p-2 border rounded" />
+      <h2 class="text-2xl font-bold mb-4 text-center">Đặt lại mật khẩu</h2>
+      <input v-model="newPassword" type="password" placeholder="Mật khẩu mới" class="w-full mb-4 p-2 border rounded" />
       <button @click="resetPassword" class="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
-        Reset Password
+        Đổi mật khẩu
       </button>
     </div>
   </div>

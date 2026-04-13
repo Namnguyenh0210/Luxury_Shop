@@ -49,23 +49,23 @@
 
       <!-- BỘ LỌC -->
       <div class="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-[#C8A97E] shadow-sm">
-        <div class="relative w-72">
-          <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+        <div class="relative group">
+          <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
             <span class="material-symbols-outlined text-[20px]">search</span>
           </span>
           <input
             v-model="filterKeyword"
             @keyup.enter="fetchReviews"
-            placeholder="Tìm theo sản phẩm, user..."
-            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
+            placeholder="Tìm sản phẩm, user..."
+            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all shadow-sm font-bold text-gray-700 placeholder:text-gray-400"
           />
         </div>
 
         <!-- Custom Status Dropdown -->
         <div class="relative min-w-[200px]">
           <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
-            class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-2.5 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
-            <span class="truncate font-medium text-gray-700">{{ getStatusLabel(filterStatus) || 'Tất cả trạng thái' }}</span>
+            class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-3 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
+            <span class="truncate font-black text-gray-700 uppercase tracking-widest text-[11px]">{{ getStatusLabel(filterStatus) || 'Tất cả trạng thái' }}</span>
             <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
           </button>
           <div v-if="openDropdown === 'status'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -74,10 +74,16 @@
               :class="filterStatus === '' ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
               Tất cả trạng thái
             </div>
-            <div @click="filterStatus = 0; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 0 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">⏳ Chờ duyệt</div>
-            <div @click="filterStatus = 1; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 1 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Đã hiển thị</div>
-            <div @click="filterStatus = 2; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 2 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">🚫 Đã ẩn</div>
+            <div @click="filterStatus = 1; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 1 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Đang hiển thị</div>
+            <div @click="filterStatus = 2; fetchReviews(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === 2 ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">🚫 Đã bị ẩn</div>
           </div>
+        </div>
+
+        <!-- Date Filters -->
+        <div class="flex items-center gap-2 bg-white rounded-2xl p-1.5 border border-[#C8A97E]/30 shadow-sm shadow-[#C8A97E]/5">
+          <input type="date" v-model="filterStartDate" @change="fetchReviews" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
+          <span class="text-[#C8A97E] px-1 font-bold">→</span>
+          <input type="date" v-model="filterEndDate" @change="fetchReviews" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
         </div>
 
         <!-- Nút Làm mới -->
@@ -91,13 +97,13 @@
       <!-- BẢNG DANH SÁCH -->
       <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
         <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
             <tr>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-1/4">Sản Phẩm & User</th>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-2/5">Nội Dung Đánh Giá</th>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs">Phản Hồi (Admin)</th>
-              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs">Trạng Thái</th>
-              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs">Hành Động</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs w-1/4">Sản Phẩm & User</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs w-2/5">Nội Dung Đánh Giá</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs">Phản Hồi (Admin)</th>
+              <th class="px-5 py-3 text-center font-black text-black uppercase tracking-wider text-xs">Trạng Thái</th>
+              <th class="px-5 py-3 text-center font-black text-black uppercase tracking-wider text-xs">Hành Động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -133,39 +139,34 @@
               </td>
 
               <td class="px-5 py-4 text-center">
-                <span v-if="rv.trangThai === 0" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
-                  Chờ duyệt
+                <span v-if="rv.trangThai !== 2" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                  Hiển thị
                 </span>
-                <span v-else-if="rv.trangThai === 1" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                  Đã hiện
-                </span>
-                <span v-else-if="rv.trangThai === 2" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+                <span v-else class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
                   Đã ẩn
                 </span>
               </td>
 
               <td class="px-5 py-4 text-center">
-                <div class="flex flex-col items-center gap-2">
-                  <div class="flex gap-2">
-                    <button v-if="rv.trangThai !== 1" @click="updateStatus(rv.maDG, 1)" title="Duyệt (Hiển thị)"
-                      class="flex items-center justify-center size-7 rounded bg-green-50 text-green-600 hover:bg-green-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">visibility</span>
-                    </button>
-                    <button v-if="rv.trangThai !== 2" @click="updateStatus(rv.maDG, 2)" title="Ẩn"
-                      class="flex items-center justify-center size-7 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">visibility_off</span>
-                    </button>
-                  </div>
-                  <div class="flex gap-2">
-                    <button @click="moModalPhanHoi(rv)" title="Trả lời"
-                      class="flex items-center justify-center size-7 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">reply</span>
-                    </button>
-                    <button @click="xoaDanhGia(rv.maDG)" title="Xoá vĩnh viễn"
-                      class="flex items-center justify-center size-7 rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">delete</span>
-                    </button>
-                  </div>
+                <div class="flex items-center justify-center gap-4">
+                  <button v-if="rv.trangThai === 2" @click="updateStatus(rv.maDG, 1)" title="Hiện đánh giá"
+                    class="text-gray-400 hover:text-[#C8A97E] transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">visibility_off</span>
+                  </button>
+                  <button v-else @click="updateStatus(rv.maDG, 2)" title="Ẩn đánh giá"
+                    class="text-[#C8A97E] hover:text-black transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">visibility</span>
+                  </button>
+                  
+                  <button @click="moModalPhanHoi(rv)" title="Trả lời"
+                    class="text-blue-400 hover:text-blue-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">edit_note</span>
+                  </button>
+                  
+                  <button @click="xoaDanhGia(rv.maDG)" title="Xoá vĩnh viễn"
+                    class="text-red-400 hover:text-red-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">delete</span>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -180,11 +181,17 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="px-5 py-4 border-t border-gray-200 flex justify-end gap-2 text-sm">
-          <button v-for="p in totalPages" :key="p" @click="currentPage = p-1; fetchReviews()"
-            class="size-8 flex items-center justify-center rounded-lg border font-medium transition-colors"
-            :class="currentPage === p-1 ? 'bg-yellow-600 text-white border-yellow-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'">
-            {{ p }}
+        <div v-if="totalPages > 1" class="px-5 py-4 border-t border-gray-200 flex justify-end items-center gap-2">
+          <button v-if="currentPage > 0" @click="currentPage = currentPage - 1; fetchReviews()"
+            class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium transition-colors">
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            Trước
+          </button>
+          <span class="px-4 py-2 bg-yellow-600 text-white rounded-xl text-sm font-bold">{{ currentPage + 1 }}</span>
+          <button v-if="currentPage < totalPages - 1" @click="currentPage = currentPage + 1; fetchReviews()"
+            class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium transition-colors">
+            Sau
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
           </button>
         </div>
       </div>
@@ -230,6 +237,8 @@ export default {
       stats: { topHigh: [], topLow: [] },
       filterKeyword: '',
       filterStatus: '',
+      filterStartDate: '',
+      filterEndDate: '',
       currentPage: 0,
       totalPages: 0,
       loading: false,
@@ -254,7 +263,13 @@ export default {
       this.loading = true
       try {
         const res = await axios.get('/admin/danh-gia', {
-          params: { keyword: this.filterKeyword, trangThai: this.filterStatus, page: this.currentPage },
+          params: { 
+            keyword: this.filterKeyword, 
+            trangThai: this.filterStatus, 
+            startDate: this.filterStartDate, 
+            endDate: this.filterEndDate, 
+            page: this.currentPage 
+          },
           withCredentials: true
         })
         if (res.data.thanhCong) {
@@ -269,11 +284,19 @@ export default {
     },
 
 
+    resetFilters() {
+      this.filterKeyword = ''
+      this.filterStatus = ''
+      this.filterStartDate = ''
+      this.filterEndDate = ''
+      this.currentPage = 0
+      this.fetchReviews()
+    },
+
     getStatusLabel(val) {
       if (val === '') return ''
-      if (val === 0) return '⏳ Chờ duyệt'
-      if (val === 1) return '✅ Đã hiển thị'
-      if (val === 2) return '🚫 Đã ẩn'
+      if (val === 1) return '✅ Đang hiển thị'
+      if (val === 2) return '🚫 Đã bị ẩn'
       return ''
     },
 

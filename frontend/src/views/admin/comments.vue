@@ -33,34 +33,40 @@
 
       <!-- BỘ LỌC -->
       <div class="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl border border-[#C8A97E] shadow-sm">
-        <div class="relative w-72">
-          <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+        <div class="relative group">
+          <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
             <span class="material-symbols-outlined text-[20px]">search</span>
           </span>
           <input
             v-model="filterKeyword"
             @keyup.enter="fetchComments"
-            placeholder="Tìm theo bài viết, khách hàng..."
-            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
+            placeholder="Tìm bài viết, khách hàng..."
+            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all shadow-sm font-bold text-gray-700 placeholder:text-gray-400"
           />
         </div>
 
         <!-- Custom Status Dropdown -->
         <div class="relative min-w-[200px]">
-          <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
-            class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-2.5 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
-            <span class="truncate font-medium text-gray-700">{{ getStatusLabel(filterStatus) || 'Tất cả trạng thái' }}</span>
-            <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
-          </button>
+            <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
+              class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-3 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
+              <span class="truncate font-black text-gray-700 uppercase tracking-widest text-[11px]">{{ getStatusLabel(filterStatus) || 'Tất cả trạng thái' }}</span>
+              <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+            </button>
           <div v-if="openDropdown === 'status'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div @click="filterStatus = ''; fetchComments(); openDropdown = null" 
               class="px-5 py-3 text-sm cursor-pointer transition-colors border-b border-gray-50 bg-yellow-50/30" 
               :class="filterStatus === '' ? 'font-bold text-[#C8A97E]' : 'text-gray-500 hover:bg-[#C8A97E]/10'">
               Tất cả trạng thái
             </div>
-            <div @click="filterStatus = false; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === false ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">⏳ Chờ duyệt</div>
-            <div @click="filterStatus = true; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === true ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Đã hiển thị</div>
+            <div @click="filterStatus = true; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === true ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">✅ Giao diện hiển thị</div>
+            <div @click="filterStatus = false; fetchComments(); openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="filterStatus === false ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">🚫 Đã ẩn vi phạm</div>
           </div>
+        </div>
+        <!-- Date Filters -->
+        <div class="flex items-center gap-2 bg-white rounded-2xl p-1.5 border border-[#C8A97E]/30 shadow-sm shadow-[#C8A97E]/5">
+          <input type="date" v-model="filterStartDate" @change="fetchComments" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
+          <span class="text-[#C8A97E] px-1 font-bold">→</span>
+          <input type="date" v-model="filterEndDate" @change="fetchComments" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
         </div>
 
         <!-- Nút Làm mới -->
@@ -72,15 +78,15 @@
       </div>
 
       <!-- BẢNG DANH SÁCH -->
-      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
+      <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden text-left">
         <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
             <tr>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-1/4">Bài Viết & User</th>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs w-2/5">Nội Dung Bình Luận</th>
-              <th class="px-5 py-3 text-left font-semibold text-gray-500 uppercase tracking-wider text-xs">Phản Hồi (Admin)</th>
-              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs">Trạng Thái</th>
-              <th class="px-5 py-3 text-center font-semibold text-gray-500 uppercase tracking-wider text-xs">Hành Động</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs w-[20%]">Bài Viết & User</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs w-[25%]">Nội Dung Bình Luận</th>
+              <th class="px-5 py-3 text-left font-black text-black uppercase tracking-wider text-xs w-[25%]">Phản Hồi (Admin)</th>
+              <th class="px-5 py-3 text-center font-black text-black uppercase tracking-wider text-xs w-[15%]">Trạng Thái</th>
+              <th class="px-5 py-3 text-center font-black text-black uppercase tracking-wider text-xs w-[15%]">Hành Động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -102,47 +108,48 @@
 
               <td class="px-5 py-4">
                 <div v-if="bl.phanHoiAdmin" class="text-sm text-gray-600 bg-purple-50/50 p-2.5 rounded-lg border border-purple-100">
-                  <div class="font-semibold text-purple-700 text-xs mb-1 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">admin_panel_settings</span> Admin ({{ bl.ngayPhanHoiAdmin }})
+                  <div class="font-semibold text-purple-700 text-[10px] mb-1 flex items-center gap-1 uppercase tracking-wider text-left">
+                    <span class="material-symbols-outlined text-[12px]">admin_panel_settings</span> Admin ({{ bl.ngayPhanHoiAdmin }})
                   </div>
-                  {{ bl.phanHoiAdmin }}
+                  <div class="text-left">{{ bl.phanHoiAdmin }}</div>
                 </div>
-                <button v-else @click="moModalPhanHoi(bl)" class="text-xs font-medium text-purple-600 hover:text-purple-800 transition-colors">
-                  + Thêm phản hồi
+                <button v-else @click="moModalPhanHoi(bl)" class="text-xs font-medium text-purple-400 hover:text-purple-600 transition-colors flex items-center gap-1 italic">
+                  <span class="material-symbols-outlined text-[14px]">add_comment</span> Chờ phản hồi...
                 </button>
               </td>
 
               <td class="px-5 py-4 text-center">
-                <span v-if="bl.trangThai === false" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
-                  Chờ duyệt
+                <span v-if="bl.trangThai === false" class="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full bg-gray-100 text-gray-500 uppercase tracking-wider">
+                  Đã ẩn
                 </span>
-                <span v-else-if="bl.trangThai === true" class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-                  Đã hiện
+                <span v-else-if="bl.trangThai === true" class="inline-flex items-center px-2.5 py-1 text-[10px] font-bold rounded-full bg-green-100 text-green-600 uppercase tracking-wider">
+                  Hiển thị
                 </span>
               </td>
 
-              <td class="px-5 py-4 text-center">
-                <div class="flex flex-col items-center gap-2">
-                  <div class="flex gap-2">
-                    <button v-if="bl.trangThai === false" @click="updateStatus(bl.maBL, true)" title="Duyệt (Hiển thị)"
-                      class="flex items-center justify-center size-7 rounded bg-green-50 text-green-600 hover:bg-green-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">visibility</span>
-                    </button>
-                    <button v-if="bl.trangThai === true" @click="updateStatus(bl.maBL, false)" title="Bỏ duyệt (Ẩn)"
-                      class="flex items-center justify-center size-7 rounded bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">visibility_off</span>
-                    </button>
-                  </div>
-                  <div class="flex gap-2">
-                    <button @click="moModalPhanHoi(bl)" title="Trả lời"
-                      class="flex items-center justify-center size-7 rounded bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">reply</span>
-                    </button>
-                    <button @click="xoaBinhLuan(bl.maBL)" title="Xoá vĩnh viễn"
-                      class="flex items-center justify-center size-7 rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors">
-                      <span class="material-symbols-outlined text-[16px]">delete</span>
-                    </button>
-                  </div>
+              <td class="px-5 py-4">
+                <div class="flex items-center justify-center gap-4">
+                  <!-- Eye Icon (Show/Hide) -->
+                  <button v-if="bl.trangThai === true" @click="updateStatus(bl.maBL, false)" title="Ẩn vi phạm"
+                    class="text-gray-400 hover:text-slate-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">visibility</span>
+                  </button>
+                  <button v-else @click="updateStatus(bl.maBL, true)" title="Hiển thị lại"
+                    class="text-green-400 hover:text-green-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">visibility_off</span>
+                  </button>
+
+                  <!-- Edit/Reply Icon -->
+                  <button @click="moModalPhanHoi(bl)" title="Phản hồi"
+                    class="text-blue-400 hover:text-blue-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">edit_note</span>
+                  </button>
+
+                  <!-- Delete Icon -->
+                  <button @click="xoaBinhLuan(bl.maBL)" title="Xoá vĩnh viễn"
+                    class="text-red-400 hover:text-red-600 transition-colors">
+                    <span class="material-symbols-outlined text-[22px]">delete</span>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -157,11 +164,17 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="px-5 py-4 border-t border-gray-200 flex justify-end gap-2 text-sm">
-          <button v-for="p in totalPages" :key="p" @click="currentPage = p-1; fetchComments()"
-            class="size-8 flex items-center justify-center rounded-lg border font-medium transition-colors"
-            :class="currentPage === p-1 ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'">
-            {{ p }}
+        <div v-if="totalPages > 1" class="px-5 py-4 border-t border-gray-200 flex justify-end items-center gap-2">
+          <button v-if="currentPage > 0" @click="currentPage = currentPage - 1; fetchComments()"
+            class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium transition-colors">
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            Trước
+          </button>
+          <span class="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-bold">{{ currentPage + 1 }}</span>
+          <button v-if="currentPage < totalPages - 1" @click="currentPage = currentPage + 1; fetchComments()"
+            class="flex items-center gap-1 px-4 py-2 border border-gray-200 rounded-xl hover:bg-gray-50 text-sm font-medium transition-colors">
+            Sau
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
           </button>
         </div>
       </div>
@@ -207,6 +220,8 @@ export default {
       stats: { topBlogs: [] },
       filterKeyword: '',
       filterStatus: '',
+      filterStartDate: '',
+      filterEndDate: '',
       currentPage: 0,
       totalPages: 0,
       loading: false,
@@ -233,7 +248,13 @@ export default {
       this.loading = true
       try {
         const res = await axios.get('/admin/binh-luan', {
-          params: { keyword: this.filterKeyword, trangThai: this.filterStatus, page: this.currentPage },
+          params: { 
+            keyword: this.filterKeyword, 
+            trangThai: this.filterStatus, 
+            startDate: this.filterStartDate, 
+            endDate: this.filterEndDate, 
+            page: this.currentPage 
+          },
           withCredentials: true
         })
         if (res.data.thanhCong) {
@@ -249,10 +270,19 @@ export default {
 
 
 
+    resetFilters() {
+      this.filterKeyword = ''
+      this.filterStatus = ''
+      this.filterStartDate = ''
+      this.filterEndDate = ''
+      this.currentPage = 0
+      this.fetchComments()
+    },
+
     getStatusLabel(val) {
       if (val === '') return ''
-      if (val === false) return '⏳ Chờ duyệt'
-      if (val === true) return '✅ Đã hiển thị'
+      if (val === false) return '🚫 Đã bị ẩn'
+      if (val === true) return '✅ Đang hiển thị'
       return ''
     },
 
@@ -325,7 +355,7 @@ export default {
       })
     },
     async updateStatus(id, newStatus) {
-      const txt = newStatus ? 'DUYỆT (Hiển thị)' : 'BỎ DUYỆT (Ẩn)';
+      const txt = newStatus ? 'BỎ ẨN (Hiển thị lại)' : 'ẨN';
       const ok = await window.$confirm(`Xác nhận ${txt} bình luận này?`)
       if(!ok) return
       try {

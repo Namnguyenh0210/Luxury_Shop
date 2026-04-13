@@ -158,33 +158,44 @@ public class PayOSController {
                 logger.warn("Không tìm thấy đơn hàng cho PayOS orderCode #{}", orderCode);
                 return "redirect:http://localhost:5173/profile?error=order-not-found";
             }
-            Long orderId = dhLookup.get().getMaDH();
+            
+            DonHang dh = dhLookup.get();
+            Long orderId = dh.getMaDH();
 
-            PayOSResponse payOSResponse = payOSService.getPaymentStatus(orderCode);
-
-            if (payOSResponse != null && payOSResponse.isSuccess()) {
-                String paymentStatus = payOSResponse.getData().getStatus();
-
-                if ("PAID".equalsIgnoreCase(paymentStatus)) {
-                    logger.info("✅ Thanh toán thành công cho đơn hàng #{}", orderId);
-                    boolean updated = updateOrderPaymentStatus(orderId, true);
-                    if (updated) {
-                        dhLookup.ifPresent(dh -> gioHangService.clearGioHang(dh.getTaiKhoan()));
-                    }
-                    return "redirect:http://localhost:5173/checkout-success?orderId=" + orderId;
-
-                } else if ("CANCELLED".equalsIgnoreCase(paymentStatus)) {
-                    logger.warn("⚠️ Thanh toán bị hủy cho đơn hàng #{}", orderId);
-                    updateOrderAsFailed(orderId, "Thanh toán bị hủy từ phía khách hàng (PayOS)");
-                    return "redirect:http://localhost:5173/profile?warning=payment-cancelled";
-
-                } else {
-                    logger.info("⏳ Đơn hàng #{} đang chờ thanh toán", orderId);
-                    return "redirect:http://localhost:5173/payment?orderId=" + orderId + "&status=PENDING";
-                }
-            } else {
-                return "redirect:http://localhost:5173/profile?error=payment-check-failed";
+            // Nếu đã thanh toán rồi thì đi thẳng tới success
+            if (dh.getTrangThaiThanhToan() == 1) {
+                return "redirect:http://localhost:5173/checkout-success?orderId=" + orderId;
             }
+
+            // Kiểm tra trạng thái từ API PayOS (Retry tối đa 3 lần nếu là PENDING để tránh race condition)
+            String paymentStatus = status;
+            int retries = 0;
+            
+            while (retries < 3 && (paymentStatus == null || "PENDING".equalsIgnoreCase(paymentStatus))) {
+                PayOSResponse payOSResponse = payOSService.getPaymentStatus(orderCode);
+                if (payOSResponse != null && payOSResponse.isSuccess()) {
+                    paymentStatus = payOSResponse.getData().getStatus();
+                    if ("PAID".equalsIgnoreCase(paymentStatus)) break;
+                }
+                retries++;
+                if (retries < 3) Thread.sleep(1000); // Đợi 1s trước khi thử lại
+            }
+
+            if ("PAID".equalsIgnoreCase(paymentStatus)) {
+                logger.info("✅ Thanh toán thành công cho đơn hàng #{}", orderId);
+                boolean updated = updateOrderPaymentStatus(orderId, true);
+                if (updated) {
+                    gioHangService.clearGioHang(dh.getTaiKhoan());
+                    return "redirect:http://localhost:5173/checkout-success?orderId=" + orderId;
+                }
+            } else if ("CANCELLED".equalsIgnoreCase(paymentStatus)) {
+                logger.warn("⚠️ Thanh toán bị hủy cho đơn hàng #{}", orderId);
+                updateOrderAsFailed(orderId, "Thanh toán bị hủy từ phía khách hàng (PayOS)");
+                return "redirect:http://localhost:5173/profile?warning=payment-cancelled";
+            }
+
+            // Mặc định quay lại trang payment nếu vẫn PENDING hoặc lỗi
+            return "redirect:http://localhost:5173/payment?orderId=" + orderId + "&status=" + paymentStatus;
 
         } catch (Exception e) {
             logger.error("❌ Lỗi khi xử lý payment return", e);
@@ -278,39 +289,72 @@ public class PayOSController {
      * ✅ KIỂM TRA TRẠNG THÁI THANH TOÁN (API)
      * Endpoint này cho phép kiểm tra trạng thái thanh toán theo thời gian thực
      */
-    @GetMapping("/check/{orderId}")
+    @GetMapping("/check/{identifier}")
     @ResponseBody
-    public ResponseEntity<?> checkPaymentStatus(@PathVariable Long orderId) {
+    public ResponseEntity<?> checkPaymentStatus(@PathVariable Long identifier) {
 
         try {
-            logger.info("🔍 Kiểm tra trạng thái thanh toán cho đơn hàng #{}", orderId);
+            logger.info("🔍 Kiểm tra trạng thái thanh toán cho: {}", identifier);
 
-            // Gọi API PayOS để lấy trạng thái
-            PayOSResponse payOSResponse = payOSService.getPaymentStatus(orderId);
+            // 1. Thử tìm đơn hàng theo ID nội bộ (identifier < 1 tỷ thường là ID)
+            Optional<DonHang> dhOpt = donHangService.findById(identifier);
+            
+            // 2. Nếu không tìm thấy theo ID, thử tìm theo mã giao dịch PayOS
+            if (dhOpt.isEmpty()) {
+                dhOpt = donHangService.findByMaGiaoDich("PAYOS_CODE_" + identifier);
+            }
+
+            if (dhOpt.isEmpty()) {
+                logger.warn("❌ Không tìm thấy đơn hàng cho định danh: {}", identifier);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Không tìm thấy đơn hàng trên hệ thống"));
+            }
+            
+            DonHang dh = dhOpt.get();
+            Long orderId = dh.getMaDH();
+            
+            // Nếu đã thanh toán rồi
+            if (dh.getTrangThaiThanhToan() == 1) {
+                return ResponseEntity.ok(Map.of("success", true, "status", "PAID", "message", "Thanh toán thành công!"));
+            }
+
+            // Lấy mã giao dịch thực tế để hỏi PayOS
+            String maGD = dh.getMaGiaoDich();
+            if (maGD == null || !maGD.startsWith("PAYOS_CODE_")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Đơn hàng này không có mã giao dịch PayOS"));
+            }
+            
+            Long payosOrderCode = Long.parseLong(maGD.substring("PAYOS_CODE_".length()));
+
+            // 3. Gọi API PayOS để lấy trạng thái
+            PayOSResponse payOSResponse = payOSService.getPaymentStatus(payosOrderCode);
 
             if (payOSResponse != null && payOSResponse.isSuccess()) {
                 String status = payOSResponse.getData().getStatus();
 
                 Map<String, Object> result = new HashMap<>();
                 result.put("success", true);
-                result.put("orderCode", orderId);
+                result.put("orderCode", payosOrderCode);
                 result.put("status", status);
                 result.put("amount", payOSResponse.getData().getAmount());
 
-                // Nếu đã thanh toán, cập nhật database
+                // 4. Nếu đã thanh toán, cập nhật database
                 if ("PAID".equalsIgnoreCase(status)) {
                     updateOrderPaymentStatus(orderId, true);
                     result.put("message", "Thanh toán thành công!");
+                    gioHangService.clearGioHang(dh.getTaiKhoan());
                 } else if ("PENDING".equalsIgnoreCase(status)) {
                     result.put("message", "Đang chờ thanh toán...");
                 } else if ("CANCELLED".equalsIgnoreCase(status)) {
+                    updateOrderAsFailed(orderId, "Thanh toán bị hủy");
                     result.put("message", "Thanh toán đã bị hủy");
                 }
 
                 return ResponseEntity.ok(result);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Không tìm thấy thông tin thanh toán"));
+                        .body(Map.of("error", "Không tìm thấy thông tin trên hệ thống PayOS"));
             }
 
         } catch (Exception e) {
@@ -359,12 +403,12 @@ public class PayOSController {
             if (dhOpt.isEmpty()) return;
             DonHang dh = dhOpt.get();
             
-            dh.setTrangThaiDH(6);        // Lỗi thanh toán (6)
+            dh.setTrangThaiDH(8);        // Lỗi thanh toán (8)
             dh.setTrangThaiThanhToan(2); // FAILED (2)
             dh.setNgayCapNhat(LocalDateTime.now());
             donHangService.save(dh);
 
-            donHangService.capNhatTrangThai(orderId, 6, "PayOS System", reason);
+            donHangService.capNhatTrangThai(orderId, 8, "PayOS System", reason);
         } catch (Exception e) {
             logger.error("❌ Lỗi updateOrderAsFailed đơn #{}", orderId, e);
         }

@@ -25,14 +25,26 @@ public class AdminDanhGiaController {
     public ResponseEntity<Map<String, Object>> getTatCaDanhGia(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer trangThai,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
         Map<String, Object> response = new HashMap<>();
         try {
+            LocalDateTime start = null;
+            LocalDateTime end = null;
+            if (startDate != null && !startDate.isEmpty()) {
+                start = java.time.LocalDate.parse(startDate).atStartOfDay();
+            }
+            if (endDate != null && !endDate.isEmpty()) {
+                end = java.time.LocalDate.parse(endDate).atTime(23, 59, 59, 999000000);
+            }
+
             Page<DanhGia> danhGiaPage = danhGiaRepository.searchDanhGiaAdmin(
                     (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null,
                     trangThai,
+                    start, end,
                     PageRequest.of(page, size)
             );
 

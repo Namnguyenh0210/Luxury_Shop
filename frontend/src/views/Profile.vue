@@ -410,27 +410,57 @@
 
                   <div class="p-8 space-y-8">
                     <!-- Progress Stepper -->
-                    <div v-if="latestOrder.trangThaiDH !== 5" class="relative py-4">
-                      <div class="flex items-center justify-between w-full relative z-10 px-4">
-                        <div v-for="(step, index) in ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Đã giao', 'Hoàn thành']" :key="index" class="flex flex-col items-center">
-                          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-700', 
-                                        latestOrder.trangThaiDH >= index ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' : 'bg-white border-gray-100 text-gray-300']">
-                            <span v-if="latestOrder.trangThaiDH > index" class="material-symbols-outlined text-xl font-bold">check</span>
-                            <span v-else class="text-xs font-bold">{{ index + 1 }}</span>
+                      <div v-if="latestOrder.trangThaiDH !== 5 && latestOrder.trangThaiDH !== 7 && latestOrder.trangThaiDH !== 8" class="relative py-4">
+                        <div class="flex items-center justify-between w-full relative z-10 px-4">
+                          <div v-for="(step, index) in ['Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Đã giao', 'Hoàn tất', 'Đã đánh giá']" :key="index" class="flex flex-col items-center">
+                            <div :class="['w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all duration-700', 
+                                          latestOrder.trangThaiDH >= index ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' : 
+                                          (latestOrder.trangThaiDH === 6 && index === 5) ? 'bg-yellow-500 border-yellow-200 text-white shadow-lg scale-110' :
+                                          'bg-white border-gray-100 text-gray-300']">
+                              <span v-if="latestOrder.trangThaiDH > index || (latestOrder.trangThaiDH === 6 && index < 5)" class="material-symbols-outlined text-xl font-bold">check</span>
+                              <span v-else class="text-xs font-bold">{{ index + 1 }}</span>
+                            </div>
+                            <span :class="['mt-3 text-[9px] font-bold uppercase tracking-wider text-center w-20 transition-colors duration-500', 
+                                          (latestOrder.trangThaiDH >= index || (latestOrder.trangThaiDH === 6 && index === 5)) ? 'text-yellow-600' : 'text-gray-400']">
+                              {{ step }}
+                            </span>
                           </div>
-                          <span :class="['mt-3 text-[9px] font-bold uppercase tracking-wider text-center w-20 transition-colors duration-500', 
-                                        latestOrder.trangThaiDH >= index ? 'text-yellow-600' : 'text-gray-400']">
-                            {{ step }}
-                          </span>
+                        </div>
+                        <div class="absolute top-9 left-0 w-full px-20 -z-0">
+                          <div class="w-full h-1 bg-gray-50 rounded-full overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 transition-all duration-1000 ease-out rounded-full" 
+                                 :style="{ width: (latestOrder.trangThaiDH === 6 ? 100 : Math.min(latestOrder.trangThaiDH * 20, 100)) + '%' }"></div>
+                          </div>
                         </div>
                       </div>
-                      <div class="absolute top-9 left-0 w-full px-20 -z-0">
-                        <div class="w-full h-1 bg-gray-50 rounded-full overflow-hidden">
-                          <div class="h-full bg-gradient-to-r from-yellow-400 to-yellow-600 transition-all duration-1000 ease-out rounded-full" 
-                               :style="{ width: (latestOrder.trangThaiDH * 25) + '%' }"></div>
+
+                      <!-- Special Banner for CHO_THANH_TOAN (7) or LOI_THANH_TOAN (8) -->
+                      <div v-else-if="latestOrder.trangThaiDH === 7 || latestOrder.trangThaiDH === 8" class="relative py-2">
+                        <div :class="['rounded-3xl p-6 border flex items-center justify-between gap-6 transition-all shadow-sm',
+                                      latestOrder.trangThaiDH === 7 ? 'bg-cyan-50 border-cyan-100' : 'bg-orange-50 border-orange-100']">
+                          <div class="flex items-center gap-5">
+                            <div :class="['w-14 h-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg animate-pulse',
+                                          latestOrder.trangThaiDH === 7 ? 'bg-cyan-500' : 'bg-orange-500']">
+                              <span class="material-symbols-outlined text-3xl font-bold">{{ latestOrder.trangThaiDH === 7 ? 'pending' : 'error' }}</span>
+                            </div>
+                            <div>
+                              <p :class="['font-black uppercase tracking-widest text-sm mb-1',
+                                          latestOrder.trangThaiDH === 7 ? 'text-cyan-700' : 'text-orange-700']">
+                                {{ latestOrder.trangThaiDH === 7 ? 'Đang chờ thanh toán qua PayOS' : 'Thanh toán không thành công' }}
+                              </p>
+                              <p :class="['text-xs font-medium italic opacity-70',
+                                          latestOrder.trangThaiDH === 7 ? 'text-cyan-600' : 'text-orange-600']">
+                                {{ latestOrder.trangThaiDH === 7 ? 'Đơn hàng sẽ tự động hủy nếu không hoàn tất thanh toán trong 5 phút.' : (latestOrder.lyDoHuy || 'Đã có lỗi xảy ra trong quá trình xử lý giao dịch của bạn.') }}
+                              </p>
+                            </div>
+                          </div>
+                          <a :href="'http://localhost:8080/payment/payos/create?orderId=' + latestOrder.maDH" 
+                             class="px-8 py-3.5 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-yellow-600 transition-all shadow-xl active:scale-95 flex items-center gap-2 shrink-0">
+                            <span class="material-symbols-outlined text-sm font-bold">qr_code_2</span>
+                            Thanh toán ngay
+                          </a>
                         </div>
                       </div>
-                    </div>
 
                     <!-- Detailed Order Content (New List View) -->
                     <div class="bg-gray-50/50 rounded-3xl p-6 border border-gray-100 space-y-4 mx-1">
@@ -471,22 +501,36 @@
                           <span class="font-bold font-black italic">Chiết khấu (Voucher):</span>
                           <span class="font-black">-{{ latestOrder.giamGia.toLocaleString() }}₫</span>
                         </div>
+                        <div class="flex justify-between items-center text-xs text-gray-500">
+                          <span class="font-bold">Phí vận chuyển:</span>
+                          <span class="font-black" :class="latestOrder.phiShip > 0 ? 'text-black' : 'text-green-600'">
+                            {{ latestOrder.phiShip > 0 ? (latestOrder.phiShip.toLocaleString() + '₫') : 'Free' }}
+                          </span>
+                        </div>
                         <div class="flex justify-between items-center pt-2 border-t border-dashed border-gray-200">
                           <span class="text-sm font-black text-black uppercase tracking-widest">Tổng thanh toán:</span>
                           <span class="text-xl font-[1000] text-yellow-700 tracking-tighter">{{ latestOrder.tongTien?.toLocaleString() }}₫</span>
                         </div>
                       </div>
 
-                      <!-- Order Time Info -->
-                      <div class="pt-4 border-t border-gray-100 px-2 mt-2 flex flex-wrap items-center gap-x-8 gap-y-2 opacity-50">
-                        <div class="flex items-center gap-2">
-                          <span class="text-[9px] font-black text-black uppercase tracking-widest">Ngày đặt:</span>
-                          <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleDateString('vi-VN') }}</span>
+                      <!-- Order Time Info and Repurchase Action -->
+                      <div class="pt-4 border-t border-gray-100 px-2 mt-2 flex flex-wrap items-center justify-between gap-y-4">
+                        <div class="flex flex-wrap items-center gap-x-8 gap-y-2 opacity-50">
+                          <div class="flex items-center gap-2">
+                            <span class="text-[9px] font-black text-black uppercase tracking-widest">Ngày đặt:</span>
+                            <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleDateString('vi-VN') }}</span>
+                          </div>
+                          <div class="flex items-center gap-2">
+                            <span class="text-[9px] font-black text-black uppercase tracking-widest">Giờ đặt:</span>
+                            <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) }}</span>
+                          </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                          <span class="text-[9px] font-black text-black uppercase tracking-widest">Giờ đặt:</span>
-                          <span class="text-[10px] font-black text-black italic">{{ new Date(latestOrder.ngayDat).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) }}</span>
-                        </div>
+                        
+                        <!-- Nút Mua Lại (Chỉ khi 4 hoặc 6) -->
+                        <button v-if="latestOrder.trangThaiDH === 4 || latestOrder.trangThaiDH === 6" @click="muaLai(latestOrder)" 
+                                class="px-5 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all transform active:scale-95 flex items-center gap-2 ml-auto shadow-sm">
+                          <span class="material-symbols-outlined text-sm font-bold">shopping_cart</span> Mua lại
+                        </button>
                       </div>
                     </div>
 
@@ -497,6 +541,8 @@
                               class="px-5 py-2.5 bg-red-50 text-red-600 border border-red-100 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all transform active:scale-95 flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm font-bold">cancel</span> Hủy đơn
                       </button>
+
+
 
                       <!-- Nút Đã nhận (Chỉ khi 3 - Đã giao) -->
                       <button v-if="!latestOrder.khachBaoChuaNhan && latestOrder.trangThaiDH === 3" @click="updateOrderStatus(latestOrder.maDH, 4)" 
@@ -526,37 +572,44 @@
                   <div class="flex flex-col lg:flex-row gap-4 items-center justify-between pb-6 border-b border-gray-50">
                     <!-- Search Input -->
                     <div class="relative w-full lg:max-w-md group">
-                      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors">search</span>
+                      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#C8A97E] group-focus-within:text-black transition-colors">search</span>
                       <input v-model="searchQuery" type="text" placeholder="Tìm kiếm đơn hàng..." 
-                             class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-4 focus:ring-blue-950/5 focus:border-blue-950 outline-none transition-all text-sm font-black text-black placeholder:text-gray-400">
+                             class="w-full pl-12 pr-4 py-3 bg-white border border-[#C8A97E]/50 rounded-2xl focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] outline-none transition-all text-sm font-bold text-gray-700 placeholder:text-gray-400 shadow-sm">
                     </div>
                     
                     <div class="flex gap-3 w-full lg:w-auto">
-                      <!-- Status Dropdown -->
-                      <div class="relative min-w-[160px]">
-                        <select v-model="orderStatus" 
-                                class="w-full appearance-none pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-[10px] font-black text-black uppercase tracking-widest focus:ring-2 focus:ring-blue-950/20 focus:border-blue-950 outline-none cursor-pointer">
-                          <option value="all">Tất cả trạng thái</option>
-                          <option value="0">Chờ xác nhận</option>
-                          <option value="1">Đã xác nhận</option>
-                          <option value="2">Đang giao</option>
-                          <option value="3">Đã giao</option>
-                          <option value="4">Hoàn tất</option>
-                          <option value="5">Đã hủy</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                      <!-- Status Dropdown (Admin Style) -->
+                      <div class="relative min-w-[170px]">
+                        <button @click.stop="openOrderDropdown = openOrderDropdown === 'status' ? null : 'status'"
+                                class="w-full border border-[#C8A97E]/50 rounded-2xl pl-5 pr-10 py-3 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                          <span class="truncate font-bold text-gray-700 uppercase tracking-wider text-[11px]">{{ orderStatus === 'all' ? 'Tất cả trạng thái' : (orderStatus === '0' ? 'Chờ xác nhận' : (orderStatus === '1' ? 'Đã xác nhận' : (orderStatus === '2' ? 'Đang giao' : (orderStatus === '3' ? 'Đã giao' : (orderStatus === '4' ? 'Hoàn tất' : (orderStatus === '6' ? 'Đã đánh giá' : (orderStatus === '5' ? 'Đã hủy' : 'Tất cả trạng thái'))))))) }}</span>
+                          <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                        </button>
+                        <div v-if="openOrderDropdown === 'status'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in shadow-xl">
+                          <div @click="orderStatus = 'all'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#C8A97E]/10 transition-colors border-b border-gray-50 text-gray-500" :class="orderStatus === 'all' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Tất cả trạng thái</div>
+                          <div @click="orderStatus = '0'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '0' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Chờ xác nhận</div>
+                          <div @click="orderStatus = '1'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '1' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đã xác nhận</div>
+                          <div @click="orderStatus = '2'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '2' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đang giao</div>
+                          <div @click="orderStatus = '3'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '3' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đã giao</div>
+                          <div @click="orderStatus = '4'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '4' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Hoàn tất</div>
+                          <div @click="orderStatus = '6'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '6' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đã đánh giá</div>
+                          <div @click="orderStatus = '5'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '5' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đã hủy</div>
+                        </div>
                       </div>
 
-                      <!-- Time Dropdown -->
-                      <div class="relative min-w-[140px]">
-                        <select v-model="timeFilter" 
-                                class="w-full appearance-none pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-[10px] font-black text-black uppercase tracking-widest focus:ring-2 focus:ring-blue-950/20 focus:border-blue-950 outline-none cursor-pointer">
-                          <option value="all">Mọi thời gian</option>
-                          <option value="week">Tuần hiện tại</option>
-                          <option value="month">Tháng hiện tại</option>
-                          <option value="year">Năm hiện tại</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                      <!-- Time Dropdown (Admin Style) -->
+                      <div class="relative min-w-[150px]">
+                        <button @click.stop="openOrderDropdown = openOrderDropdown === 'time' ? null : 'time'"
+                                class="w-full border border-[#C8A97E]/50 rounded-2xl pl-5 pr-10 py-3 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                          <span class="truncate font-bold text-gray-700 uppercase tracking-wider text-[11px]">{{ timeFilter === 'all' ? 'Mọi thời gian' : (timeFilter === 'week' ? 'Tuần hiện tại' : (timeFilter === 'month' ? 'Tháng hiện tại' : 'Năm hiện tại')) }}</span>
+                          <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                        </button>
+                        <div v-if="openOrderDropdown === 'time'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in shadow-xl">
+                          <div @click="timeFilter = 'all'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#C8A97E]/10 transition-colors border-b border-gray-50 text-gray-500" :class="timeFilter === 'all' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Mọi thời gian</div>
+                          <div @click="timeFilter = 'week'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="timeFilter === 'week' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Tuần hiện tại</div>
+                          <div @click="timeFilter = 'month'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="timeFilter === 'month' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Tháng hiện tại</div>
+                          <div @click="timeFilter = 'year'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="timeFilter === 'year' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Năm hiện tại</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -576,7 +629,7 @@
 
                         <!-- Order ID Badge -->
                         <div class="w-16 h-16 bg-gray-900 rounded-2xl flex flex-col items-center justify-center shrink-0 shadow-lg">
-                          <p class="text-[8px] font-black text-gray-400 uppercase leading-none mb-1">Order</p>
+                          <p class="text-[8px] font-black text-gray-400 uppercase leading-none mb-1">Đơn hàng</p>
                           <p class="text-xl font-black text-white leading-none">#{{ order.maDH }}</p>
                         </div>
 
@@ -585,9 +638,20 @@
                           <div class="flex items-center gap-3">
                             <span :class="['px-3 py-1 rounded-lg text-[9px] font-black uppercase border', 
                                           order.trangThaiDH === 5 ? 'bg-red-50 text-red-600 border-red-100' : 
+                                          order.trangThaiDH === 8 ? 'bg-orange-50 text-orange-600 border-orange-100' : 
+                                          order.trangThaiDH === 7 ? 'bg-cyan-50 text-cyan-600 border-cyan-100' : 
                                           order.trangThaiDH === 4 ? 'bg-green-50 text-green-600 border-green-100' : 
                                           order.trangThaiDH === 0 ? 'bg-yellow-50 text-yellow-600 border-yellow-100' : 'bg-blue-50 text-blue-600 border-blue-100']">
-                              {{ order.trangThaiDH === 5 ? 'Đã hủy' : (order.trangThaiDH === 4 ? 'Hoàn tất' : (order.trangThaiDH === 0 ? 'Chờ xác nhận' : (order.trangThaiDH === 3 ? 'Đã giao' : (order.trangThaiDH === 1 ? 'Đã duyệt' : 'Đang giao')))) }}
+                              {{ 
+                                order.trangThaiDH === 6 ? 'Đã đánh giá' : 
+                                (order.trangThaiDH === 5 ? 'Đã hủy' : 
+                                (order.trangThaiDH === 8 ? 'Lỗi thanh toán' : 
+                                (order.trangThaiDH === 7 ? 'Chờ thanh toán' : 
+                                (order.trangThaiDH === 4 ? 'Hoàn tất' : 
+                                (order.trangThaiDH === 0 ? 'Chờ xác nhận' : 
+                                (order.trangThaiDH === 3 ? 'Đã giao' : 
+                                (order.trangThaiDH === 1 ? 'Đã nhận' : 'Đang giao'))))))) 
+                              }}
                             </span>
                             <span class="text-xs font-black text-black">{{ new Date(order.ngayDat).toLocaleDateString('vi-VN') }}</span>
                           </div>
@@ -600,9 +664,12 @@
                       </div>
 
                       <!-- Row Action -->
-                      <div class="shrink-0 flex items-center">
+                      <div class="shrink-0 flex items-center gap-2">
+                        <button v-if="order.trangThaiDH === 4 || order.trangThaiDH === 6" @click="muaLai(order)" class="whitespace-nowrap px-6 py-3 bg-red-50 border border-red-100 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm">
+                          Mua lại
+                        </button>
                         <button @click="$router.push(`/profile/orders/${order.maDH}`)" class="whitespace-nowrap px-6 py-3 bg-white border border-gray-200 text-black hover:bg-black hover:text-white hover:border-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm">
-                          Xem đơn hàng
+                          Xem chi tiết
                         </button>
                       </div>
                     </div>
@@ -995,6 +1062,7 @@ export default {
       favCategories: [],
       favBrands: [],
       openFavDropdown: null, 
+      openOrderDropdown: null,
       orderStatus: "all",
       showReportModal: false,
       reportOrderId: null,
@@ -1350,13 +1418,54 @@ export default {
             `/orders/update-status/${orderId}`,
             null,
             {
-              params: { status: 5 },
+              params: { status: 5, reason: "Khách hàng hủy đơn" },
               withCredentials: true
             }
         )
         this.fetchOrders()
       } catch (err) {
         console.error("Cancel order error", err)
+      }
+    },
+
+    async muaLai(order) {
+      if (!order.chiTietList || order.chiTietList.length === 0) return;
+      
+      try {
+        let addedCount = 0;
+        let failCount = 0;
+        
+        for (const item of order.chiTietList) {
+          const params = {
+             productId: item.sanPhamChiTiet.sanPham.maSP,
+             quantity: item.soLuong,
+             variantId: item.sanPhamChiTiet.maBienThe
+          };
+          try {
+            const res = await axios.post('/cart/add-product', null, { params });
+            if(res.data.success) {
+              addedCount++;
+            } else {
+               failCount++;
+            }
+          } catch(e) {
+             failCount++;
+          }
+        }
+        
+        if (addedCount > 0) {
+           window.$toast.success(`Đã thêm lại ${addedCount} sản phẩm vào giỏ hàng!`);
+           if (window.refreshCartCount) window.refreshCartCount();
+           setTimeout(() => {
+             this.$router.push('/cart');
+           }, 500);
+        }
+        if (failCount > 0) {
+           window.$toast.warning(`Không thể thêm ${failCount} sản phẩm (có thể đã hết hàng).`);
+        }
+      } catch (err) {
+         console.error('Error repurchasing', err);
+         window.$toast.error('Có lỗi xảy ra khi thêm lại giỏ hàng');
       }
     },
 
@@ -1493,7 +1602,14 @@ export default {
 
     closeFavDropdowns() {
       this.openFavDropdown = null
+      this.openOrderDropdown = null
     },
+
+    handleGlobalClick(e) {
+      if ((this.openFavDropdown || this.openOrderDropdown) && !e.target.closest('.relative')) {
+        this.closeFavDropdowns()
+      }
+    }
   },
 
   mounted() {
@@ -1502,17 +1618,16 @@ export default {
     this.fetchAddresses()
     this.fetchFavorites()
 
-    const hash = window.location.hash.replace("#", "")
+    document.addEventListener('click', this.handleGlobalClick)
 
-    if (hash) {
+    const hash = window.location.hash.replace("#", "")
+    if (hash && ['info', 'orders', 'wishlist', 'address'].includes(hash)) {
       this.activeTab = hash
     }
-
-    window.addEventListener("click", this.closeFavDropdowns)
   },
 
   beforeUnmount() {
-    window.removeEventListener("click", this.closeFavDropdowns)
+    document.removeEventListener('click', this.handleGlobalClick)
   },
 }
 </script>

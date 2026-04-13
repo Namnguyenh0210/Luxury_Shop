@@ -28,13 +28,13 @@ public interface BaiVietRepository extends JpaRepository<BaiViet, Long> {
     // Lấy các bài viết nổi bật (mới nhất)
     List<BaiViet> findTop3ByTrangThaiTrueOrderByNgayDangDesc();
 
-    // Tìm bài viết theo tác giả và trạng thái
+    // Tìm bài viết theo người đăng và trạng thái
     Page<BaiViet> findByTaiKhoanAndTrangThaiOrderByNgayDangDesc(TaiKhoan taiKhoan, Boolean trangThai, Pageable pageable);
 
-    // Tìm tất cả bài viết của một tác giả (staff)
+    // Tìm tất cả bài viết của một người đăng (staff)
     Page<BaiViet> findByTaiKhoanOrderByNgayDangDesc(TaiKhoan taiKhoan, Pageable pageable);
 
-    // Tìm bài viết của tác giả theo keyword (staff)
+    // Tìm bài viết của người đăng theo keyword (staff)
     Page<BaiViet> findByTaiKhoanAndTieuDeContainingIgnoreCaseOrderByNgayDangDesc(TaiKhoan taiKhoan, String tieuDe, Pageable pageable);
 
     // Đếm số bài viết theo trạng thái

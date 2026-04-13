@@ -52,18 +52,18 @@ const sendRequest = async () => {
 
       <!-- Title -->
       <h2 class="text-2xl font-bold mb-2 text-center text-gray-900">
-        Forgot Password
+        Quên mật khẩu
       </h2>
 
       <p class="text-sm text-gray-600 text-center mb-6">
-        Enter your email to receive a reset link
+        Nhập email của bạn để nhận mã xác thực
       </p>
 
       <!-- Input -->
       <input
           v-model="email"
           type="email"
-          placeholder="Enter your email"
+          placeholder="Địa chỉ Email"
           class="w-full border border-gray-300 p-3 rounded-lg mb-4
                focus:outline-none
                focus:ring-2 focus:ring-[#C8A97E]
@@ -77,7 +77,7 @@ const sendRequest = async () => {
           class="w-full bg-[#C8A97E] text-white py-2.5 rounded-lg
          hover:bg-[#B8986E] transition"
       >
-        Send Request
+        Gửi yêu cầu
       </button>
 
       <!-- Messages -->
@@ -97,12 +97,12 @@ const sendRequest = async () => {
 
       <!-- Back login -->
       <p class="text-center text-sm mt-5 text-gray-600">
-        Remember your password?
+        Bạn đã nhớ mật khẩu?
         <router-link
             to="/login"
             class="text-[#C8A97E] font-medium hover:underline"
         >
-          Login
+          Đăng nhập
         </router-link>
       </p>
 

@@ -8,7 +8,6 @@ import com.example.projectend.repository.TaiKhoanRepository;
 import com.example.projectend.service.DonHangService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -41,12 +40,14 @@ public class StaffDonHangController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
 
         Pageable pageable = PageRequest.of(page, size);
         String statusStr = (status != null) ? status.toString() : null;
 
-        return donHangService.searchAdmin(keyword, statusStr, null, pageable);
+        return donHangService.searchAdmin(keyword, statusStr, startDate, endDate, pageable);
     }
 
     // =============================

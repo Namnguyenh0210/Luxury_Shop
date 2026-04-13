@@ -61,7 +61,7 @@ public class DonHang {
     private String maGiaoDich;
 
     @Column(name = "TrangThaiDH", nullable = false)
-    private Integer trangThaiDH = 0; // 0: Chờ xác nhận, 1: Đã xác nhận, 2: Đang giao, 3: Đã giao, 4: Hoàn tất, 5: Đã hủy, 6: Lỗi thanh toán, 7: Chờ thanh toán
+    private Integer trangThaiDH = 0; // 0: Chờ xác nhận, 1: Đã xác nhận, 2: Đang giao, 3: Đã giao, 4: Hoàn tất, 5: Đã hủy, 6: Đã đánh giá, 7: Chờ thanh toán, 8: Lỗi thanh toán
 
     @Column(name = "TrangThaiThanhToan", nullable = false)
     private Integer trangThaiThanhToan = 0; // 0: Chờ thanh toán, 1: Đã thanh toán
@@ -253,8 +253,9 @@ public class DonHang {
             case 3: return "Đã giao";
             case 4: return "Hoàn tất";
             case 5: return "Đã hủy";
-            case 6: return "Lỗi thanh toán";
+            case 6: return "Đã đánh giá";
             case 7: return "Chờ thanh toán";
+            case 8: return "Lỗi thanh toán";
             default: return "Không xác định";
         }
     }
@@ -294,6 +295,8 @@ public class DonHang {
             case 2: return "Thanh toán thất bại";
             case 3: return "Thanh toán hết hạn";
             case 4: return "COD - Chưa thu tiền";
+            case 5: return "Chờ hoàn tiền"; // Đã hủy nhưng đã trả tiền
+            case 6: return "Đã hoàn tiền";  // Admin đã ck trả khách
             default: return "Không xác định";
         }
     }

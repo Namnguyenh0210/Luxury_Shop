@@ -38,15 +38,15 @@
             <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
               <div class="flex items-center gap-4 flex-wrap">
                 <!-- Tìm kiếm -->
-                <div class="relative">
-                  <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                <div class="relative group">
+                  <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
                     <span class="material-symbols-outlined text-[20px]">search</span>
                   </span>
                   <input
                     v-model="filters.keyword"
                     @input="fetchProducts"
                     placeholder="Tìm sản phẩm..."
-                    class="border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all w-64 shadow-sm"
+                    class="border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all w-72 shadow-sm font-bold text-gray-700 placeholder:text-gray-400"
                   />
                 </div>
 
@@ -143,16 +143,16 @@
           <!-- PRODUCT TABLE -->
           <div class="bg-white rounded-2xl border border-[#C8A97E]/30 shadow-sm overflow-hidden animate-in slide-in-from-bottom duration-500">
             <table class="w-full text-sm border-collapse" style="table-layout: fixed;">
-                <thead class="bg-gray-50/50 border-b border-gray-200">
+                <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
                 <tr>
-                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[6%] text-center tracking-widest">ID</th>
-                  <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase w-[32%] text-left tracking-widest">Tên Sản Phẩm</th>
-                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[10%] text-center tracking-widest">Phân Loại</th>
-                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[12%] text-center tracking-widest">Thương Hiệu</th>
-                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[8%] text-center tracking-widest">Giới Tính</th>
-                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[8%] text-center tracking-widest">Số lượng</th>
-                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[12%] text-center tracking-widest">Trạng Thái</th>
-                  <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[12%] text-center tracking-widest">Hành Động</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-black uppercase w-[5%] text-center tracking-widest">ID</th>
+                  <th class="px-6 py-4 text-[11px] font-black text-black uppercase w-[25%] text-left tracking-widest">Tên Sản Phẩm</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-black uppercase w-[12%] text-center tracking-widest">Phân Loại</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-black uppercase w-[12%] text-center tracking-widest">Thương Hiệu</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-black uppercase w-[10%] text-center tracking-widest">Giới Tính</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-black uppercase w-[10%] text-center tracking-widest">Số lượng</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-black uppercase w-[13%] text-center tracking-widest">Trạng Thái</th>
+                  <th class="px-4 py-4 text-[11px] font-black text-black uppercase w-[13%] text-center tracking-widest">Hành Động</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
@@ -181,17 +181,17 @@
                     </span>
                   </td>
                   <td class="px-4 py-5" @click.stop>
-                    <div class="flex justify-center gap-1">
-                      <button @click="toggleStatus(p)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-gray-400 hover:text-gray-800 transition-all flex items-center justify-center shrink-0" :title="p.trangThaiSP == 1 ? 'Ẩn sản phẩm' : 'Hiện sản phẩm'">
-                        <span class="material-symbols-outlined text-[20px]">
+                    <div class="flex items-center justify-center gap-4">
+                      <button @click="toggleStatus(p)" class="text-gray-400 hover:text-[#C8A97E] transition-colors" :title="p.trangThaiSP == 1 ? 'Ẩn sản phẩm' : 'Hiện sản phẩm'">
+                        <span class="material-symbols-outlined text-[22px]">
                           {{ p.trangThaiSP == 1 ? 'visibility' : 'visibility_off' }}
                         </span>
                       </button>
-                      <button @click="editProduct(p)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-blue-400 hover:text-blue-600 transition-all flex items-center justify-center shrink-0" title="Sửa">
-                        <span class="material-symbols-outlined text-[20px]">edit</span>
+                      <button @click="editProduct(p)" class="text-blue-400 hover:text-blue-600 transition-colors" title="Sửa">
+                        <span class="material-symbols-outlined text-[22px]">edit_note</span>
                       </button>
-                      <button @click="deleteProduct(p.maSP)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-red-400 hover:text-red-600 transition-all flex items-center justify-center shrink-0" title="Xóa">
-                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                      <button @click="deleteProduct(p.maSP)" class="text-red-400 hover:text-red-600 transition-colors" title="Xóa">
+                        <span class="material-symbols-outlined text-[22px]">delete</span>
                       </button>
                     </div>
                   </td>
@@ -355,16 +355,16 @@
         <!-- CATEGORY TABLE -->
         <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
           <table class="w-full text-sm border-collapse" style="table-layout: fixed;">
-            <thead class="bg-gray-50 border-b border-gray-200">
+            <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
               <tr>
-                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase w-[8%] text-center tracking-widest">ID</th>
-                <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase text-left w-[20%] tracking-widest">Tên danh mục</th>
-                <th class="px-4 py-4 text-[11px] font-black text-blue-600 uppercase text-center w-[10%] tracking-widest">SP Nam</th>
-                <th class="px-4 py-4 text-[11px] font-black text-pink-600 uppercase text-center w-[10%] tracking-widest">SP Nữ</th>
-                <th class="px-4 py-4 text-[11px] font-black text-gray-600 uppercase text-center w-[10%] tracking-widest">Unisex</th>
-                <th class="px-6 py-4 text-[11px] font-black text-gray-500 uppercase text-left w-[22%] tracking-widest">Mô tả</th>
-                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase text-center w-[10%] tracking-widest">Trạng thái</th>
-                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase text-center w-[10%] tracking-widest">Hành động</th>
+                <th class="px-4 py-4 text-[11px] font-black text-black uppercase w-[5%] text-center tracking-widest">ID</th>
+                <th class="px-6 py-4 text-[11px] font-black text-black uppercase text-left w-[15%] tracking-widest">Tên danh mục</th>
+                <th class="px-4 py-4 text-[11px] font-black text-blue-800 uppercase text-center w-[10%] tracking-widest">SP Nam</th>
+                <th class="px-4 py-4 text-[11px] font-black text-pink-800 uppercase text-center w-[10%] tracking-widest">SP Nữ</th>
+                <th class="px-4 py-4 text-[11px] font-black text-gray-900 uppercase text-center w-[10%] tracking-widest">Unisex</th>
+                <th class="px-6 py-4 text-[11px] font-black text-black uppercase text-left w-[24%] tracking-widest">Mô tả</th>
+                <th class="px-4 py-4 text-[11px] font-black text-black uppercase text-center w-[13%] tracking-widest">Trạng thái</th>
+                <th class="px-4 py-4 text-[11px] font-black text-black uppercase text-center w-[13%] tracking-widest">Hành động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -421,16 +421,16 @@
         <!-- BRAND TABLE -->
         <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
           <table class="w-full text-sm border-collapse" style="table-layout: fixed;">
-            <thead class="bg-gray-50 border-b border-gray-200">
+            <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
               <tr>
-                <th class="px-2 py-4 text-[11px] font-black text-gray-500 uppercase w-[5%] text-center tracking-widest">ID</th>
-                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase text-left w-[23%] tracking-widest">Tên thương hiệu</th>
-                <th class="px-2 py-4 text-[11px] font-black text-blue-600 uppercase text-center w-[8%] tracking-widest whitespace-nowrap">SP Nam</th>
-                <th class="px-2 py-4 text-[11px] font-black text-pink-600 uppercase text-center w-[8%] tracking-widest whitespace-nowrap">SP Nữ</th>
-                <th class="px-2 py-4 text-[11px] font-black text-gray-600 uppercase text-center w-[8%] tracking-widest whitespace-nowrap">Unisex</th>
-                <th class="px-4 py-4 text-[11px] font-black text-gray-500 uppercase text-left w-[24%] tracking-widest">Mô tả</th>
-                <th class="px-2 py-4 text-[11px] font-black text-gray-500 uppercase text-center w-[12%] tracking-widest whitespace-nowrap">Trạng thái</th>
-                <th class="px-2 py-4 text-[11px] font-black text-gray-500 uppercase text-center w-[12%] tracking-widest whitespace-nowrap">Hành động</th>
+                <th class="px-2 py-4 text-[11px] font-black text-black uppercase w-[5%] text-center tracking-widest">ID</th>
+                <th class="px-4 py-4 text-[11px] font-black text-black uppercase text-left w-[15%] tracking-widest">Thương hiệu</th>
+                <th class="px-2 py-4 text-[11px] font-black text-blue-800 uppercase text-center w-[10%] tracking-widest whitespace-nowrap">SP Nam</th>
+                <th class="px-2 py-4 text-[11px] font-black text-pink-800 uppercase text-center w-[10%] tracking-widest whitespace-nowrap">SP Nữ</th>
+                <th class="px-2 py-4 text-[11px] font-black text-gray-900 uppercase text-center w-[10%] tracking-widest whitespace-nowrap">Unisex</th>
+                <th class="px-4 py-4 text-[11px] font-black text-black uppercase text-left w-[24%] tracking-widest">Mô tả</th>
+                <th class="px-2 py-4 text-[11px] font-black text-black uppercase text-center w-[13%] tracking-widest whitespace-nowrap">Trạng thái</th>
+                <th class="px-2 py-4 text-[11px] font-black text-black uppercase text-center w-[13%] tracking-widest whitespace-nowrap">Hành động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">

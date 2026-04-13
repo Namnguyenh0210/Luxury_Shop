@@ -66,21 +66,21 @@ public class BaiVietService {
     }
 
     /**
-     * Lấy bài viết theo tác giả
+     * Lấy bài viết theo người đăng
      */
     public Page<BaiViet> getBaiVietByAuthor(TaiKhoan taiKhoan, Pageable pageable) {
         return baiVietRepository.findByTaiKhoanAndTrangThaiOrderByNgayDangDesc(taiKhoan, true, pageable);
     }
 
     /**
-     * Lấy bài viết theo tác giả (staff)
+     * Lấy bài viết theo người đăng (staff)
      */
     public Page<BaiViet> findByTacGia(TaiKhoan taiKhoan, Pageable pageable) {
         return baiVietRepository.findByTaiKhoanOrderByNgayDangDesc(taiKhoan, pageable);
     }
 
     /**
-     * Tìm kiếm bài viết theo tác giả và từ khóa
+     * Tìm kiếm bài viết theo người đăng và từ khóa
      */
     public Page<BaiViet> searchByTacGiaAndKeyword(TaiKhoan taiKhoan, String keyword, Pageable pageable) {
         return baiVietRepository.findByTaiKhoanAndTieuDeContainingIgnoreCaseOrderByNgayDangDesc(taiKhoan, keyword, pageable);

@@ -142,8 +142,53 @@
               </div>
             </div>
 
-            <!-- Lỗi thanh toán (trạng thái 6) -->
-            <div v-if="order.trangThaiDH === 6" class="p-6 bg-orange-50 border border-orange-200 rounded-2xl flex items-center gap-4">
+            <!-- Refund Section for Admin -->
+            <div v-if="order.trangThaiThanhToan === 5" class="mt-8 overflow-hidden rounded-3xl border border-orange-200 shadow-xl bg-white slide-up">
+              <div class="bg-orange-600 p-6 text-white">
+                <h5 class="text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                  <span class="material-symbols-outlined">payments</span> 
+                  Yêu cầu hoàn tiền gấp
+                </h5>
+              </div>
+              <div class="p-8 space-y-6">
+                <div class="p-5 bg-orange-50 rounded-2xl border border-orange-100 italic text-orange-800 text-xs leading-relaxed">
+                  "Đơn hàng này đã được khách trả tiền nhưng hiện tại đã bị hủy. Vui lòng liên hệ khách hàng để lấy thông tin tài khoản và hoàn tất chuyển trả lại tiền."
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                      <span class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-orange-600 text-[18px]">person</span>
+                      </span>
+                      <div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Chủ tài khoản liên hệ</p>
+                        <p class="text-sm font-black text-gray-800 uppercase">{{ order.taiKhoan?.hoTen }}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-orange-600 text-[18px]">call</span>
+                      </span>
+                      <div>
+                        <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Điện thoại</p>
+                        <p class="text-sm font-black text-gray-800 tracking-wider">{{ order.taiKhoan?.soDienThoai }}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="flex flex-col justify-center gap-3">
+                     <button @click="confirmRefund" class="w-full bg-[#111111] hover:bg-orange-600 text-white px-8 py-4 rounded-full font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-xl shadow-orange-200/50 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-sm">verified</span>
+                        Xác nhận đã chuyển khoản trả khách
+                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lỗi thanh toán (trạng thái 8) -->
+            <div v-if="order.trangThaiDH === 8" class="p-6 bg-orange-50 border border-orange-200 rounded-2xl flex items-center gap-4">
               <span class="material-symbols-outlined text-orange-500 text-2xl">payment_alert</span>
               <div>
                 <p class="font-bold text-orange-700 uppercase text-[11px] tracking-widest">Lỗi thanh toán PayOS</p>
@@ -151,7 +196,7 @@
               </div>
             </div>
 
-            <div v-if="order.trangThaiDH < 4 && order.trangThaiDH !== 7 && order.trangThaiDH !== 6 && !order.khachBaoChuaNhan" class="flex flex-wrap gap-4">
+            <div v-if="order.trangThaiDH < 4 && order.trangThaiDH !== 7 && order.trangThaiDH !== 8 && !order.khachBaoChuaNhan" class="flex flex-wrap gap-4">
               <div class="flex-1 min-w-[200px]">
                 <button v-if="order.trangThaiDH === 0" 
                   @click="updateStatus(1)" 
@@ -192,9 +237,9 @@
               </button>
             </div>
             
-            <div v-else-if="order.trangThaiDH >= 4 && order.trangThaiDH !== 6 && order.trangThaiDH !== 7 && !order.khachBaoChuaNhan" class="text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            <div v-else-if="order.trangThaiDH >= 4 && order.trangThaiDH !== 8 && order.trangThaiDH !== 7 && !order.khachBaoChuaNhan" class="text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                 {{ order.trangThaiDH === 4 ? 'Hợp đồng này đã được thực hiện hoàn tất' : 'Hợp đồng này đã bị hủy bỏ' }}
+                 {{ order.trangThaiDH >= 4 && order.trangThaiDH !== 5 ? 'Giao dịch này đã được thực hiện hoàn tất' : 'Giao dịch này đã bị hủy bỏ' }}
                </p>
             </div>
           </div>
@@ -334,7 +379,7 @@ export default {
       if (!ok) return
       try {
         const res = await axios.put(
-            `/api/admin/orders/${this.order.maDH}/status`,
+            `/admin/orders/${this.order.maDH}/status`,
             null,
             { params: { status: newStatus }, withCredentials: true }
         )
@@ -351,7 +396,7 @@ export default {
     },
     
     async cancelReportedOrder() {
-      const reason = prompt("Nhập lý do hủy đơn (ví dụ: Giao thất bại, đã hoàn tiền):", "Khách báo chưa nhận được hàng: " + this.order.lyDoChuaNhan)
+      const reason = await window.$prompt("Nhập lý do hủy đơn (ví dụ: Giao thất bại, đã hoàn tiền):", { defaultValue: "Khách báo chưa nhận được hàng: " + this.order.lyDoChuaNhan })
       if (reason === null) return
       
       try {
@@ -389,6 +434,22 @@ export default {
         window.$toast.error(err.response?.data?.message || 'Không thể hủy đơn hàng')
       }
     },
+
+    async confirmRefund() {
+      const ghiChu = await window.$prompt("Nhập ghi chú hoàn tiền (Tùy chọn):", { defaultValue: "Đã chuyển khoản trả khách qua " + (this.order.hinhThucThanhToan?.tenHinhThuc || 'Stk') })
+      if (ghiChu === null) return
+
+      try {
+        const res = await axios.post(`/orders/${this.order.maDH}/confirm-refund`, { ghiChu }, { withCredentials: true })
+        if (res.data.success) {
+          window.$toast.success("✅ Đã xác nhận hoàn tiền thành công!")
+          this.fetchOrderDetail()
+        }
+      } catch (err) {
+        console.error("Confirm refund error", err)
+        window.$toast.error(err.response?.data?.message || 'Lỗi khi xác nhận hoàn tiền')
+      }
+    },
     fmtCurrency(v) { return new Intl.NumberFormat('vi-VN').format(v || 0) + ' đ' },
     statusClass(s) {
       return {
@@ -398,8 +459,9 @@ export default {
         3: { text: 'Đã giao', class: 'bg-teal-100 text-teal-700' },
         4: { text: 'Hoàn tất', class: 'bg-green-100 text-green-700' },
         5: { text: 'Đã hủy', class: 'bg-red-100   text-red-700' },
-        6: { text: 'Lỗi thanh toán', class: 'bg-orange-100 text-orange-700' },
-        7: { text: 'Chờ thanh toán', class: 'bg-cyan-100 text-cyan-700' }
+        6: { text: 'Đã đánh giá', class: 'bg-orange-100 text-orange-700' },
+        7: { text: 'Chờ thanh toán', class: 'bg-cyan-100 text-cyan-700' },
+        8: { text: 'Lỗi thanh toán', class: 'bg-gray-100 text-gray-700' }
       }[s] ?? { text: 'Không xác định', class: 'bg-gray-100 text-gray-600' }
     },
     payStatusClass(s) {
@@ -408,7 +470,9 @@ export default {
         1: { text: 'Đã thanh toán', class: 'bg-green-100 text-green-700 border-green-200' },
         2: { text: 'Thanh toán thất bại', class: 'bg-red-100 text-red-700 border-red-200' },
         3: { text: 'Thanh toán hết hạn', class: 'bg-gray-100 text-gray-500 border-gray-200' },
-        4: { text: 'COD - Chưa thu', class: 'bg-blue-50 text-blue-600 border-blue-200' }
+        4: { text: 'COD - Chưa thu', class: 'bg-blue-50 text-blue-600 border-blue-200' },
+        5: { text: 'Chờ hoàn tiền', class: 'bg-orange-100 text-orange-700 border-orange-200' },
+        6: { text: 'Đã hoàn tiền', class: 'bg-blue-100 text-blue-700 border-blue-200' }
       }[s] ?? { text: 'Chưa xác định', class: 'bg-gray-50 text-gray-400' }
     }
   },

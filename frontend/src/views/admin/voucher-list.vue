@@ -9,7 +9,7 @@
             <span class="material-symbols-outlined text-[22px]">confirmation_number</span>
           </div>
         </div>
-        <p class="text-2xl font-extrabold text-gray-900">{{ vouchers.length }}</p>
+        <p class="text-2xl font-extrabold text-gray-900">{{ stats.totalVouchers }}</p>
         <p class="text-xs font-medium text-gray-400">Trong hệ thống</p>
       </div>
 
@@ -20,30 +20,8 @@
             <span class="material-symbols-outlined text-[22px]">check_circle</span>
           </div>
         </div>
-        <p class="text-2xl font-extrabold text-gray-900">{{ vouchers.filter(v => v.trangThai && !v.isDeleted).length }}</p>
+        <p class="text-2xl font-extrabold text-gray-900">{{ stats.activeVouchers }}</p>
         <p class="text-xs font-medium text-green-600">Sẵn sàng sử dụng</p>
-      </div>
-
-      <div class="flex flex-col gap-2 rounded-2xl p-6 border border-[#C8A97E]/30 bg-white shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-          <p class="text-gray-500 text-sm font-medium">Tổng lượt dùng</p>
-          <div class="flex items-center justify-center size-10 rounded-xl bg-orange-50 text-orange-600">
-            <span class="material-symbols-outlined text-[22px]">group</span>
-          </div>
-        </div>
-        <p class="text-2xl font-extrabold text-gray-900">{{ vouchers.reduce((acc, v) => acc + (v.daSuDung || 0), 0) }}</p>
-        <p class="text-xs font-medium text-orange-600">Lượt khách đã áp dụng</p>
-      </div>
-
-      <div class="flex flex-col gap-2 rounded-2xl p-6 border border-[#C8A97E]/30 bg-white shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between">
-          <p class="text-gray-500 text-sm font-medium">Tiết kiệm cho khách</p>
-          <div class="flex items-center justify-center size-10 rounded-xl bg-blue-50 text-blue-600">
-            <span class="material-symbols-outlined text-[22px]">savings</span>
-          </div>
-        </div>
-        <p class="text-2xl font-extrabold text-gray-900">Tính toán...</p>
-        <p class="text-xs font-medium text-blue-600">Tổng giá trị giảm giá</p>
       </div>
     </div>
 
@@ -66,14 +44,14 @@
     <div class="bg-white rounded-2xl border border-[#C8A97E]/30 overflow-hidden shadow-sm">
       <div class="overflow-x-auto">
         <table class="w-full text-left">
-          <thead class="bg-gray-50/50 border-b border-gray-100">
+          <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
             <tr>
-              <th class="px-6 py-4 text-[11px] font-black uppercase text-gray-500 tracking-widest">Thông tin Voucher</th>
-              <th class="px-6 py-4 text-[11px] font-black uppercase text-gray-500 tracking-widest text-center">Mức giảm</th>
-              <th class="px-6 py-4 text-[11px] font-black uppercase text-gray-500 tracking-widest">Điều kiện áp dụng</th>
-              <th class="px-6 py-4 text-[11px] font-black uppercase text-gray-500 tracking-widest">Hiệu suất</th>
-              <th class="px-6 py-4 text-[11px] font-black uppercase text-gray-500 tracking-widest text-center">Trạng thái</th>
-              <th class="px-6 py-4 text-[11px] font-black uppercase text-gray-500 tracking-widest text-right">Thao tác</th>
+              <th class="px-6 py-4 text-[11px] font-black uppercase text-black tracking-widest">Thông tin Voucher</th>
+              <th class="px-6 py-4 text-[11px] font-black uppercase text-black tracking-widest text-center">Mức giảm</th>
+              <th class="px-6 py-4 text-[11px] font-black uppercase text-black tracking-widest">Điều kiện áp dụng</th>
+              <th class="px-6 py-4 text-[11px] font-black uppercase text-black tracking-widest">Hiệu suất</th>
+              <th class="px-6 py-4 text-[11px] font-black uppercase text-black tracking-widest text-center">Trạng thái</th>
+              <th class="px-6 py-4 text-[11px] font-black uppercase text-black tracking-widest text-center">Hành Động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50">
@@ -122,25 +100,30 @@
               </td>
               <td class="px-6 py-5 text-center">
                 <span 
-                  v-if="!v.isDeleted && v.trangThai && isVoucherActive(v)" 
-                  class="inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-[10px] font-black text-green-600 uppercase tracking-wider"
+                  class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
+                  :class="getVoucherStatus(v).class"
                 >
-                  Hoạt động
-                </span>
-                <span 
-                  v-else 
-                  class="inline-flex items-center px-3 py-1 rounded-full bg-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-wider"
-                >
-                  {{ v.isDeleted ? 'Đã Xóa' : (!v.trangThai ? 'Vô Hiệu' : 'Hết Hạn') }}
+                  {{ getVoucherStatus(v).text }}
                 </span>
               </td>
-              <td class="px-6 py-5 text-right">
-                <div class="flex items-center justify-end gap-1">
-                  <button @click="editVoucher(v)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-gray-400 hover:text-blue-500 transition-all flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">edit</span>
+              <td class="px-6 py-4 text-center">
+                <div class="flex items-center justify-center gap-4">
+                  <button @click="toggleVisibility(v)" 
+                    class="text-gray-400 hover:text-[#C8A97E] transition-colors"
+                    :title="v.hienThi ? 'Ẩn mã' : 'Hiện mã'">
+                    <span class="material-symbols-outlined text-[22px]">
+                      {{ v.hienThi ? 'visibility' : 'visibility_off' }}
+                    </span>
                   </button>
-                  <button v-if="!v.isDeleted" @click="deleteVoucher(v.maVoucher)" class="size-9 rounded-xl hover:bg-white hover:shadow-md text-gray-400 hover:text-red-500 transition-all flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                  <button @click="editVoucher(v)" 
+                    class="text-blue-400 hover:text-blue-600 transition-colors"
+                    title="Sửa mã">
+                    <span class="material-symbols-outlined text-[22px]">edit_note</span>
+                  </button>
+                  <button v-if="!v.isDeleted" @click="deleteVoucher(v.maVoucher)" 
+                    class="text-red-400 hover:text-red-600 transition-colors"
+                    title="Xóa mã">
+                    <span class="material-symbols-outlined text-[22px]">delete</span>
                   </button>
                 </div>
               </td>
@@ -222,8 +205,7 @@
                       @input="e => currentVoucher.giaTriToiDa = parseCurrency(e.target.value)"
                       @blur="e => e.target.value = formatCurrency(currentVoucher.giaTriToiDa)"
                       class="lux-input font-bold text-gray-900 pr-10" 
-                      :placeholder="currentVoucher.loaiGiamGia === 1 ? 'N/A' : '---'"
-                      :required="currentVoucher.loaiGiamGia === 0">
+                      :placeholder="currentVoucher.loaiGiamGia === 1 ? 'N/A' : 'Không giới hạn'">
                     <span v-if="currentVoucher.loaiGiamGia === 0" class="absolute right-4 top-1/2 -translate-y-1/2 text-[12px] font-black text-[#C8A97E]">₫</span>
                   </div>
                 </div>
@@ -329,6 +311,19 @@
                     <span class="text-[10px] text-gray-400 font-medium tracking-tight">Mã sẽ khả dụng ngay lập tức trên hệ thống</span>
                   </div>
                 </label>
+
+                <label class="flex items-center gap-4 cursor-pointer group p-3 rounded-2xl hover:bg-blue-50 transition-colors">
+                  <div class="relative flex items-center justify-center w-6 h-6 border-2 border-gray-200 rounded-lg transition-all group-hover:border-blue-400" 
+                       :class="{'bg-blue-600 border-blue-600': currentVoucher.hienThi}">
+                    <input v-model="currentVoucher.hienThi" type="checkbox" class="absolute opacity-0 cursor-pointer">
+                    <span v-if="currentVoucher.hienThi" class="material-symbols-outlined text-white text-base">visibility</span>
+                    <span v-else class="material-symbols-outlined text-gray-400 text-base">visibility_off</span>
+                  </div>
+                  <div class="flex flex-col">
+                    <span class="text-xs font-bold text-gray-800 uppercase tracking-widest">Hiển thị công khai</span>
+                    <span class="text-[10px] text-gray-400 font-medium tracking-tight">Tắt nếu bạn muốn mã này chỉ dành cho khách nội bộ</span>
+                  </div>
+                </label>
               </div>
 
             </div>
@@ -379,7 +374,14 @@ export default {
         ngayBatDau: this.formatDateForInput(new Date()),
         ngayKetThuc: this.formatDateForInput(new Date(Date.now() + 30*24*60*60*1000)),
         trangThai: true,
+        hienThi: true,
         isDeleted: false
+      },
+      stats: {
+        totalVouchers: 0,
+        activeVouchers: 0,
+        totalUsage: 0,
+        totalSavings: 0
       }
     };
   },
@@ -388,8 +390,19 @@ export default {
       try {
         const res = await axios.get('/admin/vouchers');
         this.vouchers = res.data;
+        const statsRes = await axios.get('/admin/vouchers/stats');
+        this.stats = statsRes.data;
       } catch (err) {
-        console.error('Fetch vouchers failed', err);
+        console.error('Fetch data failed', err);
+      }
+    },
+    async toggleVisibility(v) {
+      try {
+        v.hienThi = !v.hienThi;
+        await axios.post('/admin/vouchers', v);
+        this.fetchVouchers();
+      } catch (err) {
+        console.error('Toggle visibility failed', err);
       }
     },
     openAddModal() {
@@ -399,7 +412,7 @@ export default {
         minTotalSpendingVIP: 0, maLoaiApDung: '', maTHApDung: '', khongApDungSale: false,
         ngayBatDau: this.formatDateForInput(new Date()),
         ngayKetThuc: this.formatDateForInput(new Date(Date.now() + 30*24*60*60*1000)),
-        trangThai: true, isDeleted: false
+        trangThai: true, hienThi: true, isDeleted: false
       };
       this.showModal = true;
     },
@@ -423,10 +436,7 @@ export default {
         return;
       }
 
-      if (this.currentVoucher.loaiGiamGia === 0 && (!this.currentVoucher.giaTriToiDa || this.currentVoucher.giaTriToiDa <= 0)) {
-        if(window.$alert) window.$alert('Vui lòng nhập mức Giảm tối đa cho Voucher phần trăm', 'Thông tin không hợp lệ');
-        return;
-      }
+
 
       if (!this.currentVoucher.soLuong || this.currentVoucher.soLuong <= 0) {
         if(window.$alert) window.$alert('Số lượng phát hành phải lớn hơn 0', 'Thông tin không hợp lệ');
@@ -447,25 +457,18 @@ export default {
         await axios.post('/admin/vouchers', this.currentVoucher);
         this.showModal = false;
         this.fetchVouchers();
-        if(window.$alert) window.$alert('Phát hành Voucher Luxury thành công!', 'Thành công');
-        else alert('Lưu thành công!');
+        window.$toast.success('Phát hành Voucher Luxury thành công!');
       } catch (err) {
-        if(window.$alert) window.$alert('Lỗi khi lưu voucher: ' + err.message, 'Lỗi');
-        else alert('Lỗi: ' + err.message);
+        window.$toast.error('Lỗi khi lưu voucher: ' + err.message);
       }
     },
     async deleteVoucher(id) {
-      if (window.$confirm) {
-        if (!await window.$confirm('Bạn có chắc muốn xóa Voucher này khỏi hệ thống?')) return;
-      } else {
-        if (!confirm('Bạn có chắc muốn xóa?')) return;
-      }
+      if (!await window.$confirm('Bạn có chắc muốn xóa Voucher này khỏi hệ thống?')) return;
       try {
         await axios.delete(`/admin/vouchers/${id}`);
         this.fetchVouchers();
       } catch (err) {
-        if(window.$alert) window.$alert('Không thể thực hiện xóa', 'Lỗi');
-        else alert('Lỗi xóa');
+        window.$toast.error('Không thể thực hiện xóa');
       }
     },
     formatPrice(price) {
@@ -497,10 +500,27 @@ export default {
     getTargetText(target) {
       switch(target) {
         case 'NEW': return 'Khách mới';
-        case 'VIP': return 'Thanh viên VIP';
+        case 'VIP': return 'Thành viên VIP';
         case 'PRIVATE': return 'Đặc quyền';
         default: return 'Tất cả khách';
       }
+    },
+    getVoucherStatus(v) {
+      if (v.isDeleted) return { text: 'Đã Xóa', class: 'bg-gray-100 text-gray-400' };
+      if (!v.trangThai) return { text: 'Vô Hiệu', class: 'bg-gray-100 text-gray-400' };
+      if (!v.hienThi) return { text: 'Đã Ẩn', class: 'bg-orange-50 text-orange-600' };
+      
+      // Ưu tiên hiển thị Hết lượt nếu đã dùng hết
+      if (v.daSuDung >= v.soLuong) return { text: 'Hết Lượt', class: 'bg-orange-50 text-orange-600' };
+      
+      const now = new Date();
+      const start = new Date(v.ngayBatDau);
+      const end = new Date(v.ngayKetThuc);
+      
+      if (now < start) return { text: 'Sắp Diễn Ra', class: 'bg-blue-50 text-blue-600' };
+      if (now > end) return { text: 'Hết Hạn', class: 'bg-red-50 text-red-600' };
+      
+      return { text: 'Hoạt Động', class: 'bg-green-50 text-green-600' };
     }
   },
   mounted() {

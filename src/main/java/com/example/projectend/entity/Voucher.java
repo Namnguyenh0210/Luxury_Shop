@@ -75,6 +75,9 @@ public class Voucher {
     @Column(name = "TrangThai")
     private Boolean trangThai = true;
 
+    @Column(name = "HienThi")
+    private Boolean hienThi = true;
+
     @Column(name = "IsDeleted")
     private Boolean isDeleted = false;
 
@@ -232,5 +235,13 @@ public class Voucher {
 
     public void setIsDeleted(Boolean isDeleted) {
         this.isDeleted = isDeleted;
+    }
+
+    public Boolean getHienThi() {
+        return hienThi;
+    }
+
+    public void setHienThi(Boolean hienThi) {
+        this.hienThi = hienThi;
     }
 }

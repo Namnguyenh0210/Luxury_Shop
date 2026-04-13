@@ -128,6 +128,7 @@ public class BlogApiController {
                 blDTO.put("ngayBinhLuan", bl.getNgayBinhLuan());
                 blDTO.put("soLuongLike", bl.getSoLuotThich());
                 blDTO.put("tenNguoiDung", bl.getTaiKhoan() != null ? bl.getTaiKhoan().getHoTen() : "Khách");
+                blDTO.put("email", bl.getTaiKhoan() != null ? bl.getTaiKhoan().getEmail() : null);
                 blDTO.put("avatar", bl.getTaiKhoan() != null ? bl.getTaiKhoan().getAvatar() : null);
                 blDTO.put("phanHoiAdmin", bl.getPhanHoiAdmin());
                 blDTO.put("ngayPhanHoiAdmin", bl.getNgayPhanHoiAdmin());
@@ -190,7 +191,7 @@ public class BlogApiController {
             binhLuan.setTaiKhoan(taiKhoan);
             binhLuan.setNoiDung(noiDung.trim());
             binhLuan.setNgayBinhLuan(LocalDateTime.now());
-            binhLuan.setTrangThai(false); // Pending approval
+            binhLuan.setTrangThai(true); // Đã hiện ngay (post-moderation)
             binhLuan.setSoLuotThich(0);
 
             BinhLuan saved = binhLuanRepository.save(binhLuan);
@@ -206,6 +207,57 @@ public class BlogApiController {
             response.put("thanhCong", true);
             response.put("thongBao", "Bình luận đã được đăng thành công!");
             response.put("binhLuan", blDTO);
+
+        } catch (Exception e) {
+            response.put("thanhCong", false);
+            response.put("thongBao", "Lỗi: " + e.getMessage());
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    // =============================
+    // 3.5. CHỈNH SỬA BÌNH LUẬN
+    // =============================
+    @PutMapping("/binh-luan/{maBL}")
+    public ResponseEntity<Map<String, Object>> suaBinhLuan(
+            @PathVariable Long maBL,
+            @RequestBody Map<String, String> body) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+                response.put("thanhCong", false);
+                response.put("thongBao", "Vui lòng đăng nhập");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            BinhLuan bl = binhLuanRepository.findById(maBL).orElse(null);
+            if (bl == null) {
+                response.put("thanhCong", false);
+                response.put("thongBao", "Bình luận không tồn tại");
+                return ResponseEntity.ok(response);
+            }
+
+            TaiKhoan taiKhoan = userDetailsService.getTaiKhoanByEmail(auth.getName());
+            if (!bl.getTaiKhoan().getMaTK().equals(taiKhoan.getMaTK())) {
+                response.put("thanhCong", false);
+                response.put("thongBao", "Bạn không có quyền chỉnh sửa bình luận này");
+                return ResponseEntity.ok(response);
+            }
+
+            String noiDung = body.get("noiDung");
+            if (noiDung == null || noiDung.trim().isEmpty()) {
+                response.put("thanhCong", false);
+                response.put("thongBao", "Nội dung bình luận không được trống");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            bl.setNoiDung(noiDung.trim());
+            binhLuanRepository.save(bl);
+
+            response.put("thanhCong", true);
+            response.put("thongBao", "Đã cập nhật bình luận!");
+            response.put("noiDung", bl.getNoiDung());
 
         } catch (Exception e) {
             response.put("thanhCong", false);
@@ -280,9 +332,9 @@ public class BlogApiController {
                 "tenLoaiBV", bv.getLoaiBaiViet().getTenLoaiBV()) : null);
 
         if (bv.getTaiKhoan() != null) {
-            dto.put("tacGia", bv.getTaiKhoan().getHoTen());
+            dto.put("nguoiDang", bv.getTaiKhoan().getHoTen());
         } else {
-            dto.put("tacGia", "Luxury Fashion");
+            dto.put("nguoiDang", "Luxury Fashion");
         }
 
         if (includeFullContent) {

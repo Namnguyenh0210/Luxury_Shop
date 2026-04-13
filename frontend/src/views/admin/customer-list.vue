@@ -5,14 +5,14 @@
       <!-- ACTION BAR -->
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-          <div class="relative w-72">
-            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <div class="relative w-72 group">
+            <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
               <span class="material-symbols-outlined text-[20px]">search</span>
             </span>
             <input
               v-model="keyword"
               placeholder="Tìm kiếm tài khoản..."
-              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
+              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all shadow-sm font-bold text-gray-700 placeholder:text-gray-400"
             />
           </div>
           <!-- Lọc theo vai trò -->
@@ -39,15 +39,15 @@
       <!-- TABLE -->
       <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
         <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
             <tr>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Họ Tên</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">SĐT</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vai Trò</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
-              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Hành Động</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">ID</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Họ Tên</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Email</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">SĐT</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Vai Trò</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Trạng Thái</th>
+              <th class="px-6 py-4 text-center text-xs font-black text-black uppercase tracking-wider">Hành Động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -78,19 +78,23 @@
                 </span>
               </td>
               <td class="px-6 py-4 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <button @click="editUser(u)"
-                    class="text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg transition-colors">
-                    Sửa
+                <div class="flex items-center justify-center gap-4">
+                  <button @click="toggleStatus(u)" 
+                    class="text-gray-400 hover:text-[#C8A97E] transition-colors"
+                    :title="u.trangThai ? 'Khóa tài khoản' : 'Mở khóa tài khoản'">
+                    <span class="material-symbols-outlined text-[22px]">
+                      {{ u.trangThai ? 'visibility' : 'visibility_off' }}
+                    </span>
                   </button>
-                  <button @click="toggleStatus(u)"
-                    class="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                    :class="u.trangThai ? 'text-orange-600 bg-orange-50 hover:bg-orange-100' : 'text-green-600 bg-green-50 hover:bg-green-100'">
-                    {{ u.trangThai ? 'Khóa' : 'Mở khóa' }}
+                  <button @click="editUser(u)" 
+                    class="text-blue-400 hover:text-blue-600 transition-colors"
+                    title="Sửa thông tin">
+                    <span class="material-symbols-outlined text-[22px]">edit_note</span>
                   </button>
-                  <button @click="deleteUser(u.maTK)"
-                    class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
-                    Xóa
+                  <button @click="deleteUser(u.maTK)" 
+                    class="text-red-400 hover:text-red-600 transition-colors"
+                    title="Xóa tài khoản">
+                    <span class="material-symbols-outlined text-[22px]">delete</span>
                   </button>
                 </div>
               </td>

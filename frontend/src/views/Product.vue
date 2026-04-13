@@ -46,6 +46,23 @@
                                 <p class="text-base text-gray-500">{{ totalElements }} sản phẩm</p>
                             </div>
 
+                            <!-- Search -->
+                            <div class="py-5 border-b border-gray-100">
+                                <h3 class="text-base font-bold uppercase tracking-wider text-gray-700 mb-3">Tìm kiếm</h3>
+                                <div class="relative group">
+                                    <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
+                                        <span class="material-symbols-outlined text-[20px]">search</span>
+                                    </span>
+                                    <input
+                                        v-model="filters.search"
+                                        @input="fetchProducts"
+                                        type="text"
+                                        placeholder="Tìm sản phẩm..." 
+                                        class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all shadow-sm font-bold text-gray-700 placeholder:text-gray-400"
+                                    >
+                                </div>
+                            </div>
+
                             <!-- Sort -->
                             <div class="py-5 border-b border-gray-100">
                                 <h3 class="text-base font-bold uppercase tracking-wider text-gray-700 mb-3">Sắp xếp</h3>
@@ -144,11 +161,11 @@
                                 </div>
                                 <p class="text-[13px] font-bold text-gray-800 mb-3">Hoặc nhập khoảng giá phù hợp với bạn:</p>
                                 <div class="flex items-center gap-2 mb-3">
-                                    <input type="text" v-model="customMinPrice" @blur="formatInputPrice('min')" placeholder="0đ" class="w-full border border-gray-300 rounded-lg py-2 px-1 text-sm text-center outline-none focus:border-gray-900 transition-colors">
-                                    <span class="text-gray-500 font-bold">~</span>
-                                    <input type="text" v-model="customMaxPrice" @blur="formatInputPrice('max')" placeholder="100.000.000đ" class="w-full border border-gray-300 rounded-lg py-2 px-1 text-sm text-center outline-none focus:border-gray-900 transition-colors">
+                                    <input type="text" v-model="customMinPrice" @blur="formatInputPrice('min')" placeholder="0đ" class="w-full border border-gray-200 rounded-xl py-3 px-1 text-sm text-center outline-none focus:border-[#C8A97E] focus:ring-4 focus:ring-[#C8A97E]/10 transition-all font-bold text-gray-700">
+                                    <span class="text-gray-400 font-bold">~</span>
+                                    <input type="text" v-model="customMaxPrice" @blur="formatInputPrice('max')" placeholder="100.000.000đ" class="w-full border border-gray-200 rounded-xl py-3 px-1 text-sm text-center outline-none focus:border-[#C8A97E] focus:ring-4 focus:ring-[#C8A97E]/10 transition-all font-bold text-gray-700">
                                 </div>
-                                <button @click="applyCustomPrice" class="w-full py-2 bg-black border border-black rounded-lg text-sm font-bold text-white hover:bg-[#C8A97E] hover:border-[#C8A97E] transition-colors">
+                                <button @click="applyCustomPrice" class="w-full py-3 bg-[#C8A97E] border border-[#C8A97E] rounded-xl text-sm font-black text-white hover:bg-[#B88A00] hover:border-[#B88A00] transition-all shadow-lg shadow-[#C8A97E]/20 uppercase tracking-widest">
                                     Áp dụng khoảng giá
                                 </button>
                             </div>
@@ -157,7 +174,7 @@
                             <div class="pt-5">
                                 <button
                                     @click="resetFilters"
-                                    class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-gray-200 text-base font-semibold text-gray-700 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-200"
+                                    class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-[#C8A97E]/30 text-base font-bold text-gray-700 hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300 shadow-sm"
                                 >
                                     <span class="material-symbols-outlined text-lg">filter_list_off</span>
                                     Xóa bộ lọc
@@ -248,7 +265,7 @@
                                     <!-- Brand and Title -->
                                     <div class="mb-2 w-full">
                                         <p class="text-[13px] text-gray-500 uppercase tracking-widest font-bold mb-1">
-                                            {{ product.thuongHieu?.tenTH || 'Brand' }}
+                                            {{ product.thuongHieu?.tenTH || 'Thương hiệu' }}
                                         </p>
                                         <h4 class="text-gray-900 text-[17px] md:text-[18px] font-semibold leading-snug truncate w-full" :title="product.tenSP">
                                             <a :href="`/sanpham/${product.maSP}`" class="hover:underline underline-offset-2">
@@ -378,6 +395,7 @@ export default {
       // Brands
       brands: [],
       showAllBrands: false,
+      categories: [],
       
       // Price Filters
       selectedPriceLevel: null,
@@ -455,7 +473,19 @@ export default {
         this.error = 'Không thể tải sản phẩm. Vui lòng thử lại.'
       } finally {
         this.loading = false
+        this.updatePageTitle()
       } 
+    }, 
+    async fetchCategories() {
+      try {
+        const res = await axios.get('/categories')
+        if (res.status === 200) {
+          this.categories = res.data
+          this.updatePageTitle()
+        }
+      } catch (err) {
+        console.warn('Không lấy được danh mục', err)
+      }
     }, 
 
     //WISHLIST
@@ -524,17 +554,6 @@ export default {
       }
     },
     
-  //   async checkFavorite(productId) {
-  //   try {
-  //     const res = await axios.get('/api/favorites/check', {
-  //       params: { maSP: productId },
-  //       withCredentials: true
-  //     })
-  //     this.favoriteMap[productId] = res.data.isFavorite
-  //   } catch (e) {
-  //     this.favoriteMap[productId] = false
-  //   }
-  // },
 
    isFavorite(productId) {
       return !!this.favoriteMap[productId]
@@ -640,6 +659,53 @@ export default {
       this.fetchProducts();
     },
 
+    updatePageTitle() {
+      // 1. Gender check
+      let genderText = ""
+      if (this.filters.gioiTinh === 0) genderText = "Nam"
+      else if (this.filters.gioiTinh === 1) genderText = "Nữ"
+      else if (this.filters.gioiTinh === 2) genderText = "Unisex"
+
+      // 2. Category check
+      let categoryText = ""
+      if (this.filters.loai && this.categories.length > 0) {
+        const cat = this.categories.find(c => c.maLoai == this.filters.loai)
+        if (cat) categoryText = cat.tenLoai
+      }
+
+      // 3. Brand check
+      let brandText = ""
+      if (this.filters.thuongHieu && this.brands.length > 0) {
+        const b = this.brands.find(br => br.maTH == this.filters.thuongHieu)
+        if (b) brandText = b.tenTH
+      }
+
+      // 4. Search check
+      if (this.filters.search) {
+        this.pageTitle = `Kết quả cho "${this.filters.search}"`
+        return
+      }
+
+      // 5. Combine everything
+      if (categoryText && brandText && genderText) {
+        this.pageTitle = `${categoryText} ${brandText} - Thời trang ${genderText}`
+      } else if (categoryText && genderText) {
+        this.pageTitle = `${categoryText} - Thời trang ${genderText}`
+      } else if (brandText && genderText) {
+        this.pageTitle = `Thời trang ${genderText} - ${brandText}`
+      } else if (categoryText && brandText) {
+        this.pageTitle = `${categoryText} - ${brandText}`
+      } else if (categoryText) {
+        this.pageTitle = `Bộ sưu tập ${categoryText}`
+      } else if (brandText) {
+        this.pageTitle = `Thương hiệu ${brandText}`
+      } else if (genderText) {
+        this.pageTitle = `Thời trang ${genderText}`
+      } else {
+        this.pageTitle = "Tất cả sản phẩm"
+      }
+    },
+
     formatInputPrice(type) {
       if (type === 'min' && this.customMinPrice) {
           let val = parseInt(this.customMinPrice.toString().replace(/\D/g, '')) || 0;
@@ -654,30 +720,29 @@ export default {
       const path = this.$route.path
       const query = this.$route.query
       
+      // Sync gender from path
       this.filters.gioiTinh = null
       if (path.includes('/nam')) {
         this.filters.gioiTinh = 0
-        this.pageTitle = "Bộ sưu tập Nam"
       } else if (path.includes('/nu')) {
         this.filters.gioiTinh = 1
-        this.pageTitle = "Bộ sưu tập Nữ"
-      } else {
-        this.pageTitle = "Tất cả sản phẩm"
       }
 
+      // Sync category from query
       if (query.loai) {
         this.filters.loai = parseInt(query.loai)
       } else {
         this.filters.loai = null
       }
       
+      // Sync search from query
       if (query.search) {
         this.filters.search = query.search
-        this.pageTitle = `Kết quả tìm kiếm cho "${query.search}"`
       } else {
         this.filters.search = null
       }
 
+      // Sync brand from query
       if (query.thuongHieu) {
         this.filters.thuongHieu = parseInt(query.thuongHieu)
       } else {
@@ -686,11 +751,13 @@ export default {
 
       this.currentPage = 0
       this.fetchProducts()
+      this.updatePageTitle() 
     }
   },
 
   mounted() {
     document.addEventListener('click', this.handleGlobalClick)
+    this.fetchCategories()
     this.parseQueryParams()
     this.fetchProducts()
     this.fetchFavorites()

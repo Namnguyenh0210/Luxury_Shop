@@ -49,23 +49,23 @@
       <div class="flex flex-wrap items-center justify-between gap-6">
         <div class="flex flex-wrap items-center gap-4">
           <!-- Search -->
-          <div class="relative w-72">
-            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <div class="relative w-72 group">
+            <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
               <span class="material-symbols-outlined text-[20px]">search</span>
             </span>
             <input
               v-model="keyword"
               @input="onSearch"
               placeholder="Tìm tên khách hàng, email..."
-              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
+              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all shadow-sm font-bold text-gray-700 placeholder:text-gray-400"
             />
           </div>
 
           <!-- Custom Status Dropdown -->
           <div class="relative min-w-[200px]">
             <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
-              class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-2.5 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
-              <span class="truncate font-medium text-gray-700">{{ getStatusLabel(status) || 'Tất cả trạng thái' }}</span>
+              class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-3 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
+              <span class="truncate font-black text-gray-700 uppercase tracking-widest text-[11px]">{{ getStatusLabel(status) || 'Tất cả trạng thái' }}</span>
               <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
             </button>
             <div v-if="openDropdown === 'status'" @click.stop class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -92,31 +92,28 @@
         </div>
 
         <!-- Time Range Filters -->
-        <div class="flex items-center bg-gray-100 p-1 rounded-2xl shadow-inner">
-          <button 
-            v-for="range in timeRanges" 
-            :key="range.value"
-            @click="setTimeRange(range.value)"
-            class="px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap"
-            :class="timeRange === range.value ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
-          >
-            {{ range.label }}
-          </button>
+        <!-- Date Range Filter -->
+        <div class="flex items-center gap-2 bg-white rounded-2xl p-1.5 border border-[#C8A97E]/30 shadow-sm shadow-[#C8A97E]/5">
+          <input type="date" v-model="startDate" @change="onSearch"
+            class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[112px] cursor-pointer">
+          <span class="text-[#C8A97E] px-0.5 font-bold">→</span>
+          <input type="date" v-model="endDate" @change="onSearch"
+            class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[112px] cursor-pointer">
         </div>
       </div>
 
       <!-- TABLE -->
       <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
         <table v-if="orders.length > 0" class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
             <tr>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mã ĐH</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Khách Hàng</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ngày Đặt</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tổng Tiền</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng Thái Đơn</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Thanh Toán</th>
-              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Chi Tiết</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Mã ĐH</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Khách Hàng</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Ngày Đặt</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Tổng Tiền</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Trạng Thái Đơn</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Thanh Toán</th>
+              <th class="px-6 py-4 text-center text-xs font-black text-black uppercase tracking-wider">Hành Động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -140,12 +137,14 @@
                   {{ payStatusText(order.trangThaiThanhToan) }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-right">
-                <router-link :to="`/admin/orders/${order.maDH}`"
-                  class="text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1">
-                  Xem
-                  <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                </router-link>
+              <td class="px-6 py-4 text-center">
+                <div class="flex items-center justify-center">
+                  <router-link :to="`/admin/orders/${order.maDH}`"
+                    class="flex items-center gap-2 px-4 py-2 bg-[#C8A97E]/10 text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 group border border-[#C8A97E]/30 shadow-sm active:scale-95">
+                    Xem chi tiết
+                    <span class="material-symbols-outlined text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                  </router-link>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -186,16 +185,10 @@ export default {
       pendingOrders: [],
       keyword: '',
       status: '',
-      timeRange: '',
+      startDate: '',
+      endDate: '',
       page: 0,
       totalPages: 0,
-      timeRanges: [
-        { label: 'Tất cả', value: '' },
-        { label: 'Hôm nay', value: 'day' },
-        { label: 'Tuần này', value: 'week' },
-        { label: 'Tháng này', value: 'month' },
-        { label: 'Năm nay', value: 'year' },
-      ],
       openDropdown: null,
       statusOptions: [
         { value: '0', label: 'Chờ xác nhận' },
@@ -203,9 +196,10 @@ export default {
         { value: '2', label: 'Đang giao' },
         { value: '3', label: 'Đã giao' },
         { value: '4', label: 'Hoàn tất' },
+        { value: '6', label: 'Đã đánh giá' },
         { value: '5', label: 'Đã hủy' },
-        { value: '6', label: 'Lỗi thanh toán' },
-        { value: '7', label: 'Chờ thanh toán' }
+        { value: '7', label: 'Chờ thanh toán' },
+        { value: '8', label: 'Lỗi thanh toán' }
       ]
     }
   },
@@ -217,7 +211,8 @@ export default {
           params: { 
             keyword: this.keyword, 
             status: this.status, 
-            timeRange: this.timeRange,
+            startDate: this.startDate,
+            endDate: this.endDate,
             page: this.page,
             size: 10
           },
@@ -249,8 +244,10 @@ export default {
     resetFilters() {
       this.keyword = ''
       this.status = ''
-      this.timeRange = ''
-      this.onSearch()
+      this.startDate = ''
+      this.endDate = ''
+      this.page = 0
+      this.fetchOrders()
     },
 
     closeDropdowns() {
@@ -296,8 +293,9 @@ export default {
         3: 'Đã giao', 
         4: 'Hoàn tất', 
         5: 'Đã hủy',
-        6: 'Lỗi thanh toán',
-        7: 'Chờ thanh toán'
+        6: 'Đã đánh giá',
+        7: 'Chờ thanh toán',
+        8: 'Lỗi thanh toán'
       }[s] ?? 'Không xác định'
     },
 
@@ -310,7 +308,8 @@ export default {
         4: 'bg-green-100 text-green-700',
         5: 'bg-red-100   text-red-700',
         6: 'bg-orange-100 text-orange-700',
-        7: 'bg-cyan-100 text-cyan-700 font-black animate-pulse'
+        7: 'bg-cyan-100 text-cyan-700 font-black animate-pulse',
+        8: 'bg-gray-100 text-gray-700 font-medium'
       }[s] ?? 'bg-gray-100 text-gray-600'
     },
 
@@ -320,7 +319,9 @@ export default {
         1: 'Đã thanh toán',
         2: 'Thất bại',
         3: 'Hết hạn',
-        4: 'COD - Chưa thu'
+        4: 'COD - Chưa thu',
+        5: 'Chờ hoàn tiền',
+        6: 'Đã hoàn tiền'
       }[s] ?? 'Không xác định'
     },
 
@@ -330,7 +331,9 @@ export default {
         1: 'bg-green-100 text-green-700 border-green-200',
         2: 'bg-red-100 text-red-700 border-red-200',
         3: 'bg-gray-100 text-gray-500 border-gray-200',
-        4: 'bg-blue-50 text-blue-600 border-blue-200'
+        4: 'bg-blue-50 text-blue-600 border-blue-200',
+        5: 'bg-orange-100 text-orange-700 border-orange-200',
+        6: 'bg-blue-100 text-blue-700 border-blue-200'
       }[s] ?? 'bg-gray-50 text-gray-400'
     },
     
