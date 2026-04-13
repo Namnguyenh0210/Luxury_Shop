@@ -269,7 +269,8 @@ public class DonHangService {
      */
     @Transactional
     public void confirmPaymentAndDeductStock(Long orderId) {
-        if (orderId == null) return;
+        if (orderId == null)
+            return;
         DonHang dh = donHangRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng #" + orderId));
 
@@ -319,7 +320,8 @@ public class DonHangService {
 
     @Transactional
     public void handlePaymentExpired(Long orderId) {
-        if (orderId == null) return;
+        if (orderId == null)
+            return;
         DonHang dh = donHangRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng #" + orderId));
 
@@ -394,9 +396,11 @@ public class DonHangService {
      */
     @Transactional
     public void reportOrderNotReceived(Long id, String reason, String description) {
-        if (id == null) return;
+        if (id == null)
+            return;
         DonHang dh = donHangRepository.findById(id).orElse(null);
-        if (dh == null) return;
+        if (dh == null)
+            return;
 
         if (dh.getTrangThaiDH() != 3) {
             throw new RuntimeException("Chỉ có thể báo lỗi khi đơn hàng đang ở trạng thái Đã giao");
@@ -458,7 +462,7 @@ public class DonHangService {
 
         // Cập nhật trạng thái
         donHang.setTrangThaiDH(trangThaiMoi);
-        
+
         // LOGIC HOÀN TIỀN: Nếu đơn hàng đã THANH TOÁN (1) mà bị HỦY (5)
         if (trangThaiMoi == 5 && donHang.getTrangThaiThanhToan() == 1) {
             donHang.setTrangThaiThanhToan(5); // Chờ hoàn tiền
@@ -524,9 +528,11 @@ public class DonHangService {
      * nếu tất cả các sản phẩm trong đơn hàng đã được đánh giá.
      */
     public void checkAndUpdateOrderStatusAfterReview(Long maDH) {
-        if (maDH == null) return;
+        if (maDH == null)
+            return;
         DonHang donHang = donHangRepository.findById(maDH).orElse(null);
-        if (donHang == null) return;
+        if (donHang == null)
+            return;
 
         // Nếu trạng thái hiện tại không phải là Hoàn tất (4) hoặc Đã giao (3) thì không
         // làm gì
@@ -685,7 +691,8 @@ public class DonHangService {
      * SEARCH ADMIN (keyword = name/email; trangThai = mã hoặc tên; timeRange =
      * day/week/month/year)
      */
-    public Page<DonHang> searchAdmin(String keyword, String trangThai, String startDateStr, String endDateStr, Pageable pageable) {
+    public Page<DonHang> searchAdmin(String keyword, String trangThai, String startDateStr, String endDateStr,
+            Pageable pageable) {
         Integer statusCode = null;
         if (trangThai != null && !trangThai.isBlank()) {
             statusCode = convertStatusToCodeFlexible(trangThai.trim());
@@ -850,7 +857,7 @@ public class DonHangService {
                 "ADMIN",
                 "Xác nhận đã hoàn tiền thành công: " + (ghiChuAdmin != null ? ghiChuAdmin : "N/A"));
         lichSuDonHangRepository.save(history);
-        
+
         log.info("✅ Admin đã xác nhận hoàn tiền cho đơn hàng #{}", maDH);
     }
 }

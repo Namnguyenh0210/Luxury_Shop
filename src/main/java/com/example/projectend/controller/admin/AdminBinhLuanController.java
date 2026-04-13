@@ -29,7 +29,7 @@ public class AdminBinhLuanController {
             @RequestParam(required = false) String endDate,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
+
         Map<String, Object> response = new HashMap<>();
         try {
             LocalDateTime start = null;
@@ -45,33 +45,33 @@ public class AdminBinhLuanController {
                     (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null,
                     trangThai,
                     start, end,
-                    PageRequest.of(page, size)
-            );
+                    PageRequest.of(page, size));
 
             List<Map<String, Object>> danhSach = new ArrayList<>();
-            for(BinhLuan bl : binhLuanPage.getContent()) {
+            for (BinhLuan bl : binhLuanPage.getContent()) {
                 Map<String, Object> dto = new HashMap<>();
                 dto.put("maBL", bl.getMaBL());
                 dto.put("noiDung", bl.getNoiDung());
                 dto.put("ngayBinhLuan", bl.getNgayBinhLuan() != null ? bl.getNgayBinhLuan().format(FMT) : "");
                 dto.put("trangThai", bl.getTrangThai());
                 dto.put("phanHoiAdmin", bl.getPhanHoiAdmin());
-                dto.put("ngayPhanHoiAdmin", bl.getNgayPhanHoiAdmin() != null ? bl.getNgayPhanHoiAdmin().format(FMT) : null);
+                dto.put("ngayPhanHoiAdmin",
+                        bl.getNgayPhanHoiAdmin() != null ? bl.getNgayPhanHoiAdmin().format(FMT) : null);
                 dto.put("reportCount", bl.getSoLuotBaoCao());
 
-                if(bl.getTaiKhoan() != null) {
+                if (bl.getTaiKhoan() != null) {
                     dto.put("tenNguoiDung", bl.getTaiKhoan().getHoTen());
                     dto.put("email", bl.getTaiKhoan().getEmail());
                 } else {
                     dto.put("tenNguoiDung", "Khách");
                 }
 
-                if(bl.getBaiViet() != null) {
+                if (bl.getBaiViet() != null) {
                     dto.put("tieuDe", bl.getBaiViet().getTieuDe());
                 } else {
                     dto.put("tieuDe", "Bài viết không xác định");
                 }
-                
+
                 danhSach.add(dto);
             }
 
@@ -79,7 +79,7 @@ public class AdminBinhLuanController {
             response.put("danhSach", danhSach);
             response.put("tongSo", binhLuanPage.getTotalElements());
             response.put("tongTrang", binhLuanPage.getTotalPages());
-            
+
         } catch (Exception e) {
             response.put("thanhCong", false);
             response.put("thongBao", "Lỗi: " + e.getMessage());
@@ -88,11 +88,12 @@ public class AdminBinhLuanController {
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<Map<String, Object>> updateTrangThai(@PathVariable Long id, @RequestBody Map<String, Boolean> body) {
+    public ResponseEntity<Map<String, Object>> updateTrangThai(@PathVariable Long id,
+            @RequestBody Map<String, Boolean> body) {
         Map<String, Object> response = new HashMap<>();
         try {
             Optional<BinhLuan> opt = binhLuanRepository.findById(id);
-            if(opt.isPresent()) {
+            if (opt.isPresent()) {
                 BinhLuan bl = opt.get();
                 bl.setTrangThai(body.get("trangThai"));
                 binhLuanRepository.save(bl);
@@ -110,11 +111,12 @@ public class AdminBinhLuanController {
     }
 
     @PostMapping("/{id}/reply")
-    public ResponseEntity<Map<String, Object>> replyBinhLuan(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<Map<String, Object>> replyBinhLuan(@PathVariable Long id,
+            @RequestBody Map<String, String> body) {
         Map<String, Object> response = new HashMap<>();
         try {
             Optional<BinhLuan> opt = binhLuanRepository.findById(id);
-            if(opt.isPresent()) {
+            if (opt.isPresent()) {
                 BinhLuan bl = opt.get();
                 bl.setPhanHoiAdmin(body.get("phanHoiAdmin"));
                 bl.setNgayPhanHoiAdmin(LocalDateTime.now());
@@ -152,8 +154,8 @@ public class AdminBinhLuanController {
         try {
             List<Object[]> queryResult = binhLuanRepository.getTopBlogsByComments();
             List<Map<String, Object>> topBlogs = new ArrayList<>();
-            
-            for(int i = 0; i < Math.min(queryResult.size(), 10); i++) {
+
+            for (int i = 0; i < Math.min(queryResult.size(), 10); i++) {
                 Map<String, Object> m = new HashMap<>();
                 m.put("tieuDe", queryResult.get(i)[0]);
                 m.put("tongBL", queryResult.get(i)[1]);

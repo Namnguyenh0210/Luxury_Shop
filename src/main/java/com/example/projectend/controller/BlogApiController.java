@@ -273,7 +273,8 @@ public class BlogApiController {
     public ResponseEntity<Map<String, Object>> likeBinhLuan(@PathVariable Long maBL) {
         Map<String, Object> response = new HashMap<>();
         try {
-            if (maBL == null) throw new IllegalArgumentException("maBL is null");
+            if (maBL == null)
+                throw new IllegalArgumentException("maBL is null");
             BinhLuan bl = binhLuanRepository.findById(maBL)
                     .orElseThrow(() -> new RuntimeException("Bình luận không tồn tại"));
 
@@ -296,7 +297,8 @@ public class BlogApiController {
     public ResponseEntity<Map<String, Object>> reportBinhLuan(@PathVariable Long maBL) {
         Map<String, Object> response = new HashMap<>();
         try {
-            if (maBL == null) throw new IllegalArgumentException("maBL is null");
+            if (maBL == null)
+                throw new IllegalArgumentException("maBL is null");
             BinhLuan bl = binhLuanRepository.findById(maBL)
                     .orElseThrow(() -> new RuntimeException("Bình luận không tồn tại"));
 

@@ -51,7 +51,7 @@ public class AdminTaiKhoanController {
 
                 if (account.getVaiTros() == null || account.getVaiTros().isEmpty()) {
                     vaiTroRepository.findAll().stream()
-                            .filter(r -> r.getTenVaiTro().contains("USER")).findFirst()
+                            .filter(r -> r.getTenVaiTro().contains("USER") || r.getTenVaiTro().contains("KHACH")).findFirst()
                             .ifPresent(r -> {
                                 account.setVaiTros(new HashSet<>());
                                 account.addVaiTro(r);
