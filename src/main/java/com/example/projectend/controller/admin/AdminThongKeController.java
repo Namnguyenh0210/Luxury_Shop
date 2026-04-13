@@ -40,7 +40,7 @@ public class AdminThongKeController {
         BigDecimal totalRevenue = donHangRepository.sumTotalRevenue();
         if (totalRevenue == null)
             totalRevenue = BigDecimal.ZERO;
-
+        
         long newOrders = donHangRepository.count(); // Tổng số đơn từ trước đến nay
         long soldProducts = donHangChiTietRepository.countTotalSold();
         long totalCustomers = taiKhoanRepository.countUsersOnly(); // Chỉ đếm khách hàng thực (ROLE_USER)
