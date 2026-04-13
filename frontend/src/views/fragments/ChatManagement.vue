@@ -1,16 +1,15 @@
 <template>
   <div class="flex h-full overflow-hidden bg-white">
     <!-- LEFT PANEL: Conversation List -->
-    <div class="flex w-[22rem] flex-col border-r border-gray-100 bg-white">
-      <div class="p-6 border-b border-gray-50">
-        <h2 class="text-xs font-black uppercase tracking-[0.25em] text-gray-400 mb-6 px-1">Conversations</h2>
+    <div class="flex w-[22rem] flex-col border-r border-[#C8A97E]/30 bg-white">
+      <div class="p-6 border-b border-[#C8A97E]/30 bg-[#EFE9DB]/30">
         <div class="relative group">
-          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-[20px] group-focus-within:text-[#C8A97E] transition-colors">search</span>
+          <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-[20px] group-focus-within:text-black transition-colors">search</span>
           <input 
             type="text" 
             v-model="searchKeyword" 
             placeholder="Tìm theo tên hoặc email..." 
-            class="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-[13px] focus:ring-2 focus:ring-[#C8A97E]/20 focus:bg-white transition-all font-medium placeholder:text-gray-300" 
+            class="w-full pl-12 pr-4 py-3 bg-[#EFE9DB] border border-[#C8A97E]/20 rounded-2xl text-black font-black focus:ring-2 focus:ring-[#C8A97E]/40 focus:bg-white transition-all placeholder:text-gray-500 placeholder:font-medium" 
           />
         </div>
       </div>
@@ -79,7 +78,7 @@
     <div class="flex-1 flex flex-col bg-[#FDFDFD] relative">
       <template v-if="selectedConv">
         <!-- Chat Header: Premium Luxury Design -->
-        <div class="h-24 px-10 border-b border-gray-100 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-20">
+        <div class="h-24 px-10 border-b border-[#C8A97E]/30 flex items-center justify-between bg-white/80 backdrop-blur-md sticky top-0 z-20">
           <div class="flex items-center gap-6">
             <div class="relative group">
               <div class="size-14 rounded-2xl bg-slate-900 flex items-center justify-center shadow-2xl border-2 border-white ring-1 ring-[#C8A97E]/30 overflow-hidden">
@@ -196,7 +195,7 @@
 
     <!-- RIGHT PANEL: Customer Info (Dynamic/Collapsible) -->
     <transition name="panel">
-      <div v-if="showRightPanel && selectedConv?.taiKhoan" class="w-[22rem] border-l border-gray-50 bg-white flex flex-col z-30 overflow-y-auto custom-scroll shadow-[-10px_0_30px_rgba(0,0,0,0.02)]">
+      <div v-if="showRightPanel && selectedConv?.taiKhoan" class="w-[22rem] border-l border-[#C8A97E]/30 bg-white flex flex-col z-30 overflow-y-auto custom-scroll shadow-[-10px_0_30px_rgba(0,0,0,0.02)]">
         <!-- Close Button for Mobile/Drawer feel -->
         <div class="p-8 border-b border-gray-50 flex items-center justify-between sticky top-0 bg-white/90 backdrop-blur-md z-10">
            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">Hồ sơ khách hàng</h4>
@@ -389,11 +388,12 @@ export default {
           this.selectedConv.trangThai = 'HUMAN';
           this.fetchConversations(true);
        } catch (e) {
-          alert('Lỗi khi tiếp nhận cuộc trò chuyện');
+          window.$toast.error('Lỗi khi tiếp nhận cuộc trò chuyện');
        }
     },
     async closeConv() {
-       if (!confirm('Bạn có chắc chắn muốn kết thúc cuộc hỗ trợ này?')) return;
+       const ok = await window.$confirm('Bạn có chắc chắn muốn kết thúc cuộc hỗ trợ này?');
+       if (!ok) return;
        try {
           await axios.post('/chat/admin/status', 
              { conversationId: this.selectedConv.maCuocTroChuyen, status: 'CLOSED' },

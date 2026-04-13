@@ -2,48 +2,85 @@
   
     <div class="p-8 space-y-6">
 
-      <!-- ACTION BAR -->
+      <!-- ACTION BAR & FILTERS -->
       <div class="flex flex-wrap items-center justify-between gap-4">
-        <div class="relative w-72">
-          <span class="absolute inset-y-0 left-3 flex items-center text-gray-400">
-            <span class="material-symbols-outlined text-[20px]">search</span>
-          </span>
-          <input
-            v-model="tuKhoa"
-            placeholder="Tìm bài viết..."
-            class="w-full border border-[#C8A97E]/50 rounded-2xl pl-10 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 hover:border-[#C8A97E] transition-all shadow-sm"
-          />
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Search -->
+          <div class="relative w-64 group">
+            <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
+              <span class="material-symbols-outlined text-[20px]">search</span>
+            </span>
+            <input
+              v-model="tuKhoa"
+              placeholder="Tìm bài viết..."
+              class="w-full border border-[#C8A97E]/50 rounded-2xl pl-12 pr-4 py-3 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all shadow-sm font-bold text-gray-700 placeholder:text-gray-400"
+            />
+          </div>
+
+          <!-- Date Filters -->
+          <div class="flex items-center gap-2 bg-white rounded-2xl p-1.5 border border-[#C8A97E]/30 shadow-sm shadow-[#C8A97E]/5">
+            <input type="date" v-model="tuNgay" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
+            <span class="text-[#C8A97E] px-1 font-bold">→</span>
+            <input type="date" v-model="denNgay" class="bg-transparent border-none text-[11px] font-black text-gray-700 focus:ring-0 w-[115px] cursor-pointer">
+          </div>
+
+          <!-- Category Filter -->
+          <div class="relative min-w-[180px]">
+            <button @click.stop="openDropdown = openDropdown === 'loai' ? null : 'loai'"
+              class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-3 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
+              <span class="truncate font-black text-gray-700 uppercase tracking-widest text-[11px]">
+                {{ danhSachLoai.find(l => l.maLoaiBV == locLoai)?.tenLoaiBV || 'Tất cả loại' }}
+              </span>
+              <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+            </button>
+            <div v-if="openDropdown === 'loai'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+              <div @click="locLoai = ''; openDropdown = null" class="px-5 py-3 text-sm cursor-pointer hover:bg-[#C8A97E]/10 transition-colors text-gray-600 border-b border-gray-50" :class="!locLoai ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Tất cả loại</div>
+              <div v-for="loai in danhSachLoai" :key="loai.maLoaiBV" @click="locLoai = loai.maLoaiBV; openDropdown = null" 
+                class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="locLoai == loai.maLoaiBV ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">
+                {{ loai.tenLoaiBV }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="relative min-w-[160px]">
+            <button @click.stop="openDropdown = openDropdown === 'status' ? null : 'status'"
+              class="w-full border border-[#C8A97E]/50 rounded-2xl px-5 py-3 pr-10 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all shadow-sm flex items-center justify-between">
+              <span class="truncate font-black text-gray-700 uppercase tracking-widest text-[11px]">{{ getStatusLocLabel(trangThaiLoc) || 'Tất cả trạng thái' }}</span>
+              <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+            </button>
+            <div v-if="openDropdown === 'status'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+              <div @click="trangThaiLoc = ''; openDropdown = null" class="px-5 py-3 text-sm cursor-pointer hover:bg-[#C8A97E]/10 transition-colors text-gray-600 border-b border-gray-50" :class="trangThaiLoc === '' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Tất cả trạng thái</div>
+              <div @click="trangThaiLoc = 'true'; openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="trangThaiLoc === 'true' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Đã xuất bản</div>
+              <div @click="trangThaiLoc = 'false'; openDropdown = null" class="px-5 py-2.5 text-sm hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="trangThaiLoc === 'false' ? 'bg-[#C8A97E]/10 font-bold text-[#C8A97E]' : ''">Đã ẩn (Bản nháp)</div>
+            </div>
+          </div>
+
+          <button @click="resetFilters" class="size-11 flex items-center justify-center rounded-2xl border border-[#C8A97E]/30 text-[#C8A97E] hover:bg-[#C8A97E] hover:text-white transition-all group" title="Xóa lọc">
+            <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-500">refresh</span>
+          </button>
         </div>
+
         <button @click="moModal()"
-          class="flex items-center gap-2 bg-yellow-600 hover:bg-yellow-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-colors">
-          <span class="material-symbols-outlined text-[18px]">add</span>
+          class="flex items-center gap-2 bg-[#C8A97E] hover:bg-[#B88A00] text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg shadow-[#C8A97E]/20 transition-all active:scale-95">
+          <span class="material-symbols-outlined text-[20px]">add</span>
           Thêm Bài Viết
         </button>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <input type="date" v-model="tuNgay"
-               class="border rounded-xl px-3 py-2 text-sm" />
-
-        <span>→</span>
-
-        <input type="date" v-model="denNgay"
-               class="border rounded-xl px-3 py-2 text-sm" />
       </div>
 
       <!-- BẢNG DANH SÁCH -->
       <div class="bg-white rounded-2xl border border-[#C8A97E] shadow-sm overflow-hidden">
         <table class="w-full text-sm">
-          <thead class="bg-gray-50 border-b border-gray-200">
+          <thead class="bg-[#EFE9DB] border-b border-[#C8A97E]/30">
             <tr>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Hình Ảnh</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tiêu Đề</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Loại</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Người Đăng</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Trạng Thái</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ngày Đăng</th>
-              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Hành Động</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">ID</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Hình Ảnh</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Tiêu Đề</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Loại</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Người Đăng</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Trạng Thái</th>
+              <th class="px-6 py-4 text-left text-xs font-black text-black uppercase tracking-wider">Ngày Đăng</th>
+              <th class="px-6 py-4 text-center text-xs font-black text-black uppercase tracking-wider">Hành Động</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -73,14 +110,23 @@
               </td>
               <td class="px-6 py-4 text-gray-600">{{ formatDate(bv.ngayDang) }}</td>
               <td class="px-6 py-4 text-center">
-                <div class="flex items-center justify-center gap-2">
-                  <button @click="suaBaiViet(bv)"
-                    class="text-xs font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 px-3 py-1.5 rounded-lg transition-colors">
-                    Sửa
+                <div class="flex items-center justify-center gap-4">
+                  <button @click="doiTrangThai(bv)" 
+                    class="text-gray-400 hover:text-[#C8A97E] transition-colors"
+                    :title="bv.trangThai ? 'Ẩn bài viết' : 'Hiện bài viết'">
+                    <span class="material-symbols-outlined text-[22px]">
+                      {{ bv.trangThai ? 'visibility' : 'visibility_off' }}
+                    </span>
                   </button>
-                  <button @click="xoaBaiViet(bv.maBV)"
-                    class="text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-colors">
-                    Xóa
+                  <button @click="suaBaiViet(bv)" 
+                    class="text-blue-400 hover:text-blue-600 transition-colors"
+                    title="Sửa bài viết">
+                    <span class="material-symbols-outlined text-[22px]">edit_note</span>
+                  </button>
+                  <button @click="xoaBaiViet(bv.maBV)" 
+                    class="text-red-400 hover:text-red-600 transition-colors"
+                    title="Xóa bài viết">
+                    <span class="material-symbols-outlined text-[22px]">delete</span>
                   </button>
                 </div>
               </td>
@@ -225,7 +271,9 @@ export default {
         hinhAnh: '',
         maLoaiBV: '',
         trangThai: true
-      }
+      },
+      trangThaiLoc: '',
+      openDropdown: null
     }
   },
 
@@ -254,15 +302,64 @@ export default {
         ds = ds.filter(b => new Date(b.ngayDang) <= new Date(this.denNgay))
       }
 
+      // 🚦 lọc theo trạng thái
+      if (this.trangThaiLoc !== '') {
+        const target = this.trangThaiLoc === 'true'
+        ds = ds.filter(b => b.trangThai === target)
+      }
+
       return ds
     }
   },
 
   async mounted() {
+    window.addEventListener('click', this.closeDropdowns)
     await this.taiDuLieu()
   },
 
+  beforeUnmount() {
+    window.removeEventListener('click', this.closeDropdowns)
+  },
+
   methods: {
+    closeDropdowns() {
+      this.openDropdown = null
+    },
+
+    resetFilters() {
+      this.tuKhoa = ''
+      this.tuNgay = ''
+      this.denNgay = ''
+      this.locLoai = ''
+      this.trangThaiLoc = ''
+    },
+
+    getStatusLocLabel(val) {
+      if (val === 'true') return 'Đã xuất bản'
+      if (val === 'false') return 'Đã ẩn'
+      return ''
+    },
+
+    async doiTrangThai(bv) {
+      try {
+        const confirmMsg = bv.trangThai ? 'Bạn có muốn ẩn bài viết này?' : 'Bạn có muốn xuất bản bài viết này?'
+        const ok = await window.$confirm(confirmMsg)
+        if (!ok) return
+
+        const res = await axios.put(`/admin/blogs/${bv.maBV}`, {
+          ...bv,
+          maLoaiBV: bv.loaiBaiViet?.maLoaiBV || null,
+          trangThai: !bv.trangThai
+        }, { withCredentials: true })
+
+        if (res.data.thanhCong) {
+          bv.trangThai = !bv.trangThai
+          // Optional: re-fetch or just update local
+        }
+      } catch (e) {
+        window.$alert('Lỗi cập nhật trạng thái', 'Lỗi')
+      }
+    },
     async taiDuLieu() {
       try {
         const res = await axios.get('/admin/blogs', { withCredentials: true })

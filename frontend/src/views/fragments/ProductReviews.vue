@@ -291,7 +291,7 @@ export default {
     },
 
     async baoCaoDanhGia(maDG) {
-      if (!confirm('Bạn có chắc chắn muốn báo cáo nội dung này là spam / xúc phạm?')) return
+      if (!await window.$confirm('Bạn có chắc chắn muốn báo cáo nội dung này là spam / xúc phạm?')) return
       try {
         const res = await axios.post(`/san-pham/danh-gia/${maDG}/report`)
         if (res.data.thanhCong) {

@@ -239,7 +239,7 @@
             
             <div v-else-if="order.trangThaiDH >= 4 && order.trangThaiDH !== 8 && order.trangThaiDH !== 7 && !order.khachBaoChuaNhan" class="text-center py-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-[0.3em] italic">
-                 {{ order.trangThaiDH >= 4 && order.trangThaiDH !== 5 ? 'Hợp đồng này đã được thực hiện hoàn tất' : 'Hợp đồng này đã bị hủy bỏ' }}
+                 {{ order.trangThaiDH >= 4 && order.trangThaiDH !== 5 ? 'Giao dịch này đã được thực hiện hoàn tất' : 'Giao dịch này đã bị hủy bỏ' }}
                </p>
             </div>
           </div>
@@ -396,7 +396,7 @@ export default {
     },
     
     async cancelReportedOrder() {
-      const reason = prompt("Nhập lý do hủy đơn (ví dụ: Giao thất bại, đã hoàn tiền):", "Khách báo chưa nhận được hàng: " + this.order.lyDoChuaNhan)
+      const reason = await window.$prompt("Nhập lý do hủy đơn (ví dụ: Giao thất bại, đã hoàn tiền):", { defaultValue: "Khách báo chưa nhận được hàng: " + this.order.lyDoChuaNhan })
       if (reason === null) return
       
       try {
@@ -436,7 +436,7 @@ export default {
     },
 
     async confirmRefund() {
-      const ghiChu = prompt("Nhập ghi chú hoàn tiền (Tùy chọn):", "Đã chuyển khoản trả khách qua " + (this.order.hinhThucThanhToan?.tenHinhThuc || 'Stk'))
+      const ghiChu = await window.$prompt("Nhập ghi chú hoàn tiền (Tùy chọn):", { defaultValue: "Đã chuyển khoản trả khách qua " + (this.order.hinhThucThanhToan?.tenHinhThuc || 'Stk') })
       if (ghiChu === null) return
 
       try {

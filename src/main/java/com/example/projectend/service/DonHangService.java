@@ -685,23 +685,24 @@ public class DonHangService {
      * SEARCH ADMIN (keyword = name/email; trangThai = mã hoặc tên; timeRange =
      * day/week/month/year)
      */
-    public Page<DonHang> searchAdmin(String keyword, String trangThai, String timeRange, Pageable pageable) {
+    public Page<DonHang> searchAdmin(String keyword, String trangThai, String startDateStr, String endDateStr, Pageable pageable) {
         Integer statusCode = null;
         if (trangThai != null && !trangThai.isBlank()) {
             statusCode = convertStatusToCodeFlexible(trangThai.trim());
         }
 
         LocalDateTime startDate = null;
-        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime endDate = null;
 
-        if (timeRange != null && !timeRange.isBlank()) {
-            startDate = switch (timeRange.toLowerCase()) {
-                case "day" -> LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-                case "week" -> LocalDateTime.now().minusWeeks(1);
-                case "month" -> LocalDateTime.now().minusMonths(1);
-                case "year" -> LocalDateTime.now().minusYears(1);
-                default -> null;
-            };
+        try {
+            if (startDateStr != null && !startDateStr.isBlank()) {
+                startDate = java.time.LocalDate.parse(startDateStr).atStartOfDay();
+            }
+            if (endDateStr != null && !endDateStr.isBlank()) {
+                endDate = java.time.LocalDate.parse(endDateStr).atTime(23, 59, 59);
+            }
+        } catch (Exception e) {
+            log.error("Lỗi parse ngày: " + e.getMessage());
         }
 
         String cleanKeyword = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;

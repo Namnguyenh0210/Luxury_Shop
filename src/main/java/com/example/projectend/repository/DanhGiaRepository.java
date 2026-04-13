@@ -49,8 +49,15 @@ public interface DanhGiaRepository extends JpaRepository<DanhGia, Long> {
            "OR LOWER(d.taiKhoan.hoTen) LIKE LOWER(CONCAT('%', :tuKhoa, '%')) " +
            "OR LOWER(d.donHangChiTiet.sanPhamChiTiet.sanPham.tenSP) LIKE LOWER(CONCAT('%', :tuKhoa, '%'))) " +
            "AND (:trangThai IS NULL OR (:trangThai = 1 AND (d.trangThai IS NULL OR d.trangThai != 2)) OR (:trangThai = 2 AND d.trangThai = 2)) " +
+           "AND (:startDate IS NULL OR d.ngayDanhGia >= :startDate) " +
+           "AND (:endDate IS NULL OR d.ngayDanhGia <= :endDate) " +
            "ORDER BY d.ngayDanhGia DESC")
-    Page<DanhGia> searchDanhGiaAdmin(@Param("tuKhoa") String tuKhoa, @Param("trangThai") Integer trangThai, Pageable pageable);
+    Page<DanhGia> searchDanhGiaAdmin(
+            @Param("tuKhoa") String tuKhoa, 
+            @Param("trangThai") Integer trangThai, 
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
+            Pageable pageable);
 
     // Admin thống kê đánh giá
     @Query("SELECT d.donHangChiTiet.sanPhamChiTiet.sanPham.tenSP as tenSP, AVG(d.diem) as avgDiem, COUNT(d) as tongDG " +

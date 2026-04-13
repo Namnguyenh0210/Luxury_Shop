@@ -572,38 +572,44 @@
                   <div class="flex flex-col lg:flex-row gap-4 items-center justify-between pb-6 border-b border-gray-50">
                     <!-- Search Input -->
                     <div class="relative w-full lg:max-w-md group">
-                      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors">search</span>
+                      <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#C8A97E] group-focus-within:text-black transition-colors">search</span>
                       <input v-model="searchQuery" type="text" placeholder="Tìm kiếm đơn hàng..." 
-                             class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-4 focus:ring-blue-950/5 focus:border-blue-950 outline-none transition-all text-sm font-black text-black placeholder:text-gray-400">
+                             class="w-full pl-12 pr-4 py-3 bg-white border border-[#C8A97E]/50 rounded-2xl focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] outline-none transition-all text-sm font-bold text-gray-700 placeholder:text-gray-400 shadow-sm">
                     </div>
                     
                     <div class="flex gap-3 w-full lg:w-auto">
-                      <!-- Status Dropdown -->
-                      <div class="relative min-w-[160px]">
-                        <select v-model="orderStatus" 
-                                class="w-full appearance-none pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-[10px] font-black text-black uppercase tracking-widest focus:ring-2 focus:ring-blue-950/20 focus:border-blue-950 outline-none cursor-pointer">
-                          <option value="all">Tất cả trạng thái</option>
-                          <option value="0">Chờ xác nhận</option>
-                          <option value="1">Đã xác nhận</option>
-                          <option value="2">Đang giao</option>
-                          <option value="3">Đã giao</option>
-                          <option value="4">Hoàn tất</option>
-                          <option value="6">Đã đánh giá</option>
-                          <option value="5">Đã hủy</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                      <!-- Status Dropdown (Admin Style) -->
+                      <div class="relative min-w-[170px]">
+                        <button @click.stop="openOrderDropdown = openOrderDropdown === 'status' ? null : 'status'"
+                                class="w-full border border-[#C8A97E]/50 rounded-2xl pl-5 pr-10 py-3 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                          <span class="truncate font-bold text-gray-700 uppercase tracking-wider text-[11px]">{{ orderStatus === 'all' ? 'Tất cả trạng thái' : (orderStatus === '0' ? 'Chờ xác nhận' : (orderStatus === '1' ? 'Đã xác nhận' : (orderStatus === '2' ? 'Đang giao' : (orderStatus === '3' ? 'Đã giao' : (orderStatus === '4' ? 'Hoàn tất' : (orderStatus === '6' ? 'Đã đánh giá' : (orderStatus === '5' ? 'Đã hủy' : 'Tất cả trạng thái'))))))) }}</span>
+                          <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                        </button>
+                        <div v-if="openOrderDropdown === 'status'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in shadow-xl">
+                          <div @click="orderStatus = 'all'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#C8A97E]/10 transition-colors border-b border-gray-50 text-gray-500" :class="orderStatus === 'all' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Tất cả trạng thái</div>
+                          <div @click="orderStatus = '0'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '0' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Chờ xác nhận</div>
+                          <div @click="orderStatus = '1'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '1' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đã xác nhận</div>
+                          <div @click="orderStatus = '2'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '2' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đang giao</div>
+                          <div @click="orderStatus = '3'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '3' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đã giao</div>
+                          <div @click="orderStatus = '4'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '4' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Hoàn tất</div>
+                          <div @click="orderStatus = '6'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '6' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đã đánh giá</div>
+                          <div @click="orderStatus = '5'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="orderStatus === '5' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Đã hủy</div>
+                        </div>
                       </div>
 
-                      <!-- Time Dropdown -->
-                      <div class="relative min-w-[140px]">
-                        <select v-model="timeFilter" 
-                                class="w-full appearance-none pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-[10px] font-black text-black uppercase tracking-widest focus:ring-2 focus:ring-blue-950/20 focus:border-blue-950 outline-none cursor-pointer">
-                          <option value="all">Mọi thời gian</option>
-                          <option value="week">Tuần hiện tại</option>
-                          <option value="month">Tháng hiện tại</option>
-                          <option value="year">Năm hiện tại</option>
-                        </select>
-                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+                      <!-- Time Dropdown (Admin Style) -->
+                      <div class="relative min-w-[150px]">
+                        <button @click.stop="openOrderDropdown = openOrderDropdown === 'time' ? null : 'time'"
+                                class="w-full border border-[#C8A97E]/50 rounded-2xl pl-5 pr-10 py-3 text-sm bg-white text-left focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/20 hover:border-[#C8A97E] transition-all flex items-center justify-between shadow-sm">
+                          <span class="truncate font-bold text-gray-700 uppercase tracking-wider text-[11px]">{{ timeFilter === 'all' ? 'Mọi thời gian' : (timeFilter === 'week' ? 'Tuần hiện tại' : (timeFilter === 'month' ? 'Tháng hiện tại' : 'Năm hiện tại')) }}</span>
+                          <span class="material-symbols-outlined text-[20px] absolute right-3 text-[#C8A97E]">expand_more</span>
+                        </button>
+                        <div v-if="openOrderDropdown === 'time'" class="absolute z-50 w-full mt-2 bg-white border border-[#C8A97E]/20 rounded-2xl shadow-2xl overflow-hidden animate-fade-in shadow-xl">
+                          <div @click="timeFilter = 'all'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest cursor-pointer hover:bg-[#C8A97E]/10 transition-colors border-b border-gray-50 text-gray-500" :class="timeFilter === 'all' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Mọi thời gian</div>
+                          <div @click="timeFilter = 'week'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="timeFilter === 'week' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Tuần hiện tại</div>
+                          <div @click="timeFilter = 'month'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="timeFilter === 'month' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Tháng hiện tại</div>
+                          <div @click="timeFilter = 'year'; openOrderDropdown = null" class="px-5 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#C8A97E]/10 cursor-pointer transition-colors text-gray-600" :class="timeFilter === 'year' ? 'text-[#C8A97E] bg-[#C8A97E]/5' : ''">Năm hiện tại</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1056,6 +1062,7 @@ export default {
       favCategories: [],
       favBrands: [],
       openFavDropdown: null, 
+      openOrderDropdown: null,
       orderStatus: "all",
       showReportModal: false,
       reportOrderId: null,
@@ -1595,7 +1602,14 @@ export default {
 
     closeFavDropdowns() {
       this.openFavDropdown = null
+      this.openOrderDropdown = null
     },
+
+    handleGlobalClick(e) {
+      if ((this.openFavDropdown || this.openOrderDropdown) && !e.target.closest('.relative')) {
+        this.closeFavDropdowns()
+      }
+    }
   },
 
   mounted() {
@@ -1604,17 +1618,16 @@ export default {
     this.fetchAddresses()
     this.fetchFavorites()
 
-    const hash = window.location.hash.replace("#", "")
+    document.addEventListener('click', this.handleGlobalClick)
 
-    if (hash) {
+    const hash = window.location.hash.replace("#", "")
+    if (hash && ['info', 'orders', 'wishlist', 'address'].includes(hash)) {
       this.activeTab = hash
     }
-
-    window.addEventListener("click", this.closeFavDropdowns)
   },
 
   beforeUnmount() {
-    window.removeEventListener("click", this.closeFavDropdowns)
+    document.removeEventListener('click', this.handleGlobalClick)
   },
 }
 </script>
