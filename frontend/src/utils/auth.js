@@ -16,6 +16,7 @@ export async function fetchCurrentUser() {
     if (res.data.authenticated) {
       const normalizedRoles = (res.data.vaiTros || []).map(r => r.replace('ROLE_', ''))
       authState.user = {
+        maTK: res.data.maTK,
         name: res.data.hoTen || res.data.email,
         role: normalizedRoles.join(', '),
         roles: normalizedRoles

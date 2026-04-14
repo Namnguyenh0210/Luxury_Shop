@@ -4,6 +4,7 @@ import com.example.projectend.entity.DonHang;
 import com.example.projectend.repository.DonHangChiTietRepository;
 import com.example.projectend.repository.DonHangRepository;
 import com.example.projectend.repository.TaiKhoanRepository;
+import com.example.projectend.repository.YeuCauNhapKhoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,9 @@ public class AdminThongKeController {
 
     @Autowired
     private TaiKhoanRepository taiKhoanRepository;
+
+    @Autowired
+    private YeuCauNhapKhoRepository yeuCauNhapKhoRepository;
 
     @GetMapping
     public Map<String, Object> getDashboard(
@@ -161,6 +165,7 @@ public class AdminThongKeController {
         // Bổ sung cho thông báo
         response.put("pendingConfirmCount", donHangRepository.countByTrangThaiDH(0));
         response.put("refundPendingCount", donHangRepository.countByTrangThaiThanhToan(5));
+        response.put("pendingStockRequestsCount", yeuCauNhapKhoRepository.countByTrangThai(0));
 
         return response;
     }

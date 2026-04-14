@@ -96,6 +96,7 @@ public class ApiController {
             }
 
             response.put("authenticated", true);
+            response.put("maTK", taiKhoan.getMaTK());
             response.put("email", email);
             response.put("hoTen", taiKhoan.getHoTen());
             response.put("soDienThoai", taiKhoan.getSoDienThoai());
@@ -461,10 +462,14 @@ public class ApiController {
 
             response.put("success", true);
             response.put("message", "Đăng nhập thành công");
-            response.put("user", Map.of(
-                    "email", taiKhoan.getEmail(),
-                    "hoTen", taiKhoan.getHoTen(),
-                    "vaiTros", roleNames));
+            
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("maTK", taiKhoan.getMaTK());
+            userMap.put("email", taiKhoan.getEmail());
+            userMap.put("hoTen", taiKhoan.getHoTen());
+            userMap.put("vaiTros", roleNames);
+            
+            response.put("user", userMap);
             response.put("redirectUrl", redirectUrl);
 
             return ResponseEntity.ok(response);

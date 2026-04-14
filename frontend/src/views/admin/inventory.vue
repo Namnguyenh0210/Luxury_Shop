@@ -243,15 +243,15 @@
           </button>
         </div>
 
-        <!-- Filter tabs (Admin view) -->
-        <div v-if="isAdmin" class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
+        <!-- Filter tabs -->
+        <div class="flex gap-1 bg-gray-100 p-1 rounded-2xl w-fit">
           <button v-for="rf in requestFilters" :key="rf.val" @click="requestFilterTab = rf.val"
             :class="requestFilterTab === rf.val ? 'bg-white shadow-sm text-[#C8A97E]' : 'text-gray-400 hover:text-gray-600'"
             class="px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all flex items-center gap-2">
             {{ rf.label }}
             <span class="px-2 py-0.5 rounded-full text-[10px] font-black transition-colors"
               :class="requestFilterTab === rf.val ? 'bg-[#C8A97E] text-white shadow-sm' : 'bg-gray-200 text-gray-500'">
-              {{ stockRequests.filter(r => rf.val === 'all' || r.trangThai === rf.val).length }}
+              {{ getRequestCount(rf.val) }}
             </span>
           </button>
         </div>
@@ -266,10 +266,11 @@
                 <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Sản Phẩm</th>
                 <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Biến thể</th>
                 <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Tồn Kho</th>
-                <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest font-serif italic">Qty</th>
+                <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">SL</th>
                 <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Ngày Gửi</th>
+                <th class="px-6 py-5 text-left text-[10px] font-black text-black uppercase tracking-widest">Mô Tả</th>
                 <th class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Trạng Thái</th>
-                <th v-if="isAdmin" class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Hành Động</th>
+                <th v-if="isAdmin || isStaff" class="px-6 py-5 text-center text-[10px] font-black text-black uppercase tracking-widest">Hành Động</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -312,20 +313,32 @@
                     {{ req.trangThai === 0 ? 'Chờ duyệt' : req.trangThai === 1 ? 'Đã duyệt' : 'Từ chối' }}
                   </span>
                 </td>
-                <td v-if="isAdmin" class="px-5 py-4 text-center">
-                  <div v-if="req.trangThai === 0" class="flex items-center justify-center gap-4">
+                <td v-if="isAdmin || isStaff" class="px-5 py-4 text-center">
+                  <!-- Admin Actions -->
+                  <div v-if="isAdmin && req.trangThai === 0" class="flex items-center justify-center gap-1">
                     <button @click="processRequest(req)"
-                      class="text-green-500 hover:text-green-700 transition-colors"
+                      class="p-2 rounded-xl text-green-500 hover:bg-green-50 transition-all"
                       title="Duyệt yêu cầu">
-                      <span class="material-symbols-outlined text-[24px]">check_circle</span>
+                      <span class="material-symbols-outlined text-[20px] font-black">check</span>
                     </button>
                     <button @click="rejectRequest(req)"
-                      class="text-red-400 hover:text-red-600 transition-colors"
+                      class="p-2 rounded-xl text-red-500 hover:bg-red-50 transition-all"
                       title="Từ chối yêu cầu">
-                      <span class="material-symbols-outlined text-[24px]">cancel</span>
+                      <span class="material-symbols-outlined text-[20px] font-black">close</span>
                     </button>
                   </div>
-                  <span v-else class="text-[10px] font-black uppercase tracking-widest text-gray-400 italic">Đã xử lý</span>
+                  
+                  <!-- Staff Actions -->
+                  <div v-else-if="isStaff && req.trangThai === 0" class="flex items-center justify-center">
+                    <button @click="revokeRequest(req)"
+                      class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-all text-[10px] font-black uppercase tracking-widest border border-transparent hover:border-red-200"
+                      title="Thu hồi yêu cầu">
+                      <span class="material-symbols-outlined text-[18px]">history</span>
+                      Thu hồi
+                    </button>
+                  </div>
+                  
+                  <span v-else class="text-[10px] font-black uppercase tracking-widest text-gray-400 italic">Hết hiệu lực</span>
                 </td>
               </tr>
             </tbody>
@@ -735,47 +748,48 @@
   </Transition>
 
       <!-- ====== MODAL THÊM/SỬA NCC ====== -->
-      <div v-if="showNccModal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" @click.self="closeNccModal">
-        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col">
-          <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-            <h2 class="text-base font-bold text-gray-800">{{ nccForm.maNCC ? 'Sửa Nhà Cung Cấp' : 'Thêm Nhà Cung Cấp Mới' }}</h2>
-            <button @click="closeNccModal" class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
+    <Teleport to="body">
+      <div v-if="showNccModal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" @click.self="closeNccModal">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl flex flex-col animate-in fade-in zoom-in duration-300">
+          <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+            <h2 class="text-lg font-black text-gray-900 tracking-tight">{{ nccForm.maNCC ? 'Sửa Nhà Cung Cấp' : 'Thêm Nhà Cung Cấp Mới' }}</h2>
+            <button @click="closeNccModal" class="size-10 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all rounded-xl hover:bg-gray-100">
               <span class="material-symbols-outlined">close</span>
             </button>
           </div>
-          <div class="p-6 space-y-4">
+          <div class="p-8 space-y-5">
             <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-gray-600">Tên NCC <span class="text-red-500">*</span></label>
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Tên NCC <span class="text-red-500">*</span></label>
               <input v-model="nccForm.tenNCC" placeholder="Nhập tên nhà cung cấp..."
-                class="w-full border border-[#C8A97E] rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all" />
+                class="w-full border border-gray-200 rounded-2xl px-5 py-3.5 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all font-bold text-gray-700" />
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-5">
               <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-gray-600">Số Điện Thoại</label>
+                <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Số Điện Thoại</label>
                 <input v-model="nccForm.soDienThoai" placeholder="0xxx xxx xxx"
-                  class="w-full border border-[#C8A97E] rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all" />
+                  class="w-full border border-gray-200 rounded-2xl px-5 py-3.5 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all font-bold text-gray-700" />
               </div>
-              
             </div>
             <div class="space-y-1.5">
-              <label class="text-xs font-semibold text-gray-600">Địa chỉ</label>
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Địa chỉ</label>
               <input v-model="nccForm.diaChi" placeholder="Nhập địa chỉ..."
-                class="w-full border border-[#C8A97E] rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all" />
+                class="w-full border border-gray-200 rounded-2xl px-5 py-3.5 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all font-bold text-gray-700" />
             </div>
           </div>
-          <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+          <div class="flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-100 bg-gray-50/50 rounded-b-3xl">
             <button @click="closeNccModal"
-              class="px-5 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">
+              class="px-6 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm font-bold text-gray-500 transition-all">
               Hủy
             </button>
             <button @click="saveNcc"
-              class="px-5 py-2.5 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] text-white text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+              class="px-8 py-3 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] text-white text-sm font-black shadow-lg shadow-[#C8A97E]/20 transition-all flex items-center gap-2">
               <span class="material-symbols-outlined text-[18px]">save</span>
-              {{ nccForm.maNCC ? 'Cập Nhật' : 'Lưu' }}
+              {{ nccForm.maNCC ? 'CẬP NHẬT' : 'LƯU NCC' }}
             </button>
           </div>
+        </div>
       </div>
-    </div>
+    </Teleport>
     
     <!-- ====== MODAL CHI TIẾT PHIẾU NHẬP ====== -->
     <Transition name="modal-fade">
@@ -878,108 +892,117 @@
     </Transition>
 
     <!-- ====== MODAL GẬI YÊU CẦU MỚI (Staff) ====== -->
-    <div v-if="showNewRequestModal" class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" @click.self="showNewRequestModal = false">
-      <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl flex flex-col">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 class="text-base font-bold text-gray-800 flex items-center gap-2">
-            <span class="material-symbols-outlined text-[#C8A97E]">assignment_add</span>
-            Gửi Yêu Cầu Nhập Hàng
-          </h2>
-          <button @click="showNewRequestModal = false" class="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <div class="p-6 space-y-4">
-          <!-- Select Product -->
-          <div class="space-y-1.5 relative">
-            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Sản Phẩm <span class="text-red-500">*</span></label>
-            <input
-              v-model="reqForm.productSearch"
-              @input="filterReqProducts"
-              @focus="showReqProductDrop = true"
-              @blur="hideReqProductDrop"
-              placeholder="Gõ tên sản phẩm..."
-              class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all"
-            />
-            <div v-if="showReqProductDrop && reqFilteredProducts.length > 0"
-              class="absolute z-50 w-full mt-1 bg-white border border-[#C8A97E]/20 rounded-xl shadow-xl max-h-48 overflow-y-auto">
-              <div v-for="p in reqFilteredProducts" :key="p.maSP"
-                @mousedown.prevent="selectReqProduct(p)"
-                class="px-4 py-2.5 text-sm hover:bg-[#C8A97E]/5 cursor-pointer border-b border-gray-50 last:border-0">
-                {{ p.tenSP }}
+    <Teleport to="body">
+      <div v-if="showNewRequestModal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" @click.self="showNewRequestModal = false">
+        <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl flex flex-col animate-in fade-in zoom-in duration-300">
+          <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+            <h2 class="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#C8A97E]">assignment_add</span>
+              Gửi Yêu Cầu Nhập Hàng
+            </h2>
+            <button @click="showNewRequestModal = false" class="size-10 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all rounded-xl hover:bg-gray-100">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <div class="p-8 space-y-5">
+            <!-- Select Product -->
+            <div class="space-y-1.5 relative">
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Sản Phẩm <span class="text-red-500">*</span></label>
+              <div class="relative group">
+                <span class="absolute inset-y-0 left-4 flex items-center text-[#C8A97E] group-focus-within:text-black transition-colors">
+                  <span class="material-symbols-outlined text-[20px]">search</span>
+                </span>
+                <input
+                  v-model="reqForm.productSearch"
+                  @input="filterReqProducts"
+                  @focus="showReqProductDrop = true"
+                  @blur="hideReqProductDrop"
+                  placeholder="Gõ tên sản phẩm..."
+                  class="w-full border border-gray-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all font-bold text-gray-700"
+                />
+                <div v-if="showReqProductDrop && reqFilteredProducts.length > 0"
+                  class="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl max-h-48 overflow-y-auto animate-in fade-in zoom-in duration-200">
+                  <div v-for="p in reqFilteredProducts" :key="p.maSP"
+                    @mousedown.prevent="selectReqProduct(p)"
+                    class="px-5 py-3 text-sm hover:bg-[#C8A97E]/5 cursor-pointer border-b border-gray-50 last:border-0 font-semibold text-gray-700">
+                    {{ p.tenSP }}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Select Variant -->
-          <div v-if="reqVariants.length > 0" class="space-y-1.5">
-            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Biến Thể (Size/Màu) <span class="text-red-500">*</span></label>
-            <select v-model="reqForm.maBienThe"
-              class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all">
-              <option value="">-- Chọn biến thể --</option>
-              <option v-for="v in reqVariants" :key="v.maBienThe" :value="v.maBienThe">
-                Size {{ v.size }} / {{ v.mau }} — Tồn kho: {{ v.soLuongTon }}
-              </option>
-            </select>
-          </div>
+            <!-- Select Variant -->
+            <div v-if="reqVariants.length > 0" class="space-y-1.5 animate-in slide-in-from-top-2">
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Biến Thể (Size/Màu) <span class="text-red-500">*</span></label>
+              <select v-model="reqForm.maBienThe"
+                class="w-full border border-gray-200 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all font-bold text-gray-700">
+                <option value="">-- Chọn biến thể --</option>
+                <option v-for="v in reqVariants" :key="v.maBienThe" :value="v.maBienThe">
+                  Size {{ v.size }} / {{ v.mau }} — Tồn kho: {{ v.soLuongTon }}
+                </option>
+              </select>
+            </div>
 
-          <!-- Qty -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Số Lượng Yêu Cầu <span class="text-red-500">*</span></label>
-            <input type="number" v-model.number="reqForm.qty" min="1"
-              class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all font-bold">
-          </div>
+            <!-- Qty -->
+            <div class="space-y-1.5">
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Số Lượng Yêu Cầu <span class="text-red-500">*</span></label>
+              <input type="number" v-model.number="reqForm.qty" min="1"
+                class="w-full border border-gray-200 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all font-black text-gray-800 text-lg">
+            </div>
 
-          <!-- Note -->
-          <div class="space-y-1.5">
-            <label class="text-xs font-bold text-gray-500 uppercase tracking-wider">Ghi Chú</label>
-            <textarea v-model="reqForm.ghiChu" rows="2"
-              placeholder="Lý do yêu cầu nhập hàng..."
-              class="w-full border border-[#C8A97E]/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 transition-all resize-none"></textarea>
+            <!-- Note -->
+            <div class="space-y-1.5">
+              <label class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Ghi Chú</label>
+              <textarea v-model="reqForm.ghiChu" rows="3"
+                placeholder="Lý do yêu cầu nhập hàng..."
+                class="w-full border border-gray-200 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all resize-none font-medium text-gray-700"></textarea>
+            </div>
           </div>
-        </div>
-        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-          <button @click="showNewRequestModal = false"
-            class="px-5 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-colors">Hủy</button>
-          <button @click="submitNewRequest"
-            :disabled="!reqForm.maBienThe || reqForm.qty < 1"
-            class="px-5 py-2.5 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
-            <span class="material-symbols-outlined text-[18px]">send</span>
-            Gửi Yêu Cầu
-          </button>
+          <div class="flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-100 bg-gray-50/50 rounded-b-3xl">
+            <button @click="showNewRequestModal = false"
+              class="px-6 py-3 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-sm font-bold text-gray-500 transition-all">Hủy</button>
+            <button @click="submitNewRequest"
+              :disabled="!reqForm.maBienThe || reqForm.qty < 1"
+              class="px-10 py-3 rounded-xl bg-[#C8A97E] hover:bg-[#B88A00] disabled:bg-gray-200 disabled:cursor-not-allowed text-white text-sm font-black shadow-lg shadow-[#C8A97E]/20 transition-all flex items-center gap-2 uppercase tracking-widest">
+              <span class="material-symbols-outlined text-[20px]">send</span>
+              Gửi Yêu Cầu
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
     <!-- Global Dialog (Alert / Prompt) -->
-    <div v-if="dialog.show" class="fixed inset-0 z-[60] bg-black/50 flex items-center justify-center p-4 transition-opacity" @click.self="closeDialog">
-      <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-[pop_0.2s_ease-out]">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-          <h2 class="text-base font-bold" :class="dialog.isError ? 'text-red-600' : 'text-gray-800'">
-            {{ dialog.title }}
-          </h2>
-          <button @click="closeDialog" class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
-            <span class="material-symbols-outlined text-[20px]">close</span>
-          </button>
-        </div>
-        <div class="p-6">
-          <p class="text-sm text-gray-700 mb-4">{{ dialog.message }}</p>
-          <input v-if="dialog.type === 'prompt'" v-model="dialog.input" @keyup.enter="submitDialog" ref="dialogInputRef"
-            class="w-full border border-[#C8A97E]/60 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#C8A97E]/30 focus:border-[#C8A97E] transition-all" />
-        </div>
-        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
-          <button v-if="dialog.type === 'prompt' || dialog.type === 'confirm'" @click="closeDialog"
-            class="px-5 py-2 rounded-xl text-sm font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 transition-colors">
-            Hủy
-          </button>
-          <button @click="submitDialog"
-            class="px-5 py-2 rounded-xl text-white text-sm font-semibold shadow-sm transition-colors"
-            :class="dialog.isError ? 'bg-red-600 hover:bg-red-700' : 'bg-[#C8A97E] hover:bg-[#B88A00]'">
-            Xác nhận
-          </button>
+    <Teleport to="body">
+      <div v-if="dialog.show" class="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-all" @click.self="closeDialog">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-[pop_0.2s_ease-out] border border-gray-100">
+          <div class="flex items-center justify-between px-8 py-6 border-b border-gray-50 bg-gray-50/30">
+            <h2 class="text-lg font-black tracking-tight" :class="dialog.isError ? 'text-red-500' : 'text-gray-900'">
+              {{ dialog.title }}
+            </h2>
+            <button @click="closeDialog" class="size-8 flex items-center justify-center text-gray-400 hover:text-gray-900 transition-all rounded-lg hover:bg-gray-100">
+              <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
+          <div class="p-8">
+            <p class="text-[15px] font-medium text-gray-600 leading-relaxed mb-6">{{ dialog.message }}</p>
+            <input v-if="dialog.type === 'prompt'" v-model="dialog.input" @keyup.enter="submitDialog" ref="dialogInputRef"
+              class="w-full border border-gray-200 rounded-2xl px-5 py-3.5 text-sm bg-white focus:outline-none focus:ring-4 focus:ring-[#C8A97E]/10 focus:border-[#C8A97E] transition-all font-bold text-gray-700 shadow-inner" />
+          </div>
+          <div class="flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-50 bg-gray-50/30">
+            <button v-if="dialog.type === 'prompt' || dialog.type === 'confirm'" @click="closeDialog"
+              class="px-6 py-2.5 rounded-xl text-sm font-black text-gray-400 hover:text-gray-600 transition-colors uppercase tracking-widest">
+              Hủy
+            </button>
+            <button @click="submitDialog"
+              class="px-8 py-3 rounded-xl text-white text-sm font-black shadow-lg shadow-[#C8A97E]/20 transition-all uppercase tracking-widest"
+              :class="dialog.isError ? 'bg-red-500 hover:bg-red-600 shadow-red-500/20' : 'bg-[#C8A97E] hover:bg-[#B88A00]'">
+              Xác nhận
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
@@ -1034,9 +1057,9 @@ export default {
       requestFilterTab: 'all',
       requestFilters: [
         { label: 'Tất cả', val: 'all' },
-        { label: '⏳ Chờ duyệt', val: 0 },
-        { label: '✅ Đã duyệt', val: 1 },
-        { label: '❌ Từ chối', val: 2 },
+        { label: 'Chờ duyệt', val: 0 },
+        { label: 'Đã duyệt', val: 1 },
+        { label: 'Từ chối', val: 2 },
       ],
       showNewRequestModal: false,
       reqForm: { productSearch: '', productId: '', maBienThe: '', qty: 10, ghiChu: '' },
@@ -1061,18 +1084,23 @@ export default {
     totalAmount() {
       return this.form.items.reduce((s, i) => s + i.qty * i.price, 0)
     },
+    currentUser() {
+      return authState?.user || null
+    },
     isAdmin() {
-      return authState.user?.roles?.includes('ADMIN')
+      return this.currentUser?.roles?.includes('ADMIN') || false
     },
     isStaff() {
-      return authState.user?.roles?.includes('NHANVIEN') && !this.isAdmin
+      return (this.currentUser?.roles?.includes('NHANVIEN') && !this.isAdmin) || false
     },
     pendingRequestCount() {
        return this.stockRequests.filter(r => r.trangThai === 0).length
     },
     filteredRequests() {
-      let list = this.isAdmin ? this.stockRequests : this.stockRequests.filter(r => r.nhanVien?.maTK === authState.user?.maTK)
-      if (this.isAdmin && this.requestFilterTab !== 'all') {
+      const u = this.currentUser
+      if (!u) return []
+      let list = this.isAdmin ? this.stockRequests : this.stockRequests.filter(r => r.nhanVien?.maTK === u.maTK)
+      if (this.requestFilterTab !== 'all') {
         list = list.filter(r => r.trangThai === this.requestFilterTab)
       }
       return list
@@ -1121,6 +1149,15 @@ export default {
   },
 
   methods: {
+    getRequestCount(status) {
+      const u = this.currentUser
+      if (!u) return 0
+      let list = this.isAdmin ? this.stockRequests : this.stockRequests.filter(r => r.nhanVien?.maTK === u.maTK)
+      if (status !== 'all') {
+        list = list.filter(r => r.trangThai === status)
+      }
+      return list.length
+    },
     async showAppDialog({ type = 'alert', title = 'Thông báo', message = '', defaultValue = '', isError = false }) {
        return new Promise((resolve) => {
            this.dialog = {
@@ -1642,6 +1679,23 @@ export default {
           this.stockRequests = res.data.stockRequests || []
        } catch (e) { console.error(e) }
     },
+    async revokeRequest(req) {
+       const ok = await this.showAppDialog({ 
+         type: 'confirm', 
+         title: 'Xác nhận thu hồi',
+         message: `Bạn có chắc chắn muốn thu hồi yêu cầu nhập hàng #${req.maYeuCau}? Admin sẽ không còn thấy yêu cầu này.` 
+       })
+       if (!ok) return
+       try {
+          await axios.delete(`/admin/inventory/request/${req.maYeuCau}`, { withCredentials: true })
+          await this.showAppDialog({ title: 'Thành công', message: 'Đã thu hồi yêu cầu thành công.' })
+          const res = await axios.get('/admin/inventory', { withCredentials: true })
+          this.stockRequests = res.data.stockRequests || []
+       } catch (e) { 
+          console.error(e)
+          await this.showAppDialog({ isError: true, title: 'Lỗi', message: 'Không thể thu hồi yêu cầu này.' })
+       }
+    },
     async submit() {
       if (!this.form.maNCC || this.form.items.length === 0) {
         await this.showAppDialog({ isError: true, message: 'Vui lòng điền đầy đủ thông tin.' }); return
@@ -1694,12 +1748,16 @@ export default {
           qty: this.reqForm.qty,
           ghiChu: this.reqForm.ghiChu || 'Yêu cầu nhập từ nhân viên'
         }, { withCredentials: true })
-        await this.showAppDialog({ title: 'Thành công', message: 'Yêu cầu đã được gửi đến Admin.' })
-        this.showNewRequestModal = false
+
+        // Refresh data first
         const res = await axios.get('/admin/inventory', { withCredentials: true })
         this.stockRequests = res.data.stockRequests || []
+
+        await this.showAppDialog({ title: 'Thành công', message: 'Yêu cầu đã được gửi đến Admin.' })
+        this.showNewRequestModal = false
       } catch (e) {
-        await this.showAppDialog({ isError: true, message: 'Lỗi khi gửi yêu cầu.' })
+        console.error(e)
+        await this.showAppDialog({ isError: true, title: 'Lỗi', message: 'Không thể gửi yêu cầu.' })
       }
     },
 	
