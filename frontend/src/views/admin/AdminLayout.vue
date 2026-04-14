@@ -261,6 +261,19 @@ export default {
            })
         }
 
+        // 2. Kiểm tra yêu cầu nhập kho mới từ nhân viên
+        if (stats.pendingStockRequestsCount > 0) {
+           newNotis.push({
+             title: 'YÊU CẦU NHẬP KHO',
+             desc: `Có ${stats.pendingStockRequestsCount} yêu cầu nhập hàng mới từ nhân viên đang chờ bạn duyệt.`,
+             icon: 'inventory',
+             bg: 'bg-blue-50',
+             color: 'text-blue-600',
+             time: 'KIỂM DUYỆT',
+             link: '/admin/inventory'
+           })
+        }
+
         // 2. Kiểm tra hoàn tiền (PayOS Cancelled but Paid) - Dữ liệu từ Backend
         if (stats.refundPendingCount > 0) {
             newNotis.push({

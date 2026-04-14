@@ -247,6 +247,38 @@ public class AdminInventoryController {
         return ResponseEntity.notFound().build();
     }
 
+    // API Thu hồi yêu cầu (Chỉ dành cho chủ sở hữu hoặc Admin, khi trạng thái là Chờ Duyệt)
+    @DeleteMapping("/request/{id}")
+    public ResponseEntity<?> revokeRequest(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long id) {
+        try {
+            Optional<YeuCauNhapKho> reqOpt = yeuCauNhapKhoRepository.findById(id);
+            if (reqOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+            YeuCauNhapKho req = reqOpt.get();
+            TaiKhoan currentUser = taiKhoanRepository.findByEmail(userDetails.getUsername()).get();
+
+            // Kiểm tra quyền: Phải là Admin HOẶC là người tạo yêu cầu
+            boolean isAdmin = currentUser.getVaiTros().stream().anyMatch(v -> "ADMIN".equalsIgnoreCase(v.getTenVaiTro()));
+            boolean isOwner = req.getNhanVien() != null && req.getNhanVien().getMaTK().equals(currentUser.getMaTK());
+
+            if (!isAdmin && !isOwner) {
+                return ResponseEntity.status(403).body(Map.of("message", "Bạn không có quyền thu hồi yêu cầu này."));
+            }
+
+            // Chỉ cho phép thu hồi khi còn ở trạng thái Chờ Duyệt (0)
+            if (req.getTrangThai() != 0) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Chỉ có thể thu hồi yêu cầu đang ở trạng thái chờ duyệt."));
+            }
+
+            yeuCauNhapKhoRepository.delete(req);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Đã thu hồi yêu cầu nhập hàng."));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Lỗi: " + e.getMessage());
+        }
+    }
+
     // API lấy biến thể của 1 sản phẩm
     @GetMapping("/variants/{maSP}")
     public ResponseEntity<?> getVariantsBySanPham(@PathVariable Long maSP) {
