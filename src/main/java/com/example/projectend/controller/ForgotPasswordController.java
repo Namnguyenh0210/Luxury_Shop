@@ -29,7 +29,7 @@ public class ForgotPasswordController {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private EmailService emailService; // nếu muốn gửi email thật
+    private EmailService emailService; // gửi email thật thông qua app password
 
     // Gửi OTP
     @PostMapping("/forgot")
@@ -44,12 +44,12 @@ public class ForgotPasswordController {
             return ResponseEntity.badRequest().body(Map.of("error", "Email không tồn tại"));
         }
 
-        String otp = String.valueOf(new Random().nextInt(900000) + 100000);
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000); //tạo otp random gồm 6 chữ số
 
         PasswordResetToken token = new PasswordResetToken();
         token.setEmail(email);
         token.setOtp(otp);
-        token.setExpiry(LocalDateTime.now().plusMinutes(5));
+        token.setExpiry(LocalDateTime.now().plusMinutes(5)); //thời gian thiết lập
         token.setTrangThai(true);
 
         tokenRepository.save(token);

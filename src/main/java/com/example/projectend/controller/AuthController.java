@@ -3,6 +3,8 @@ package com.example.projectend.controller;
 import com.example.projectend.entity.PasswordResetToken;
 import com.example.projectend.entity.TaiKhoan;
 import com.example.projectend.entity.VaiTro;
+import com.example.projectend.repository.DiaChiRepository;
+import com.example.projectend.entity.DiaChi;
 import com.example.projectend.repository.PasswordResetTokenRepository;
 import com.example.projectend.repository.TaiKhoanRepository;
 import com.example.projectend.repository.VaiTroRepository;
@@ -36,6 +38,8 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private DiaChiRepository diaChiRepository;
     // ================= REGISTER API =================
     @PostMapping("/register")
     public ResponseEntity<?> registerApi(@RequestBody Map<String, String> body) {
@@ -44,13 +48,14 @@ public class AuthController {
         String matKhau = body.get("matKhau");
         String confirmPassword = body.get("confirmPassword");
         String soDienThoai = body.get("soDienThoai");
+        String diaChi = body.get("diaChi");
 
         if (hoTen == null || hoTen.trim().isEmpty()) return ResponseEntity.badRequest().body("Họ tên không được để trống");
         if (email == null || email.trim().isEmpty()) return ResponseEntity.badRequest().body("Email không được để trống");
         if (matKhau == null || matKhau.length() < 6) return ResponseEntity.badRequest().body("Mật khẩu phải có ít nhất 6 ký tự");
         if (!matKhau.equals(confirmPassword)) return ResponseEntity.badRequest().body("Mật khẩu xác nhận không khớp");
         if (taiKhoanRepository.existsByEmail(email)) return ResponseEntity.badRequest().body("Email đã tồn tại");
-
+        if (diaChi == null || diaChi.trim().isEmpty()) return ResponseEntity.badRequest().body("Địa chỉ không được để trống");
         try {
             VaiTro vaiTroUser = vaiTroRepository.findByTenVaiTro("KHACHHANG")
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò KHACHHANG"));
@@ -63,8 +68,17 @@ public class AuthController {
             taiKhoanMoi.addVaiTro(vaiTroUser);
             taiKhoanMoi.setTrangThai(true);
             taiKhoanMoi.setNgayTao(LocalDateTime.now());
+            taiKhoanMoi.setDiaChi(diaChi.trim());
 
-            taiKhoanRepository.save(taiKhoanMoi);
+            TaiKhoan savedUser = taiKhoanRepository.save(taiKhoanMoi);
+
+            DiaChi address = new DiaChi();
+            address.setTaiKhoan(savedUser);
+            address.setHoTenNguoiNhan(savedUser.getHoTen());
+            address.setSoDienThoai(savedUser.getSoDienThoai());
+            address.setDiaChiChiTiet(savedUser.getDiaChi());
+
+            diaChiRepository.save(address);
 
             return ResponseEntity.ok("Đăng ký thành công");
         } catch (Exception e) {
